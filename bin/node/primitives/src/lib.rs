@@ -38,6 +38,8 @@ pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::Account
 /// The type for looking up accounts. We don't expect more than 4 billion of them.
 pub type AccountIndex = u32;
 
+pub type USDT = u64;
+
 /// Balance of an account.
 pub type Balance = u128;
 

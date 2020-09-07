@@ -160,7 +160,7 @@ pub fn staging_testnet_config() -> ChainSpec {
 	let boot_nodes = vec![];
 
 	let mut properties = Map::new();
-	properties.insert("tokenSymbol".into(),"DCAP".into());
+	properties.insert("tokenSymbol".into(),"DICO".into());
 	properties.insert("tokenDecimals".into(),14.into());
 
 	ChainSpec::from_genesis(
@@ -345,7 +345,7 @@ fn development_config_genesis() -> GenesisConfig {
 pub fn development_config() -> ChainSpec {
 
 	let mut properties = Map::new();
-	properties.insert("tokenSymbol".into(),"DCAP".into());
+	properties.insert("tokenSymbol".into(),"DICO".into());
 	properties.insert("tokenDecimals".into(),14.into());
 
 	ChainSpec::from_genesis(
@@ -376,7 +376,7 @@ fn local_testnet_genesis() -> GenesisConfig {
 /// Local testnet config (multivalidator Alice + Bob)
 pub fn local_testnet_config() -> ChainSpec {
 	let mut properties = Map::new();
-	properties.insert("tokenSymbol".into(),"DCAP".into());
+	properties.insert("tokenSymbol".into(),"DICO".into());
 	properties.insert("tokenDecimals".into(),14.into());
 
 	ChainSpec::from_genesis(

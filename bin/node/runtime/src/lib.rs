@@ -83,6 +83,7 @@ use impls::{CurrencyToVoteHandler, Author};
 /// Constant values used within the runtime.
 pub mod constants;
 use constants::{time::*, currency::*};
+pub mod ico;
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]
@@ -186,6 +187,11 @@ impl pallet_utility::Trait for Runtime {
 	type Event = Event;
 	type Call = Call;
 	type WeightInfo = ();
+}
+
+impl ico::Trait for Runtime{
+	type Event = Event;
+	type ModuleId = TreasuryModuleId;
 }
 
 parameter_types! {
@@ -876,6 +882,7 @@ construct_runtime!(
 		Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
 		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
 		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
+		Ico: ico::{Module, Call, Storage, Event<T>},
 	}
 );
 
