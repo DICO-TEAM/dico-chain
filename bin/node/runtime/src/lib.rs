@@ -84,6 +84,7 @@ use impls::{CurrencyToVoteHandler, Author};
 pub mod constants;
 use constants::{time::*, currency::*};
 pub mod ico;
+use pallet_generic_asset as generic_asset;
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]
@@ -181,6 +182,12 @@ impl frame_system::Trait for Runtime {
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
+}
+
+impl generic_asset::Trait for Runtime {
+	type Event = Event;
+	type GenericBalance = Balance;
+	type AssetId = u32;
 }
 
 impl pallet_utility::Trait for Runtime {
@@ -883,6 +890,7 @@ construct_runtime!(
 		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
 		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
 		Ico: ico::{Module, Call, Storage, Event<T>},
+		GenericAsset: generic_asset::{Module, Storage, Call, Event<T>, Config<T>},
 	}
 );
 

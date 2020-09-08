@@ -23,7 +23,7 @@ use node_runtime::{
 	Block, BuildStorage, Call, CheckedExtrinsic, GenesisConfig, Header, UncheckedExtrinsic,
 };
 use node_runtime::constants::currency::*;
-use node_testing::keyring::*;
+// use node_testing::keyring::*;
 use sp_core::{NativeOrEncoded, NeverNativeValue};
 use sp_core::storage::well_known_keys;
 use sp_core::traits::{CodeExecutor, RuntimeCode};

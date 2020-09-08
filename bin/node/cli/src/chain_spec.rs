@@ -26,7 +26,7 @@ use node_runtime::{
 	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, ContractsConfig, CouncilConfig,
 	DemocracyConfig,GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
 	StakingConfig, ElectionsConfig, IndicesConfig, SocietyConfig, SudoConfig, SystemConfig,
-	TechnicalCommitteeConfig, wasm_binary_unwrap,
+	TechnicalCommitteeConfig, wasm_binary_unwrap, GenericAssetConfig,
 };
 use node_runtime::Block;
 use node_runtime::constants::currency::*;
@@ -243,6 +243,7 @@ pub fn testnet_genesis(
 	let num_endowed_accounts = endowed_accounts.len();
 
 	const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
+	const GenericAssetBalance: Balance = 10_000_000 * DOLLARS;
 	const STASH: Balance = 100 * DOLLARS;
 
 	GenesisConfig {
@@ -327,6 +328,23 @@ pub fn testnet_genesis(
 			max_members: 999,
 		}),
 		pallet_vesting: Some(Default::default()),
+
+		generic_asset: Some(GenericAssetConfig{
+			next_asset_id: 3u32,  // 下一次创建的资产的id
+			staking_asset_id:0u32,
+			spending_asset_id:0u32,
+			assets:vec![0,1,2],  // 初始化资产
+			initial_balance: GenericAssetBalance,  // 每种资产每个人初始化金额
+
+			endowed_accounts: vec![
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				get_account_id_from_seed::<sr25519::Public>("Bob"),
+				get_account_id_from_seed::<sr25519::Public>("Eve")
+			],  // 每种资产里面初始配置人员
+
+		}
+		),
+
 	}
 }
 

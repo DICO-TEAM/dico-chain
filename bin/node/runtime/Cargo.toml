@@ -79,6 +79,7 @@ pallet-utility = { version = "2.0.0-rc5", default-features = false, path = "../.
 pallet-transaction-payment = { version = "2.0.0-rc5", default-features = false, path = "../../../frame/transaction-payment" }
 pallet-transaction-payment-rpc-runtime-api = { version = "2.0.0-rc5", default-features = false, path = "../../../frame/transaction-payment/rpc/runtime-api/" }
 pallet-vesting = { version = "2.0.0-rc5", default-features = false, path = "../../../frame/vesting" }
+pallet-generic-asset ={version = "2.0.0-rc5", path = "../../../frame/generic-asset", default-features = false}
 
 [build-dependencies]
 wasm-builder-runner = { version = "1.0.5", package = "substrate-wasm-builder-runner", path = "../../../utils/wasm-builder-runner" }
@@ -89,6 +90,7 @@ sp-io = { version = "2.0.0-rc5", path = "../../../primitives/io" }
 [features]
 default = ["std"]
 std = [
+	"pallet-generic-asset/std",
 	"sp-authority-discovery/std",
 	"pallet-authority-discovery/std",
 	"pallet-authorship/std",

@@ -47,6 +47,10 @@ impl<T> Filter<T> for () {
 	fn filter(_: &T) -> bool { true }
 }
 
+pub trait GenericAssetIdProvider<AssetId> {
+	fn get_next_asset_id() -> AssetId;
+}
+
 /// Trait to add a constraint onto the filter.
 pub trait FilterStack<T>: Filter<T> {
 	/// The type used to archive the stack.

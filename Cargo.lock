@@ -1728,12 +1728,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fs_extra"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f2a4a2034423744d2cc7ca2068453168dcdb82c438419e639a26bd87839c674"
-
-[[package]]
 name = "fuchsia-cprng"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3494,44 +3488,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "node-bench"
-version = "0.8.0-rc5"
-dependencies = [
- "derive_more",
- "fs_extra",
- "futures 0.3.5",
- "hash-db",
- "hex",
- "kvdb 0.7.0",
- "kvdb-rocksdb",
- "lazy_static",
- "log",
- "node-primitives",
- "node-runtime",
- "node-testing",
- "parity-db",
- "parity-util-mem 0.7.0",
- "rand 0.7.3",
- "sc-basic-authorship",
- "sc-cli",
- "sc-client-api",
- "sc-transaction-pool",
- "serde",
- "serde_json",
- "sp-consensus",
- "sp-core",
- "sp-finality-tracker",
- "sp-inherents",
- "sp-runtime",
- "sp-state-machine",
- "sp-timestamp",
- "sp-transaction-pool",
- "sp-trie",
- "structopt",
- "tempfile",
-]
-
-[[package]]
 name = "node-browser-testing"
 version = "2.0.0-rc5"
 dependencies = [
@@ -3632,7 +3588,6 @@ dependencies = [
  "frame-system",
  "node-primitives",
  "node-runtime",
- "node-testing",
  "pallet-balances",
  "pallet-contracts",
  "pallet-grandpa",
@@ -3750,6 +3705,7 @@ dependencies = [
  "pallet-democracy",
  "pallet-elections-phragmen",
  "pallet-finality-tracker",
+ "pallet-generic-asset",
  "pallet-grandpa",
  "pallet-identity",
  "pallet-im-online",
@@ -3793,113 +3749,6 @@ dependencies = [
  "sp-version",
  "static_assertions",
  "substrate-wasm-builder-runner",
-]
-
-[[package]]
-name = "node-template"
-version = "2.0.0-rc5"
-dependencies = [
- "futures 0.3.5",
- "log",
- "node-template-runtime",
- "parking_lot 0.10.2",
- "sc-basic-authorship",
- "sc-cli",
- "sc-client-api",
- "sc-consensus",
- "sc-consensus-aura",
- "sc-executor",
- "sc-finality-grandpa",
- "sc-network",
- "sc-service",
- "sc-transaction-pool",
- "sp-consensus",
- "sp-consensus-aura",
- "sp-core",
- "sp-finality-grandpa",
- "sp-inherents",
- "sp-runtime",
- "sp-transaction-pool",
- "structopt",
- "substrate-build-script-utils",
-]
-
-[[package]]
-name = "node-template-runtime"
-version = "2.0.0-rc5"
-dependencies = [
- "frame-executive",
- "frame-support",
- "frame-system",
- "pallet-aura",
- "pallet-balances",
- "pallet-grandpa",
- "pallet-randomness-collective-flip",
- "pallet-sudo",
- "pallet-template",
- "pallet-timestamp",
- "pallet-transaction-payment",
- "parity-scale-codec",
- "serde",
- "sp-api",
- "sp-block-builder",
- "sp-consensus-aura",
- "sp-core",
- "sp-inherents",
- "sp-io",
- "sp-offchain",
- "sp-runtime",
- "sp-session",
- "sp-std",
- "sp-transaction-pool",
- "sp-version",
- "substrate-wasm-builder-runner",
-]
-
-[[package]]
-name = "node-testing"
-version = "2.0.0-rc5"
-dependencies = [
- "criterion 0.3.1",
- "frame-support",
- "frame-system",
- "fs_extra",
- "futures 0.3.5",
- "log",
- "node-executor",
- "node-primitives",
- "node-runtime",
- "pallet-balances",
- "pallet-contracts",
- "pallet-grandpa",
- "pallet-indices",
- "pallet-session",
- "pallet-society",
- "pallet-staking",
- "pallet-timestamp",
- "pallet-transaction-payment",
- "pallet-treasury",
- "parity-scale-codec",
- "sc-block-builder",
- "sc-cli",
- "sc-client-api",
- "sc-client-db",
- "sc-executor",
- "sc-service",
- "sp-api",
- "sp-block-builder",
- "sp-blockchain",
- "sp-consensus",
- "sp-core",
- "sp-finality-tracker",
- "sp-inherents",
- "sp-io",
- "sp-keyring",
- "sp-runtime",
- "sp-timestamp",
- "substrate-test-client",
- "tempfile",
- "wabt",
 ]
 
 [[package]]
@@ -4816,18 +4665,6 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
-]
-
-[[package]]
-name = "pallet-template"
-version = "2.0.0-rc5"
-dependencies = [
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "sp-core",
- "sp-io",
- "sp-runtime",
 ]
 
 [[package]]

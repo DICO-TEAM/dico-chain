@@ -4,10 +4,11 @@ use frame_support::{debug, ensure, decl_module, decl_storage, decl_error, decl_e
 					StorageValue, StorageMap, StorageDoubleMap, Blake2_256, traits::{Get}};
 use frame_system as system;
 use system::{ensure_signed, ensure_root};
-use sp_runtime::{DispatchResult, Percent, ModuleId, RuntimeDebug, traits::{AccountIdConversion}};
+use sp_runtime::{DispatchResult, Percent, ModuleId, RuntimeDebug, traits::{AccountIdConversion, CheckedAdd, One}};
 use codec::{Encode, Decode};
 use node_primitives::{USDT};
 use pallet_balances as balances;
+use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions};
 
 
 /// 募集资金的信息
@@ -48,7 +49,7 @@ pub struct IcoInfo<Balance, BlockNumber>{
 	unlock_proportion: Percent,
 }
 
-pub trait Trait: system::Trait + balances::Trait {
+pub trait Trait: system::Trait + balances::Trait + generic_asset::Trait {
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 	type ModuleId: Get<ModuleId>;
 }
@@ -65,7 +66,8 @@ decl_storage! {
 decl_error! {
 	/// Error for the elections module.
 	pub enum Error for Module<T: Trait> {
-
+		/// 数据溢出
+		Overflow,
 
 	}
 	}
@@ -81,6 +83,7 @@ decl_module! {
 		/// 项目方要求募集资金
 		#[weight = 120_000_000]
 		fn ask_for_raise(origin, info: IcoInfo<T::Balance, T::BlockNumber>){
+
 
 		}
 
@@ -121,6 +124,7 @@ decl_module! {
 }
 }
 
+
 decl_event!(
 	pub enum Event<T> where
 	 <T as system::Trait>::AccountId {
@@ -129,7 +133,36 @@ decl_event!(
 );
 
 impl <T: Trait> Module<T> {
-	pub fn account_id() -> T::AccountId {
+
+	/// 获取国库id
+	pub fn get_treasury_id() -> T::AccountId {
 		T::ModuleId::get().into_account()
 	}
+
+
+	/// 获取下一个资产id
+	pub fn get_next_asset_id() -> T::AssetId {
+		<generic_asset::Module<T>>::next_asset_id()
+	}
+
+	/// 设置下一个资产id
+	pub fn set_next_asset_id() -> DispatchResult{
+		let mut asset_id = Self::get_next_asset_id();
+		asset_id = asset_id.checked_add(&One::one()).ok_or(Error::<T>::Overflow)?;
+		<NextAssetId<T>>::put(asset_id);
+		Ok(())
+	}
+
+
+	/// 创建一个资产(先处理下一个asset_id后才会成功执行)
+	pub fn create_asset(
+		asset_id: T::AssetId,
+		from_account: Option<T::AccountId>,
+		options: AssetOptions<T::GenericBalance, T::AccountId>,
+		) -> DispatchResult{
+
+		<generic_asset::Module<T>>::create_asset(Some(asset_id), from_account, options)?;
+		Ok(())
+	}
+
 }
