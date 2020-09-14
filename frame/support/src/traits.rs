@@ -550,6 +550,10 @@ impl<A> FindAuthor<A> for () {
 	}
 }
 
+pub trait IcoAsset<AssetId> {
+	fn set_asset_symbol(id: AssetId, project_name: Vec<u8>, symbol: Vec<u8>);
+}
+
 /// A trait for verifying the seal of a header and returning the author.
 pub trait VerifySeal<Header, Author> {
 	/// Verify a header and return the author, if any.

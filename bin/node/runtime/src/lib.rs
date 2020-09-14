@@ -196,9 +196,21 @@ impl pallet_utility::Trait for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+
+	pub const RaiseDeposit: Balance = 100 * DOLLARS;
+	pub const MinProportion: Percent = Percent::from_percent(60);
+	pub const MaxDurtion: BlockNumber = 180 * DAYS;
+
+}
+
 impl ico::Trait for Runtime{
 	type Event = Event;
 	type ModuleId = TreasuryModuleId;
+	type RaiseDeposit = RaiseDeposit;
+	type Currency = Balances;
+	type MinProportion = MinProportion;
+	type MaxDurtion = MaxDurtion;
 }
 
 parameter_types! {
