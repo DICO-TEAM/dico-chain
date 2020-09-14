@@ -16,7 +16,7 @@ type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::Ac
 /// 募集资金的信息
 #[cfg_attr(feature = "std", derive())]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
-pub struct IcoInfo<Balance>{
+pub struct IcoInfo<Balance, BlockNumber>{
 	/// 项目名字
 	project_name: Vec<u8>,
 	/// 代币名称
@@ -37,6 +37,9 @@ pub struct IcoInfo<Balance>{
 	user_max_usdt: Option<USDT>,
 	/// 这次募集资金拿出来的代币数量
 	total_token_in_use: Balance,
+	/// 募集资金的周期
+	raise_duration: BlockNumber,
+
 	/// 募集的usdt数量
 	raise_usdt_total: USDT,
 	/// 排除在外的国家
@@ -67,7 +70,7 @@ decl_storage! {
 	trait Store for Module<T: Trait> as TemplateModule {
 
 		/// 所有正在参加ico或是已经ico成功的项目 (project_name, symbol) => (asset_id, end_time, IcoInfo)
-		pub Projects get(fn all_project): double_map hasher(blake2_128_concat) Vec<u8>, hasher(blake2_128_concat) Vec<u8> => Option<(T::AssetId, T::BlockNumber, IcoInfo<T::Balance>)>;
+		pub Projects get(fn all_project): double_map hasher(blake2_128_concat) Vec<u8>, hasher(blake2_128_concat) Vec<u8> => Option<(T::AssetId, T::BlockNumber, IcoInfo<T::Balance, T::BlockNumber>)>;
 
 		/// 资产id对应的币种(todo 多资产模块初始化币种应该对这个也进行初始化)
 		pub SymbolOf get(fn symbol_of): map hasher(blake2_128_concat) T::AssetId => Option<(Vec<u8>, Vec<u8>)>;
@@ -93,6 +96,8 @@ decl_error! {
 		TokenAmountErr,
 		/// usdt数量错误
 		UsdtAmountErr,
+		/// 达到最大周期要求
+		ToMaxDurtion,
 
 	}
 	}
@@ -117,7 +122,7 @@ decl_module! {
 
 		/// 项目方要求募集资金
 		#[weight = 120_000_000]
-		fn ask_for_raise(origin, info: IcoInfo<T::Balance>){
+		fn ask_for_raise(origin, info: IcoInfo<T::Balance, T::BlockNumber>){
 			let who = ensure_signed(origin)?;
 			let mut info = info.clone();
 			// 字符串相关参数不能为空
@@ -169,7 +174,9 @@ decl_module! {
 				// 获取下一个资产id
 				let id = Self::get_next_asset_id();
 
-				let end_time = Self::now() + T::MaxDurtion::get();
+				// 募集资金的周期不能大于系统最长
+				ensure!(info.raise_duration.clone() <= T::MaxDurtion::get(), Error::<T>::ToMaxDurtion);
+				let end_time = Self::now() + info.raise_duration.clone();
 
 				<Raising<T>>::mutate(|z| z.insert(id.clone()));
 
