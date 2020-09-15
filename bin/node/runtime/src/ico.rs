@@ -6,12 +6,44 @@ use frame_system as system;
 use system::{ensure_signed, ensure_root};
 use sp_runtime::{DispatchResult, Percent, ModuleId, RuntimeDebug, traits::{AccountIdConversion, CheckedAdd, One}};
 use codec::{Encode, Decode};
-use node_primitives::{USDT};
+use node_primitives::{USDT, Balance};
 use pallet_balances as balances;
 use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions};
 
 
 type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
+
+
+/// 额外信息
+#[cfg_attr(feature = "std", derive())]
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
+pub struct Additional<AssetId, BlockNumber>{
+	/// ico对应的资产id
+	asset_id: AssetId,
+	/// ico结束时间
+	end_time: BlockNumber,
+	/// 已经募集到的usdt数量
+	already_raise_usdt: USDT,
+}
+
+
+/// 地址
+#[cfg_attr(feature = "std", derive())]
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
+pub struct Address{
+	/// usdt地址
+	usdt: Option<Vec<u8>>,
+	/// dico地址
+	dico: Option<Vec<u8>>,
+}
+
+
+#[cfg_attr(feature = "std", derive())]
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
+pub enum Symbol {
+	Usdt,
+	Dico,
+}
 
 /// 募集资金的信息
 #[cfg_attr(feature = "std", derive())]
@@ -31,6 +63,8 @@ pub struct IcoInfo<Balance, BlockNumber>{
 	total_circulation: Balance,
 	/// 官网地址
 	official_website: Vec<u8>,
+	/// 公钥地址
+	public_keys: Address,
 	/// 用户参与的最小金额
 	user_min_usdt: Option<USDT>,
 	/// 用户参与的最大金额
@@ -39,7 +73,6 @@ pub struct IcoInfo<Balance, BlockNumber>{
 	total_token_in_use: Balance,
 	/// 募集资金的周期
 	raise_duration: BlockNumber,
-
 	/// 募集的usdt数量
 	raise_usdt_total: USDT,
 	/// 排除在外的国家
@@ -70,7 +103,7 @@ decl_storage! {
 	trait Store for Module<T: Trait> as TemplateModule {
 
 		/// 所有正在参加ico或是已经ico成功的项目 (project_name, symbol) => (asset_id, end_time, IcoInfo)
-		pub Projects get(fn all_project): double_map hasher(blake2_128_concat) Vec<u8>, hasher(blake2_128_concat) Vec<u8> => Option<(T::AssetId, T::BlockNumber, IcoInfo<T::Balance, T::BlockNumber>)>;
+		pub Projects get(fn all_project): double_map hasher(blake2_128_concat) Vec<u8>, hasher(blake2_128_concat) Vec<u8> => Option<(Additional<T::AssetId, T::BlockNumber>, IcoInfo<T::Balance, T::BlockNumber>)>;
 
 		/// 资产id对应的币种(todo 多资产模块初始化币种应该对这个也进行初始化)
 		pub SymbolOf get(fn symbol_of): map hasher(blake2_128_concat) T::AssetId => Option<(Vec<u8>, Vec<u8>)>;
@@ -98,6 +131,20 @@ decl_error! {
 		UsdtAmountErr,
 		/// 达到最大周期要求
 		ToMaxDurtion,
+		/// 地址为空
+		AddressEmpty,
+		/// 不是正在ico的资产
+		NotRaising,
+		/// 获取数据错误
+		GetErr,
+		/// 过期
+		Expire,
+		/// usdt超出限额
+		AmountTooLarge,
+		/// usdt没有达到最低
+		AmountTooShort,
+		/// 金额参数不能是0
+		AmountZero,
 
 	}
 	}
@@ -162,6 +209,12 @@ decl_module! {
 			// 募集的usdt数量不能是0
 			ensure!(info.raise_usdt_total.clone() != (0 as USDT), Error::<T>::UsdtAmountErr);
 
+			// 接收筹款的地址不能是空
+			ensure!((info.public_keys.usdt.clone().is_some() && info.public_keys.usdt.clone().unwrap().len() != 0)
+				|| (info.public_keys.dico.clone().is_some() && info.public_keys.dico.clone().unwrap().len() != 0),
+				Error::<T>::AddressEmpty
+			);
+
 			let project_name = info.project_name.clone();
 			let symbol = info.symbol.clone();
 
@@ -182,7 +235,7 @@ decl_module! {
 
 				<SymbolOf<T>>::insert(id.clone(), (project_name.clone(), symbol.clone()));
 
-				<Projects<T>>::insert(project_name.clone(), symbol.clone(), (id.clone(), end_time.clone(), info.clone()));
+				<Projects<T>>::insert(project_name.clone(), symbol.clone(), (Additional{asset_id: id.clone(), end_time: end_time.clone(), already_raise_usdt: 0 as USDT}, info.clone()));
 
 				// 设置下一个资产id
 				Self::set_next_asset_id();
@@ -196,18 +249,53 @@ decl_module! {
 		/// 项目方取消筹集资金(等于项目出问题， 取消本次募集资金)
 		#[weight = 120_000_000]
 		fn cancel_raise(origin, project_id: u32){
+
 		}
 
 
 		/// 项目方中途决定关闭募集资金（钱已经筹集足够，不再继募集）
 		#[weight = 120_000_000]
 		fn close_raise(origin, project_id: u32) {
+
 		}
 
 
 		/// 用户参与ico
 		#[weight = 120_000_000]
-		fn user_join_into_ico(origin, project_id: u32, amount: USDT) {
+		fn user_join_into_ico(origin, asset_id: T::AssetId, user_symbol: Symbol, user_amount: Balance) {
+			ensure_signed(origin)?;
+
+			// todo 进行募集资金的币种与usdt之间的转换
+			let amount = Self::balance_convert_to_usdt(user_symbol.clone(), user_amount.clone());
+
+			// amount参数不能是0
+			ensure!(amount > 0 as USDT, Error::<T>::AmountZero);
+
+			// 这个资产是否正在ico
+			ensure!(<Raising<T>>::get().contains(&asset_id), Error::<T>::NotRaising);
+
+			let (project_name, symbol) = <SymbolOf<T>>::get(asset_id.clone()).ok_or(Error::<T>::GetErr)?;
+
+			// 获取ico具体信息
+			let info = <Projects<T>>::get(project_name.clone(), symbol.clone()).ok_or(Error::<T>::GetErr)?;
+
+			// 判断是否已经过期
+			ensure!(Self::now() < info.0.end_time.clone(), Error::<T>::Expire);
+
+			// 累加金额不能大于最大募集资金
+			let amount1 = amount.checked_add(info.0.already_raise_usdt.clone()).ok_or(Error::<T>::Overflow)?;
+			ensure!(info.1.raise_usdt_total.clone() >= amount1, Error::<T>::NotRaising);
+
+			// 金额不能小于最小（也不能是0）  不能大于最大
+			if info.1.user_max_usdt.clone().is_some(){
+				ensure!(info.1.user_max_usdt.clone().unwrap() <= amount.clone(), Error::<T>::AmountTooLarge);
+			}
+			if info.1.user_min_usdt.clone().is_some(){
+				ensure!(info.1.user_min_usdt.clone().unwrap() >= amount.clone(), Error::<T>::AmountTooShort);
+			}
+
+			// todo 被排除在外的国家不能参与（结合identity模块)
+
 
 		}
 
@@ -273,6 +361,11 @@ impl <T: Trait> Module<T> {
 	/// 获取当前区块高度
 	fn now() -> T::BlockNumber{
 		<system::Module<T>>::block_number()
+	}
+
+	// 把其他币种的金额转换成usdt
+	fn balance_convert_to_usdt(user_symbol: Symbol, user_amount: Balance) -> USDT{
+		10000 as USDT
 	}
 
 }
