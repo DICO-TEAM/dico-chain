@@ -208,7 +208,7 @@ impl ico::Trait for Runtime{
 	type Event = Event;
 	type ModuleId = TreasuryModuleId;
 	type RaiseDeposit = RaiseDeposit;
-	type Currency = Balances;
+// 	type Currency = Balances;
 	type MinProportion = MinProportion;
 	type MaxDurtion = MaxDurtion;
 }

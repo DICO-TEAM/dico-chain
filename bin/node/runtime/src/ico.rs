@@ -7,11 +7,12 @@ use system::{ensure_signed, ensure_root};
 use sp_runtime::{DispatchResult, Percent, ModuleId, RuntimeDebug, traits::{AccountIdConversion, CheckedAdd, One}};
 use codec::{Encode, Decode};
 use node_primitives::{USDT, Balance};
-use pallet_balances as balances;
+use pallet_balances::{self as balances};
 use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions};
+use pallet_identity::{self as identity};
 
 
-type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
+type BalanceOf<T> = <<T as identity::Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
 
 
 /// 额外信息
@@ -38,12 +39,19 @@ pub struct Address{
 }
 
 
+// #[cfg_attr(feature = "std", derive())]
+// #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
+
+
+
+/// 币种
 #[cfg_attr(feature = "std", derive())]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
 pub enum Symbol {
 	Usdt,
 	Dico,
 }
+
 
 /// 募集资金的信息
 #[cfg_attr(feature = "std", derive())]
@@ -83,14 +91,14 @@ pub struct IcoInfo<Balance, BlockNumber>{
 	unlock_proportion: Percent,
 }
 
-pub trait Trait: system::Trait + balances::Trait + generic_asset::Trait {
+pub trait Trait: system::Trait + balances::Trait + generic_asset::Trait + identity::Trait {
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 	type ModuleId: Get<ModuleId>;
 
 	// 募集资金需要抵押的金额
 	type RaiseDeposit: Get<BalanceOf<Self>>;
 
-	type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
+// 	type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
 
 	// 募集资金需要的最小占币
 	type MinProportion: Get<Percent>;
@@ -145,6 +153,8 @@ decl_error! {
 		AmountTooShort,
 		/// 金额参数不能是0
 		AmountZero,
+		/// 在被排除在外的国家
+		InExcludeCountry,
 
 	}
 	}
@@ -263,7 +273,7 @@ decl_module! {
 		/// 用户参与ico
 		#[weight = 120_000_000]
 		fn user_join_into_ico(origin, asset_id: T::AssetId, user_symbol: Symbol, user_amount: Balance) {
-			ensure_signed(origin)?;
+			let who = ensure_signed(origin)?;
 
 			// todo 进行募集资金的币种与usdt之间的转换
 			let amount = Self::balance_convert_to_usdt(user_symbol.clone(), user_amount.clone());
@@ -295,7 +305,7 @@ decl_module! {
 			}
 
 			// todo 被排除在外的国家不能参与（结合identity模块)
-
+			ensure!(!Self::is_in_exclude_countries(who.clone(), info.1.exclude_countries.clone()), Error::<T>::InExcludeCountry);
 
 		}
 
@@ -363,9 +373,15 @@ impl <T: Trait> Module<T> {
 		<system::Module<T>>::block_number()
 	}
 
-	// 把其他币种的金额转换成usdt
+	// todo 把其他币种的金额转换成usdt
 	fn balance_convert_to_usdt(user_symbol: Symbol, user_amount: Balance) -> USDT{
 		10000 as USDT
+	}
+
+	// todo 这个人是否在被排除在kyc外的国家
+	fn is_in_exclude_countries(who: T::AccountId, countrise: Vec<Vec<u8>>) -> bool{
+		false
+
 	}
 
 }

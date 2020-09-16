@@ -132,7 +132,7 @@ pub trait Trait: frame_system::Trait {
 	type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
 
 	/// The currency trait.
-	type Currency: ReservableCurrency<Self::AccountId>;
+	type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
 
 	/// The amount held on deposit for a registered identity.
 	type BasicDeposit: Get<BalanceOf<Self>>;
@@ -305,6 +305,7 @@ pub enum IdentityField {
 	PgpFingerprint = 0b0000000000000000000000000000000000000000000000000000000000100000,
 	Image          = 0b0000000000000000000000000000000000000000000000000000000001000000,
 	Twitter        = 0b0000000000000000000000000000000000000000000000000000000010000000,
+// 	Country        = 0b0000000000000000000000000000000000000000000000000000000100000000,
 }
 
 /// Wrapper type for `BitFlags<IdentityField>` that implements `Codec`.
@@ -374,6 +375,9 @@ pub struct IdentityInfo {
 
 	/// The Twitter identity. The leading `@` character may be elided.
 	pub twitter: Data,
+
+	/// 所处的国家
+	pub country: Data,
 }
 
 /// Information concerning the identity of the controller of an account.
