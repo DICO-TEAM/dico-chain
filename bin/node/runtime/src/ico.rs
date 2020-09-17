@@ -1,5 +1,5 @@
 
-use sp_std::{prelude::*, result::Result, collections::btree_set::BTreeSet};
+use sp_std::{prelude::*, result::Result, collections::{btree_set::BTreeSet, btree_map::BTreeMap}};
 use frame_support::{debug, ensure, decl_module, decl_storage, decl_error, decl_event, weights::{Weight},
 					StorageValue, StorageMap, StorageDoubleMap, Blake2_256, traits::{Get, IcoAsset, Currency, ReservableCurrency}};
 use frame_system as system;
@@ -38,11 +38,34 @@ pub struct Address{
 	dico: Option<Vec<u8>>,
 }
 
+#[cfg_attr(feature = "std", derive())]
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
+pub enum AddressEnum {
+	Usdt(Vec<u8>),
+	Dico(Vec<u8>),
+}
 
-// #[cfg_attr(feature = "std", derive())]
-// #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
+impl Default for AddressEnum {
+	fn default() -> Self {
+		Self::Usdt(vec![])
+	}
+}
+
+#[cfg_attr(feature = "std", derive())]
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, Default)]
+pub struct TokenAmount<AddressEnum> {
+	usdt: (AddressEnum, Balance),
+	dico: (AddressEnum, Balance),
+}
 
 
+/// 项目募集资金的具体金额（ 包括项目方和用户)
+#[cfg_attr(feature = "std", derive())]
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, Default)]
+pub struct RaiseAmount<TokenAmount, BTreeMap> {
+	project_manager_get: TokenAmount,
+	others_send: BTreeMap,
+}
 
 /// 币种
 #[cfg_attr(feature = "std", derive())]
@@ -119,6 +142,8 @@ decl_storage! {
 		/// 正在进行ico的项目（资产id代替）
 		pub Raising get(fn raising): BTreeSet<T::AssetId>;
 
+		/// 项目筹集资金的具体金额
+		pub SpecificRaiseAmount get(fn specific_raise_amount): RaiseAmount<TokenAmount<AddressEnum>, BTreeMap<T::AccountId, TokenAmount<AddressEnum>>>;
 
 	}
 	}
@@ -247,6 +272,8 @@ decl_module! {
 
 				<Projects<T>>::insert(project_name.clone(), symbol.clone(), (Additional{asset_id: id.clone(), end_time: end_time.clone(), already_raise_usdt: 0 as USDT}, info.clone()));
 
+				// todo 创建资产
+
 				// 设置下一个资产id
 				Self::set_next_asset_id();
 
@@ -260,23 +287,28 @@ decl_module! {
 		#[weight = 120_000_000]
 		fn cancel_raise(origin, project_id: u32){
 
+			// 加入筹集资金完毕的队列（还在做项目)
+			// 从Raising中删除数据
+			// 销毁对应的币种  归还筹集的币
+
 		}
 
 
 		/// 项目方中途决定关闭募集资金（钱已经筹集足够，不再继募集）
 		#[weight = 120_000_000]
 		fn close_raise(origin, project_id: u32) {
-
+			// 筹集的资金要达到60%
+			// 从Raising中删除数据
 		}
 
 
 		/// 用户参与ico
 		#[weight = 120_000_000]
-		fn user_join_into_ico(origin, asset_id: T::AssetId, user_symbol: Symbol, user_amount: Balance) {
+		fn user_join_into_ico(origin, asset_id: T::AssetId, user_symbol: Symbol, usdt_amount: USDT) {
+
 			let who = ensure_signed(origin)?;
 
-			// todo 进行募集资金的币种与usdt之间的转换
-			let amount = Self::balance_convert_to_usdt(user_symbol.clone(), user_amount.clone());
+			let amount = usdt_amount;
 
 			// amount参数不能是0
 			ensure!(amount > 0 as USDT, Error::<T>::AmountZero);
@@ -289,7 +321,7 @@ decl_module! {
 			// 获取ico具体信息
 			let info = <Projects<T>>::get(project_name.clone(), symbol.clone()).ok_or(Error::<T>::GetErr)?;
 
-			// 判断是否已经过期
+			// todo 判断是否已经过期 过期要进行相应的处理（归还币 销毁资产 删除Raising数据）
 			ensure!(Self::now() < info.0.end_time.clone(), Error::<T>::Expire);
 
 			// 累加金额不能大于最大募集资金
@@ -305,7 +337,21 @@ decl_module! {
 			}
 
 			// todo 被排除在外的国家不能参与（结合identity模块)
-			ensure!(!Self::is_in_exclude_countries(who.clone(), info.1.exclude_countries.clone()), Error::<T>::InExcludeCountry);
+			ensure!(!Self::is_exclude_countries(who.clone(), info.1.exclude_countries.clone()), Error::<T>::InExcludeCountry);
+
+
+			// todo usdt转换成代币数量
+			let token = Self::usdt_convert_to_balances(user_symbol.clone(), amount.clone());
+
+			// todo 代币琐仓
+
+			// todo eth usdt btc 等琐仓
+
+			// todo 存储个人筹集资金记录（币种 金额 地址）
+
+			// todo 存储项目具体金额
+
+			// todo 判断筹集资金是否结束（金额到顶） 结束直接处理(删除Raising中的数据)
 
 		}
 
@@ -374,12 +420,12 @@ impl <T: Trait> Module<T> {
 	}
 
 	// todo 把其他币种的金额转换成usdt
-	fn balance_convert_to_usdt(user_symbol: Symbol, user_amount: Balance) -> USDT{
-		10000 as USDT
+	fn usdt_convert_to_balances(user_symbol: Symbol, usdt_amount: USDT) -> Balance{
+		10000 as Balance
 	}
 
 	// todo 这个人是否在被排除在kyc外的国家
-	fn is_in_exclude_countries(who: T::AccountId, countrise: Vec<Vec<u8>>) -> bool{
+	fn is_exclude_countries(who: T::AccountId, countrise: Vec<Vec<u8>>) -> bool{
 		false
 
 	}
