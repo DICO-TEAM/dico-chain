@@ -10,109 +10,11 @@ use node_primitives::{USDT, Balance};
 use pallet_balances::{self as balances};
 use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions};
 use pallet_identity::{self as identity};
+use crate::raw::{Additional, Address, AddressEnum, TokenAmount, RaiseAmount, Symbol, IcoInfo};
 
 
 type BalanceOf<T> = <<T as identity::Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
 
-
-/// 额外信息
-#[cfg_attr(feature = "std", derive())]
-#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
-pub struct Additional<AssetId, BlockNumber>{
-	/// ico对应的资产id
-	asset_id: AssetId,
-	/// ico结束时间
-	end_time: BlockNumber,
-	/// 已经募集到的usdt数量
-	already_raise_usdt: USDT,
-}
-
-
-/// 地址
-#[cfg_attr(feature = "std", derive())]
-#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
-pub struct Address{
-	/// usdt地址
-	usdt: Option<Vec<u8>>,
-	/// dico地址
-	dico: Option<Vec<u8>>,
-}
-
-#[cfg_attr(feature = "std", derive())]
-#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
-pub enum AddressEnum {
-	Usdt(Vec<u8>),
-	Dico(Vec<u8>),
-}
-
-impl Default for AddressEnum {
-	fn default() -> Self {
-		Self::Usdt(vec![])
-	}
-}
-
-#[cfg_attr(feature = "std", derive())]
-#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, Default)]
-pub struct TokenAmount<AddressEnum> {
-	usdt: (AddressEnum, Balance),
-	dico: (AddressEnum, Balance),
-}
-
-
-/// 项目募集资金的具体金额（ 包括项目方和用户)
-#[cfg_attr(feature = "std", derive())]
-#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, Default)]
-pub struct RaiseAmount<TokenAmount, BTreeMap> {
-	project_manager_get: TokenAmount,
-	others_send: BTreeMap,
-}
-
-/// 币种
-#[cfg_attr(feature = "std", derive())]
-#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
-pub enum Symbol {
-	Usdt,
-	Dico,
-}
-
-
-/// 募集资金的信息
-#[cfg_attr(feature = "std", derive())]
-#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
-pub struct IcoInfo<Balance, BlockNumber>{
-	/// 项目名字
-	project_name: Vec<u8>,
-	/// 代币名称
-	symbol: Vec<u8>,
-	/// logo地址
-	logo_url: Vec<u8>,
-	/// 项目是否做了认证
-	is_identity: bool,
-	/// 总发行量
-	total_issuance: Balance,
-	/// 总流通量
-	total_circulation: Balance,
-	/// 官网地址
-	official_website: Vec<u8>,
-	/// 公钥地址
-	public_keys: Address,
-	/// 用户参与的最小金额
-	user_min_usdt: Option<USDT>,
-	/// 用户参与的最大金额
-	user_max_usdt: Option<USDT>,
-	/// 这次募集资金拿出来的代币数量
-	total_token_in_use: Balance,
-	/// 募集资金的周期
-	raise_duration: BlockNumber,
-	/// 募集的usdt数量
-	raise_usdt_total: USDT,
-	/// 排除在外的国家
-	exclude_countries: Vec<Vec<u8>>,
-	/// 琐仓比例
-	vesting_proportion: Percent,
-	/// 单次解锁比例
-	unlock_proportion: Percent,
-}
 
 pub trait Trait: system::Trait + balances::Trait + generic_asset::Trait + identity::Trait {
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
@@ -121,14 +23,13 @@ pub trait Trait: system::Trait + balances::Trait + generic_asset::Trait + identi
 	// 募集资金需要抵押的金额
 	type RaiseDeposit: Get<BalanceOf<Self>>;
 
-// 	type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
-
 	// 募集资金需要的最小占币
 	type MinProportion: Get<Percent>;
 
 	// 募集资金最大的周期
 	type MaxDurtion: Get<Self::BlockNumber>;
 }
+
 
 decl_storage! {
 	trait Store for Module<T: Trait> as TemplateModule {
@@ -368,6 +269,7 @@ decl_module! {
 // 		/// 检查ico是否已经达到上限， 达到上限即给每个账号打币
 // 		/// 问题： 怎么归还已经筹集到的币种？？？
 		fn on_finalize(n: T::BlockNumber){
+
 		}
 
 }
@@ -380,6 +282,7 @@ decl_event!(
 		AskForRaised(AccountId, Vec<u8>, Vec<u8>),
 	}
 );
+
 
 impl <T: Trait> Module<T> {
 
@@ -414,15 +317,18 @@ impl <T: Trait> Module<T> {
 		Ok(())
 	}
 
+
 	/// 获取当前区块高度
 	fn now() -> T::BlockNumber{
 		<system::Module<T>>::block_number()
 	}
 
+
 	// todo 把其他币种的金额转换成usdt
 	fn usdt_convert_to_balances(user_symbol: Symbol, usdt_amount: USDT) -> Balance{
 		10000 as Balance
 	}
+
 
 	// todo 这个人是否在被排除在kyc外的国家
 	fn is_exclude_countries(who: T::AccountId, countrise: Vec<Vec<u8>>) -> bool{
@@ -431,6 +337,8 @@ impl <T: Trait> Module<T> {
 	}
 
 }
+
+
 
 impl<T: Trait> IcoAsset<T::AssetId> for Module<T>{
 	fn set_asset_symbol(id: T::AssetId, project_name: Vec<u8>, symbol: Vec<u8>){

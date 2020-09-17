@@ -84,6 +84,7 @@ use impls::{CurrencyToVoteHandler, Author};
 pub mod constants;
 use constants::{time::*, currency::*};
 pub mod ico;
+pub mod raw;
 use pallet_generic_asset as generic_asset;
 
 // Make the WASM binary available.
