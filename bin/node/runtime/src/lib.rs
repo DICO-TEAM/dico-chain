@@ -85,6 +85,7 @@ pub mod constants;
 use constants::{time::*, currency::*};
 pub mod ico;
 pub mod raw;
+pub mod dao;
 use pallet_generic_asset as generic_asset;
 
 // Make the WASM binary available.
@@ -212,6 +213,10 @@ impl ico::Trait for Runtime{
 // 	type Currency = Balances;
 	type MinProportion = MinProportion;
 	type MaxDurtion = MaxDurtion;
+}
+
+impl dao::Trait for Runtime {
+	type Event = Event;
 }
 
 parameter_types! {
@@ -903,6 +908,7 @@ construct_runtime!(
 		Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
 		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
 		Ico: ico::{Module, Call, Storage, Event<T>},
+		Dao: dao::{Module, Call, Storage, Event<T>},
 		GenericAsset: generic_asset::{Module, Storage, Call, Event<T>, Config<T>},
 	}
 );

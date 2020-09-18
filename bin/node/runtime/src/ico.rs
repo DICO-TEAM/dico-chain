@@ -1,4 +1,5 @@
 
+
 use sp_std::{prelude::*, result::Result, collections::{btree_set::BTreeSet, btree_map::BTreeMap}};
 use frame_support::{debug, ensure, decl_module, decl_storage, decl_error, decl_event, weights::{Weight},
 					StorageValue, StorageMap, StorageDoubleMap, Blake2_256, traits::{Get, IcoAsset, Currency, ReservableCurrency}};
@@ -11,7 +12,6 @@ use pallet_balances::{self as balances};
 use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions};
 use pallet_identity::{self as identity};
 use crate::raw::{Additional, Address, AddressEnum, TokenAmount, RaiseAmount, Symbol, IcoInfo};
-
 
 type BalanceOf<T> = <<T as identity::Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
 
@@ -32,7 +32,7 @@ pub trait Trait: system::Trait + balances::Trait + generic_asset::Trait + identi
 
 
 decl_storage! {
-	trait Store for Module<T: Trait> as TemplateModule {
+	trait Store for Module<T: Trait> as IcoModule {
 
 		/// 所有正在参加ico或是已经ico成功的项目 (project_name, symbol) => (asset_id, end_time, IcoInfo)
 		pub Projects get(fn all_project): double_map hasher(blake2_128_concat) Vec<u8>, hasher(blake2_128_concat) Vec<u8> => Option<(Additional<T::AssetId, T::BlockNumber>, IcoInfo<T::Balance, T::BlockNumber>)>;
@@ -46,6 +46,8 @@ decl_storage! {
 		/// 项目筹集资金的具体金额
 		pub SpecificRaiseAmount get(fn specific_raise_amount): RaiseAmount<TokenAmount<AddressEnum>, BTreeMap<T::AccountId, TokenAmount<AddressEnum>>>;
 
+		/// 正在进行dao的项目
+		pub Dao get(fn dao): BTreeSet<T::AssetId>;
 	}
 	}
 
@@ -252,7 +254,7 @@ decl_module! {
 
 			// todo 存储项目具体金额
 
-			// todo 判断筹集资金是否结束（金额到顶） 结束直接处理(删除Raising中的数据)
+			// todo 判断筹集资金是否结束（金额到顶） 结束直接处理(删除Raising中的数据, 在Dao中添加该资产id)
 
 		}
 
