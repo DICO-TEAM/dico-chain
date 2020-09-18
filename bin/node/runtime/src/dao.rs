@@ -11,12 +11,13 @@ use pallet_balances::{self as balances};
 use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions};
 use pallet_identity::{self as identity};
 use crate::raw::{Additional, Address, AddressEnum, TokenAmount, RaiseAmount, Symbol, IcoInfo};
+use crate::ico;
 
 
 type BalanceOf<T> = <<T as identity::Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
 
 
-pub trait Trait: system::Trait {
+pub trait Trait: system::Trait + ico::Trait {
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 }
 
@@ -43,9 +44,6 @@ decl_module! {
 		type Error = Error<T>;
 		fn deposit_event() = default;
 
-// 		/// 检查ico是否过期， 过期看筹集资金是否达到最低要求
-// 		/// 检查ico是否已经达到上限， 达到上限即给每个账号打币
-// 		/// 问题： 怎么归还已经筹集到的币种？？？
 		fn on_finalize(n: T::BlockNumber){
 
 		}
