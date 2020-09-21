@@ -88,6 +88,16 @@ pub mod raw;
 pub mod dao;
 use pallet_generic_asset as generic_asset;
 
+pub mod kyc;
+
+
+#[cfg(test)]
+mod mock;
+
+#[cfg(test)]
+mod tests;
+
+
 // Make the WASM binary available.
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
@@ -869,6 +879,22 @@ impl pallet_vesting::Trait for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	pub const KycBasicDeposit: Balance = 5 * DOLLARS;       // 258 bytes on-chain
+	pub const KycFieldDeposit: Balance = 250 * CENTS;        // 66 bytes on-chain
+}
+
+impl kyc::Trait for Runtime {
+	type Event = Event;
+	type Currency = Balances;
+	type BasicDeposit = KycBasicDeposit;
+	type FieldDeposit = KycFieldDeposit;
+	type Slashed = Treasury;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
+	type JudgeOrigin = EnsureRootOrHalfCouncil;
+	type SupervisorOrigin = EnsureRootOrHalfCouncil;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -909,6 +935,8 @@ construct_runtime!(
 		Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
 		Ico: ico::{Module, Call, Storage, Event<T>},
 		Dao: dao::{Module, Call, Storage, Event<T>},
+
+		KYC: kyc::{Module, Call, Storage, Event<T>},
 		GenericAsset: generic_asset::{Module, Storage, Call, Event<T>, Config<T>},
 	}
 );
