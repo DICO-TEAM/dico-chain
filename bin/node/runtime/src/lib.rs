@@ -215,8 +215,16 @@ impl ico::Trait for Runtime{
 	type MaxDurtion = MaxDurtion;
 }
 
+parameter_types! {
+	// One storage item; key size is 32; value is size 4+4+16+32 bytes = 56 bytes.
+	pub const QuitExpire: BlockNumber = 1 * DAYS;
+	pub const ReleaseExpire: BlockNumber = 1 * DAYS;
+}
+
 impl dao::Trait for Runtime {
 	type Event = Event;
+	type QuitExpire = QuitExpire;
+	type ReleaseExpire = ReleaseExpire;
 }
 
 parameter_types! {

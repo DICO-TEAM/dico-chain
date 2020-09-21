@@ -10,7 +10,7 @@ use node_primitives::{USDT, Balance};
 use pallet_balances::{self as balances};
 use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions};
 use pallet_identity::{self as identity};
-use crate::raw::{Additional, Address, AddressEnum, TokenAmount, RaiseAmount, Symbol, IcoInfo};
+use crate::raw::{DicoVote, Symbol};
 use crate::ico;
 
 
@@ -19,6 +19,10 @@ type BalanceOf<T> = <<T as identity::Trait>::Currency as Currency<<T as system::
 
 pub trait Trait: system::Trait + ico::Trait {
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+	/// 退出ico提案的过期时间
+	type QuitExpire: Get<Self::BlockNumber>;
+	/// 释放琐仓的提案的过期时间
+	type ReleaseExpire: Get<Self::BlockNumber>;
 }
 
 
@@ -40,9 +44,41 @@ decl_error! {
 decl_module! {
 
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
+// 		/// 退出ico的提案的过期时间
+// 		const QuitExpire: T::BlockNumber = T::QuitExpire::get();
+// 		/// 释放琐仓提案的过期时间
+// 		const ReleaseExpire: T::BlockNumber = T::ReleaseExpire::get();
 
 		type Error = Error<T>;
 		fn deposit_event() = default;
+
+		/// 提出彻底退出募集资金的议案
+		#[weight = 120_000_000]
+		fn request_quit(origin, asset_id: T::AssetId) {
+			// 签名
+			//
+
+		}
+
+		/// 给退出ico的提案进行投票
+		#[weight = 120_000_000]
+		fn vote_for_quit_proposal(origin, asset_id: T::AssetId, vote: DicoVote){
+
+		}
+
+		/// 项目方请求释放琐仓(释放哪个币种)
+		#[weight = 120_000_000]
+		fn request_release(origin, asset_id: T::AssetId, symbol: Symbol, amount: Balance) {
+
+		}
+
+		/// 对释放琐仓的提案进行投票
+		#[weight = 120_000_000]
+		fn vote_for_release_proposal(origin, asset_id: T::AssetId) {
+
+		}
+
+
 
 		fn on_finalize(n: T::BlockNumber){
 

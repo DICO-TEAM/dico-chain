@@ -44,8 +44,8 @@ impl Default for AddressEnum {
 #[cfg_attr(feature = "std", derive())]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, Default)]
 pub struct TokenAmount<AddressEnum> {
-	pub usdt: (AddressEnum, Balance),
-	pub dico: (AddressEnum, Balance),
+	pub usdt: (AddressEnum, Balance, USDT),
+	pub dico: (AddressEnum, Balance, USDT),
 }
 
 
@@ -66,6 +66,13 @@ pub enum Symbol {
 	Dico,
 }
 
+/// 投票
+#[cfg_attr(feature = "std", derive())]
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
+pub enum DicoVote {
+	Approval,
+	Reject,
+}
 
 /// 募集资金的信息
 #[cfg_attr(feature = "std", derive())]
