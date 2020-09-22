@@ -2,7 +2,7 @@
 
 use sp_std::{prelude::*, result::Result, collections::{btree_set::BTreeSet, btree_map::BTreeMap}};
 use frame_support::{debug, ensure, decl_module, decl_storage, decl_error, decl_event, weights::{Weight},
-					StorageValue, StorageMap, StorageDoubleMap, Blake2_256, traits::{Get, IcoAsset, Currency, ReservableCurrency}};
+					StorageValue, StorageMap, StorageDoubleMap, Blake2_256, traits::{Get, IcoAsset, Currency, ReservableCurrency, LockIdentifier}};
 use frame_system as system;
 use system::{ensure_signed, ensure_root};
 use sp_runtime::{DispatchResult, Percent, ModuleId, RuntimeDebug, traits::{AccountIdConversion, CheckedAdd, One}};
@@ -15,6 +15,7 @@ use crate::raw::{Additional, Address, AddressEnum, TokenAmount, RaiseAmount, Sym
 
 type BalanceOf<T> = <<T as identity::Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
 
+pub const DICO_ID: LockIdentifier = *b"dico    ";
 
 pub trait Trait: system::Trait + balances::Trait + generic_asset::Trait + identity::Trait {
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
