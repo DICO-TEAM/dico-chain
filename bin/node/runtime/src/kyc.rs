@@ -201,12 +201,8 @@ impl<
 pub enum KycField {
     Name = 1 << 0,
     Country = 1 << 1,
-    Web = 1 << 2,
-    Email = 1 << 3,
-    Github = 1 << 4,
-    Twitter = 1 << 5,
-    Info = 1 << 6,
-    PgpPublicKey = 1 << 7, // dico 命令行 生成
+    Info = 1 << 2,
+    PgpPublicKey = 1 << 3, // dico 命令行 生成
 }
 
 #[derive(Clone, Copy, PartialEq, Default, RuntimeDebug)]
@@ -242,18 +238,6 @@ pub struct KYCInfo {
 
     /// 名字
     pub name: Data,
-
-    /// 网站
-    pub web: Data,
-
-    /// email
-    pub email: Data,
-
-    /// github
-    pub github: Data,
-
-    /// twitter
-    pub twitter: Data,
 
     /// 信息说明,可以时候一个地址 -> 数据部分，dico 命令行生成
     pub info: Data,
@@ -386,7 +370,7 @@ decl_module! {
         fn deposit_event() = default;
 
         #[weight = 120_000_000]
-        fn add_judge(origin, account: T::AccountId) -> DispatchResult {
+        pub fn add_judge(origin, account: T::AccountId) -> DispatchResult {
             T::JudgeOrigin::ensure_origin(origin)?;
 
             let (i, judge_count) = <Judges<T>>::try_mutate(
@@ -406,7 +390,7 @@ decl_module! {
 
         /// 一个机构存在之后，可以发送成为这个机构的 监管者
         #[weight = 120_000_000]
-        fn apply_supervisor(origin, account: T::AccountId) -> DispatchResult {
+        pub fn apply_supervisor(origin, account: T::AccountId) -> DispatchResult {
 
             T::SupervisorOrigin::ensure_origin(origin)?;
 
@@ -428,7 +412,7 @@ decl_module! {
 
 
         #[weight = 120_000_000]
-        fn set_kyc(origin, info: KYCInfo) -> DispatchResult {
+        pub fn set_kyc(origin, info: KYCInfo) -> DispatchResult {
             // TODO: 自定义 KYCInfo 的数据结构
             let sender = ensure_signed(origin)?;
             // TODO: 设置KYC额外信息的限制
@@ -462,7 +446,7 @@ decl_module! {
         }
 
         #[weight = 120_000_000]
-        fn clear_kyc(origin) -> DispatchResult {
+        pub fn clear_kyc(origin) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
             let id = <KYCOf<T>>::take(&sender).ok_or(Error::<T>::NotNamed)?;
@@ -477,7 +461,7 @@ decl_module! {
 
         // 发送验证请求
         #[weight = 120_000_000]
-        fn request_judgement(origin,
+        pub fn request_judgement(origin,
             #[compact] judge_index: JudgeIndex,
             #[compact] max_fee: BalanceOf<T>,
         ) -> DispatchResult {
@@ -514,7 +498,7 @@ decl_module! {
 
 
         #[weight = 120_000_000]
-        fn cancel_request(origin, jugle_index: JudgeIndex) -> DispatchResult {
+        pub fn cancel_request(origin, jugle_index: JudgeIndex) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             let mut id = <KYCOf<T>>::get(&sender).ok_or(Error::<T>::NotFound)?;
 
@@ -539,7 +523,7 @@ decl_module! {
 
         /// judge set fee
         #[weight = 120_000_000]
-        fn judge_set_fee(origin,
+        pub fn judge_set_fee(origin,
             #[compact] index: judge_index,
             #[compact] fee: BalanceOf<T>,
         ) -> DispatchResult {
@@ -558,7 +542,7 @@ decl_module! {
 
         /// judge 设置费用
         #[weight = 120_000_000]
-        fn judge_set_fields(origin,
+        pub fn judge_set_fields(origin,
             #[compact] index: JudgeIndex,
             fields: KycFields,
         ) -> DispatchResult {
@@ -576,7 +560,7 @@ decl_module! {
 
 
         #[weight = 120_000_000]
-        fn judge_provide_judgement(origin,
+        pub fn judge_provide_judgement(origin,
             #[compact] judge_index: JudgeIndex,
             target: <T::Lookup as StaticLookup>::Source,
             judgement: Judgement<BalanceOf<T>>,
@@ -610,7 +594,7 @@ decl_module! {
 
         /// 监管者实现监管逻辑，需要获得查看权
         #[weight = 120_000_000]
-        fn supervisor_provide_judgement(origin,
+        pub fn supervisor_provide_judgement(origin,
             #[compact] judge_index: JudgeIndex,
             target: <T::Lookup as StaticLookup>::Source,
             // supervisor 一旦设定某个阶段，那么会改变之前的评判结果
@@ -648,7 +632,7 @@ decl_module! {
 
         // 当用户不想要某个身份的时候，可以直接解除，费用不退
         #[weight = 120_000_000]
-        fn remove_kyc(origin, target: <T::Lookup as StaticLookup>::Source) -> DispatchResult {
+        pub fn remove_kyc(origin, target: <T::Lookup as StaticLookup>::Source) -> DispatchResult {
             T::ForceOrigin::ensure_origin(origin)?;
 
             // Figure out who we're meant to be clearing.
