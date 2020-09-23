@@ -9,7 +9,7 @@ use sp_runtime::{DispatchResult, Percent, ModuleId, RuntimeDebug, traits::{Accou
 use codec::{Encode, Decode};
 use node_primitives::{USDT, Balance};
 use pallet_balances::{self as balances};
-use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions};
+use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions, PermissionsV1, PermissionLatest};
 use pallet_identity::{self as identity};
 use crate::raw::{Additional, Address, AddressEnum, TokenAmount, RaiseAmount, Symbol, IcoInfo};
 
@@ -36,7 +36,7 @@ decl_storage! {
 	trait Store for Module<T: Trait> as IcoModule {
 
 		/// 所有正在参加ico或是已经ico成功的项目 (project_name, symbol) => (asset_id, end_time, IcoInfo)
-		pub Projects get(fn all_project): double_map hasher(blake2_128_concat) Vec<u8>, hasher(blake2_128_concat) Vec<u8> => Option<(Additional<T::AssetId, T::BlockNumber>, IcoInfo<T::Balance, T::BlockNumber>)>;
+		pub Projects get(fn all_project): double_map hasher(blake2_128_concat) Vec<u8>, hasher(blake2_128_concat) Vec<u8> => Option<(Additional<T::AssetId, T::BlockNumber>, IcoInfo<T::GenericBalance, T::BlockNumber>)>;
 
 		/// 资产id对应的币种(todo 多资产模块初始化币种应该对这个也进行初始化)
 		pub SymbolOf get(fn symbol_of): map hasher(blake2_128_concat) T::AssetId => Option<(Vec<u8>, Vec<u8>)>;
@@ -108,7 +108,7 @@ decl_module! {
 
 		/// 项目方要求募集资金
 		#[weight = 120_000_000]
-		fn ask_for_raise(origin, info: IcoInfo<T::Balance, T::BlockNumber>){
+		fn ask_for_raise(origin, info: IcoInfo<T::GenericBalance, T::BlockNumber>){
 			let who = ensure_signed(origin)?;
 			let mut info = info.clone();
 			// 字符串相关参数不能为空
@@ -121,10 +121,10 @@ decl_module! {
 					}
 
 			// 总发行量与流通量、用于募资量大于0 并且流通量小于发行量， 用于募资的量
-			if info.total_issuance.clone() == T::Balance::from(0u32)
-				|| info.total_circulation.clone() == T::Balance::from(0u32)
+			if info.total_issuance.clone() == T::GenericBalance::from(0u32)
+				|| info.total_circulation.clone() == T::GenericBalance::from(0u32)
 				|| info.total_circulation.clone() > info.total_issuance.clone()
-				|| info.total_token_in_use == T::Balance::from(0)
+				|| info.total_token_in_use == T::GenericBalance::from(0)
 				|| info.total_token_in_use.clone() > info.total_issuance.clone()
 				{
 					return Err(Error::<T>::TokenAmountErr)?;
@@ -168,6 +168,17 @@ decl_module! {
 
 				// 募集资金的周期不能大于系统最长
 				ensure!(info.raise_duration.clone() <= T::MaxDurtion::get(), Error::<T>::ToMaxDurtion);
+
+				let asset_options = AssetOptions {
+					/// 募集的资金作为当前的总发行量
+					initial_issuance: info.total_token_in_use.clone(),
+					/// 不给铸币 更新 销毁权限
+					permissions: PermissionLatest::<T::AccountId>::default(),
+				};
+
+				// 创建资产到default账户
+				Self::create_asset(id.clone(), None, asset_options)?;
+
 				let end_time = Self::now() + info.raise_duration.clone();
 
 				<Raising<T>>::mutate(|z| z.insert(id.clone()));
@@ -175,8 +186,6 @@ decl_module! {
 				<SymbolOf<T>>::insert(id.clone(), (project_name.clone(), symbol.clone()));
 
 				<Projects<T>>::insert(project_name.clone(), symbol.clone(), (Additional{asset_id: id.clone(), end_time: end_time.clone(), already_raise_usdt: 0 as USDT}, info.clone()));
-
-				// todo 创建资产
 
 				// 设置下一个资产id
 				Self::set_next_asset_id();
