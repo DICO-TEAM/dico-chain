@@ -285,7 +285,9 @@ impl<AccountId: Decode> Decode for PermissionVersions<AccountId> {
 			}
 		)
 	}
+
 }
+
 
 impl<AccountId> Default for PermissionsV1<AccountId> {
 	fn default() -> Self {
@@ -516,12 +518,25 @@ impl<T: Trait> Module<T> {
 
 	/// Get an account's free balance of an asset kind.
 	pub fn free_balance(asset_id: &T::AssetId, who: &T::AccountId) -> T::GenericBalance {
-		<FreeBalance<T>>::get(asset_id, who)
+		if <TotalIssuance<T>>::contains_key(asset_id){
+			return <FreeBalance<T>>::get(asset_id, who);
+		}
+		else {
+			<FreeBalance<T>>::remove(asset_id, who);
+			return T::GenericBalance::from(0u32);
+		}
+
 	}
 
 	/// Get an account's reserved balance of an asset kind.
 	pub fn reserved_balance(asset_id: &T::AssetId, who: &T::AccountId) -> T::GenericBalance {
-		<ReservedBalance<T>>::get(asset_id, who)
+		if <TotalIssuance<T>>::contains_key(asset_id){
+			return <ReservedBalance<T>>::get(asset_id, who);
+		}
+		else {
+			<ReservedBalance<T>>::remove(asset_id, who);
+			return T::GenericBalance::from(0u32);
+		}
 	}
 
 	/// Mint to an account's free balance, without event

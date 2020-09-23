@@ -6,13 +6,15 @@ use sp_std::{prelude::*,};
 /// 额外信息
 #[cfg_attr(feature = "std", derive())]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
-pub struct Additional<AssetId, BlockNumber>{
+pub struct Additional<AssetId, BlockNumber, BTreeSet>{
 	/// ico对应的资产id
 	pub asset_id: AssetId,
 	/// ico结束时间
 	pub end_time: BlockNumber,
 	/// 已经募集到的usdt数量
 	pub already_raise_usdt: USDT,
+	/// 参与募集资金的人员名单
+	pub people: BTreeSet,
 }
 
 

@@ -9,7 +9,8 @@ use sp_runtime::{DispatchResult, Percent, ModuleId, RuntimeDebug, traits::{Accou
 use codec::{Encode, Decode};
 use node_primitives::{USDT, Balance};
 use pallet_balances::{self as balances};
-use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions, PermissionsV1, PermissionLatest};
+use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions, PermissionsV1, PermissionLatest,
+						   TotalIssuance, FreeBalance, ReservedBalance, Permissions, };
 use pallet_identity::{self as identity};
 use crate::raw::{Additional, Address, AddressEnum, TokenAmount, RaiseAmount, Symbol, IcoInfo};
 
@@ -36,7 +37,7 @@ decl_storage! {
 	trait Store for Module<T: Trait> as IcoModule {
 
 		/// 所有正在参加ico或是已经ico成功的项目 (project_name, symbol) => (asset_id, end_time, IcoInfo)
-		pub Projects get(fn all_project): double_map hasher(blake2_128_concat) Vec<u8>, hasher(blake2_128_concat) Vec<u8> => Option<(Additional<T::AssetId, T::BlockNumber>, IcoInfo<T::GenericBalance, T::BlockNumber>)>;
+		pub Projects get(fn all_project): double_map hasher(blake2_128_concat) Vec<u8>, hasher(blake2_128_concat) Vec<u8> => Option<(Additional<T::AssetId, T::BlockNumber, BTreeSet<T::AccountId>>, IcoInfo<T::GenericBalance, T::BlockNumber>)>;
 
 		/// 资产id对应的币种(todo 多资产模块初始化币种应该对这个也进行初始化)
 		pub SymbolOf get(fn symbol_of): map hasher(blake2_128_concat) T::AssetId => Option<(Vec<u8>, Vec<u8>)>;
@@ -185,7 +186,7 @@ decl_module! {
 
 				<SymbolOf<T>>::insert(id.clone(), (project_name.clone(), symbol.clone()));
 
-				<Projects<T>>::insert(project_name.clone(), symbol.clone(), (Additional{asset_id: id.clone(), end_time: end_time.clone(), already_raise_usdt: 0 as USDT}, info.clone()));
+				<Projects<T>>::insert(project_name.clone(), symbol.clone(), (Additional{asset_id: id.clone(), end_time: end_time.clone(), already_raise_usdt: 0 as USDT, people: BTreeSet::<T::AccountId>::default()}, info.clone()));
 
 				// 设置下一个资产id
 				Self::set_next_asset_id();
@@ -236,7 +237,7 @@ decl_module! {
 
 			// todo 判断是否已经过期 过期要进行相应的处理（归还币 销毁资产 删除Raising数据）
 			ensure!(Self::now() < info.0.end_time.clone(), Error::<T>::Expire);
-
+			//
 			// 累加金额不能大于最大募集资金
 			let amount1 = amount.checked_add(info.0.already_raise_usdt.clone()).ok_or(Error::<T>::Overflow)?;
 			ensure!(info.1.raise_usdt_total.clone() >= amount1, Error::<T>::NotRaising);
@@ -347,6 +348,14 @@ impl <T: Trait> Module<T> {
 		false
 
 	}
+
+	// todo 销毁多资产模块的某个币种
+	fn remove_asset(asset_id: T::AssetId) {
+		<TotalIssuance<T>>::remove(asset_id);
+		<Permissions<T>>::remove(asset_id);
+
+	}
+
 
 }
 
