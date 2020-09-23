@@ -31,12 +31,12 @@ pub struct Address{
 
 #[cfg_attr(feature = "std", derive())]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
-pub enum AddressEnum {
+pub enum AddressEnum<AccountId> {
 	Usdt(Vec<u8>),
-	Dico(Vec<u8>),
+	Dico(AccountId),
 }
 
-impl Default for AddressEnum {
+impl<T> Default for AddressEnum<T> {
 	fn default() -> Self {
 		Self::Usdt(vec![])
 	}

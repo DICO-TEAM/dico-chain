@@ -46,7 +46,7 @@ decl_storage! {
 		pub Raising get(fn raising): BTreeSet<T::AssetId>;
 
 		/// 项目筹集资金的具体金额
-		pub SpecificRaiseAmount get(fn specific_raise_amount): RaiseAmount<TokenAmount<AddressEnum>, BTreeMap<T::AccountId, TokenAmount<AddressEnum>>>;
+		pub SpecificRaiseAmount get(fn specific_raise_amount): map hasher(blake2_128_concat) T::AssetId => Option<RaiseAmount<TokenAmount<AddressEnum<T::AccountId>>, BTreeMap<T::AccountId, TokenAmount<AddressEnum<T::AccountId>>>>>;
 
 		/// 正在进行dao的项目
 		pub Dao get(fn dao): BTreeSet<T::AssetId>;
@@ -236,7 +236,14 @@ decl_module! {
 			let info = <Projects<T>>::get(project_name.clone(), symbol.clone()).ok_or(Error::<T>::GetErr)?;
 
 			// todo 判断是否已经过期 过期要进行相应的处理（归还币 销毁资产 删除Raising数据）
-			ensure!(Self::now() < info.0.end_time.clone(), Error::<T>::Expire);
+			if Self::now() > info.0.end_time.clone() {
+				// todo 获取本资产募集资金的参与人员
+				// todo 对募集资金的项目方进行解锁
+				// todo 归还每个参与ico的人员的相应币种(删除SpecificRaiseAmount信息)
+				// todo 销毁该项目方的资产（删除SymbolOf、Projects）
+
+				return Err(Error::<T>::Expire)?;
+			}
 			//
 			// 累加金额不能大于最大募集资金
 			let amount1 = amount.checked_add(info.0.already_raise_usdt.clone()).ok_or(Error::<T>::Overflow)?;
