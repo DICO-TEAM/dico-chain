@@ -200,10 +200,10 @@ decl_module! {
 		/// 项目方取消筹集资金(等于项目出问题， 取消本次募集资金)
 		#[weight = 120_000_000]
 		fn cancel_raise(origin, project_id: u32){
-
-			// 加入筹集资金完毕的队列（还在做项目)
-			// 从Raising中删除数据
-			// 销毁对应的币种  归还筹集的币
+			// todo 一定是正在筹集资金的项目
+			// todo 删除Projects、SymbolOf、Raising
+			// todo 从Raising中删除数据
+			// todo 销毁对应的币种  归还筹集的币
 
 		}
 
@@ -211,8 +211,9 @@ decl_module! {
 		/// 项目方中途决定关闭募集资金（钱已经筹集足够，不再继募集）
 		#[weight = 120_000_000]
 		fn close_raise(origin, project_id: u32) {
-			// 筹集的资金要达到60%
-			// 从Raising中删除数据
+			// todo 筹集的资金要达到60%
+			// todo 从Raising中删除数据
+			// todo 加入dao
 		}
 
 
