@@ -2,7 +2,7 @@
 
 use sp_std::{prelude::*, result::Result, collections::{btree_set::BTreeSet, btree_map::BTreeMap}};
 use frame_support::{debug, ensure, decl_module, decl_storage, decl_error, decl_event, weights::{Weight},
-					StorageValue, StorageMap, StorageDoubleMap, Blake2_256, traits::{Get, IcoAsset, Currency, ReservableCurrency, LockIdentifier}};
+					StorageValue, StorageMap, StorageDoubleMap, Blake2_256, traits::{Get, ExistenceRequirement::AllowDeath, IcoAsset, Currency, ReservableCurrency, LockIdentifier, LockableCurrency}};
 use frame_system as system;
 use system::{ensure_signed, ensure_root};
 use sp_runtime::{DispatchResult, Percent, ModuleId, RuntimeDebug, traits::{AccountIdConversion, CheckedAdd, One}};
@@ -13,6 +13,7 @@ use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions, Per
 						   TotalIssuance, FreeBalance, ReservedBalance, Permissions, };
 use pallet_identity::{self as identity};
 use crate::raw::{Additional, Address, AddressEnum, TokenAmount, RaiseAmount, Symbol, IcoInfo};
+use sp_std::convert::{TryInto,TryFrom, Into};
 
 type BalanceOf<T> = <<T as identity::Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
 
@@ -37,7 +38,7 @@ decl_storage! {
 	trait Store for Module<T: Trait> as IcoModule {
 
 		/// 所有正在参加ico或是已经ico成功的项目 (project_name, symbol) => (asset_id, end_time, IcoInfo)
-		pub Projects get(fn all_project): double_map hasher(blake2_128_concat) Vec<u8>, hasher(blake2_128_concat) Vec<u8> => Option<(Additional<T::AssetId, T::BlockNumber, BTreeSet<T::AccountId>>, IcoInfo<T::GenericBalance, T::BlockNumber>)>;
+		pub Projects get(fn all_project): double_map hasher(blake2_128_concat) Vec<u8>, hasher(blake2_128_concat) Vec<u8> => Option<(Additional<T::AssetId, T::BlockNumber, BTreeSet<T::AccountId>>, IcoInfo<T::GenericBalance, T::BlockNumber, Address<T::AccountId>>)>;
 
 		/// 资产id对应的币种(todo 多资产模块初始化币种应该对这个也进行初始化)
 		pub SymbolOf get(fn symbol_of): map hasher(blake2_128_concat) T::AssetId => Option<(Vec<u8>, Vec<u8>)>;
@@ -85,6 +86,8 @@ decl_error! {
 		AmountZero,
 		/// 在被排除在外的国家
 		InExcludeCountry,
+		/// 不支持的代币
+		UnknownSymbol,
 
 	}
 	}
@@ -109,7 +112,7 @@ decl_module! {
 
 		/// 项目方要求募集资金
 		#[weight = 120_000_000]
-		fn ask_for_raise(origin, info: IcoInfo<T::GenericBalance, T::BlockNumber>){
+		fn ask_for_raise(origin, info: IcoInfo<T::GenericBalance, T::BlockNumber, Address<T::AccountId>>){
 			let who = ensure_signed(origin)?;
 			let mut info = info.clone();
 			// 字符串相关参数不能为空
@@ -151,7 +154,7 @@ decl_module! {
 
 			// 接收筹款的地址不能是空
 			ensure!((info.public_keys.usdt.clone().is_some() && info.public_keys.usdt.clone().unwrap().len() != 0)
-				|| (info.public_keys.dico.clone().is_some() && info.public_keys.dico.clone().unwrap().len() != 0),
+				|| (info.public_keys.dico.clone().is_some()),
 				Error::<T>::AddressEmpty
 			);
 
@@ -238,10 +241,33 @@ decl_module! {
 
 			// todo 判断是否已经过期 过期要进行相应的处理（归还币 销毁资产 删除Raising数据）
 			if Self::now() > info.0.end_time.clone() {
-				// todo 获取本资产募集资金的参与人员
-				// todo 对募集资金的项目方进行解锁
-				// todo 归还每个参与ico的人员的相应币种(删除SpecificRaiseAmount信息)
-				// todo 销毁该项目方的资产（删除SymbolOf、Projects）
+				// 获取本资产募集资金的参与人员
+				let people = info.0.people;
+
+				// 获取本项目目的具体筹集
+				let specific_raise_amount = <SpecificRaiseAmount<T>>::get(asset_id.clone()).unwrap();
+
+				// 对募集资金的项目方进行解锁
+				Self::release_project_manager_lock(specific_raise_amount.clone());
+				// 归还每个参与ico的人员的相应币种(删除SpecificRaiseAmount信息)
+				Self::give_back_player_token(specific_raise_amount.clone(), people.clone());
+
+				// 删除具体筹集资金的信息
+				<SpecificRaiseAmount<T>>::remove(asset_id.clone());
+
+				// 销毁该项目方的资产
+				Self::remove_asset(asset_id.clone());
+
+				// 删除SymbolOf
+				<SymbolOf<T>>::remove(asset_id.clone());
+
+				// 删除Projects
+				<Projects<T>>::remove(project_name.clone(), symbol.clone());
+
+				// 从正在ico的队列种删除
+				let mut raising = <Raising<T>>::get();
+				raising.remove(&asset_id);
+				<Raising<T>>::put(raising);
 
 				return Err(Error::<T>::Expire)?;
 			}
@@ -268,6 +294,7 @@ decl_module! {
 			// todo 代币琐仓
 
 			// todo eth usdt btc 等琐仓
+
 
 			// todo 存储个人筹集资金记录（币种 金额 地址）
 
@@ -357,12 +384,106 @@ impl <T: Trait> Module<T> {
 
 	}
 
+
 	// todo 销毁多资产模块的某个币种
 	fn remove_asset(asset_id: T::AssetId) {
 		<TotalIssuance<T>>::remove(asset_id);
 		<Permissions<T>>::remove(asset_id);
 
 	}
+
+
+	/// 释放项目方的琐仓
+	fn release_project_manager_lock(raise_amount: RaiseAmount<TokenAmount<AddressEnum<T::AccountId>>, BTreeMap<T::AccountId, TokenAmount<AddressEnum<T::AccountId>>>>) {
+		// 获取项目方募集到的具体资金情况
+		let project_manager_get = raise_amount.project_manager_get;
+
+		// 对项目方募集到的具体币种进行解锁处理
+		let dico = project_manager_get.dico;
+// 		// 把募集到的dico数量转换成balance类型
+// 		let dico_amount = <BalanceOf<T> as TryFrom::<Balance>>::try_from(dico.1).ok().unwrap();
+		// 释放琐仓的dico
+		match dico.0 {
+			AddressEnum::<T::AccountId>::Dico(x) => {
+				T::Currency::remove_lock(DICO_ID, &x);
+			},
+			_ => {},
+		}
+
+		// todo 其他币种也要进行释放 目前等待xcmp上线再进行处理
+
+	}
+
+
+	/// 归还每个参与ico的人员的相应币种
+	fn give_back_player_token(raise_amount: RaiseAmount<TokenAmount<AddressEnum<T::AccountId>>, BTreeMap<T::AccountId, TokenAmount<AddressEnum<T::AccountId>>>>, people: BTreeSet<T::AccountId>) {
+		let people_cp = people.clone();
+		let mut people_iter = people.iter();
+		// 获取项目方的信息
+		let project_manager_get = raise_amount.project_manager_get.clone();
+		// 获取参与ico的人员的信息
+		let others_send = raise_amount.others_send.clone();
+
+		for i in 0..people_cp.len(){
+			if let Some(man) = people_iter.next() {
+				// 查找个人的具体筹集资金的情况
+				if let Some(other_info) = others_send.get(&man) {
+
+					// 处理dico
+					{
+						let manager_dico = project_manager_get.dico.clone();
+						let other_dico = &other_info.dico;
+						let manager_address = match manager_dico.0 {
+							AddressEnum::<T::AccountId>::Dico(x) => Some(x),
+							_ => None,
+						};
+
+						let other_address = match &other_dico.0 {
+							AddressEnum::<T::AccountId>::Dico(x) => Some(x),
+							_ => None,
+						};
+
+						let mut dico_amount = <BalanceOf<T>>::from(0u32);
+						if <BalanceOf<T> as TryFrom::<Balance>>::try_from(other_dico.1.clone()).ok().is_some() {
+							dico_amount = <BalanceOf<T> as TryFrom::<Balance>>::try_from(other_dico.1.clone()).ok().unwrap();
+						}
+
+						if manager_address.is_some() && other_address.is_some() {
+							T::Currency::transfer(&manager_address.unwrap(), &other_address.unwrap(), dico_amount, AllowDeath);
+						}
+					}
+
+					// todo 其他币种等待xcmp上线后处理
+					{
+					}
+
+			}
+			}
+
+		}
+	}
+
+
+// 	/// 给项目方进行琐仓
+// 	fn set_lock_for_manager(symbol: Symbol, amount: Balance, info: IcoInfo<T::GenericBalance, T::BlockNumber, Address<T::AccountId>>) -> DispatchResult {
+// 		match symbol {
+// 			Symbol::Dico => {
+// 				let address = info.public_keys.clone();
+// 				if let Some(dico_address) = address.dico {
+// 					let (project_name, symbol) = (info.project_name.clone(), info.symbol.clone());
+// 					if let Some(project) = <Projects<T>>::get(project_name, symbol){
+// 						let additional = project.0;
+//
+// 					}
+//
+// 				}
+// 			},
+//
+// 			_ => return Err(Error::<T>::UnknownSymbol)?,
+// 		}
+// 	}
+
+
 
 
 }

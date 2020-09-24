@@ -81,7 +81,7 @@ use sp_runtime::traits::{StaticLookup, Zero, AppendZerosInput, Saturating};
 use frame_support::{
 	decl_module, decl_event, decl_storage, ensure, decl_error,
 	dispatch::DispatchResultWithPostInfo,
-	traits::{Currency, ReservableCurrency, OnUnbalanced, Get, BalanceStatus, EnsureOrigin},
+	traits::{Currency, ReservableCurrency, LockableCurrency, OnUnbalanced, Get, BalanceStatus, EnsureOrigin},
 	weights::Weight,
 };
 use frame_system::ensure_signed;
@@ -132,7 +132,7 @@ pub trait Trait: frame_system::Trait {
 	type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
 
 	/// The currency trait.
-	type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
+	type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId> + LockableCurrency<Self::AccountId>;
 
 	/// The amount held on deposit for a registered identity.
 	type BasicDeposit: Get<BalanceOf<Self>>;

@@ -21,11 +21,11 @@ pub struct Additional<AssetId, BlockNumber, BTreeSet>{
 /// 地址
 #[cfg_attr(feature = "std", derive())]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
-pub struct Address{
+pub struct Address<AccountId>{
 	/// usdt地址
 	pub usdt: Option<Vec<u8>>,
 	/// dico地址
-	pub dico: Option<Vec<u8>>,
+	pub dico: Option<AccountId>,
 }
 
 
@@ -79,7 +79,7 @@ pub enum DicoVote {
 /// 募集资金的信息
 #[cfg_attr(feature = "std", derive())]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
-pub struct IcoInfo<Balance, BlockNumber>{
+pub struct IcoInfo<Balance, BlockNumber, Address>{
 	/// 项目名字
 	pub project_name: Vec<u8>,
 	/// 代币名称
