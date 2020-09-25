@@ -13,11 +13,10 @@ use pallet_identity::{self as identity};
 use crate::raw::{DicoVote, Symbol};
 use crate::ico;
 
-
 type BalanceOf<T> = <<T as identity::Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
 
 
-pub trait Trait: system::Trait + ico::Trait {
+pub trait Trait: system::Trait + generic_asset::Trait {
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 	/// 退出ico提案的过期时间
 	type QuitExpire: Get<Self::BlockNumber>;
@@ -29,6 +28,8 @@ pub trait Trait: system::Trait + ico::Trait {
 decl_storage! {
 	trait Store for Module<T: Trait> as DaoModule {
 
+		/// 正在进行dao的项目
+		pub Dao get(fn dao): BTreeSet<T::AssetId>;
 	}
 	}
 

@@ -14,12 +14,13 @@ use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions, Per
 use pallet_identity::{self as identity};
 use crate::raw::{Additional, Address, AddressEnum, TokenAmount, RaiseAmount, Symbol, IcoInfo};
 use sp_std::convert::{TryInto,TryFrom, Into};
+use crate::dao::{self, Dao};
 
 type BalanceOf<T> = <<T as identity::Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
 
 pub const DICO_ID: LockIdentifier = *b"dico    ";
 
-pub trait Trait: system::Trait + balances::Trait + generic_asset::Trait + identity::Trait {
+pub trait Trait: system::Trait + balances::Trait + identity::Trait + dao::Trait{
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 	type ModuleId: Get<ModuleId>;
 
@@ -49,8 +50,6 @@ decl_storage! {
 		/// 项目筹集资金的具体金额
 		pub SpecificRaiseAmount get(fn specific_raise_amount): map hasher(blake2_128_concat) T::AssetId => Option<RaiseAmount<TokenAmount<AddressEnum<T::AccountId>>, BTreeMap<T::AccountId, TokenAmount<AddressEnum<T::AccountId>>>>>;
 
-		/// 正在进行dao的项目
-		pub Dao get(fn dao): BTreeSet<T::AssetId>;
 	}
 	}
 
@@ -417,6 +416,11 @@ impl <T: Trait> Module<T> {
 	}
 
 
+	/// todo 增加或是减少募集的金额
+	fn change_specific_amount(asset_id: T::AssetId, symbol: Symbol, amount: Balance, usdt_amount: USDT, is_sub: bool) {
+
+	}
+
 	// todo 把其他币种的金额转换成usdt
 	fn usdt_convert_to_balances(user_symbol: Symbol, usdt_amount: USDT) -> Balance{
 		10000 as Balance
@@ -430,7 +434,7 @@ impl <T: Trait> Module<T> {
 	}
 
 
-	// todo 销毁多资产模块的某个币种
+	/// 销毁多资产模块的某个币种
 	fn remove_asset(asset_id: T::AssetId) {
 		<TotalIssuance<T>>::remove(asset_id);
 		<Permissions<T>>::remove(asset_id);
