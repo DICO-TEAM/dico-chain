@@ -2,7 +2,7 @@
 
 use sp_std::{prelude::*, result::Result, collections::{btree_set::BTreeSet, btree_map::BTreeMap}};
 use frame_support::{debug, ensure, decl_module, decl_storage, decl_error, decl_event, weights::{Weight},
-					StorageValue, StorageMap, StorageDoubleMap, Blake2_256, traits::{Get, ExistenceRequirement::AllowDeath, IcoAsset, Currency, ReservableCurrency, LockIdentifier, LockableCurrency}};
+					StorageValue, StorageMap, StorageDoubleMap, Blake2_256, traits::{WithdrawReason, Get, ExistenceRequirement::AllowDeath, IcoAsset, Currency, ReservableCurrency, LockIdentifier, LockableCurrency}};
 use frame_system as system;
 use system::{ensure_signed, ensure_root};
 use sp_runtime::{DispatchResult, Percent, ModuleId, RuntimeDebug, traits::{AccountIdConversion, CheckedAdd, One}};
@@ -88,6 +88,8 @@ decl_error! {
 		InExcludeCountry,
 		/// 不支持的代币
 		UnknownSymbol,
+		/// 没有相关的代币地址
+		AddressNotExists,
 
 	}
 	}
@@ -202,21 +204,46 @@ decl_module! {
 
 		/// 项目方取消筹集资金(等于项目出问题， 取消本次募集资金)
 		#[weight = 120_000_000]
-		fn cancel_raise(origin, project_id: u32){
-			// todo 一定是正在筹集资金的项目
-			// todo 删除Projects、SymbolOf、Raising
-			// todo 从Raising中删除数据
-			// todo 销毁对应的币种  归还筹集的币
+		fn cancel_raise(origin, asset_id: T::AssetId){
+			let who = ensure_signed(origin)?;
+			// 这个项目正在筹集资金
+			let raising = <Raising<T>>::get();
+			if raising.contains(&asset_id) {
+				Self::fail_to_do(asset_id);
+			}
+
+			else {
+				return Err(Error::<T>::NotRaising)?;
+			}
 
 		}
 
 
 		/// 项目方中途决定关闭募集资金（钱已经筹集足够，不再继募集）
 		#[weight = 120_000_000]
-		fn close_raise(origin, project_id: u32) {
-			// todo 筹集的资金要达到60%
-			// todo 从Raising中删除数据
-			// todo 加入dao
+		fn close_raise(origin, asset_id: T::AssetId) {
+			let who = ensure_signed(origin)?;
+			// 项目正在募集资金
+			let mut raising = <Raising<T>>::get();
+			if raising.contains(&asset_id) {
+				let (project_name, symbol) = <SymbolOf<T>>::get(asset_id.clone()).unwrap();
+				let info = <Projects<T>>::get(project_name, symbol).unwrap();
+				let raise_usdt_total = info.1.raise_usdt_total.clone();
+				let already_raise_usdt = info.0.already_raise_usdt.clone();
+				if T::MinProportion::get() * raise_usdt_total <= already_raise_usdt {
+					let mut dao = <Dao<T>>::get();
+					dao.insert(asset_id.clone());
+					<Dao<T>>::put(dao);
+
+					raising.remove(&asset_id);
+					<Raising<T>>::put(raising);
+
+				}
+
+			}
+			else {
+				return Err(Error::<T>::NotRaising)?;
+			}
 		}
 
 
@@ -237,38 +264,11 @@ decl_module! {
 			let (project_name, symbol) = <SymbolOf<T>>::get(asset_id.clone()).ok_or(Error::<T>::GetErr)?;
 
 			// 获取ico具体信息
-			let info = <Projects<T>>::get(project_name.clone(), symbol.clone()).ok_or(Error::<T>::GetErr)?;
+			let mut info = <Projects<T>>::get(project_name.clone(), symbol.clone()).ok_or(Error::<T>::GetErr)?;
 
 			// todo 判断是否已经过期 过期要进行相应的处理（归还币 销毁资产 删除Raising数据）
 			if Self::now() > info.0.end_time.clone() {
-				// 获取本资产募集资金的参与人员
-				let people = info.0.people;
-
-				// 获取本项目目的具体筹集
-				let specific_raise_amount = <SpecificRaiseAmount<T>>::get(asset_id.clone()).unwrap();
-
-				// 对募集资金的项目方进行解锁
-				Self::release_project_manager_lock(specific_raise_amount.clone());
-				// 归还每个参与ico的人员的相应币种(删除SpecificRaiseAmount信息)
-				Self::give_back_player_token(specific_raise_amount.clone(), people.clone());
-
-				// 删除具体筹集资金的信息
-				<SpecificRaiseAmount<T>>::remove(asset_id.clone());
-
-				// 销毁该项目方的资产
-				Self::remove_asset(asset_id.clone());
-
-				// 删除SymbolOf
-				<SymbolOf<T>>::remove(asset_id.clone());
-
-				// 删除Projects
-				<Projects<T>>::remove(project_name.clone(), symbol.clone());
-
-				// 从正在ico的队列种删除
-				let mut raising = <Raising<T>>::get();
-				raising.remove(&asset_id);
-				<Raising<T>>::put(raising);
-
+				Self::fail_to_do(asset_id.clone());
 				return Err(Error::<T>::Expire)?;
 			}
 			//
@@ -293,15 +293,26 @@ decl_module! {
 
 			// todo 代币琐仓
 
-			// todo eth usdt btc 等琐仓
-
+			// 对项目方进行琐仓
+			Self::set_lock_for_manager(user_symbol.clone(), token, info.0.clone(), info.1.clone())?;
 
 			// todo 存储个人筹集资金记录（币种 金额 地址）
 
-			// todo 存储项目具体金额
+			// 存储项目具体金额
+			let already_raise_usdt = info.0.already_raise_usdt.clone();
+			let now_amount = already_raise_usdt + usdt_amount;
+			info.0.already_raise_usdt = now_amount;
+			<Projects<T>>::insert(project_name, symbol, info.clone());
 
-			// todo 判断筹集资金是否结束（金额到顶） 结束直接处理(删除Raising中的数据, 在Dao中添加该资产id)
-
+			// 判断筹集资金是否结束（金额到顶） 结束直接处理(删除Raising中的数据, 在Dao中添加该资产id)
+			if amount1 == info.1.raise_usdt_total {
+				let mut raising = <Raising<T>>::get();
+				raising.remove(&asset_id);
+				<Raising<T>>::put(raising);
+				let mut dao = <Dao<T>>::get();
+				dao.insert(asset_id.clone());
+				<Dao<T>>::put(dao);
+			}
 		}
 
 
@@ -312,12 +323,46 @@ decl_module! {
 		}
 
 
-
-// 		/// 检查ico是否过期， 过期看筹集资金是否达到最低要求
-// 		/// 检查ico是否已经达到上限， 达到上限即给每个账号打币
-// 		/// 问题： 怎么归还已经筹集到的币种？？？
 		fn on_finalize(n: T::BlockNumber){
+			let raising = <Raising<T>>::get();
+			let mut raising_iter = raising.iter();
+			let len = raising.clone().len();
+			for i in 0..len {
+				let asset_id = raising_iter.next().unwrap();
+				let symbol_info = <SymbolOf<T>>::get(asset_id.clone());
+				if symbol_info.is_some() {
+					let (project_name, symbol) = symbol_info.unwrap();
+					let project_opt = <Projects<T>>::get(project_name, symbol);
+					if project_opt.is_some() {
+						let now = Self::now();
+						let end_time = project_opt.clone().unwrap().0.end_time;
+						// 如果结束时间到
+						if now > end_time {
 
+							// 如果募集的资金达到要求
+							if T::MinProportion::get() * project_opt.clone().unwrap().1.raise_usdt_total <= project_opt.clone().unwrap().0.already_raise_usdt {
+								let mut dao = <Dao<T>>::get();
+								dao.insert(asset_id.clone());
+								<Dao<T>>::put(dao);
+
+								let mut raising_1 = <Raising<T>>::get();
+								raising_1.remove(&asset_id);
+								<Raising<T>>::put(raising_1);
+							}
+
+						}
+						else {
+							Self::fail_to_do(*asset_id);
+						}
+					}
+					else {
+						continue;
+					}
+				}
+				else{
+					continue;
+				}
+			}
 		}
 
 }
@@ -393,21 +438,54 @@ impl <T: Trait> Module<T> {
 	}
 
 
+	/// 募集资金没有成功 处理
+	fn fail_to_do(asset_id: T::AssetId) {
+		let (project_name, symbol) = <SymbolOf<T>>::get(asset_id.clone()).unwrap();
+		let info = <Projects<T>>::get(project_name.clone(), symbol.clone()).unwrap();
+
+		let people = info.0.people;
+		// 获取本项目目的具体筹集
+		let specific_raise_amount = <SpecificRaiseAmount<T>>::get(asset_id.clone()).unwrap();
+
+		// 对募集资金的项目方进行解锁
+		Self::release_project_manager_lock(specific_raise_amount.clone());
+		// 归还每个参与ico的人员的相应币种(删除SpecificRaiseAmount信息)
+		Self::give_back_player_token(specific_raise_amount.clone(), people.clone());
+
+		// 删除具体筹集资金的信息
+		<SpecificRaiseAmount<T>>::remove(asset_id.clone());
+
+		// 销毁该项目方的资产
+		Self::remove_asset(asset_id.clone());
+
+		// 删除SymbolOf
+		<SymbolOf<T>>::remove(asset_id.clone());
+
+		// 删除Projects
+		<Projects<T>>::remove(project_name.clone(), symbol.clone());
+
+		// 从正在ico的队列种删除
+		let mut raising = <Raising<T>>::get();
+		raising.remove(&asset_id);
+		<Raising<T>>::put(raising);
+	}
+
+
 	/// 释放项目方的琐仓
 	fn release_project_manager_lock(raise_amount: RaiseAmount<TokenAmount<AddressEnum<T::AccountId>>, BTreeMap<T::AccountId, TokenAmount<AddressEnum<T::AccountId>>>>) {
 		// 获取项目方募集到的具体资金情况
 		let project_manager_get = raise_amount.project_manager_get;
 
 		// 对项目方募集到的具体币种进行解锁处理
-		let dico = project_manager_get.dico;
-// 		// 把募集到的dico数量转换成balance类型
-// 		let dico_amount = <BalanceOf<T> as TryFrom::<Balance>>::try_from(dico.1).ok().unwrap();
-		// 释放琐仓的dico
-		match dico.0 {
-			AddressEnum::<T::AccountId>::Dico(x) => {
-				T::Currency::remove_lock(DICO_ID, &x);
-			},
-			_ => {},
+		if let Some(dico) = project_manager_get.dico {
+			match dico.0 {
+				AddressEnum::<T::AccountId>::Dico(x) => {
+					T::Currency::remove_lock(DICO_ID, &x);
+				},
+				_ => {},
+
+		}
+
 		}
 
 		// todo 其他币种也要进行释放 目前等待xcmp上线再进行处理
@@ -433,19 +511,26 @@ impl <T: Trait> Module<T> {
 					{
 						let manager_dico = project_manager_get.dico.clone();
 						let other_dico = &other_info.dico;
-						let manager_address = match manager_dico.0 {
+
+						// 这两地址都存在才有意义
+						if manager_dico.is_none() || other_dico.is_none() {
+							continue;
+						}
+
+						// 获取项目方的地址
+						let manager_address = match manager_dico.unwrap().0.clone() {
 							AddressEnum::<T::AccountId>::Dico(x) => Some(x),
 							_ => None,
 						};
-
-						let other_address = match &other_dico.0 {
+						// 获取这个人的地址
+						let other_address = match &other_dico.as_ref().unwrap().0 {
 							AddressEnum::<T::AccountId>::Dico(x) => Some(x),
 							_ => None,
 						};
 
 						let mut dico_amount = <BalanceOf<T>>::from(0u32);
-						if <BalanceOf<T> as TryFrom::<Balance>>::try_from(other_dico.1.clone()).ok().is_some() {
-							dico_amount = <BalanceOf<T> as TryFrom::<Balance>>::try_from(other_dico.1.clone()).ok().unwrap();
+						if <BalanceOf<T> as TryFrom::<Balance>>::try_from(other_dico.as_ref().unwrap().1).ok().is_some() {
+							dico_amount = <BalanceOf<T> as TryFrom::<Balance>>::try_from(other_dico.as_ref().unwrap().1).ok().unwrap();
 						}
 
 						if manager_address.is_some() && other_address.is_some() {
@@ -464,24 +549,66 @@ impl <T: Trait> Module<T> {
 	}
 
 
-// 	/// 给项目方进行琐仓
-// 	fn set_lock_for_manager(symbol: Symbol, amount: Balance, info: IcoInfo<T::GenericBalance, T::BlockNumber, Address<T::AccountId>>) -> DispatchResult {
-// 		match symbol {
-// 			Symbol::Dico => {
-// 				let address = info.public_keys.clone();
-// 				if let Some(dico_address) = address.dico {
-// 					let (project_name, symbol) = (info.project_name.clone(), info.symbol.clone());
-// 					if let Some(project) = <Projects<T>>::get(project_name, symbol){
-// 						let additional = project.0;
-//
-// 					}
-//
-// 				}
-// 			},
-//
-// 			_ => return Err(Error::<T>::UnknownSymbol)?,
-// 		}
-// 	}
+	/// 给项目方进行琐仓
+	fn set_lock_for_manager(symbol: Symbol, amount: Balance, additional: Additional<T::AssetId, T::BlockNumber, BTreeSet<T::AccountId>>, ico_info: IcoInfo<T::GenericBalance, T::BlockNumber, Address<T::AccountId>>) -> DispatchResult {
+		// 获取项目方的所有地址
+		let address = ico_info.public_keys.clone();
+
+		match symbol {
+			Symbol::Dico => {
+
+				// 如果项目方的dico地址不存在 就结束
+				if address.dico.is_some() {
+					return Err(Error::<T>::AddressNotExists)?;
+				}
+
+				let dico_address = address.dico.unwrap();
+
+				let asset_id = additional.asset_id;
+
+				// 获取具体信息
+				let raise_opt = <SpecificRaiseAmount<T>>::get(asset_id.clone());
+				// 如果私募的信息已经存在
+				if raise_opt.is_some() {
+					let specific_raise_amount = raise_opt.unwrap();
+					let project_manager_get = specific_raise_amount.project_manager_get.clone();
+					let manager_dico = project_manager_get.dico.clone();
+
+					// 如果dico的信息存在
+					if manager_dico.clone().is_some() {
+						let manager_address = match &manager_dico.as_ref().unwrap().0 {
+							AddressEnum::<T::AccountId>::Dico(x) => Some(x),
+							_ => return Err(Error::<T>::AddressNotExists)?,
+						};
+
+						let dico = manager_dico.clone().unwrap();
+
+						// 如果dico的地址存在 增加dico数量 以及增加usdt数量
+						let real_amount = dico.1 + amount;
+						let real_amount = <BalanceOf<T> as TryFrom::<Balance>>::try_from(real_amount).ok().unwrap();
+						let reasons = WithdrawReason::Transfer | WithdrawReason::Reserve;
+						T::Currency::set_lock(DICO_ID, &manager_address.unwrap(), real_amount, reasons);
+
+					}
+					// 如果dico的信息不存在
+
+				}
+
+				// 如果是第一次添加私募信息
+				else {
+					let real_amount = amount;
+					let real_amount = <BalanceOf<T> as TryFrom::<Balance>>::try_from(real_amount).ok().unwrap();
+					let reasons = WithdrawReason::Transfer | WithdrawReason::Reserve;
+					T::Currency::set_lock(DICO_ID, &dico_address, real_amount, reasons);
+
+				}
+
+				},
+
+			_ => return Err(Error::<T>::UnknownSymbol)?,
+		}
+		Ok(())
+	}
 
 
 

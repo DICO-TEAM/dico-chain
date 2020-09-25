@@ -26,6 +26,7 @@ pub struct Address<AccountId>{
 	pub usdt: Option<Vec<u8>>,
 	/// dico地址
 	pub dico: Option<AccountId>,
+
 }
 
 
@@ -46,8 +47,8 @@ impl<T> Default for AddressEnum<T> {
 #[cfg_attr(feature = "std", derive())]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, Default)]
 pub struct TokenAmount<AddressEnum> {
-	pub usdt: (AddressEnum, Balance, USDT),
-	pub dico: (AddressEnum, Balance, USDT),
+	pub usdt: Option<(AddressEnum, Balance, USDT)>,
+	pub dico: Option<(AddressEnum, Balance, USDT)>,
 }
 
 
