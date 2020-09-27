@@ -10,7 +10,7 @@ use codec::{Encode, Decode};
 use node_primitives::{USDT, Balance};
 use pallet_balances::{self as balances};
 use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions, PermissionsV1, PermissionLatest,
-						   TotalIssuance, FreeBalance, ReservedBalance, Permissions, };
+						   TotalIssuance, FreeBalance, ReservedBalance, Permissions, GENERIC_ID};
 use pallet_identity::{self as identity};
 use crate::raw::*;
 use sp_std::convert::{TryInto,TryFrom, Into};
@@ -260,12 +260,12 @@ decl_module! {
 			// 获取ico具体信息
 			let mut info = <Projects<T>>::get(project_name.clone(), symbol.clone()).ok_or(Error::<T>::GetErr)?;
 
-			// todo 判断是否已经过期 过期要进行相应的处理（归还币 销毁资产 删除Raising数据）
+			// 判断是否已经过期 过期要进行相应的处理
 			if Self::now() > info.0.end_time.clone() {
 				Self::fail_to_do(asset_id.clone());
 				return Err(Error::<T>::Expire)?;
 			}
-			//
+
 			// 累加金额不能大于最大募集资金
 			let amount1 = amount.checked_add(info.0.already_raise_usdt.clone()).ok_or(Error::<T>::Overflow)?;
 			ensure!(info.1.raise_usdt_total.clone() >= amount1, Error::<T>::NotRaising);
@@ -282,10 +282,11 @@ decl_module! {
 			ensure!(!Self::is_exclude_countries(who.clone(), info.1.exclude_countries.clone()), Error::<T>::InExcludeCountry);
 
 
-			// todo usdt转换成代币数量
+			// usdt转换成代币数量
 			let token = Self::usdt_convert_to_balances(user_symbol.clone(), amount.clone());
 
-			// todo 代币琐仓
+			// 对多资产模块的资产进行琐仓
+			Self::set_lock_for_generic_asset(token, asset_id.clone(), who.clone());
 
 			// 对项目方进行琐仓
 			Self::set_lock_for_manager(user_symbol.clone(), token, info.0.clone(), info.1.clone())?;
@@ -313,39 +314,7 @@ decl_module! {
 
 
 		fn on_finalize(n: T::BlockNumber){
-			let raising = <Raising<T>>::get();
-			let mut raising_iter = raising.iter();
-			let len = raising.clone().len();
-			for i in 0..len {
-				let asset_id = raising_iter.next().unwrap();
-				let symbol_info = <SymbolOf<T>>::get(asset_id.clone());
-				if symbol_info.is_some() {
-					let (project_name, symbol) = symbol_info.unwrap();
-					let project_opt = <Projects<T>>::get(project_name, symbol);
-					if project_opt.is_some() {
-						let now = Self::now();
-						let end_time = project_opt.clone().unwrap().0.end_time;
-						// 如果结束时间到
-						if now > end_time {
-
-							// 如果募集的资金达到要求
-							if T::MinProportion::get() * project_opt.clone().unwrap().1.raise_usdt_total <= project_opt.clone().unwrap().0.already_raise_usdt {
-								Self::success_to_do(asset_id.clone());
-							}
-
-						}
-						else {
-							Self::fail_to_do(*asset_id);
-						}
-					}
-					else {
-						continue;
-					}
-				}
-				else{
-					continue;
-				}
-			}
+			Self::finalize_do();
 		}
 
 }
@@ -548,6 +517,16 @@ impl <T: Trait> Module<T> {
 	}
 
 
+	/// 给参与ico的人员进行多资产代币的琐仓
+	fn set_lock_for_generic_asset(amount: Balance, asset_id: T::AssetId, who: T::AccountId) {
+		let token_1 = <T::GenericBalance as TryFrom::<Balance>>::try_from(amount).ok().unwrap();
+		// 获取目前已经琐仓的金额
+		let token_2 = <generic_asset::Module<T>>::get_lock_amount(GENERIC_ID, asset_id.clone(), who.clone());
+		let token_now = token_1 + token_2;
+		let reasons = WithdrawReason::Transfer | WithdrawReason::Reserve;
+		<generic_asset::Module<T>>::set_lock(GENERIC_ID, asset_id.clone(), &who, token_now, reasons);
+
+	}
 
 	/// 给项目方进行琐仓
 	fn set_lock_for_manager(symbol: Symbol, amount: Balance, additional: Additional<T::AssetId, T::BlockNumber, BTreeSet<T::AccountId>>, ico_info: IcoInfo<T::GenericBalance, T::BlockNumber, Address<T::AccountId>>) -> DispatchResult {
@@ -608,6 +587,44 @@ impl <T: Trait> Module<T> {
 			_ => return Err(Error::<T>::UnknownSymbol)?,
 		}
 		Ok(())
+	}
+
+
+	/// 出块最后一布操作（检查正在募集资金的提案是否过期 并处理)
+	fn finalize_do() {
+		let raising = <Raising<T>>::get();
+		let mut raising_iter = raising.iter();
+		let len = raising.clone().len();
+		for i in 0..len {
+			let asset_id = raising_iter.next().unwrap();
+			let symbol_info = <SymbolOf<T>>::get(asset_id.clone());
+			if symbol_info.is_some() {
+				let (project_name, symbol) = symbol_info.unwrap();
+				let project_opt = <Projects<T>>::get(project_name, symbol);
+				if project_opt.is_some() {
+					let now = Self::now();
+					let end_time = project_opt.clone().unwrap().0.end_time;
+					// 如果结束时间到
+					if now > end_time {
+
+						// 如果募集的资金达到要求
+						if T::MinProportion::get() * project_opt.clone().unwrap().1.raise_usdt_total <= project_opt.clone().unwrap().0.already_raise_usdt {
+							Self::success_to_do(asset_id.clone());
+						}
+
+					}
+					else {
+						Self::fail_to_do(*asset_id);
+					}
+				}
+				else {
+					continue;
+				}
+			}
+			else{
+				continue;
+			}
+		}
 	}
 
 

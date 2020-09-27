@@ -173,6 +173,8 @@ use frame_support::{
 };
 use frame_system::{ensure_signed, ensure_root};
 
+pub const GENERIC_ID: LockIdentifier = *b"generic ";
+
 mod mock;
 mod tests;
 
@@ -844,7 +846,27 @@ impl<T: Trait> Module<T> {
 		<FreeBalance<T>>::insert(asset_id, who, &balance);
 	}
 
-	fn set_lock(
+
+	/// 获取琐仓的金额
+	pub fn get_lock_amount(id: LockIdentifier, asset_id: T::AssetId, who: T::AccountId) -> T::GenericBalance {
+		let locks = <Locks<T>>::get(asset_id.clone(), who.clone());
+		let mut amount = T::GenericBalance::from(0u32);
+		let len = locks.len();
+		let mut locks_iter = locks.iter();
+		for i in 0..len {
+			if let Some(lock) = locks_iter.next() {
+				if lock.id == id {
+					amount = lock.amount;
+					break;
+				}
+			}
+		}
+
+		amount
+	}
+
+
+	pub fn set_lock(
 		id: LockIdentifier,
 		asset_id: T::AssetId,
 		who: &T::AccountId,
