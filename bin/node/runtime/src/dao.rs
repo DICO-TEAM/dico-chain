@@ -10,7 +10,7 @@ use node_primitives::{USDT, Balance};
 use pallet_balances::{self as balances};
 use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions};
 use pallet_identity::{self as identity};
-use crate::raw::{DicoVote, Symbol};
+use crate::raw::*;
 use crate::ico;
 
 type BalanceOf<T> = <<T as identity::Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
@@ -22,6 +22,12 @@ pub trait Trait: system::Trait + generic_asset::Trait {
 	type QuitExpire: Get<Self::BlockNumber>;
 	/// 释放琐仓的提案的过期时间
 	type ReleaseExpire: Get<Self::BlockNumber>;
+	///  通过这个可以直接操作ico模块
+	type IcoHandler: IcoHandler<Self::AssetId,
+		Additional<Self::AssetId, Self::BlockNumber, BTreeSet<Self::AccountId>>,
+		IcoInfo<Self::GenericBalance, Self::BlockNumber, Address<Self::AccountId>>,
+		RaiseAmount<TokenAmount<AddressEnum<Self::AccountId>>, BTreeMap<Self::AccountId, TokenAmount<AddressEnum<Self::AccountId>>>>>;
+
 }
 
 

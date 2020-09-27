@@ -225,6 +225,7 @@ impl dao::Trait for Runtime {
 	type Event = Event;
 	type QuitExpire = QuitExpire;
 	type ReleaseExpire = ReleaseExpire;
+	type IcoHandler = Ico;
 }
 
 parameter_types! {

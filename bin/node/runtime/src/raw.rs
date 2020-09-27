@@ -114,3 +114,10 @@ pub struct IcoInfo<Balance, BlockNumber, Address>{
 	/// 单次解锁比例
 	pub unlock_proportion: Percent,
 }
+
+
+pub trait IcoHandler<AssetId, Additional, IcoInfo, RaiseAmount> {
+	fn get_project_info(project_name: Vec<u8>, symbol: Vec<u8>) -> Option<(Additional, IcoInfo)>;
+	fn get_name_and_symbol(asset_id: AssetId) -> Option<(Vec<u8>, Vec<u8>)>;
+	fn get_specific_amount(asset_id: AssetId) -> Option<RaiseAmount>;
+}

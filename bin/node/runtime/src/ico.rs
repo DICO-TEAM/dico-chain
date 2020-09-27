@@ -12,7 +12,7 @@ use pallet_balances::{self as balances};
 use pallet_generic_asset::{self as generic_asset, NextAssetId, AssetOptions, PermissionsV1, PermissionLatest,
 						   TotalIssuance, FreeBalance, ReservedBalance, Permissions, };
 use pallet_identity::{self as identity};
-use crate::raw::{Additional, Address, AddressEnum, TokenAmount, RaiseAmount, Symbol, IcoInfo};
+use crate::raw::*;
 use sp_std::convert::{TryInto,TryFrom, Into};
 use crate::dao::{self, Dao};
 
@@ -230,12 +230,7 @@ decl_module! {
 				let raise_usdt_total = info.1.raise_usdt_total.clone();
 				let already_raise_usdt = info.0.already_raise_usdt.clone();
 				if T::MinProportion::get() * raise_usdt_total <= already_raise_usdt {
-					let mut dao = <Dao<T>>::get();
-					dao.insert(asset_id.clone());
-					<Dao<T>>::put(dao);
-
-					raising.remove(&asset_id);
-					<Raising<T>>::put(raising);
+					Self::success_to_do(asset_id.clone());
 
 				}
 
@@ -305,12 +300,7 @@ decl_module! {
 
 			// 判断筹集资金是否结束（金额到顶） 结束直接处理(删除Raising中的数据, 在Dao中添加该资产id)
 			if amount1 == info.1.raise_usdt_total {
-				let mut raising = <Raising<T>>::get();
-				raising.remove(&asset_id);
-				<Raising<T>>::put(raising);
-				let mut dao = <Dao<T>>::get();
-				dao.insert(asset_id.clone());
-				<Dao<T>>::put(dao);
+				Self::success_to_do(asset_id.clone());
 			}
 		}
 
@@ -340,13 +330,7 @@ decl_module! {
 
 							// 如果募集的资金达到要求
 							if T::MinProportion::get() * project_opt.clone().unwrap().1.raise_usdt_total <= project_opt.clone().unwrap().0.already_raise_usdt {
-								let mut dao = <Dao<T>>::get();
-								dao.insert(asset_id.clone());
-								<Dao<T>>::put(dao);
-
-								let mut raising_1 = <Raising<T>>::get();
-								raising_1.remove(&asset_id);
-								<Raising<T>>::put(raising_1);
+								Self::success_to_do(asset_id.clone());
 							}
 
 						}
@@ -553,6 +537,18 @@ impl <T: Trait> Module<T> {
 	}
 
 
+	/// 募集资金成功后做的
+	fn success_to_do(asset_id: T::AssetId) {
+		let mut raising = <Raising<T>>::get();
+		raising.remove(&asset_id);
+		<Raising<T>>::put(raising);
+		let mut dao = <Dao<T>>::get();
+		dao.insert(asset_id.clone());
+		<Dao<T>>::put(dao);
+	}
+
+
+
 	/// 给项目方进行琐仓
 	fn set_lock_for_manager(symbol: Symbol, amount: Balance, additional: Additional<T::AssetId, T::BlockNumber, BTreeSet<T::AccountId>>, ico_info: IcoInfo<T::GenericBalance, T::BlockNumber, Address<T::AccountId>>) -> DispatchResult {
 		// 获取项目方的所有地址
@@ -626,3 +622,27 @@ impl<T: Trait> IcoAsset<T::AssetId> for Module<T>{
 		<SymbolOf<T>>::insert(id, (project_name, symbol));
 	}
 }
+
+impl <T: Trait> IcoHandler<T::AssetId,
+	Additional<T::AssetId, T::BlockNumber, BTreeSet<T::AccountId>>,
+	IcoInfo<T::GenericBalance, T::BlockNumber, Address<T::AccountId>>,
+	RaiseAmount<TokenAmount<AddressEnum<T::AccountId>>, BTreeMap<T::AccountId, TokenAmount<AddressEnum<T::AccountId>>>>>
+for Module<T> {
+	fn get_project_info(project_name: Vec<u8>, symbol: Vec<u8>) -> Option<(Additional<T::AssetId, T::BlockNumber, BTreeSet<T::AccountId>>, IcoInfo<T::GenericBalance, T::BlockNumber, Address<T::AccountId>>)>{
+
+		<Projects<T>>::get(project_name, symbol)
+	}
+
+	fn get_name_and_symbol(asset_id: T::AssetId) -> Option<(Vec<u8>, Vec<u8>)> {
+
+		<SymbolOf<T>>::get(asset_id)
+	}
+
+	fn get_specific_amount(asset_id: T::AssetId) -> Option<RaiseAmount<TokenAmount<AddressEnum<T::AccountId>>, BTreeMap<T::AccountId, TokenAmount<AddressEnum<T::AccountId>>>>> {
+
+		<SpecificRaiseAmount<T>>::get(asset_id)
+
+	}
+}
+
+
