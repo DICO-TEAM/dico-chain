@@ -2,7 +2,7 @@
 
 use sp_std::{prelude::*, result::Result, collections::{btree_set::BTreeSet, btree_map::BTreeMap}};
 use frame_support::{debug, ensure, decl_module, decl_storage, decl_error, decl_event, weights::{Weight},
-					StorageValue, StorageMap, StorageDoubleMap, Blake2_256, traits::{WithdrawReason, Get, ExistenceRequirement::AllowDeath, IcoAsset, Currency, ReservableCurrency, LockIdentifier, LockableCurrency}};
+					StorageValue, StorageMap, StorageDoubleMap, Blake2_256, traits::{WithdrawReason, Get, ExistenceRequirement::AllowDeath, Currency, ReservableCurrency, LockIdentifier, LockableCurrency}};
 use frame_system as system;
 use system::{ensure_signed, ensure_root};
 use sp_runtime::{DispatchResult, Percent, ModuleId, RuntimeDebug, traits::{AccountIdConversion, CheckedAdd, One}};
@@ -342,6 +342,7 @@ impl <T: Trait> Module<T> {
 		<generic_asset::Module<T>>::next_asset_id()
 	}
 
+
 	/// 设置下一个资产id
 	pub fn set_next_asset_id() -> DispatchResult{
 		let mut asset_id = Self::get_next_asset_id();
@@ -528,6 +529,7 @@ impl <T: Trait> Module<T> {
 
 	}
 
+
 	/// 给项目方进行琐仓
 	fn set_lock_for_manager(symbol: Symbol, amount: Balance, additional: Additional<T::AssetId, T::BlockNumber, BTreeSet<T::AccountId>>, ico_info: IcoInfo<T::GenericBalance, T::BlockNumber, Address<T::AccountId>>) -> DispatchResult {
 		// 获取项目方的所有地址
@@ -633,18 +635,12 @@ impl <T: Trait> Module<T> {
 }
 
 
-
-impl<T: Trait> IcoAsset<T::AssetId> for Module<T>{
-	fn set_asset_symbol(id: T::AssetId, project_name: Vec<u8>, symbol: Vec<u8>){
-		<SymbolOf<T>>::insert(id, (project_name, symbol));
-	}
-}
-
 impl <T: Trait> IcoHandler<T::AssetId,
 	Additional<T::AssetId, T::BlockNumber, BTreeSet<T::AccountId>>,
 	IcoInfo<T::GenericBalance, T::BlockNumber, Address<T::AccountId>>,
 	RaiseAmount<TokenAmount<AddressEnum<T::AccountId>>, BTreeMap<T::AccountId, TokenAmount<AddressEnum<T::AccountId>>>>>
 for Module<T> {
+
 	fn get_project_info(project_name: Vec<u8>, symbol: Vec<u8>) -> Option<(Additional<T::AssetId, T::BlockNumber, BTreeSet<T::AccountId>>, IcoInfo<T::GenericBalance, T::BlockNumber, Address<T::AccountId>>)>{
 
 		<Projects<T>>::get(project_name, symbol)
@@ -659,6 +655,10 @@ for Module<T> {
 
 		<SpecificRaiseAmount<T>>::get(asset_id)
 
+	}
+
+	fn set_asset_symbol(id: T::AssetId, project_name: Vec<u8>, symbol: Vec<u8>){
+		<SymbolOf<T>>::insert(id, (project_name, symbol));
 	}
 }
 
