@@ -13,6 +13,7 @@ members = [
 	"bin/node/runtime",
 #	"bin/node/testing",
 	"bin/utils/subkey",
+	"bin/utils/dkey",
 	"bin/utils/chain-spec-builder",
 	"client/api",
 	"client/authority-discovery",

@@ -778,14 +778,17 @@ mod tests {
 
 		let matches = app.clone().get_matches_from(arg_vec);
 		let matches = matches.subcommand().1.unwrap();
+
 		let mnemonic = generate_mnemonic(matches).expect("generate failed");
 
 		let (pair, seed) =
 			<<CryptoType as Crypto>::Pair as Pair>::from_phrase(mnemonic.phrase(), password)
 				.unwrap();
+
 		let public_key = CryptoType::public_from_pair(&pair);
 		let public_key = format_public_key::<CryptoType>(public_key);
 		let seed = format_seed::<CryptoType>(seed);
+
 		let message = "Blah Blah\n".as_bytes().to_vec();
 
 		let signature = do_sign::<CryptoType>(&seed, message.clone(), password).expect("signing failed");

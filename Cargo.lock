@@ -1124,6 +1124,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "curve25519-dalek"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8492de420e9e60bc9a1d66e2dbb91825390b738a388606600663fc529b4b307"
+dependencies = [
+ "byteorder",
+ "digest 0.9.0",
+ "rand_core 0.5.1",
+ "subtle 2.2.2",
+ "zeroize",
+]
+
+[[package]]
 name = "data-encoding"
 version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1187,6 +1200,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "dkey"
+version = "2.0.0-rc5"
+dependencies = [
+ "clap",
+ "curve25519-dalek 3.0.0",
+ "derive_more",
+ "frame-system",
+ "futures 0.1.29",
+ "hex",
+ "hex-literal",
+ "hyper 0.12.35",
+ "itertools 0.8.2",
+ "jsonrpc-core-client",
+ "libp2p",
+ "node-primitives",
+ "node-runtime",
+ "pallet-balances",
+ "pallet-grandpa",
+ "pallet-transaction-payment",
+ "parity-scale-codec",
+ "rand 0.7.3",
+ "rand_core 0.5.1",
+ "rpassword",
+ "sc-rpc",
+ "serde_json",
+ "sp-core",
+ "sp-runtime",
+ "substrate-bip39",
+ "tiny-bip39",
+ "zeroize",
+]
+
+[[package]]
 name = "dns-parser"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1217,7 +1263,7 @@ version = "1.0.0-pre.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "21a8a37f4e8b35af971e6db5e3897e7a6344caa3f92f6544f88125a1f5f0035a"
 dependencies = [
- "curve25519-dalek",
+ "curve25519-dalek 2.0.0",
  "ed25519",
  "rand 0.7.3",
  "serde",
@@ -1244,18 +1290,18 @@ dependencies = [
 
 [[package]]
 name = "enumflags2"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a80e524ebf194285b57e5e7944018721c7fffc673253f5183f7accd88a2a3b0c"
+checksum = "83c8d82922337cd23a15f88b70d8e4ef5f11da38dd7cdb55e84dd5de99695da0"
 dependencies = [
  "enumflags2_derive",
 ]
 
 [[package]]
 name = "enumflags2_derive"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ed9afacaea0301eefb738c9deea725e6d53938004597cdc518a8cf9a7aa2f03"
+checksum = "946ee94e3dbf58fdd324f9ce245c7b238d46a66f00e86a020b71996349e46cce"
 dependencies = [
  "proc-macro2",
  "quote 1.0.6",
@@ -2955,7 +3001,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f353f8966bbaaf7456535fffd3f366f153148773a0cf04b2ec3860955cb720e"
 dependencies = [
  "bytes 0.5.4",
- "curve25519-dalek",
+ "curve25519-dalek 2.0.0",
  "futures 0.3.5",
  "lazy_static",
  "libp2p-core",
@@ -3685,6 +3731,7 @@ dependencies = [
 name = "node-runtime"
 version = "2.0.0-rc5"
 dependencies = [
+ "enumflags2",
  "frame-benchmarking",
  "frame-executive",
  "frame-support",
@@ -7033,7 +7080,7 @@ checksum = "021b403afe70d81eea68f6ea12f6b3c9588e5d536a94c3bf80f15e7faa267862"
 dependencies = [
  "arrayref",
  "arrayvec 0.5.1",
- "curve25519-dalek",
+ "curve25519-dalek 2.0.0",
  "getrandom",
  "merlin",
  "rand 0.7.3",
@@ -9827,7 +9874,7 @@ version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "637ff90c9540fa3073bb577e65033069e4bae7c79d49d74aa3ffdf5342a53217"
 dependencies = [
- "curve25519-dalek",
+ "curve25519-dalek 2.0.0",
  "rand_core 0.5.1",
  "zeroize",
 ]

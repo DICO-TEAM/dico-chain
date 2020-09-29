@@ -10,13 +10,13 @@
 //! * `set_kyc` - Set the associated kyc of an account; a small deposit is reserved if not
 //!   already taken.
 //! * `clear_kyc` - Remove an account's associated kyc; the deposit is returned.
-//! * `request_judgement` - Request a judgement from a registrar, paying a fee.
+//! * `request_judgement` - Request a judgement from a judge, paying a fee.
 //! * `cancel_request` - Cancel the previous request for a judgement.
 //!
 //! #### For judge(身份认证服务商IAS) --> 属性验证者
 //!
 //! * `judge_set_fee` - Set the fee required to be paid for a judgement to be given by the judge.
-//! * `judge_set_fields` - Set the fields that a registrar cares about in their judgements.
+//! * `judge_set_fields` - Set the fields that a judge cares about in their judgements.
 //! * `judge_provide_judgement` - Provide a judgement to an kyc account.
 //!
 //! #### For supervision(监管)  --> 属性监管者
@@ -332,7 +332,8 @@ decl_event!(
         KYCCleared(AccountId, Balance),
         JudgementRequested(AccountId, JudgeIndex),
         CanelJudgementRequested(AccountId, JudgeIndex),
-        RemoveKYC(AccountId, Balance)
+        RemoveKYC(AccountId, Balance),
+        JudgementGiven(AccountId, JudgeIndex),
 
 
     }
@@ -401,7 +402,7 @@ decl_module! {
                     supervisors.push(Some(JudgeInfo {
                         account, fee: Zero::zero(), fields: Default::default()
                     }));
-                    Ok(((judges.len() - 1) as JudgeIndex, judges.len()))
+                    Ok(((supervisors.len() - 1) as SupervisorIndex, supervisors.len()))
                 }
             )?;
 
@@ -524,7 +525,7 @@ decl_module! {
         /// judge set fee
         #[weight = 120_000_000]
         pub fn judge_set_fee(origin,
-            #[compact] index: judge_index,
+            #[compact] index: JudgeIndex,
             #[compact] fee: BalanceOf<T>,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
@@ -534,7 +535,7 @@ decl_module! {
                     .and_then(|x| x.as_mut())
                     .and_then(|r| if r.account == who { r.fee = fee; Some(()) } else { None })
                     .ok_or_else(|| DispatchError::from(Error::<T>::InvalidIndex))?;
-                Ok(rs.len())
+                Ok(j.len())
             })?;
             Ok(())
         }
@@ -553,7 +554,7 @@ decl_module! {
                     .and_then(|x| x.as_mut())
                     .and_then(|r| if r.account == who { r.fields = fields; Some(()) } else { None })
                     .ok_or_else(|| DispatchError::from(Error::<T>::InvalidIndex))?;
-                Ok(rs.len())
+                Ok(j.len())
             })?;
             Ok(())
         }
@@ -572,11 +573,11 @@ decl_module! {
             <Judges<T>>::get()
                 .get(judge_index as usize)
                 .and_then(Option::as_ref)
-                .and_then(|j| if r.account == sender { Some(j) } else { None })
+                .and_then(|j| if j.account == sender { Some(j) } else { None })
                 .ok_or(Error::<T>::InvalidIndex)?;
             let mut id = <KYCOf<T>>::get(&target).ok_or(Error::<T>::InvalidTarget)?;
 
-            let item = (reg_index, judgement);
+            let item = (judge_index, judgement);
             match id.judgements.binary_search_by_key(&judge_index, |x| x.0) {
                 Ok(position) => {
                     if let Judgement::FeePaid(fee) = id.judgements[position].1 {
@@ -588,7 +589,7 @@ decl_module! {
             }
 
             <KYCOf<T>>::insert(&target, id);
-            Self::deposit_event(RawEvent::JudgementGiven(target, reg_index));
+            Self::deposit_event(RawEvent::JudgementGiven(target, judge_index));
             Ok(())
         }
 
@@ -626,7 +627,7 @@ decl_module! {
             }
 
             <KYCOf<T>>::insert(&target, id);
-            Self::deposit_event(RawEvent::JudgementGiven(target, reg_index));
+            Self::deposit_event(RawEvent::JudgementGiven(target, judge_index));
             Ok(())
         }
 
@@ -634,6 +635,7 @@ decl_module! {
         #[weight = 120_000_000]
         pub fn remove_kyc(origin, target: <T::Lookup as StaticLookup>::Source) -> DispatchResult {
             T::ForceOrigin::ensure_origin(origin)?;
+
 
             // Figure out who we're meant to be clearing.
             let target = T::Lookup::lookup(target)?;
@@ -648,25 +650,27 @@ decl_module! {
 
 
 
+
+
     }
 }
 
-impl<T: Trait> Module<T> {
-    /// Transfer ownership
-    fn _transfer(sender: T::AccountId, receiver: T::AccountId, #[compact] judge_index: JudgeIndex) -> DispatchResult {
-        let judge = <Judges<T>>::get()
-            .get(judge_index as usize)
-            .and_then(Option::as_ref)
-            .and_then(|j| if j.account == sender { Some(j) } else { None })
-            .ok_or(Error::<T>::InvalidIndex)?;
-
-        // TODO: 对judge 信息进行解密
-
-        Ok(())
-    }
-
-    fn _copy(sender: T::AccountId, receiver: T::AccountId, #[compact] judge_index: JudgeIndex) -> DispatchResult {
-        // TODO: 实现加密解密的数据传递
-        Ok(())
-    }
-}
+// impl<T: Trait> Module<T> {
+//     /// Transfer ownership
+//     fn _transfer(sender: T::AccountId, receiver: T::AccountId, #[compact] judge_index: JudgeIndex) -> DispatchResult {
+//         let judge = <Judges<T>>::get()
+//             .get(judge_index as usize)
+//             .and_then(Option::as_ref)
+//             .and_then(|j| if j.account == sender { Some(j) } else { None })
+//             .ok_or(Error::<T>::InvalidIndex)?;
+//
+//         // TODO: 对judge 信息进行解密
+//
+//         Ok(())
+//     }
+//
+//     fn _copy(sender: T::AccountId, receiver: T::AccountId, #[compact] judge_index: JudgeIndex) -> DispatchResult {
+//         // TODO: 实现加密解密的数据传递
+//         Ok(())
+//     }
+// }
