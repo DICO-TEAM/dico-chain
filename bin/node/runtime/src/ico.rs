@@ -5,7 +5,7 @@ use frame_support::{debug, ensure, decl_module, decl_storage, decl_error, decl_e
 					StorageValue, StorageMap, StorageDoubleMap, Blake2_256, traits::{WithdrawReason, Get, ExistenceRequirement::AllowDeath, Currency, ReservableCurrency, LockIdentifier, LockableCurrency}};
 use frame_system as system;
 use system::{ensure_signed, ensure_root};
-use sp_runtime::{DispatchResult, Percent, ModuleId, RuntimeDebug, traits::{AccountIdConversion, CheckedAdd, One}};
+use sp_runtime::{DispatchResult, DispatchError, Percent, ModuleId, RuntimeDebug, traits::{AccountIdConversion, CheckedAdd, One}};
 use codec::{Encode, Decode};
 use node_primitives::{USDT, Balance};
 use pallet_balances::{self as balances};
@@ -97,6 +97,7 @@ decl_error! {
 
 	}
 	}
+
 
 
 decl_module! {
@@ -372,6 +373,122 @@ impl <T: Trait> Module<T> {
 	/// 获取当前区块高度
 	fn now() -> T::BlockNumber{
 		<system::Module<T>>::block_number()
+	}
+
+
+	/// 增加筹集的具体资金
+	fn add_specific_amount(asset_id: T::AssetId, address_enum: AddressEnum<T::AccountId>, amount: Balance, usdt_num: USDT) -> DispatchResult {
+		// asset_id 资产id
+		// address_enum: 地址(参与ico的那个人的地址)
+		// amount: 代币的数量
+		// usdt_num: amount对应的usdt价值
+
+		let address_enum_cp = address_enum.clone();
+
+		match address_enum_cp {
+			AddressEnum::<T::AccountId>::Dico(dico_address) => {
+				let (project_name, symbol) = <SymbolOf<T>>::get(asset_id.clone()).ok_or(Error::<T>::SymbolNotExists)?;
+				let project = <Projects<T>>::get(project_name, symbol).ok_or(Error::<T>::ProjectNotExists)?;
+				// 获取项目方给的所有地址
+				let address = project.1.public_keys;
+				let dico_address_opt = address.dico;
+				// 如果dico地址存在 才会进行下面的步骤
+				if dico_address_opt.is_some() {
+					// 获取项目方具体信息
+					let manager_info_opt = Self::get_project_raise_info(address_enum.clone(), asset_id.clone())?;
+					let player_info_opt = Self::get_player_raise_info(address_enum.clone(), asset_id.clone(), dico_address);
+					// todo 今晚完成
+				}
+				else {
+					return Err(Error::<T>::AddressNotExists)?;
+				}
+
+			},
+			// todo 其他币种等待xcmp上线后处理
+			_ => return Err(Error::<T>::UnknownSymbol)?,
+		}
+		Ok(())
+	}
+
+
+	/// 获取项目方某个币种筹集到资金的情况
+	fn get_project_raise_info(address_enum: AddressEnum<T::AccountId>, asset_id: T::AssetId) -> Result<Option<(AddressEnum<T::AccountId>, Balance, USDT)>, DispatchError> {
+		match address_enum {
+			AddressEnum::<T::AccountId>::Dico(address) => {
+				let specific_raise_amount_opt = <SpecificRaiseAmount<T>>::get(asset_id.clone());
+				// 如果信息存在  说明不是第一次添加
+				if specific_raise_amount_opt.is_some() {
+					let specific_raise_amount = specific_raise_amount_opt.clone().unwrap();
+					let project_manager_get = specific_raise_amount.project_manager_get;
+
+					let dico_info_opt = &project_manager_get.dico;
+
+					// 如果这个币种有记录
+					if dico_info_opt.is_some() {
+						let dico_info = dico_info_opt.as_ref().unwrap();
+						return Ok(Some((dico_info.clone().0, dico_info.clone().1, dico_info.clone().2)));
+					}
+
+					// 这个币种没有记录
+					else {
+						return Ok(None);
+					}
+					}
+
+				else {
+					return Ok(None);
+				}
+
+			},
+
+			// todo 其他币种要等xcmp上线之后解决
+			_ => return Err(Error::<T>::UnknownSymbol)?,
+		}
+	}
+
+
+	/// 获取某个人某个币种参与ico的具体情况（币种， 该币的个数， 对应的usdt数)
+	fn get_player_raise_info(address_enum: AddressEnum<T::AccountId>, asset_id: T::AssetId, who: T::AccountId) -> Result<Option<(AddressEnum<T::AccountId>, Balance, USDT)>, DispatchError> {
+		match address_enum {
+			AddressEnum::<T::AccountId>::Dico(address) => {
+				let specific_raise_amount_opt = <SpecificRaiseAmount<T>>::get(asset_id.clone());
+				// 这个资产有募集资金记录
+				if specific_raise_amount_opt.is_some() {
+					let specific_raise_amount = specific_raise_amount_opt.clone().unwrap();
+					let others_send_map = specific_raise_amount.others_send.clone();
+					let player_send_opt = others_send_map.get(&who);
+
+					// 有这个人的记录
+					if player_send_opt.is_some() {
+						let dico_info_opt = &player_send_opt.unwrap().dico;
+
+						// 如果有这个币的记录
+						if dico_info_opt.is_some() {
+							let dico_info = dico_info_opt.as_ref().unwrap();
+							return Ok(Some((dico_info.clone().0, dico_info.clone().1, dico_info.clone().2)));
+						}
+						else {
+							return Ok(None);
+						}
+
+					}
+					// 如果没有这个人的记录
+					else{
+						return Ok(None);
+					}
+
+				}
+				// 这个资产还没有募集资金
+				else{
+					return Ok(None);
+				}
+
+			},
+
+			// todo 其他币种等xcmp上线之后
+			_ => { return Err(Error::<T>::UnknownSymbol)?; },
+		}
+
 	}
 
 
