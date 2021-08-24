@@ -1,0 +1,36 @@
+[package]
+name        = 'pallet-template'
+authors     = ["DICO-TEAM"]
+description = 'FRAME pallet template for defining custom runtime logic.'
+license     = 'Apache 2.0'
+version     = '3.0.0'
+homepage    = 'https://github.com/DICO-TEAM/dico-chain'
+repository  = 'https://github.com/DICO-TEAM/dico-chain'
+edition     = '2018'
+
+
+[package.metadata.docs.rs]
+targets = ['x86_64-unknown-linux-gnu']
+
+[dependencies]
+codec              = { package = 'parity-scale-codec', version = '2.0.0', features = ['derive'], default-features = false }
+
+frame-benchmarking = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false, optional = true }
+frame-support      = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+frame-system       = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+
+[dev-dependencies]
+serde      = { version = "1.0.101" }
+sp-core    = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+sp-runtime = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+sp-io      = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+
+[features]
+default = ['std']
+runtime-benchmarks = ['frame-benchmarking']
+std = [
+	'codec/std',
+	'frame-support/std',
+	'frame-system/std',
+	'frame-benchmarking/std',
+]
