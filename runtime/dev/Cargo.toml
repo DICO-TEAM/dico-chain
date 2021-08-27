@@ -28,6 +28,10 @@ log               = { version = "0.4.14", default-features = false }
 ## local primitives
 dico-primitives = { version = "1.0.0", default-features = false, path = "../../primitives" }
 
+# Local Dependencies
+pallet-template = { package = 'pallet-template', path = '../../pallets/template', default-features = false }
+pallet-kyc = { package = 'pallet-kyc', path = '../../pallets/kyc', default-features = false }
+
 
 ## dependencies primitives
 sp-authority-discovery = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }

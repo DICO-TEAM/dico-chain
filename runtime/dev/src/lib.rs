@@ -70,6 +70,10 @@ use impls::Author;
 
 use sp_runtime::generic::Era;
 
+/// Import the local pallet.
+pub use pallet_template;
+pub use pallet_kyc;
+
 // Make the WASM binary available.
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
@@ -1115,6 +1119,18 @@ impl pallet_transaction_storage::Config for Runtime {
 	type WeightInfo = pallet_transaction_storage::weights::SubstrateWeight<Runtime>;
 }
 
+/// Configure the pallet template in pallets/template.
+impl pallet_template::Config for Runtime {
+	type Event = Event;
+}
+
+/// Configure the pallet template in pallets/template.
+impl pallet_kyc::Config for Runtime {
+	type Event = Event;
+}
+
+
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1161,6 +1177,9 @@ construct_runtime!(
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>},
 		TransactionStorage: pallet_transaction_storage::{Pallet, Call, Storage, Inherent, Config<T>, Event<T>},
+		//local pallet
+		TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>},
+		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>},
 	}
 );
 

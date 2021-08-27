@@ -18,6 +18,10 @@ debug:
 build:
 	cargo build
 
+.PHONY: build-dev
+build-dev:
+	cargo build --bin dico-dev --locked
+
 .PHONY: release
 release: clear
 	cargo build --release
