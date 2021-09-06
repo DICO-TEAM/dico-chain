@@ -1628,6 +1628,7 @@ dependencies = [
 name = "currencies"
 version = "3.0.0"
 dependencies = [
+ "dico-primitives",
  "frame-support",
  "frame-system",
  "orml-tokens",

@@ -54,7 +54,7 @@ use sp_std::vec::Vec;
 
 use orml_traits::{
 	arithmetic::{Signed, SimpleArithmetic},
-	// currency::TransferAll,
+	currency::TransferAll,
 	BalanceStatus,
 	BasicCurrency,
 	BasicCurrencyExtended,
@@ -80,13 +80,11 @@ use sp_std::{
 // mod mock;
 // mod tests;
 mod weights;
-
 pub use module::*;
 pub use weights::WeightInfo;
-
 pub mod currencies_trait;
-
 use currencies_trait::CurrenciesHandler;
+use dico_primitives::AssetId;
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, Default, RuntimeDebug)]
 pub struct DicoAssetMetadata {
@@ -110,8 +108,8 @@ pub mod module {
 
 	pub(crate) type BalanceOf<T> =
 	<<T as Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::Balance;
-	pub(crate) type CurrencyIdOf<T> =
-	<<T as Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::CurrencyId;
+	// pub(crate) type AssetId =
+	// <<T as Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::CurrencyId;
 	pub(crate) type AmountOf<T> =
 	<<T as Config>::MultiCurrency as MultiCurrencyExtended<<T as frame_system::Config>::AccountId>>::Amount;
 
@@ -119,7 +117,7 @@ pub mod module {
 	pub trait Config: frame_system::Config {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-		type MultiCurrency: MultiCurrency<Self::AccountId>
+		type MultiCurrency: MultiCurrency<Self::AccountId, CurrencyId = AssetId>
 		+ MultiCurrencyExtended<Self::AccountId>
 		+ MultiLockableCurrency<Self::AccountId>
 		+ MultiReservableCurrency<Self::AccountId>;
@@ -129,7 +127,7 @@ pub mod module {
 		+ BasicReservableCurrency<Self::AccountId, Balance = BalanceOf<Self>>;
 
 		#[pallet::constant]
-		type GetNativeCurrencyId: Get<CurrencyIdOf<Self>>;
+		type GetNativeCurrencyId: Get<AssetId>;
 
 		/// Weight information for extrinsics in this module.
 		type WeightInfo: WeightInfo;
@@ -152,28 +150,30 @@ pub mod module {
 		ShouldNotChangeDecimals,
 		MetadataNotExists,
 		NativeCurrency,
+		CurrencyIdTooLarge,
+		CurrencyIdTooLow,
 	}
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub (crate) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Currency transfer success. [currency_id, from, to, amount]
-		Transferred(CurrencyIdOf<T>, T::AccountId, T::AccountId, BalanceOf<T>),
+		Transferred(AssetId, T::AccountId, T::AccountId, BalanceOf<T>),
 		/// Update balance success. [currency_id, who, amount]
-		BalanceUpdated(CurrencyIdOf<T>, T::AccountId, AmountOf<T>),
+		BalanceUpdated(AssetId, T::AccountId, AmountOf<T>),
 		/// Deposit success. [currency_id, who, amount]
-		Deposited(CurrencyIdOf<T>, T::AccountId, BalanceOf<T>),
+		Deposited(AssetId, T::AccountId, BalanceOf<T>),
 		/// Withdraw success. [currency_id, who, amount]
-		Withdrawn(CurrencyIdOf<T>, T::AccountId, BalanceOf<T>),
-		CreateAsset(T::AccountId, CurrencyIdOf<T>, BalanceOf<T>),
-		SetMetadata(T::AccountId, CurrencyIdOf<T>, DicoAssetMetadata),
-		Burn(T::AccountId, CurrencyIdOf<T>, BalanceOf<T>),
+		Withdrawn(AssetId, T::AccountId, BalanceOf<T>),
+		CreateAsset(T::AccountId, AssetId, BalanceOf<T>),
+		SetMetadata(T::AccountId, AssetId, DicoAssetMetadata),
+		Burn(T::AccountId, AssetId, BalanceOf<T>),
 	}
 
 	#[pallet::storage]
 	/// Metadata of an asset.
 	pub(super) type DicoAssetsInfo<T: Config> =
-	StorageMap<_, Blake2_128Concat, CurrencyIdOf<T>, DicoAssetInfo<T::AccountId, DicoAssetMetadata>>;
+	StorageMap<_, Blake2_128Concat, AssetId, DicoAssetInfo<T::AccountId, DicoAssetMetadata>>;
 
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
@@ -187,26 +187,11 @@ pub mod module {
 		#[pallet::weight(10000)]
 		pub fn create_asset(
 			origin: OriginFor<T>,
-			currency_id: CurrencyIdOf<T>,
+			currency_id: AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let user = ensure_signed(origin)?;
-			ensure!(
-				!Self::is_exists_metadata(currency_id)
-					&& T::MultiCurrency::total_issuance(currency_id) == BalanceOf::<T>::from(0u32),
-				Error::<T>::AssetAlreadyExists
-			);
-
-			Self::deposit(T::GetNativeCurrencyId::get(), &user, T::CreateConsume::get())?;
-
-			T::MultiCurrency::deposit(currency_id, &user, amount)?;
-			DicoAssetsInfo::<T>::insert(
-				currency_id,
-				DicoAssetInfo {
-					owner: user.clone(),
-					metadata: None,
-				},
-			);
+			Self::do_deposit(user.clone(), currency_id, amount, false)?;
 
 			Self::deposit_event(Event::CreateAsset(user.clone(), currency_id, amount));
 			Ok(().into())
@@ -218,7 +203,7 @@ pub mod module {
 		#[pallet::weight(10000)]
 		pub fn set_metadata(
 			origin: OriginFor<T>,
-			currency_id: CurrencyIdOf<T>,
+			currency_id: AssetId,
 			metadata: DicoAssetMetadata,
 		) -> DispatchResultWithPostInfo {
 			let user = ensure_signed(origin)?;
@@ -257,7 +242,7 @@ pub mod module {
 		#[pallet::weight(10000)]
 		pub fn burn(
 			origin: OriginFor<T>,
-			currency_id: CurrencyIdOf<T>,
+			currency_id: AssetId,
 			amount: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let user = ensure_signed(origin)?;
@@ -277,7 +262,7 @@ pub mod module {
 		pub fn transfer(
 			origin: OriginFor<T>,
 			dest: <T::Lookup as StaticLookup>::Source,
-			currency_id: CurrencyIdOf<T>,
+			currency_id: AssetId,
 			#[pallet::compact] amount: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let from = ensure_signed(origin)?;
@@ -314,7 +299,7 @@ pub mod module {
 		pub fn update_balance(
 			origin: OriginFor<T>,
 			who: <T::Lookup as StaticLookup>::Source,
-			currency_id: CurrencyIdOf<T>,
+			currency_id: AssetId,
 			amount: AmountOf<T>,
 		) -> DispatchResultWithPostInfo {
 			ensure_root(origin)?;
@@ -327,14 +312,53 @@ pub mod module {
 	}
 }
 
-impl<T: Config> CurrenciesHandler<CurrencyIdOf<T>, DicoAssetMetadata, DispatchError> for Pallet<T> {
-	fn get_metadata(currency: CurrencyIdOf<T>) -> Result<DicoAssetMetadata, DispatchError> {
-		Ok(Self::get_metadata(currency)?)
+impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::AccountId, BalanceOf<T>, DispatchResult> for Pallet<T> {
+
+	fn get_metadata(currency_id: AssetId) -> result::Result<DicoAssetMetadata, DispatchError> {
+		if currency_id == T::GetNativeCurrencyId::get() {
+			return Ok(DicoAssetMetadata {
+				name: "dico".into(),
+				symbol: "DICO".into(),
+				decimals: 14u8,
+			});
+		}
+		let mut asset_info = DicoAssetsInfo::<T>::get(currency_id).ok_or(Error::<T>::AssetNotExists)?;
+		if asset_info.metadata.is_some() {
+			Ok(asset_info.metadata.unwrap())
+		} else {
+			Err(Error::<T>::MetadataNotExists)?
+		}
+	}
+
+	fn do_deposit(user: T::AccountId, currency_id: AssetId, amount: BalanceOf<T>, is_swap_deposit: bool) -> DispatchResult {
+		ensure!(
+			!Self::is_exists_metadata(currency_id)
+				&& T::MultiCurrency::total_issuance(currency_id) == BalanceOf::<T>::from(0u32),
+			Error::<T>::AssetAlreadyExists
+		);
+		if is_swap_deposit {
+			ensure!(Self::is_currency_id_too_large(currency_id), Error::<T>::CurrencyIdTooLow);
+		}
+		else {
+			ensure!(!Self::is_currency_id_too_large(currency_id), Error::<T>::CurrencyIdTooLarge);
+			Self::withdraw(T::GetNativeCurrencyId::get(), &user, T::CreateConsume::get())?;
+		}
+
+		T::MultiCurrency::deposit(currency_id, &user, amount)?;
+		DicoAssetsInfo::<T>::insert(
+			currency_id,
+			DicoAssetInfo {
+				owner: user.clone(),
+				metadata: None,
+			},
+		);
+
+		Ok(())
 	}
 }
 
 impl<T: Config> Pallet<T> {
-	fn is_exists_metadata(currency_id: CurrencyIdOf<T>) -> bool {
+	fn is_exists_metadata(currency_id: AssetId) -> bool {
 		if currency_id == T::GetNativeCurrencyId::get() {
 			return true;
 		}
@@ -352,25 +376,17 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
-	fn get_metadata(currency_id: CurrencyIdOf<T>) -> result::Result<DicoAssetMetadata, DispatchError> {
-		if currency_id == T::GetNativeCurrencyId::get() {
-			return Ok(DicoAssetMetadata {
-				name: "dico".into(),
-				symbol: "DICO".into(),
-				decimals: 14u8,
-			});
+	fn is_currency_id_too_large(currency_id: AssetId) -> bool {
+		if currency_id >= 2000_0000 {
+			return true;
 		}
-		let mut asset_info = DicoAssetsInfo::<T>::get(currency_id).ok_or(Error::<T>::AssetNotExists)?;
-		if asset_info.metadata.is_some() {
-			Ok(asset_info.metadata.unwrap())
-		} else {
-			Err(Error::<T>::MetadataNotExists)?
-		}
+		false
 	}
+
 }
 
 impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
-	type CurrencyId = CurrencyIdOf<T>;
+	type CurrencyId = AssetId;
 	type Balance = BalanceOf<T>;
 
 	fn minimum_balance(currency_id: Self::CurrencyId) -> Self::Balance {
@@ -587,7 +603,7 @@ pub struct Currency<T, GetCurrencyId>(marker::PhantomData<T>, marker::PhantomDat
 impl<T, GetCurrencyId> BasicCurrency<T::AccountId> for Currency<T, GetCurrencyId>
 	where
 		T: Config,
-		GetCurrencyId: Get<CurrencyIdOf<T>>,
+		GetCurrencyId: Get<AssetId>,
 {
 	type Balance = BalanceOf<T>;
 
@@ -635,7 +651,7 @@ impl<T, GetCurrencyId> BasicCurrency<T::AccountId> for Currency<T, GetCurrencyId
 impl<T, GetCurrencyId> BasicCurrencyExtended<T::AccountId> for Currency<T, GetCurrencyId>
 	where
 		T: Config,
-		GetCurrencyId: Get<CurrencyIdOf<T>>,
+		GetCurrencyId: Get<AssetId>,
 {
 	type Amount = AmountOf<T>;
 
@@ -647,7 +663,7 @@ impl<T, GetCurrencyId> BasicCurrencyExtended<T::AccountId> for Currency<T, GetCu
 impl<T, GetCurrencyId> BasicLockableCurrency<T::AccountId> for Currency<T, GetCurrencyId>
 	where
 		T: Config,
-		GetCurrencyId: Get<CurrencyIdOf<T>>,
+		GetCurrencyId: Get<AssetId>,
 {
 	type Moment = T::BlockNumber;
 
@@ -667,7 +683,7 @@ impl<T, GetCurrencyId> BasicLockableCurrency<T::AccountId> for Currency<T, GetCu
 impl<T, GetCurrencyId> BasicReservableCurrency<T::AccountId> for Currency<T, GetCurrencyId>
 	where
 		T: Config,
-		GetCurrencyId: Get<CurrencyIdOf<T>>,
+		GetCurrencyId: Get<AssetId>,
 {
 	fn can_reserve(who: &T::AccountId, value: Self::Balance) -> bool {
 		<Pallet<T> as MultiReservableCurrency<T::AccountId>>::can_reserve(GetCurrencyId::get(), who, value)
