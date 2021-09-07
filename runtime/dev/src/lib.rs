@@ -5,8 +5,9 @@
 use codec::{Decode, Encode};
 use dico_primitives::{
 	constants::{currency::*, time::*},
-	AccountIndex, Balance, BlockNumber, Hash, Index, Moment,
+	AccountIndex, Balance, BlockNumber, Hash, Index, Moment, AssetId, Amount
 };
+use currencies::{BasicCurrencyAdapter};
 pub use dico_primitives::{AccountId, Signature};
 use frame_support::{
 	construct_runtime, parameter_types,
@@ -42,13 +43,14 @@ use sp_core::{
 use sp_inherents::{CheckInherentsResult, InherentData};
 use sp_runtime::curve::PiecewiseLinear;
 use sp_runtime::traits::{
-	self, BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys, SaturatedConversion, StaticLookup,
+	self, Zero, BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys, SaturatedConversion, StaticLookup,
 };
 use sp_runtime::transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys, ApplyExtrinsicResult, FixedPointNumber, Perbill, Percent, Permill,
 	Perquintill,
 };
+use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended};
 use sp_std::prelude::*;
 #[cfg(any(feature = "std", test))]
 use sp_version::NativeVersion;
@@ -1115,6 +1117,45 @@ impl pallet_transaction_storage::Config for Runtime {
 	type WeightInfo = pallet_transaction_storage::weights::SubstrateWeight<Runtime>;
 }
 
+/// ORML Configurations
+parameter_type_with_key! {
+	pub ExistentialDeposits: |_currency_id: AssetId| -> Balance {
+		Zero::zero()
+	};
+}
+
+
+impl orml_tokens::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type Amount = Amount;
+	type CurrencyId = AssetId;
+	type WeightInfo = ();
+	type ExistentialDeposits = ExistentialDeposits;
+	type OnDust = ();
+	type MaxLocks = MaxLocks;
+	type DustRemovalWhitelist = ();
+}
+
+parameter_types! {
+	pub const CreateConsume: Balance = 100 * DOLLARS;
+	pub const DICOAssetId: AssetId = 0;
+}
+
+impl currencies::Config for Runtime {
+	type Event = Event;
+	type MultiCurrency = Tokens;
+
+	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+
+	type GetNativeCurrencyId = DICOAssetId;
+
+	type WeightInfo = ();
+
+	type CreateConsume = CreateConsume;
+}
+
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1161,6 +1202,9 @@ construct_runtime!(
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>},
 		TransactionStorage: pallet_transaction_storage::{Pallet, Call, Storage, Inherent, Config<T>, Event<T>},
+		// ORML related modules
+		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
+		Currencies: currencies::{Pallet, Event<T>, Call, Storage},
 	}
 );
 

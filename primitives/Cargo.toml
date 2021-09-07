@@ -41,4 +41,11 @@ std = [
     'sp-io/std',
     'sp-consensus-aura/std',
     'frame-system/std',
+    'sp-application-crypto/std',
+    'pallet-aura/std',
+    'pallet-grandpa/std',
+    'sp-version/std',
+    'sp-consensus-aura/std',
+
+
 ]
