@@ -191,7 +191,7 @@ pub mod module {
 			amount: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let user = ensure_signed(origin)?;
-			Self::do_deposit(user.clone(), currency_id, amount, false)?;
+			Self::do_create(user.clone(), currency_id, amount, false)?;
 
 			Self::deposit_event(Event::CreateAsset(user.clone(), currency_id, amount));
 			Ok(().into())
@@ -330,7 +330,7 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 		}
 	}
 
-	fn do_deposit(user: T::AccountId, currency_id: AssetId, amount: BalanceOf<T>, is_swap_deposit: bool) -> DispatchResult {
+	fn do_create(user: T::AccountId, currency_id: AssetId, amount: BalanceOf<T>, is_swap_deposit: bool) -> DispatchResult {
 		ensure!(
 			!Self::is_exists_metadata(currency_id)
 				&& T::MultiCurrency::total_issuance(currency_id) == BalanceOf::<T>::from(0u32),
