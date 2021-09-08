@@ -354,19 +354,8 @@
   },
   "TimestampedValueOf": "TimestampedValue",
   "OrderedSet": "Vec<AccountId>",
-  "SwapPair": "(AssetId, AssetId)",
-  "PoolId": "AssetId",
-  "PoolUserInfo": {
-    "amount": "Balance",
-    "reward_debt": "Balance"
-  },
-  "PoolInfo": {
-    "liquidity_id": "AssetId",
-    "alloc_point": "U256",
-    "last_reward_block": "BlockNumber",
-    "acc_dico_per_share": "U256",
-    "total_amount": "Balance"
-  },
+  "Pair": "(AssetId, AssetId)",
+  "LiquidityInfo": "(Balance, Balance, AssetId)",
   "CurrencyIdOf": "AssetId",
   "IcoCollectiveVotes": {
     "index": "u32",

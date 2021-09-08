@@ -17,7 +17,8 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 
-pub mod asset;
+pub mod macros;
+pub use macros::*;
 pub mod constants;
 pub use constants::*;
 
