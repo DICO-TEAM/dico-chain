@@ -72,6 +72,9 @@ use impls::Author;
 
 use sp_runtime::generic::Era;
 
+/// Import dico-chain pallets.
+pub use pallet_amm;
+
 // Make the WASM binary available.
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
@@ -1117,7 +1120,7 @@ impl pallet_transaction_storage::Config for Runtime {
 	type WeightInfo = pallet_transaction_storage::weights::SubstrateWeight<Runtime>;
 }
 
-/// ORML Configurations
+// ORML Configurations
 parameter_type_with_key! {
 	pub ExistentialDeposits: |_currency_id: AssetId| -> Balance {
 		Zero::zero()
@@ -1137,6 +1140,7 @@ impl orml_tokens::Config for Runtime {
 	type DustRemovalWhitelist = ();
 }
 
+// dico-chain pallets configurations.
 parameter_types! {
 	pub const CreateConsume: Balance = 100 * DOLLARS;
 	pub const DICOAssetId: AssetId = 0;
@@ -1153,6 +1157,19 @@ impl currencies::Config for Runtime {
 	type WeightInfo = ();
 
 	type CreateConsume = CreateConsume;
+}
+
+parameter_types! {
+	pub const AmmLiquidityAssetIdBase: AssetId = 20_000_000;
+	pub const AmmPalletId: PalletId = PalletId(*b"dico/amm");
+}
+
+impl pallet_amm::Config for Runtime {
+	type Event = Event;
+	type Currency = Currencies;
+	type LiquidityAssetIdBase = AmmLiquidityAssetIdBase;
+	type PalletId = AmmPalletId;
+	type WeightInfo = pallet_amm::weights::DicoWeight<Runtime>;
 }
 
 
@@ -1202,9 +1219,13 @@ construct_runtime!(
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>},
 		TransactionStorage: pallet_transaction_storage::{Pallet, Call, Storage, Inherent, Config<T>, Event<T>},
+
 		// ORML related modules
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
 		Currencies: currencies::{Pallet, Event<T>, Call, Storage},
+
+		// dico-chain related modules
+		AMM: pallet_amm::{Pallet, Call, Storage, Event<T>},
 	}
 );
 
@@ -1575,6 +1596,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_utility, Utility);
 			add_benchmark!(params, batches, pallet_vesting, Vesting);
 			add_benchmark!(params, batches, pallet_election_provider_multi_phase, ElectionProviderMultiPhase);
+			add_benchmark!(params, batches, amm, AMM);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
