@@ -503,5 +503,17 @@
   "BalanceLock": {
     "id": "LockIdentifier",
     "amount": "Balance"
+  },
+  "PoolId": "u32",
+  "Participant": {
+    "amount": "Balance",
+    "reward_debt": "Balance"
+  },
+  "PoolInfo": {
+    "liquidity_id": "AssetId",
+    "alloc_point": "U256",
+    "last_reward_block": "BlockNumber",
+    "acc_dico_per_share": "U256",
+    "total_amount": "Balance"
   }
 }
