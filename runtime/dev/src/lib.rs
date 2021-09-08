@@ -74,6 +74,7 @@ use sp_runtime::generic::Era;
 
 /// Import dico-chain pallets.
 pub use pallet_amm;
+pub use pallet_lbp;
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]
@@ -1162,6 +1163,7 @@ impl currencies::Config for Runtime {
 parameter_types! {
 	pub const AmmLiquidityAssetIdBase: AssetId = 20_000_000;
 	pub const AmmPalletId: PalletId = PalletId(*b"dico/amm");
+	pub const LBPPalletId: PalletId = PalletId(*b"dico/lbp");
 }
 
 impl pallet_amm::Config for Runtime {
@@ -1170,6 +1172,15 @@ impl pallet_amm::Config for Runtime {
 	type LiquidityAssetIdBase = AmmLiquidityAssetIdBase;
 	type PalletId = AmmPalletId;
 	type WeightInfo = pallet_amm::weights::DicoWeight<Runtime>;
+}
+
+
+impl pallet_lbp::Config for Runtime {
+	type Event = Event;
+	type Currency = Currencies;
+	type PalletId = LBPPalletId;
+	type LbpId = u32;
+	type WeightInfo = pallet_lbp::weights::DicoWeight<Runtime>;
 }
 
 
@@ -1226,6 +1237,7 @@ construct_runtime!(
 
 		// dico-chain related modules
 		AMM: pallet_amm::{Pallet, Call, Storage, Event<T>},
+		LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>},
 	}
 );
 
@@ -1597,6 +1609,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_vesting, Vesting);
 			add_benchmark!(params, batches, pallet_election_provider_multi_phase, ElectionProviderMultiPhase);
 			add_benchmark!(params, batches, amm, AMM);
+			add_benchmark!(params, batches, lbp, LBP);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)

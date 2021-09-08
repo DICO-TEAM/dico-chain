@@ -1864,6 +1864,7 @@ dependencies = [
  "pallet-identity",
  "pallet-im-online",
  "pallet-indices",
+ "pallet-lbp",
  "pallet-lottery",
  "pallet-membership",
  "pallet-mmr",
@@ -5339,6 +5340,27 @@ dependencies = [
  "sp-keyring",
  "sp-runtime",
  "sp-std",
+]
+
+[[package]]
+name = "pallet-lbp"
+version = "1.0.0"
+dependencies = [
+ "dico-primitives",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "frame-system-benchmarking",
+ "orml-tokens",
+ "orml-traits",
+ "parity-scale-codec",
+ "primitive-types 0.10.1",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "substrate-wasm-builder 3.0.0",
 ]
 
 [[package]]
