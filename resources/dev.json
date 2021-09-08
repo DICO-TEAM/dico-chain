@@ -503,5 +503,39 @@
   "BalanceLock": {
     "id": "LockIdentifier",
     "amount": "Balance"
-  }
+  },
+  "LbpStatus": {
+    "_enum": [
+      "Pending",
+      "Cancelled",
+      "InProgress",
+      "Finished"
+    ]
+  },
+  "LbpPair": {
+    "supply_asset": "AssetId",
+    "target_asset": "AssetId"
+  },
+  "LbpInfo": {
+    "start_block": "BlockNumber",
+    "end_block": "BlockNumber",
+    "steps": "u32",
+    "owner": "AccountId",
+    "supply_asset": "AssetId",
+    "target_asset": "AssetId",
+    "initial_supply_balance": "Balance",
+    "initial_target_balance": "Balance",
+    "initial_supply_start_weight": "u128",
+    "initial_supply_end_weight": "u128",
+    "initial_target_start_weight": "u128",
+    "initial_target_end_weight": "u128",
+    "supply_balance": "Balance",
+    "target_balance": "Balance",
+    "supply_weight": "u128",
+    "target_weight": "u128",
+    "status": "LbpStatus",
+    "step": "u32",
+    "next_block": "BlockNumber"
+  },
+  "LbpId": "u32"
 }
