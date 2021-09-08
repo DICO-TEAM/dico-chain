@@ -325,7 +325,7 @@ pub mod pallet {
 
 			ensure!(lbp_info.owner == who, Error::<T>::MustBeOwner);
 			ensure!(lbp_info.status == LbpStatus::Pending ||
-                lbp_info.status == LbpStatus::Finished, Error::<T>::MustBeNonTradingStatus);
+				lbp_info.status == LbpStatus::Finished, Error::<T>::MustBeNonTradingStatus);
 
 			let module_account_id = Self::account_id();
 
@@ -378,12 +378,12 @@ pub mod pallet {
 			ensure!(lbp_info.status == LbpStatus::InProgress, Error::<T>::MustBeInProgressStatus);
 			ensure!(min_target_amount <= lbp_info.target_balance, Error::<T>::InvalidTargetAmount);
 			ensure!(
-                to_u256!(supply_amount) <= bmul(
-                    to_u256!(lbp_info.supply_balance),
-                    to_u256!(MAX_IN_RATIO)
-                ).ok_or(ArithmeticError::Overflow)?,
-                Error::<T>::ErrMaxSupplyRatio
-            );
+				to_u256!(supply_amount) <= bmul(
+					to_u256!(lbp_info.supply_balance),
+					to_u256!(MAX_IN_RATIO)
+				).ok_or(ArithmeticError::Overflow)?,
+				Error::<T>::ErrMaxSupplyRatio
+			);
 
 			let spot_price_before =
 				calc_spot_price(to_u256!(lbp_info.supply_balance),
@@ -404,17 +404,17 @@ pub mod pallet {
 
 			ensure!(target_amount >= to_u256!(min_target_amount), Error::<T>::UnacceptableTargetAmount);
 			ensure!(
-                spot_price_before <= bdiv(to_u256!(supply_amount), target_amount).ok_or(ArithmeticError::Overflow)?,
-                Error::<T>::ErrMathApprox
-            );
+				spot_price_before <= bdiv(to_u256!(supply_amount), target_amount).ok_or(ArithmeticError::Overflow)?,
+				Error::<T>::ErrMathApprox
+			);
 
 			lbp_info.supply_balance = to_balance!(
-                badd(to_u256!(lbp_info.supply_balance), to_u256!(supply_amount)).ok_or(ArithmeticError::Overflow)?
-            )?;
+				badd(to_u256!(lbp_info.supply_balance), to_u256!(supply_amount)).ok_or(ArithmeticError::Overflow)?
+			)?;
 
 			lbp_info.target_balance = to_balance!(
-                bsub(to_u256!(lbp_info.target_balance), target_amount).ok_or(ArithmeticError::Overflow)?
-            )?;
+				bsub(to_u256!(lbp_info.target_balance), target_amount).ok_or(ArithmeticError::Overflow)?
+			)?;
 
 			let spot_price_after =
 				calc_spot_price(to_u256!(lbp_info.supply_balance),
@@ -470,12 +470,12 @@ pub mod pallet {
 			ensure!(lbp_info.status == LbpStatus::InProgress, Error::<T>::MustBeInProgressStatus);
 			ensure!(target_amount <= lbp_info.target_balance, Error::<T>::InvalidTargetAmount);
 			ensure!(
-                to_u256!(target_amount) <= bmul(
-                    to_u256!(lbp_info.target_balance),
-                    to_u256!(MAX_OUT_RATIO)
-                ).ok_or(ArithmeticError::Overflow)?,
-                Error::<T>::ErrMaxTargetRatio
-            );
+				to_u256!(target_amount) <= bmul(
+					to_u256!(lbp_info.target_balance),
+					to_u256!(MAX_OUT_RATIO)
+				).ok_or(ArithmeticError::Overflow)?,
+				Error::<T>::ErrMaxTargetRatio
+			);
 
 			let spot_price_before =
 				calc_spot_price(to_u256!(lbp_info.supply_balance),
@@ -498,12 +498,12 @@ pub mod pallet {
 			ensure!(supply_amount <= to_u256!(max_supply_amount), Error::<T>::UnacceptableSupplyAmount);
 
 			lbp_info.supply_balance = to_balance!(
-                badd(to_u256!(lbp_info.supply_balance), supply_amount).ok_or(ArithmeticError::Overflow)?
-            )?;
+				badd(to_u256!(lbp_info.supply_balance), supply_amount).ok_or(ArithmeticError::Overflow)?
+			)?;
 
 			lbp_info.target_balance = to_balance!(
-                bsub(to_u256!(lbp_info.target_balance), to_u256!(target_amount)).ok_or(ArithmeticError::Overflow)?
-            )?;
+				bsub(to_u256!(lbp_info.target_balance), to_u256!(target_amount)).ok_or(ArithmeticError::Overflow)?
+			)?;
 
 			let spot_price_after =
 				calc_spot_price(to_u256!(lbp_info.supply_balance),
@@ -516,9 +516,9 @@ pub mod pallet {
 			ensure!(spot_price_after >= spot_price_before, Error::<T>::ErrMathApprox);
 			ensure!(spot_price_after <= to_u256!(max_price), Error::<T>::UnacceptablePrice);
 			ensure!(
-                spot_price_before <= bdiv(supply_amount, to_u256!(target_amount)).ok_or(ArithmeticError::Overflow)?,
-                Error::<T>::ErrMathApprox
-            );
+				spot_price_before <= bdiv(supply_amount, to_u256!(target_amount)).ok_or(ArithmeticError::Overflow)?,
+				Error::<T>::ErrMathApprox
+			);
 
 			let module_account_id = Self::account_id();
 
@@ -584,7 +584,7 @@ impl<T: Config> Pallet<T> {
 		Lbps::<T>::try_mutate(lbp_id, |maybe_lbp_info| -> DispatchResultWithPostInfo {
 			let lbp_info = maybe_lbp_info.as_mut().ok_or(Error::<T>::LbpNotFind)?;
 			ensure!(lbp_info.status == LbpStatus::Pending ||
-                lbp_info.status == LbpStatus::InProgress, Error::<T>::MustBeNotEndStatus);
+				lbp_info.status == LbpStatus::InProgress, Error::<T>::MustBeNotEndStatus);
 
 			if lbp_info.status == LbpStatus::Pending && now >= lbp_info.start_block {
 				lbp_info.status = LbpStatus::InProgress;

@@ -27,22 +27,22 @@ type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
-    pub enum Test where
-     Block = Block,
-     NodeBlock = Block,
-     UncheckedExtrinsic = UncheckedExtrinsic,
-     {
-         System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-         Lbp: lbp::{Pallet, Call, Storage, Event<T>},
-         Currency: orml_tokens::{Pallet, Event<T>},
-     }
+	pub enum Test where
+	 Block = Block,
+	 NodeBlock = Block,
+	 UncheckedExtrinsic = UncheckedExtrinsic,
+	 {
+		 System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+		 Lbp: lbp::{Pallet, Call, Storage, Event<T>},
+		 Currency: orml_tokens::{Pallet, Event<T>},
+	 }
 );
 
 parameter_types! {
-    pub const BlockHashCount: u64 = 250;
-    pub const SS58Prefix: u8 = 63;
-    pub const LbpPalletId: PalletId = PalletId(*b"ico/lbpx");
-    pub const DICOAssetId: AssetId = 0;
+	pub const BlockHashCount: u64 = 250;
+	pub const SS58Prefix: u8 = 63;
+	pub const LbpPalletId: PalletId = PalletId(*b"ico/lbpx");
+	pub const DICOAssetId: AssetId = 0;
 }
 
 impl system::Config for Test {
@@ -72,9 +72,9 @@ impl system::Config for Test {
 }
 
 parameter_type_with_key! {
-    pub ExistentialDeposits: |_currency_id: AssetId| -> Balance {
-        Zero::zero()
-    };
+	pub ExistentialDeposits: |_currency_id: AssetId| -> Balance {
+		Zero::zero()
+	};
 }
 
 
@@ -91,9 +91,9 @@ impl orml_tokens::Config for Test {
 }
 
 ord_parameter_types! {
-    pub const One: u64 = 1;
-    pub const Two: u64 = 2;
-    pub const Three: u64 = 3;
+	pub const One: u64 = 1;
+	pub const Two: u64 = 2;
+	pub const Three: u64 = 3;
 }
 impl Config for Test {
 	type Event = Event;
