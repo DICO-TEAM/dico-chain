@@ -343,7 +343,8 @@ pub mod pallet {
 			let last_reward_block_hp: BlockNumber = last_reward_block.saturated_into();
 
 			let mut total_alloc_point = TotalAllocPoint::<T>::get();
-			total_alloc_point = total_alloc_point.checked_add(alloc_point).ok_or(ArithmeticError::Overflow)?;
+			total_alloc_point = total_alloc_point
+				.checked_add(alloc_point).ok_or(ArithmeticError::Overflow)?;
 			TotalAllocPoint::<T>::put(total_alloc_point);
 
 			let pool_info = PoolInfo::new(liquidity_id, alloc_point, last_reward_block_hp);
@@ -392,7 +393,8 @@ pub mod pallet {
 				let total_amount = user_amount_hp
 					.checked_add(amount_hp).ok_or(ArithmeticError::Overflow)?;
 				participant.amount = to_balance!(total_amount)?;
-				pool.total_amount = to_balance!(total_amount_hp.checked_add(amount_hp).ok_or(ArithmeticError::Overflow)?)?;
+				pool.total_amount = to_balance!(total_amount_hp
+					.checked_add(amount_hp).ok_or(ArithmeticError::Overflow)?)?;
 			}
 
 			participant.reward_debt = to_balance!(to_u256!(participant.amount)
@@ -442,8 +444,10 @@ pub mod pallet {
 			}
 
 			if amount > Balance::zero() {
-				participant.amount = to_balance!(to_u256!(participant.amount).checked_sub(to_u256!(amount)).ok_or(ArithmeticError::Overflow)?)?;
-				pool.total_amount = to_balance!(to_u256!(pool.total_amount).checked_sub(to_u256!(amount)).ok_or(ArithmeticError::Overflow)?)?;
+				participant.amount = to_balance!(to_u256!(participant.amount)
+					.checked_sub(to_u256!(amount)).ok_or(ArithmeticError::Overflow)?)?;
+				pool.total_amount = to_balance!(to_u256!(pool.total_amount)
+					.checked_sub(to_u256!(amount)).ok_or(ArithmeticError::Overflow)?)?;
 				T::Currency::transfer(pool.liquidity_id, &module_account_id, &who, amount)?;
 			}
 
