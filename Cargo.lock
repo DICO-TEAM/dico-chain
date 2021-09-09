@@ -1859,6 +1859,7 @@ dependencies = [
  "pallet-democracy",
  "pallet-election-provider-multi-phase",
  "pallet-elections-phragmen",
+ "pallet-farm",
  "pallet-gilt",
  "pallet-grandpa",
  "pallet-identity",
@@ -5254,6 +5255,27 @@ dependencies = [
  "sp-npos-elections",
  "sp-runtime",
  "sp-std",
+]
+
+[[package]]
+name = "pallet-farm"
+version = "1.0.0"
+dependencies = [
+ "dico-primitives",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "frame-system-benchmarking",
+ "orml-tokens",
+ "orml-traits",
+ "parity-scale-codec",
+ "primitive-types 0.10.1",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "substrate-wasm-builder 3.0.0",
 ]
 
 [[package]]
