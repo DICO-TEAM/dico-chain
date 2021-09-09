@@ -1124,9 +1124,32 @@ impl pallet_template::Config for Runtime {
 	type Event = Event;
 }
 
+
+
+parameter_types! {
+	pub const KYCPalletId: PalletId = PalletId(*b"dico/kyc");
+	pub const MaxIAS: u32 = 200;
+	pub const MaxSwordHolder: u32 = 200;
+	pub const KYCBasicDeposit: Balance = 100 * DOLLARS;
+	pub const KYCServiceDeposit: Balance = 1000 * DOLLARS;
+
+}
+
 /// Configure the pallet template in pallets/template.
 impl pallet_kyc::Config for Runtime {
 	type Event = Event;
+	type Currency = Balances;
+	type PalletId = KYCPalletId;
+	type BasicDeposit = KYCBasicDeposit;
+	type ServiceDeposit = KYCServiceDeposit;
+	type MaxIAS = MaxIAS;
+	type MaxSwordHolder = MaxSwordHolder;
+	type Slashed = Treasury;
+	type Randomness = RandomnessCollectiveFlip;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
+	type IASOrigin = EnsureRootOrHalfCouncil;
+	type SwordHolderOrigin = EnsureRootOrHalfCouncil;
+	type WeightInfo = pallet_kyc::weights::SubstrateWeight<Runtime>;
 }
 
 

@@ -10,6 +10,349 @@ pub type Message = [u8; 128];
 pub type Data = Vec<u8>;
 
 
+/// IAS Judgement
+#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+pub enum Judgement<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> {
+    /// The default value; no opinion is held.
+    Unknown,
+    /// No judgement is yet in place, but a deposit is reserved as payment for providing one.
+    FeePaid(Balance),
+    /// The data appears to be reasonably acceptable in terms of its accuracy,
+    /// however no in depth checks (such as in-person meetings or formal KYC)
+    /// have been conducted.
+    Reasonable,
+    /// The target is known directly by the registrar and the registrar can
+    /// fully attest to the the data's accuracy.
+    KnownGood,
+    /// The data was once good but is currently out of date. There is no
+    /// malicious intent in the inaccuracy. This judgement can be removed
+    /// through updating the data.
+    OutOfDate,
+    /// The data is imprecise or of sufficiently low-quality to be problematic.
+    /// It is not indicative of malicious intent. This judgement can be removed
+    /// through updating the data.
+    LowQuality,
+    /// The data is erroneous. This may be indicative of malicious intent. This
+    /// cannot be removed except by the registrar.
+    Erroneous,
+    /// The data is repeat. Maybe it was submitted before.
+    /// By then the KYC user's ID number already exists
+    Repeat,
+}
+
+impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> Judgement<Balance> {
+    /// Returns `true` if this judgement is indicative of a deposit being
+    /// currently held.
+    pub(crate) fn has_deposit(&self) -> bool {
+        match self {
+            Judgement::FeePaid(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns `true` if this judgement is one that should not be generally be
+    /// replaced outside of specialized handlers.
+    pub(crate) fn is_sticky(&self) -> bool {
+        match self {
+            Judgement::FeePaid(_) | Judgement::Erroneous => true,
+            _ => false,
+        }
+    }
+
+    /// Returns `true` if this judgement has paid
+    pub(crate) fn is_paid(&self) -> bool {
+        match self {
+            Judgement::FeePaid(_) => true,
+            _ => false,
+        }
+    }
+}
+
+/// kyc information authentication by the `SwordHolder`
+#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+pub enum Authentication {
+    /// pending status
+    Pending,
+    /// Success： The supervisor believes that the certification is successful
+    Success,
+    /// Failure: The supervisor believes that the certification is not
+    /// successful
+    Failure,
+}
+
+impl Authentication {
+    /// Certification passed
+    pub(crate) fn has_success(&self) -> bool {
+        match self {
+            Authentication::Success => true,
+            _ => false,
+        }
+    }
+
+    /// Authentication failed
+    pub(crate) fn has_failure(&self) -> bool {
+        match self {
+            Authentication::Failure => true,
+            _ => false,
+        }
+    }
+
+    pub(crate) fn is_pending(&self) -> bool {
+        match self {
+            Authentication::Pending => true,
+            _ => false,
+        }
+    }
+}
+
+/// black info enum
+#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+pub enum Black<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> {
+    /// The default value; no opinion is held.
+    Unknown,
+    /// fraud
+    Fraud(Balance),
+    /// Information cheating
+    Cheat,
+}
+
+impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> Black<Balance> {
+    /// cheat.
+    pub(crate) fn is_cheat(&self) -> bool {
+        match self {
+            Black::Fraud(_) | Black::Cheat => true,
+            _ => false,
+        }
+    }
+}
+
+/// The blacklist of kyc
+#[derive(Clone, Encode, Eq, PartialEq, RuntimeDebug)]
+pub struct BlackInfo<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> {
+    pub info: Vec<Black<Balance>>,
+}
+
+impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> Decode for BlackInfo<Balance> {
+    fn decode<I: codec::Input>(input: &mut I) -> sp_std::result::Result<Self, codec::Error> {
+        let info = Decode::decode(&mut AppendZerosInput::new(input))?;
+        Ok(Self { info })
+    }
+}
+
+/// KYC field used by the user for authentication
+#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+pub enum KYCFields {
+    Name,
+    Area,
+    ExchangeKey,
+    Email,
+}
+
+/// Information concerning the identity of the controller of an account.
+///
+/// NOTE: This should be stored at the end of the storage item to facilitate the
+/// addition of extra fields in a backwards compatible way through a specialized
+/// `Decode` impl.
+#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+#[cfg_attr(test, derive(Default))]
+pub struct KYCInfo {
+    /// display name
+    /// Stored as UTF-8.
+    pub name: Vec<u8>,
+
+    /// The full area name
+    /// Stored as UTF-8.
+    pub area: AreaCode,
+
+    /// public key to exchange
+    /// Stored as UTF-8.
+    pub exchange_key: Vec<u8>,
+
+    /// email
+    /// Stored as UTF-8.
+    pub email: Vec<u8>,
+}
+
+/// Information concerning the identity of the controller of an account.
+#[derive(Clone, Encode, Eq, PartialEq, RuntimeDebug)]
+pub struct Registration<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> {
+    /// Judgements from the registrars on this identity. Stored ordered by
+    pub judgements: Vec<(KYCFields, KYCIndex, Judgement<Balance>, Authentication)>,
+
+    /// Amount held on deposit for this information.
+    pub deposit: Balance,
+
+    /// Information on the identity.
+    pub info: KYCInfo,
+}
+
+impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq + Zero + Add> Registration<Balance> {
+    pub(crate) fn total_deposit(&self) -> Balance {
+        self.deposit
+            + self
+            .judgements
+            .iter()
+            .map(|(_, _, ref j, _)| {
+                if let Judgement::FeePaid(fee) = j {
+                    *fee
+                } else {
+                    Zero::zero()
+                }
+            })
+            .fold(Zero::zero(), |a, i| a + i)
+    }
+}
+
+impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> Decode for Registration<Balance> {
+    fn decode<I: codec::Input>(input: &mut I) -> sp_std::result::Result<Self, codec::Error> {
+        let (judgements, deposit, info) = Decode::decode(&mut AppendZerosInput::new(input))?;
+        Ok(Self {
+            judgements,
+            deposit,
+            info,
+        })
+    }
+}
+
+/// Information concerning a identity authentication service(IAS).
+#[derive(Clone, Encode, Decode, Eq, Copy, PartialEq, RuntimeDebug)]
+#[cfg_attr(test, derive(Default))]
+pub struct IASInfo<
+    Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
+    AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
+> {
+    /// The account of the registrar.
+    pub account: AccountId,
+
+    /// Amount required to be given to the registrar for them to provide
+    /// judgement.
+    pub fee: Balance,
+
+    /// public key to exchange
+    /// Stored as UTF-8.
+    pub exchange_key: ExchangeKey,
+
+    /// Relevant fields for this registrar. Registrar judgements are limited to
+    /// attestations on these fields.
+    pub fields: KYCFields,
+}
+
+impl<
+    Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
+    AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
+> IASInfo<Balance, AccountId>
+{
+    pub fn set_account(&mut self, account: AccountId) -> &mut Self {
+        self.account = account;
+        self
+    }
+    pub fn set_fee(&mut self, fee: Balance) -> &mut Self {
+        self.fee = fee;
+        self
+    }
+
+    pub fn set_exchange_key(&mut self, exchange_key: ExchangeKey) -> &mut Self {
+        self.exchange_key = exchange_key;
+        self
+    }
+
+    pub fn set_fields(&mut self, fields: KYCFields) -> &mut Self {
+        self.fields = fields;
+        self
+    }
+}
+
+/// ApplicationForm
+#[derive(Clone, Encode, Decode, Eq, Copy, PartialEq, RuntimeDebug)]
+#[cfg_attr(test, derive(Default))]
+pub struct ApplicationForm<
+    Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
+    AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
+> {
+    /// The account of the registrar.
+    pub ias: (KYCIndex, IASInfo<Balance, AccountId>),
+
+    /// Amount required to be given to the registrar for them to provide
+    /// judgement.
+    pub supervisor: (KYCIndex, IASInfo<Balance, AccountId>),
+
+    /// public key to exchange
+    /// Stored as UTF-8.
+    pub progress: Progress,
+}
+
+impl<
+    Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
+    AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
+> ApplicationForm<Balance, AccountId>
+{
+    pub fn set_ias(&mut self, index: KYCIndex, ias: IASInfo<Balance, AccountId>) -> &mut Self {
+        self.ias = (index, ias);
+        self
+    }
+
+    pub fn set_supervisor(&mut self, index: KYCIndex, supervisor: IASInfo<Balance, AccountId>) -> &mut Self {
+        self.supervisor = (index, supervisor);
+        self
+    }
+
+    pub fn set_progress(&mut self, progress: Progress) -> &mut Self {
+        self.progress = progress;
+        self
+    }
+
+    pub fn is_repeat(&self, kyc_fields: &KYCFields) -> bool {
+        match self {
+            Self {
+                ias,
+                supervisor,
+                progress,
+            } => {
+                // When Progress is Failure, can apply again.
+                if ias.1.fields == kyc_fields.clone() && progress != &Progress::Failure {
+                    true
+                } else {
+                    false
+                }
+            }
+            _ => false,
+        }
+    }
+}
+
+/// Certification progress record
+#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+pub enum Progress {
+    /// pending status
+    Pending,
+    /// IAS Start this progress
+    IasDoing,
+    /// IAS Done this progress
+    IasDone,
+    /// Supervisor Done this progress
+    SupervisorDone,
+    /// Success： The ias/supervisor believes that the certification is
+    /// successful
+    Success,
+    /// Failure: The ias/supervisor believes that the certification is not
+    /// successful
+    Failure,
+}
+
+/// Record.
+#[derive(Clone, Encode, Decode, Eq, Copy, PartialEq, RuntimeDebug)]
+#[cfg_attr(test, derive(Default))]
+pub struct Record<AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq> {
+    /// The account of the registrar.
+    pub account: AccountId,
+
+    /// Progress
+    pub progress: Progress,
+
+    /// KYCFields .
+    pub fields: KYCFields,
+}
+
 /// International Organization for Standardization (ISO)
 #[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
 pub enum AreaCode {
