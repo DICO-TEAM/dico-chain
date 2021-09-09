@@ -30,6 +30,7 @@ dico-primitives = { version = "1.0.0", default-features = false, path = "../../p
 currencies      = { version = "3.0.0", default-features = false, path = "../../pallets/currencies"}
 pallet-amm      = { version = "1.0.0", default-features = false, path = '../../pallets/amm'}
 pallet-farm     = { version = "1.0.0", default-features = false, path = '../../pallets/farm'}
+pallet-lbp      = { version = "1.0.0", default-features = false, path = '../../pallets/lbp'}
 
 
 
@@ -191,6 +192,7 @@ std = [
     "orml-traits/std",
     "pallet-amm/std",
     "pallet-farm/std",
+    "pallet-lbp/std",
 ]
 runtime-benchmarks = [
     "frame-benchmarking",
@@ -231,6 +233,7 @@ runtime-benchmarks = [
     "frame-system-benchmarking",
     "pallet-amm/frame-benchmarking",
     "pallet-farm/frame-benchmarking",
+    'pallet-lbp/runtime-benchmarks',
     "hex-literal",
 ]
 try-runtime = [
