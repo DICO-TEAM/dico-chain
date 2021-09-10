@@ -200,6 +200,8 @@ std = [
     "pallet-amm/std",
     "pallet-farm/std",
     "pallet-lbp/std",
+    "pallet-pricedao/std",
+    "orml-oracle/std",
 ]
 runtime-benchmarks = [
     "frame-benchmarking",
