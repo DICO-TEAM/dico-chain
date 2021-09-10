@@ -22,17 +22,14 @@ pub trait WeightInfo {
 
 	/// identity authentication service(IAS)
 	fn ias_set_fee(r: u32) -> Weight;
-	fn ias_set_fields(r: u32) -> Weight;
 	fn ias_provide_judgement(r: u32, x: u32) -> Weight;
-	fn apply_certification(r: u32, x: u32) -> Weight;
 	fn ias_request_sword_holder(r: u32, x: u32) -> Weight;
 
 	/// For general users
 	fn set_kyc(r: u32, x: u32) -> Weight;
 	fn clear_kyc(r: u32, x: u32) -> Weight;
-	fn get_ias(r: u32, x: u32) -> Weight;
 	fn request_judgement(r: u32, x: u32) -> Weight;
-	fn cancel_request(r: u32, x: u32) -> Weight;
+	fn apply_certification(r: u32, x: u32) -> Weight;
 }
 
 /// Weights for pallet_kyc using the Substrate node and recommended hardware.
@@ -95,12 +92,6 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(1 as Weight))
 	}
 
-	fn ias_set_fields(r: u32) -> Weight {
-		(11_375_000 as Weight)
-			.saturating_add((382_000 as Weight).saturating_mul(r as Weight))
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
-	}
 	fn ias_provide_judgement(r: u32, x: u32) -> Weight {
 		(71_923_000 as Weight)
 			.saturating_add((529_000 as Weight).saturating_mul(r as Weight))
@@ -141,13 +132,6 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(1 as Weight))
 	}
 
-	fn get_ias(r: u32, x: u32) -> Weight {
-		(71_923_000 as Weight)
-			.saturating_add((529_000 as Weight).saturating_mul(r as Weight))
-			.saturating_add((1_763_000 as Weight).saturating_mul(x as Weight))
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
-	}
 
 	fn request_judgement(r: u32, x: u32) -> Weight {
 		(75_299_000 as Weight)
@@ -157,13 +141,6 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(1 as Weight))
 	}
 
-	fn cancel_request(r: u32, x: u32) -> Weight {
-		(67_492_000 as Weight)
-			.saturating_add((225_000 as Weight).saturating_mul(r as Weight))
-			.saturating_add((2_003_000 as Weight).saturating_mul(x as Weight))
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
-	}
 }
 
 // For backwards compatibility and tests
@@ -219,13 +196,6 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
 	}
 
-	fn get_ias(r: u32, x: u32) -> Weight {
-		(71_923_000 as Weight)
-			.saturating_add((529_000 as Weight).saturating_mul(r as Weight))
-			.saturating_add((1_763_000 as Weight).saturating_mul(x as Weight))
-			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
-	}
 
 	fn apply_certification(r: u32, x: u32) -> Weight {
 		(71_923_000 as Weight)
@@ -240,13 +210,6 @@ impl WeightInfo for () {
 			.saturating_add((493_000 as Weight).saturating_mul(r as Weight))
 			.saturating_add((2_014_000 as Weight).saturating_mul(x as Weight))
 			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
-	}
-	fn cancel_request(r: u32, x: u32) -> Weight {
-		(67_492_000 as Weight)
-			.saturating_add((225_000 as Weight).saturating_mul(r as Weight))
-			.saturating_add((2_003_000 as Weight).saturating_mul(x as Weight))
-			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
 			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
 	}
 
@@ -264,12 +227,6 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
 	}
 
-	fn ias_set_fields(r: u32) -> Weight {
-		(11_375_000 as Weight)
-			.saturating_add((382_000 as Weight).saturating_mul(r as Weight))
-			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
-	}
 
 	fn ias_provide_judgement(r: u32, x: u32) -> Weight {
 		(71_923_000 as Weight)
