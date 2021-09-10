@@ -795,6 +795,19 @@ dependencies = [
 
 [[package]]
 name = "cargo_metadata"
+version = "0.12.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7714a157da7991e23d90686b9524b9e12e0407a108647f52e9328f4b3d51ac7f"
+dependencies = [
+ "cargo-platform",
+ "semver 0.11.0",
+ "semver-parser 0.10.2",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "cargo_metadata"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "081e3f0755c1f380c2d010481b6fa2e02973586d5f2b24eebb7a2a1d98b143d8"
@@ -1625,6 +1638,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "currencies"
+version = "3.0.0"
+dependencies = [
+ "dico-primitives",
+ "frame-support",
+ "frame-system",
+ "orml-tokens",
+ "orml-traits",
+ "pallet-balances",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "curve25519-dalek"
 version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1799,6 +1830,7 @@ dependencies = [
 name = "dico-runtime"
 version = "1.0.0"
 dependencies = [
+ "currencies",
  "dico-primitives",
  "frame-benchmarking",
  "frame-election-provider-support",
@@ -1811,6 +1843,9 @@ dependencies = [
  "hex-literal",
  "log",
  "max-encoded-len",
+ "orml-tokens",
+ "orml-traits",
+ "pallet-amm",
  "pallet-assets",
  "pallet-authority-discovery",
  "pallet-authorship",
@@ -1824,12 +1859,14 @@ dependencies = [
  "pallet-democracy",
  "pallet-election-provider-multi-phase",
  "pallet-elections-phragmen",
+ "pallet-farm",
  "pallet-gilt",
  "pallet-grandpa",
  "pallet-identity",
  "pallet-im-online",
  "pallet-indices",
  "pallet-kyc",
+ "pallet-lbp",
  "pallet-lottery",
  "pallet-membership",
  "pallet-mmr",
@@ -1874,7 +1911,7 @@ dependencies = [
  "sp-transaction-pool",
  "sp-version",
  "static_assertions",
- "substrate-wasm-builder",
+ "substrate-wasm-builder 4.0.0",
 ]
 
 [[package]]
@@ -2148,7 +2185,7 @@ dependencies = [
  "fixed-hash",
  "impl-rlp",
  "impl-serde",
- "primitive-types",
+ "primitive-types 0.9.1",
  "uint",
 ]
 
@@ -3658,7 +3695,7 @@ dependencies = [
  "sp-std",
  "sp-transaction-pool",
  "sp-version",
- "substrate-wasm-builder",
+ "substrate-wasm-builder 4.0.0",
  "xcm",
  "xcm-builder",
  "xcm-executor",
@@ -4359,7 +4396,7 @@ dependencies = [
  "impl-trait-for-tuples",
  "max-encoded-len-derive",
  "parity-scale-codec",
- "primitive-types",
+ "primitive-types 0.9.1",
 ]
 
 [[package]]
@@ -4873,12 +4910,78 @@ dependencies = [
 ]
 
 [[package]]
+name = "orml-tokens"
+version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git?rev=650ef607d023e4537d3f2932baa5e50bc3a349cb#650ef607d023e4537d3f2932baa5e50bc3a349cb"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "max-encoded-len",
+ "orml-traits",
+ "parity-scale-codec",
+ "serde",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "orml-traits"
+version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git?rev=650ef607d023e4537d3f2932baa5e50bc3a349cb#650ef607d023e4537d3f2932baa5e50bc3a349cb"
+dependencies = [
+ "frame-support",
+ "impl-trait-for-tuples",
+ "num-traits",
+ "orml-utilities",
+ "parity-scale-codec",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "xcm",
+]
+
+[[package]]
+name = "orml-utilities"
+version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git?rev=650ef607d023e4537d3f2932baa5e50bc3a349cb#650ef607d023e4537d3f2932baa5e50bc3a349cb"
+dependencies = [
+ "frame-support",
+ "parity-scale-codec",
+ "serde",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "owning_ref"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ff55baddef9e4ad00f88b6c743a2a8062d4c6ade126c2a528644b8e444d52ce"
 dependencies = [
  "stable_deref_trait",
+]
+
+[[package]]
+name = "pallet-amm"
+version = "1.0.0"
+dependencies = [
+ "dico-primitives",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "frame-system-benchmarking",
+ "orml-tokens",
+ "orml-traits",
+ "parity-scale-codec",
+ "primitive-types 0.10.1",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "substrate-wasm-builder 3.0.0",
 ]
 
 [[package]]
@@ -5157,6 +5260,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-farm"
+version = "1.0.0"
+dependencies = [
+ "dico-primitives",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "frame-system-benchmarking",
+ "orml-tokens",
+ "orml-traits",
+ "parity-scale-codec",
+ "primitive-types 0.10.1",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "substrate-wasm-builder 3.0.0",
+]
+
+[[package]]
 name = "pallet-gilt"
 version = "3.0.0"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8#74101dc21cfffb4c2d014fcc28edc166d5ca1b16"
@@ -5256,6 +5380,27 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+]
+
+[[package]]
+name = "pallet-lbp"
+version = "1.0.0"
+dependencies = [
+ "dico-primitives",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "frame-system-benchmarking",
+ "orml-tokens",
+ "orml-traits",
+ "parity-scale-codec",
+ "primitive-types 0.10.1",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "substrate-wasm-builder 3.0.0",
 ]
 
 [[package]]
@@ -5852,7 +5997,7 @@ dependencies = [
  "lru",
  "parity-util-mem-derive",
  "parking_lot 0.11.1",
- "primitive-types",
+ "primitive-types 0.9.1",
  "smallvec 1.6.1",
  "winapi 0.3.9",
 ]
@@ -6871,7 +7016,7 @@ dependencies = [
  "sp-transaction-pool",
  "sp-version",
  "static_assertions",
- "substrate-wasm-builder",
+ "substrate-wasm-builder 4.0.0",
 ]
 
 [[package]]
@@ -7127,7 +7272,7 @@ dependencies = [
  "sp-std",
  "sp-transaction-pool",
  "sp-version",
- "substrate-wasm-builder",
+ "substrate-wasm-builder 4.0.0",
 ]
 
 [[package]]
@@ -7259,6 +7404,16 @@ dependencies = [
  "impl-codec",
  "impl-rlp",
  "impl-serde",
+ "uint",
+]
+
+[[package]]
+name = "primitive-types"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05e4722c697a58a99d5d06a08c30821d7c082a4632198de1eaa5a6c22ef42373"
+dependencies = [
+ "fixed-hash",
  "uint",
 ]
 
@@ -9682,7 +9837,7 @@ dependencies = [
  "parity-scale-codec",
  "parity-util-mem",
  "parking_lot 0.11.1",
- "primitive-types",
+ "primitive-types 0.9.1",
  "rand 0.7.3",
  "regex",
  "schnorrkel",
@@ -9908,7 +10063,7 @@ source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8#741
 dependencies = [
  "impl-trait-for-tuples",
  "parity-scale-codec",
- "primitive-types",
+ "primitive-types 0.9.1",
  "sp-externalities",
  "sp-runtime-interface-proc-macro",
  "sp-std",
@@ -10420,7 +10575,7 @@ dependencies = [
  "sp-transaction-pool",
  "sp-trie",
  "sp-version",
- "substrate-wasm-builder",
+ "substrate-wasm-builder 4.0.0",
  "trie-db",
 ]
 
@@ -10447,13 +10602,29 @@ dependencies = [
 
 [[package]]
 name = "substrate-wasm-builder"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "79091baab813855ddf65b191de9fe53e656b6b67c1e9bd23fdcbff8788164684"
+dependencies = [
+ "ansi_term 0.12.1",
+ "atty",
+ "build-helper",
+ "cargo_metadata 0.12.3",
+ "tempfile",
+ "toml",
+ "walkdir",
+ "wasm-gc-api",
+]
+
+[[package]]
+name = "substrate-wasm-builder"
 version = "4.0.0"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8#74101dc21cfffb4c2d014fcc28edc166d5ca1b16"
 dependencies = [
  "ansi_term 0.12.1",
  "atty",
  "build-helper",
- "cargo_metadata",
+ "cargo_metadata 0.13.1",
  "sp-maybe-compressed-blob",
  "tempfile",
  "toml",
