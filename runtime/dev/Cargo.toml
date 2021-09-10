@@ -28,6 +28,9 @@ log               = { version = "0.4.14", default-features = false }
 ## local primitives
 dico-primitives = { version = "1.0.0", default-features = false, path = "../../primitives" }
 currencies      = { version = "3.0.0", default-features = false, path = "../../pallets/currencies"}
+pallet-pricedao = { path = '../../pallets/pricedao', default-features = false}
+orml-oracle = { path = '../../pallets/orml-oracle', default-features = false}
+
 pallet-amm      = { version = "1.0.0", default-features = false, path = '../../pallets/amm'}
 pallet-farm     = { version = "1.0.0", default-features = false, path = '../../pallets/farm'}
 pallet-lbp      = { version = "1.0.0", default-features = false, path = '../../pallets/lbp'}

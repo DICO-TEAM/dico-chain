@@ -159,29 +159,29 @@ pub mod module {
 	#[pallet::getter(fn locked_price)]
 	pub type LockedPrice<T: Config<I>, I: 'static = ()> = StorageMap<_, Twox64Concat, T::OracleKey, T::OracleValue>;
 
-	#[pallet::genesis_config]
-	pub struct GenesisConfig<T: Config<I>, I: 'static = ()> {
-		pub members:  Vec<T::AccountId>,
-		pub phantom: sp_std::marker::PhantomData<I>,
-	}
-
-	#[cfg(feature = "std")]
-	impl<T: Config<I>, I: 'static> Default for GenesisConfig<T, I> {
-		fn default() -> Self {
-			GenesisConfig {
-				members: Default::default(),
-				phantom: Default::default(),
-			}
-		}
-	}
-
-	#[pallet::genesis_build]
-	impl<T: Config<I>, I: 'static> GenesisBuild<T, I> for GenesisConfig<T, I> {
-		fn build(&self) {
-			// <Members<T, I>>::put(self.members.clone().into());
-			Members::<T, I>::put(OrderedSet::from_sorted_set(self.members.clone().try_into().unwrap()));
-		}
-	}
+	// #[pallet::genesis_config]
+	// pub struct GenesisConfig<T: Config<I>, I: 'static = ()> {
+	// 	pub members:  Vec<T::AccountId>,
+	// 	pub phantom: sp_std::marker::PhantomData<I>,
+	// }
+	//
+	// #[cfg(feature = "std")]
+	// impl<T: Config<I>, I: 'static> Default for GenesisConfig<T, I> {
+	// 	fn default() -> Self {
+	// 		GenesisConfig {
+	// 			members: Default::default(),
+	// 			phantom: Default::default(),
+	// 		}
+	// 	}
+	// }
+	//
+	// #[pallet::genesis_build]
+	// impl<T: Config<I>, I: 'static> GenesisBuild<T, I> for GenesisConfig<T, I> {
+	// 	fn build(&self) {
+	// 		// <Members<T, I>>::put(self.members.clone().into());
+	// 		Members::<T, I>::put(OrderedSet::from_sorted_set(self.members.clone().try_into().unwrap()));
+	// 	}
+	// }
 
 	#[pallet::pallet]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
