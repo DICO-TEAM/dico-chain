@@ -5,8 +5,9 @@
 use codec::{Decode, Encode};
 use dico_primitives::{
 	constants::{currency::*, time::*},
-	AccountIndex, Balance, BlockNumber, Hash, Index, Moment,
+	AccountIndex, Balance, BlockNumber, Hash, Index, Moment, AssetId, Amount
 };
+use currencies::{BasicCurrencyAdapter};
 pub use dico_primitives::{AccountId, Signature};
 use frame_support::{
 	construct_runtime, parameter_types,
@@ -42,13 +43,14 @@ use sp_core::{
 use sp_inherents::{CheckInherentsResult, InherentData};
 use sp_runtime::curve::PiecewiseLinear;
 use sp_runtime::traits::{
-	self, BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys, SaturatedConversion, StaticLookup,
+	self, Zero, BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys, SaturatedConversion, StaticLookup,
 };
 use sp_runtime::transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys, ApplyExtrinsicResult, FixedPointNumber, Perbill, Percent, Permill,
 	Perquintill,
 };
+use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended};
 use sp_std::prelude::*;
 #[cfg(any(feature = "std", test))]
 use sp_version::NativeVersion;
@@ -70,9 +72,10 @@ use impls::Author;
 
 use sp_runtime::generic::Era;
 
-/// Import the local pallet.
-pub use pallet_template;
-pub use pallet_kyc;
+/// Import dico-chain pallets.
+pub use pallet_amm;
+pub use pallet_farm;
+pub use pallet_lbp;
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]
@@ -1119,39 +1122,79 @@ impl pallet_transaction_storage::Config for Runtime {
 	type WeightInfo = pallet_transaction_storage::weights::SubstrateWeight<Runtime>;
 }
 
-/// Configure the pallet template in pallets/template.
-impl pallet_template::Config for Runtime {
-	type Event = Event;
+// ORML Configurations
+parameter_type_with_key! {
+	pub ExistentialDeposits: |_currency_id: AssetId| -> Balance {
+		Zero::zero()
+	};
 }
 
 
+impl orml_tokens::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type Amount = Amount;
+	type CurrencyId = AssetId;
+	type WeightInfo = ();
+	type ExistentialDeposits = ExistentialDeposits;
+	type OnDust = ();
+	type MaxLocks = MaxLocks;
+	type DustRemovalWhitelist = ();
+}
+
+// dico-chain pallets configurations.
+parameter_types! {
+	pub const CreateConsume: Balance = 100 * DOLLARS;
+	pub const DICOAssetId: AssetId = 0;
+}
+
+impl currencies::Config for Runtime {
+	type Event = Event;
+	type MultiCurrency = Tokens;
+
+	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+
+	type GetNativeCurrencyId = DICOAssetId;
+
+	type WeightInfo = ();
+
+	type CreateConsume = CreateConsume;
+}
 
 parameter_types! {
-	pub const KYCPalletId: PalletId = PalletId(*b"dico/kyc");
-	pub const MaxIAS: u32 = 200;
-	pub const MaxSwordHolder: u32 = 200;
-	pub const KYCBasicDeposit: Balance = 100 * DOLLARS;
-	pub const KYCServiceDeposit: Balance = 1000 * DOLLARS;
-
+	pub const AmmLiquidityAssetIdBase: AssetId = 20_000_000;
+	pub const AmmPalletId: PalletId = PalletId(*b"dico/amm");
+	pub const FarmPalletId: PalletId = PalletId(*b"dico/fam");
+	pub const LBPPalletId: PalletId = PalletId(*b"dico/lbp");
 }
 
-/// Configure the pallet template in pallets/template.
-impl pallet_kyc::Config for Runtime {
+impl pallet_amm::Config for Runtime {
 	type Event = Event;
-	type Currency = Balances;
-	type PalletId = KYCPalletId;
-	type BasicDeposit = KYCBasicDeposit;
-	type ServiceDeposit = KYCServiceDeposit;
-	type MaxIAS = MaxIAS;
-	type MaxSwordHolder = MaxSwordHolder;
-	type Slashed = Treasury;
-	type Randomness = RandomnessCollectiveFlip;
-	type ForceOrigin = EnsureRootOrHalfCouncil;
-	type IASOrigin = EnsureRootOrHalfCouncil;
-	type SwordHolderOrigin = EnsureRootOrHalfCouncil;
-	type WeightInfo = pallet_kyc::weights::SubstrateWeight<Runtime>;
+	type Currency = Currencies;
+	type LiquidityAssetIdBase = AmmLiquidityAssetIdBase;
+	type PalletId = AmmPalletId;
+	type WeightInfo = pallet_amm::weights::DicoWeight<Runtime>;
 }
 
+impl pallet_farm::Config for Runtime {
+	type Event = Event;
+	type PoolId = u32;
+	type Currency = Currencies;
+	type FounderSetOrigin =
+		pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+	type NativeAssetId = DICOAssetId;
+	type PalletId = FarmPalletId;
+	type WeightInfo = pallet_farm::weights::DicoWeight<Runtime>;
+}
+
+
+impl pallet_lbp::Config for Runtime {
+	type Event = Event;
+	type Currency = Currencies;
+	type PalletId = LBPPalletId;
+	type LbpId = u32;
+	type WeightInfo = pallet_lbp::weights::DicoWeight<Runtime>;
+}
 
 
 construct_runtime!(
@@ -1200,9 +1243,15 @@ construct_runtime!(
 		Gilt: pallet_gilt::{Pallet, Call, Storage, Event<T>, Config},
 		Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>},
 		TransactionStorage: pallet_transaction_storage::{Pallet, Call, Storage, Inherent, Config<T>, Event<T>},
-		//local pallet
-		TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>},
-		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>},
+
+		// ORML related modules
+		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
+		Currencies: currencies::{Pallet, Event<T>, Call, Storage},
+
+		// dico-chain related modules
+		AMM: pallet_amm::{Pallet, Call, Storage, Event<T>},
+		Farm: pallet_farm::{Pallet, Call, Storage, Event<T>},
+		LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>},
 	}
 );
 
@@ -1573,6 +1622,9 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_utility, Utility);
 			add_benchmark!(params, batches, pallet_vesting, Vesting);
 			add_benchmark!(params, batches, pallet_election_provider_multi_phase, ElectionProviderMultiPhase);
+			add_benchmark!(params, batches, amm, AMM);
+			add_benchmark!(params, batches, farm, Farm);
+			add_benchmark!(params, batches, lbp, LBP);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)

@@ -27,11 +27,20 @@ log               = { version = "0.4.14", default-features = false }
 
 ## local primitives
 dico-primitives = { version = "1.0.0", default-features = false, path = "../../primitives" }
+currencies      = { version = "3.0.0", default-features = false, path = "../../pallets/currencies"}
+pallet-amm      = { version = "1.0.0", default-features = false, path = '../../pallets/amm'}
+pallet-farm     = { version = "1.0.0", default-features = false, path = '../../pallets/farm'}
+pallet-lbp      = { version = "1.0.0", default-features = false, path = '../../pallets/lbp'}
 
 # Local Dependencies
 pallet-template = { package = 'pallet-template', path = '../../pallets/template', default-features = false }
 pallet-kyc = { package = 'pallet-kyc', path = '../../pallets/kyc', default-features = false }
 
+
+
+# orml
+orml-tokens = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
+orml-traits = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
 
 ## dependencies primitives
 sp-authority-discovery = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
@@ -182,6 +191,12 @@ std = [
     "log/std",
     "frame-try-runtime/std",
     "sp-npos-elections/std",
+    "currencies/std",
+    "orml-tokens/std",
+    "orml-traits/std",
+    "pallet-amm/std",
+    "pallet-farm/std",
+    "pallet-lbp/std",
 ]
 runtime-benchmarks = [
     "frame-benchmarking",
@@ -220,6 +235,9 @@ runtime-benchmarks = [
     "pallet-offences-benchmarking",
     "pallet-session-benchmarking",
     "frame-system-benchmarking",
+    "pallet-amm/frame-benchmarking",
+    "pallet-farm/frame-benchmarking",
+    'pallet-lbp/runtime-benchmarks',
     "hex-literal",
 ]
 try-runtime = [
