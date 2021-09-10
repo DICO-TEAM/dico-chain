@@ -32,6 +32,10 @@ pallet-amm      = { version = "1.0.0", default-features = false, path = '../../p
 pallet-farm     = { version = "1.0.0", default-features = false, path = '../../pallets/farm'}
 pallet-lbp      = { version = "1.0.0", default-features = false, path = '../../pallets/lbp'}
 
+# Local Dependencies
+pallet-template = { package = 'pallet-template', path = '../../pallets/template', default-features = false }
+pallet-kyc = { package = 'pallet-kyc', path = '../../pallets/kyc', default-features = false }
+
 
 
 # orml
