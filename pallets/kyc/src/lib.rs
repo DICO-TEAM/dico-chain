@@ -142,6 +142,11 @@ pub mod pallet {
 	#[pallet::getter(fn get_nonce)]
 	pub(super) type Nonce<T: Config> = StorageValue<_, u64, ValueQuery>;
 
+	/// area data of user account
+	#[pallet::storage]
+	#[pallet::getter(fn area_data)]
+	pub(super) type AreaData<T: Config> = StorageMap<_, Twox64Concat, AreaCode, u64, ValueQuery>;
+
 	/// kyc of account
 	#[pallet::storage]
 	#[pallet::getter(fn kyc)]
@@ -234,6 +239,8 @@ pub mod pallet {
 	pub enum Error<T> {
 		/// Nonce has overflowed past u64 limits
 		NonceOverflow,
+		/// Count Overflow
+		CountOverflow,
 		/// Account already exists
 		AccountExists,
 		/// Insufficient permissions
@@ -720,6 +727,14 @@ pub mod pallet {
 			})
 		}
 
+		fn increment_area_count(area: &AreaCode) -> DispatchResult {
+			<AreaData<T>>::try_mutate(area, |count| {
+				let next = count.checked_add(1).ok_or(Error::<T>::CountOverflow)?;
+				*count = next;
+				Ok(().into())
+			})
+		}
+
 		/// generate a random number for get random value
 		fn generate_random_number(seed: u64) -> u64 {
 			let (random_seed, _block_number) = T::Randomness::random(&(T::PalletId::get(), seed).encode()[..]);
@@ -990,6 +1005,10 @@ pub mod pallet {
 									element.3 = *authentication;
 								}
 							}
+
+							if kyc_fields == KYCFields::Area {
+								Self::increment_area_count(&registration.info.area)?;
+							}
 							<KYCOf<T>>::insert(&target, registration);
 
 							application.as_mut().map(|i| {
@@ -998,6 +1017,8 @@ pub mod pallet {
 							});
 						}
 					}
+
+
 					<ApplicationFormList<T>>::insert(target, app_list);
 					Self::update_record_list(&ias.1.account, target, &kyc_fields, Progress::Success);
 					Self::update_record_list(&supervisor.1.account, target, &kyc_fields, Progress::Success);
