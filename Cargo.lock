@@ -1639,7 +1639,7 @@ dependencies = [
 
 [[package]]
 name = "currencies"
-version = "3.0.0"
+version = "1.0.0"
 dependencies = [
  "dico-primitives",
  "frame-support",
@@ -4913,7 +4913,7 @@ dependencies = [
 
 [[package]]
 name = "orml-oracle"
-version = "3.0.0"
+version = "1.0.0"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5567,7 +5567,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-pricedao"
-version = "3.0.0"
+version = "1.0.0"
 dependencies = [
  "dico-primitives",
  "frame-benchmarking",

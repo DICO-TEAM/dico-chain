@@ -1,9 +1,9 @@
 [package]
 name        = 'pallet-pricedao'
 authors     = ["DICO-TEAM"]
-description = 'FRAME pallet template for defining custom runtime logic.'
+description = 'price dao.'
 license     = 'Apache 2.0'
-version     = '3.0.0'
+version     = '1.0.0'
 homepage    = 'https://github.com/DICO-TEAM/dico-chain'
 repository  = 'https://github.com/DICO-TEAM/dico-chain'
 edition     = '2018'
