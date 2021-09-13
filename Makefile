@@ -33,3 +33,8 @@ fix:
 .PHONY: dev
 dev:
 	./target/release/dico-dev --dev --ws-external
+
+# -------------------------------------git-------------------------------------
+.PHONY: diff
+diff:
+	git diff --name-only --diff-filter=U

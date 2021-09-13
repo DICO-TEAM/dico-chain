@@ -9,5 +9,12 @@
 
 </div>
 
+## Credits
 
+[ORML](https://github.com/open-web3-stack/open-runtime-module-library)
+
+
+## License
+
+The project is made available under the Apache2.0/MIT license. See the `LICENSE` file for more information.
 
