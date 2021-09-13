@@ -19,6 +19,7 @@
 
 use crate::{Authorship, Balances, NegativeImbalance};
 use frame_support::traits::{Currency, OnUnbalanced};
+use dico_primitives::{Price,Moment};
 
 pub struct Author;
 impl OnUnbalanced<NegativeImbalance> for Author {
@@ -26,3 +27,4 @@ impl OnUnbalanced<NegativeImbalance> for Author {
 		Balances::resolve_creating(&Authorship::author(), amount);
 	}
 }
+pub type TimeStampedPrice = orml_oracle::TimestampedValue<Price, Moment>;

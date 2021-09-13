@@ -5,12 +5,12 @@
 use codec::{Decode, Encode};
 use dico_primitives::{
 	constants::{currency::*, time::*},
-	AccountIndex, Balance, BlockNumber, Hash, Index, Moment, AssetId, Amount
+	AccountIndex, Balance, BlockNumber, Hash, Index, Moment, AssetId, Amount,CurrencyId, Price
 };
 use currencies::{BasicCurrencyAdapter};
 pub use dico_primitives::{AccountId, Signature};
 use frame_support::{
-	construct_runtime, parameter_types,
+	construct_runtime, parameter_types,PalletId,
 	traits::{
 		Currency, Imbalance, KeyOwnerProofSystem, LockIdentifier, MaxEncodedLen, OnUnbalanced, U128CurrencyToVote,
 	},
@@ -20,7 +20,7 @@ use frame_support::{
 	},
 	RuntimeDebug,
 };
-use frame_support::{traits::InstanceFilter, PalletId};
+use frame_support::{traits::InstanceFilter};
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
 	EnsureOneOf, EnsureRoot,
@@ -48,7 +48,7 @@ use sp_runtime::traits::{
 use sp_runtime::transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys, ApplyExtrinsicResult, FixedPointNumber, Perbill, Percent, Permill,
-	Perquintill,
+	Perquintill,DispatchResult,
 };
 use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended};
 use sp_std::prelude::*;
@@ -69,6 +69,7 @@ pub use sp_runtime::BuildStorage;
 /// Implementations of some helper traits passed into runtime modules as associated types.
 pub mod impls;
 use impls::Author;
+use impls::TimeStampedPrice;
 
 use sp_runtime::generic::Era;
 
@@ -79,6 +80,9 @@ pub use pallet_kyc;
 pub use pallet_amm;
 pub use pallet_farm;
 pub use pallet_lbp;
+pub use pallet_pricedao;
+
+
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]
@@ -1232,6 +1236,72 @@ impl pallet_kyc::Config for Runtime {
 	type WeightInfo = pallet_kyc::weights::SubstrateWeight<Runtime>;
 }
 
+// price data
+/// price
+parameter_types! {
+	pub const MaxOracleSize: u32 = 5;
+	pub const MinimumCount: u32 = 3;  // todo: The minimum number is 3
+	pub const ExpiresIn: Moment = 1000 * 60 * 60; // todo: 60 mins
+	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
+	pub const FeedPledgedBalance: Balance = 500 * DOLLARS;  // todo : pledge 500 dico?
+	pub const withdrawExpirationPeriod: BlockNumber = 10 * MINUTES;   // TODO: 5 * DAYS;
+}
+
+type DicoDataProvider = orml_oracle::Instance1;
+impl orml_oracle::Config<DicoDataProvider> for Runtime {
+	type Event = Event;
+	type OnNewData = ();
+	type CombineData = orml_oracle::DefaultCombineData<Runtime, MinimumCount, ExpiresIn, DicoDataProvider>;
+	type Time = Timestamp;
+	type OracleKey = CurrencyId;
+	type OracleValue = Price;
+	type MaxOracleSize = MaxOracleSize;
+	type RootOperatorAccountId = ZeroAccountId;
+	type WeightInfo = ();  //todo
+}
+
+
+create_median_value_data_provider!(
+	AggregatedDataProvider,
+	CurrencyId,
+	Price,
+	TimeStampedPrice,
+	[DicoOracle]
+);
+
+// Aggregated data provider cannot feed.
+impl DataFeeder<CurrencyId, Price, AccountId> for AggregatedDataProvider {
+	fn feed_value(_: AccountId, _: CurrencyId, _: Price) -> DispatchResult {
+		Err("Not supported".into())
+	}
+}
+
+parameter_types! {
+	pub const DicoTreasuryModuleId: PalletId = PalletId(*b"dico/trs");   // todo: modify name
+}
+
+type EnsureRootOrTwoThirdsGeneralCouncil = EnsureOneOf<
+	AccountId,
+	EnsureRoot<AccountId>,
+	pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>,
+>;
+
+impl pallet_pricedao::Config<pallet_pricedao::Instance1> for Runtime {
+	type Event = Event;
+	type Source = AggregatedDataProvider;
+	type FeedOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
+	type MembershipInitialized = DicoOracle;
+	type DicoTreasuryModuleId = DicoTreasuryModuleId;
+	type Currency = Balances;
+	type PledgedBalance = FeedPledgedBalance;
+	type WithdrawExpirationPeriod = withdrawExpirationPeriod;
+	type WeightInfo = pallet_pricedao::weights::PriceWeight<Runtime>;
+}
+
+
+
+
+
 
 construct_runtime!(
 	pub enum Runtime where
@@ -1284,12 +1354,14 @@ construct_runtime!(
 		// ORML related modules
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
 		Currencies: currencies::{Pallet, Event<T>, Call, Storage},
+		DicoOracle: orml_oracle::<Instance1>::{Pallet, Storage, Call, Event<T>},
 
 		// dico-chain related modules
 		AMM: pallet_amm::{Pallet, Call, Storage, Event<T>},
 		Farm: pallet_farm::{Pallet, Call, Storage, Event<T>},
 		LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>},
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>},
+		PriceDao: pallet_pricedao::<Instance1>::{Pallet, Call, Storage, Event<T>},
 	}
 );
 

@@ -51,3 +51,42 @@ impl  WeightInfo for () {
 
 
 }
+
+pub struct PriceWeight<T>(PhantomData<T>);
+impl<T: frame_system::Config> WeightInfo for PriceWeight<T> {
+    fn lock_price() -> Weight {
+        (70_000_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(11 as Weight))
+            .saturating_add(T::DbWeight::get().writes(3 as Weight))
+    }
+
+    fn unlock_price() -> Weight {
+        (12_000_000 as Weight)
+            .saturating_add(T::DbWeight::get().writes(1 as Weight))
+    }
+
+    fn del_feed_account(c: u32) -> Weight {
+        (12_000_000 as Weight)
+            .saturating_add(T::DbWeight::get().writes(1 as Weight).saturating_mul(c as Weight))
+    }
+
+    fn insert_feed_account(c: u32) -> Weight {
+        (10_000_000 as Weight)
+            .saturating_add(T::DbWeight::get().writes(1 as Weight).saturating_mul(c as Weight))
+    }
+
+    fn exit_feed() -> Weight {
+        (70_000_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(11 as Weight))
+            .saturating_add(T::DbWeight::get().writes(3 as Weight))
+    }
+
+    fn withdraw() -> Weight {
+        (70_000_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(11 as Weight))
+            .saturating_add(T::DbWeight::get().writes(3 as Weight))
+    }
+
+
+}
+

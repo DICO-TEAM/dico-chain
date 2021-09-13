@@ -89,32 +89,32 @@ pub mod module {
 	#[pallet::getter(fn deposit_balance)]
 	pub type DepositBalance<T: Config<I>, I: 'static = ()> = StorageMap<_, Twox64Concat, T::AccountId, DepositBalanceInfo<BalanceOf<T,I>, T::BlockNumber>>;
 
-	#[pallet::genesis_config]
-	pub struct GenesisConfig<T: Config<I>, I: 'static = ()> {
-		pub members: Vec<T::AccountId>,
-		pub phantom: sp_std::marker::PhantomData<I>,
-	}
-
-	#[cfg(feature = "std")]
-	impl<T: Config<I>, I: 'static> Default for GenesisConfig<T, I> {
-		fn default() -> Self {
-			GenesisConfig {
-				members: Default::default(),
-				phantom: Default::default(),
-			}
-		}
-	}
-
-	#[pallet::genesis_build]
-	impl<T: Config<I>, I: 'static> GenesisBuild<T, I> for GenesisConfig<T, I> {
-		fn build(&self) {
-			// <Members<T, I>>::put(self.members.clone());
-			let mut members = self.members.clone();
-			members.sort();
-			T::MembershipInitialized::initialize_members(members.clone());
-			<Members<T, I>>::put(members);
-		}
-	}
+	// #[pallet::genesis_config]
+	// pub struct GenesisConfig<T: Config<I>, I: 'static = ()> {
+	// 	pub members: Vec<T::AccountId>,
+	// 	pub phantom: sp_std::marker::PhantomData<I>,
+	// }
+	//
+	// #[cfg(feature = "std")]
+	// impl<T: Config<I>, I: 'static> Default for GenesisConfig<T, I> {
+	// 	fn default() -> Self {
+	// 		GenesisConfig {
+	// 			members: Default::default(),
+	// 			phantom: Default::default(),
+	// 		}
+	// 	}
+	// }
+	//
+	// #[pallet::genesis_build]
+	// impl<T: Config<I>, I: 'static> GenesisBuild<T, I> for GenesisConfig<T, I> {
+	// 	fn build(&self) {
+	// 		// <Members<T, I>>::put(self.members.clone());
+	// 		let mut members = self.members.clone();
+	// 		members.sort();
+	// 		T::MembershipInitialized::initialize_members(members.clone());
+	// 		<Members<T, I>>::put(members);
+	// 	}
+	// }
 
 	#[pallet::pallet]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
@@ -215,7 +215,8 @@ pub mod module {
 		pub fn withdraw(origin: OriginFor<T>) -> DispatchResultWithPostInfo{
 			// withdraw owner ledge
 			let feeder = ensure_signed(origin.clone())?;
-			Self::do_withdraw(feeder)?;
+			Self::do_withdraw(&feeder)?;
+			T::MembershipInitialized::del_members(&[feeder]);
 			Ok(().into())
 		}
 
@@ -281,9 +282,9 @@ impl<T: Config<I>, I: 'static> Pallet<T, I>  {
 		}
 	}
 
-	fn do_withdraw(who: T::AccountId) -> DispatchResult{
+	fn do_withdraw(who: &T::AccountId) -> DispatchResult{
 		let now = system::Pallet::<T>::block_number();
-		let balance_info: Option<DepositBalanceInfo<_, _>> = <DepositBalance<T, I>>::get(&who);
+		let balance_info: Option<DepositBalanceInfo<_, _>> = <DepositBalance<T, I>>::get(who);
 		let info = match balance_info{
 			Some(balance_info) => {
 				if balance_info.expiration.is_zero(){ // is zero
@@ -295,9 +296,9 @@ impl<T: Config<I>, I: 'static> Pallet<T, I>  {
 				balance_info},
 			_ => return Err(Error::<T,I>::NoneValue)?,
 		};
-		T::Currency::unreserve(&who,info.amount);
+		T::Currency::unreserve(who,info.amount);
 		// delete DepositBalanceInfo
-		<DepositBalance<T, I>>::remove(&who);
+		<DepositBalance<T, I>>::remove(who);
 		return Ok(());
 	}
 }
