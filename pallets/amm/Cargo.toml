@@ -28,7 +28,8 @@ orml-tokens = { default-features = false, git = "https://github.com/open-web3-st
 
 
 # local
-dico-primitives = { path = "../../primitives", default-features = false, version = "1.0.0" }
+dico-primitives = { package = "dico-primitives", path = "../../primitives", default-features = false }
+dico-currencies = { package = "currencies", path = "../currencies", default-features = false }
 
 
 # frame dependencies
@@ -43,7 +44,9 @@ sp-std     = { git = 'https://github.com/paritytech/substrate.git', branch = 'po
 sp-runtime = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 
 [dev-dependencies]
-sp-io = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+sp-io           = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-balances = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+
 
 [features]
 default = ['std']

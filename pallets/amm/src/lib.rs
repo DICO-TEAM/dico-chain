@@ -27,6 +27,7 @@ use codec::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 
 use orml_traits::{MultiCurrency, MultiCurrencyExtended};
+use dico_currencies::{DicoAssetMetadata};
 
 mod math;
 mod benchmarking;
@@ -50,18 +51,14 @@ impl Pair {
 	}
 }
 
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
+#[derive(Encode, Decode, Eq, PartialEq, Copy, Default, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct LiquidityInfo(pub Balance, pub Balance, pub AssetId);
 
-impl Default for LiquidityInfo {
-	fn default() -> Self {
-		Self(0, 0, 0)
-	}
-}
-
 // Re-export pallet items so that they can be accessed from the crate namespace.
 pub use pallet::*;
+use dico_currencies::currencies_trait::CurrenciesHandler;
+use crate::math::LIQUIDITY_DECIMALS;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -74,7 +71,7 @@ pub mod pallet {
 	impl<T: Config> Hooks<T::BlockNumber> for Pallet<T> {}
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config {
+	pub trait Config: frame_system::Config + dico_currencies::Config {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
 		/// Multi currency for transfer of currencies
@@ -121,6 +118,8 @@ pub mod pallet {
 		NoLiquidityIdAvailable,
 		/// The liquidity pool does not exist.
 		LiquidityNotFind,
+		/// The asset metadata is invalid.
+		AssetMetadataInvalid,
 	}
 
 	#[pallet::event]
@@ -149,21 +148,6 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		#[transactional]
-		pub fn deposit_asset(
-			origin: OriginFor<T>,
-			asset_id: AssetId,
-			amount: Balance,
-		) -> DispatchResultWithPostInfo {
-			let who = ensure_signed(origin)?;
-			T::Currency::deposit(asset_id, &who, amount)?;
-
-			Self::deposit_event(Event::AssetDeposited(who, asset_id, amount));
-
-			Ok(().into())
-		}
-
 		/// Add liquidity to previously created asset pair pool.
 		///
 		/// Emits `LiquidityAdded` event when successful.
@@ -205,7 +189,7 @@ pub mod pallet {
 			let module_account_id = Self::account_id();
 
 			if liquidity_id.is_zero() {
-				*liquidity_id = Self::get_next_liquidity_id()?;
+				*liquidity_id = Self::create_liquidity_asset(asset_a, asset_b)?;
 			}
 
 			let new_liquidity_id = *liquidity_id;
@@ -214,7 +198,7 @@ pub mod pallet {
 
 			if total_liquidity.is_zero() {
 				// permanently lock the first MINIMUM_LIQUIDITY assets
-				T::Currency::deposit(*liquidity_id, &module_account_id, math::DEFAULT_MINIMUM_LIQUIDITY)?;
+				T::Currency::deposit(*liquidity_id, &module_account_id, math::MINIMUM_LIQUIDITY)?;
 			}
 
 			let add_liquidity = math::calc_liquidity_add(
@@ -223,7 +207,7 @@ pub mod pallet {
 				to_u256!(amount_a),
 				to_u256!(amount_b),
 				to_u256!(total_liquidity),
-				to_u256!(math::DEFAULT_MINIMUM_LIQUIDITY),
+				to_u256!(math::MINIMUM_LIQUIDITY),
 			)?;
 			let add_liquidity = to_balance!(add_liquidity)?;
 
@@ -413,6 +397,51 @@ pub mod pallet {
 impl<T: Config> Pallet<T> {
 	fn account_id() -> T::AccountId {
 		T::PalletId::get().into_account()
+	}
+
+	fn create_liquidity_asset(
+		asset_a: AssetId,
+		asset_b: AssetId,
+	) -> sp_std::result::Result<AssetId, DispatchErrorWithPostInfo> {
+		let asset_a_metadata = dico_currencies::module::Pallet::<T>::get_metadata(asset_a)?;
+		let asset_b_metadata = dico_currencies::module::Pallet::<T>::get_metadata(asset_b)?;
+
+		ensure!(
+			!asset_a_metadata.name.is_empty()
+			&& !asset_a_metadata.symbol.is_empty()
+			&& !asset_b_metadata.name.is_empty()
+			&& !asset_b_metadata.symbol.is_empty(),
+			Error::<T>::AssetMetadataInvalid
+		);
+
+		let mut liquidity_symbol = "a".as_bytes().to_vec();
+		liquidity_symbol.extend(asset_a_metadata.symbol.clone());
+		liquidity_symbol.extend(asset_b_metadata.symbol.clone());
+
+		let mut liquidity_name = "Amm ".as_bytes().to_vec();
+		liquidity_name.extend(liquidity_symbol.clone());
+
+		let module_account_id = Self::account_id();
+		let new_liquidity_id = Self::get_next_liquidity_id()?;
+		let amount =
+			<<T as dico_currencies::Config>::MultiCurrency as
+			orml_traits::MultiCurrency<<T as frame_system::Config>::AccountId>>::Balance::from(0u32);
+
+		let liquidity_metadata = DicoAssetMetadata {
+			name: liquidity_name,
+			symbol: liquidity_symbol,
+			decimals: LIQUIDITY_DECIMALS,
+		};
+
+		dico_currencies::module::Pallet::<T>::do_create(
+			module_account_id,
+			new_liquidity_id,
+			Some(liquidity_metadata),
+			amount,
+			true,
+		)?;
+
+		Ok(new_liquidity_id)
 	}
 
 	fn get_next_liquidity_id() -> sp_std::result::Result<AssetId, DispatchErrorWithPostInfo> {

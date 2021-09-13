@@ -4984,6 +4984,7 @@ dependencies = [
 name = "pallet-amm"
 version = "1.0.0"
 dependencies = [
+ "currencies",
  "dico-primitives",
  "frame-benchmarking",
  "frame-support",
@@ -4991,6 +4992,7 @@ dependencies = [
  "frame-system-benchmarking",
  "orml-tokens",
  "orml-traits",
+ "pallet-balances",
  "parity-scale-codec",
  "primitive-types 0.10.1",
  "serde",

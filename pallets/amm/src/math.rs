@@ -9,7 +9,8 @@ use frame_support::ensure;
 #[cfg(test)]
 pub const TEST_DECIMAL: u128 = 10_000_000_000u128;
 
-pub const DEFAULT_MINIMUM_LIQUIDITY: u128 = 1000u128;
+pub const MINIMUM_LIQUIDITY: u128 = 1000u128;
+pub const LIQUIDITY_DECIMALS: u8 = 10;
 
 /// Given a certain amount of asset A and a trading pair reserve,
 /// return an equal amount of other asset B.
