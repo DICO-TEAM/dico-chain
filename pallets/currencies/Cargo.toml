@@ -1,8 +1,12 @@
 [package]
-name = "currencies"
-version = "3.0.0"
-edition = "2018"
-authors = ["wetalice <wetalice@protonmail.com>"]
+name        = 'currencies'
+authors     = ["DICO-TEAM"]
+description = 'currencies'
+license     = 'Apache 2.0'
+version     = '1.0.0'
+homepage    = 'https://github.com/DICO-TEAM/dico-chain'
+repository  = 'https://github.com/DICO-TEAM/dico-chain'
+edition     = '2018'
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 frame-support = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
