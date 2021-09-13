@@ -28,7 +28,8 @@ orml-tokens = { default-features = false, git = "https://github.com/open-web3-st
 
 
 # local
-dico-primitives = { path = "../../primitives", default-features = false, version = "1.0.0" }
+dico-primitives = { package = "dico-primitives", path = "../../primitives", default-features = false }
+dico-currencies = { package = "currencies", path = "../currencies", default-features = false }
 
 
 # frame dependencies
