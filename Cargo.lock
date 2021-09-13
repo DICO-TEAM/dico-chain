@@ -4990,6 +4990,7 @@ dependencies = [
  "frame-system-benchmarking",
  "orml-tokens",
  "orml-traits",
+ "pallet-balances",
  "parity-scale-codec",
  "primitive-types 0.10.1",
  "serde",

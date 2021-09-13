@@ -9,7 +9,7 @@ pub use crate::mock::{
 	DEFAULT_ASSET_AMOUNT,
 };
 use frame_support::{assert_ok};
-
+use dico_currencies::DicoAssetMetadata;
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut ext = ExtBuilder::default().build();
@@ -31,9 +31,40 @@ fn expect_events(e: Vec<TestEvent>) {
 	assert_eq!(last_events(e.len()), e);
 }
 
+fn preset_conditions() {
+	assert_ok!(
+		Currency::create_asset(Origin::signed(ALICE), DOT, DEFAULT_ASSET_AMOUNT, Some(
+			DicoAssetMetadata{
+			name: "Polkadot".into(),
+			symbol: "DOT".into(),
+			decimals: 10
+		}))
+	);
+	assert_ok!(
+		Currency::create_asset(Origin::signed(ALICE), USDT, DEFAULT_ASSET_AMOUNT, Some(DicoAssetMetadata {
+			name: "Tether USDT".into(),
+			symbol: "USDT".into(),
+			decimals: 10
+		}))
+	);
+	assert_ok!(
+		Currency::create_asset(Origin::signed(ALICE), DICO, DEFAULT_ASSET_AMOUNT, Some(DicoAssetMetadata {
+			name: "Distributed ICO".into(),
+			symbol: "DICO".into(),
+			decimals: 10
+		}))
+	);
+
+	assert_ok!(Currency::deposit(DOT, &BOB, DEFAULT_ASSET_AMOUNT));
+	assert_ok!(Currency::deposit(USDT, &BOB, DEFAULT_ASSET_AMOUNT));
+	assert_ok!(Currency::deposit(DICO, &BOB, DEFAULT_ASSET_AMOUNT));
+}
+
 #[test]
 fn add_liquidity_should_work() {
 	new_test_ext().execute_with(|| {
+		preset_conditions();
+
 		let asset_a = DICO;
 		let asset_b = USDT;
 		assert_ok!(AMM::add_liquidity(
@@ -98,6 +129,8 @@ fn add_liquidity_should_work() {
 #[test]
 fn remove_liquidity_should_work() {
 	new_test_ext().execute_with(|| {
+		preset_conditions();
+
 		let asset_a = DICO;
 		let asset_b = USDT;
 		assert_ok!(AMM::add_liquidity(
@@ -144,6 +177,8 @@ fn remove_liquidity_should_work() {
 #[test]
 fn swap_exact_assets_for_assets_should_work() {
 	new_test_ext().execute_with(|| {
+		preset_conditions();
+
 		let asset_a = DICO;
 		let asset_b = USDT;
 		assert_ok!(AMM::add_liquidity(
@@ -187,6 +222,8 @@ fn swap_exact_assets_for_assets_should_work() {
 #[test]
 fn swap_exact_assets_for_assets_2_should_work() {
 	new_test_ext().execute_with(|| {
+		preset_conditions();
+
 		assert_ok!(AMM::add_liquidity(
 			Origin::signed(ALICE),
 			DICO,
@@ -234,7 +271,7 @@ fn swap_exact_assets_for_assets_2_should_work() {
 		let pair = AMM::pair_for(DOT, USDT);
 		assert_eq!(
 			Liquidity::<Test>::get(pair).unwrap(),
-			LiquidityInfo(100_000_000_000_000-1775681666676, 500_000_000_000_000 + 9066108938801, 20000001)
+			LiquidityInfo(100_000_000_000_000 - 1775681666676, 500_000_000_000_000 + 9066108938801, 20000001)
 		);
 
 
@@ -246,6 +283,8 @@ fn swap_exact_assets_for_assets_2_should_work() {
 #[test]
 fn swap_assets_for_exact_assets_should_work() {
 	new_test_ext().execute_with(|| {
+		preset_conditions();
+
 		let asset_a = DICO;
 		let asset_b = USDT;
 		assert_ok!(AMM::add_liquidity(
@@ -289,6 +328,8 @@ fn swap_assets_for_exact_assets_should_work() {
 #[test]
 fn swap_assets_for_exact_assets2_should_work() {
 	new_test_ext().execute_with(|| {
+		preset_conditions();
+
 		assert_ok!(AMM::add_liquidity(
 			Origin::signed(ALICE),
 			DICO,
@@ -336,7 +377,7 @@ fn swap_assets_for_exact_assets2_should_work() {
 		let pair = AMM::pair_for(DOT, USDT);
 		assert_eq!(
 			Liquidity::<Test>::get(pair).unwrap(),
-			LiquidityInfo(100_000_000_000_000-1775681666676, 500_000_000_000_000 + 9066108938801, 20000001)
+			LiquidityInfo(100_000_000_000_000 - 1775681666676, 500_000_000_000_000 + 9066108938801, 20000001)
 		);
 
 		expect_events(vec![Event::Swapped(BOB, vec![DICO, USDT, DOT],
