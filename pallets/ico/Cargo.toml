@@ -1,0 +1,49 @@
+[package]
+name = "ico"
+version = "1.0.0"
+authors = ["barbara <dicobarbara@protonmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+primitive-types = { version = "0.9.1", default-features = false}
+
+frame-support   = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
+frame-system    = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
+sp-runtime      = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
+sp-std          = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
+codec           = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
+sp-core         = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
+sp-io           = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
+pallet-balances = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
+
+# orml
+orml-traits = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
+orml-tokens = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
+
+# local
+currencies      = { path = '../currencies', default-features = false, version = '1.0.0'}
+pallet-kyc      = { path = "../kyc", default-features = false,  version = "1.0.0"}
+dico-primitives = { path = "../../primitives", default-features = false,  version = "1.0.0"}
+dico-treasury   = { path = "../treasury", default-features = false,  version = "1.0.0" }
+
+
+[features]
+default = ['std']
+std = [
+    "frame-support/std",
+    "frame-system/std",
+    "sp-runtime/std",
+    "sp-std/std",
+    "codec/std",
+    "orml-traits/std",
+    "orml-tokens/std",
+    "currencies/std",
+    "pallet-kyc/std",
+    "sp-core/std",
+    "pallet-balances/std",
+    "primitive-types/std",
+    "dico-primitives/std",
+    "dico-treasury/std",
+]
