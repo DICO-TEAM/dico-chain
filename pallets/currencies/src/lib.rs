@@ -98,8 +98,8 @@ pub struct DicoAssetMetadata {
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, Default, RuntimeDebug)]
 pub struct DicoAssetInfo<AccountId, DicoAssetMetadata> {
-	owner: AccountId,
-	metadata: Option<DicoAssetMetadata>,
+	pub owner: AccountId,
+	pub metadata: Option<DicoAssetMetadata>,
 }
 
 #[frame_support::pallet]
@@ -171,6 +171,7 @@ pub mod module {
 	}
 
 	#[pallet::storage]
+	#[pallet::getter(fn asset_info)]
 	/// Metadata of an asset.
 	pub(super) type DicoAssetsInfo<T: Config> =
 	StorageMap<_, Blake2_128Concat, AssetId, DicoAssetInfo<T::AccountId, DicoAssetMetadata>>;
@@ -189,9 +190,10 @@ pub mod module {
 			origin: OriginFor<T>,
 			currency_id: AssetId,
 			amount: BalanceOf<T>,
+			metadata: Option<DicoAssetMetadata>,
 		) -> DispatchResultWithPostInfo {
 			let user = ensure_signed(origin)?;
-			Self::do_create(user.clone(), currency_id, amount, false)?;
+			Self::do_create(user.clone(), currency_id, metadata, amount, false)?;
 
 			Self::deposit_event(Event::CreateAsset(user.clone(), currency_id, amount));
 			Ok(().into())
@@ -218,17 +220,14 @@ pub mod module {
 
 			let mut asset_info = DicoAssetsInfo::<T>::get(currency_id).ok_or(Error::<T>::AssetNotExists)?;
 
-			ensure!(user.clone() == asset_info.owner, Error::<T>::NotOwner);
+			ensure!(user == asset_info.owner, Error::<T>::NotOwner);
 
-			if asset_info.metadata.is_some() {
-				ensure!(
-					asset_info.clone().metadata.unwrap() != metadata,
-					Error::<T>::MetadataNotChange
-				);
-				ensure!(
-					asset_info.metadata.clone().unwrap().decimals == metadata.decimals,
-					Error::<T>::ShouldNotChangeDecimals
-				);
+			match asset_info.metadata.as_ref() {
+				Some(x) => {
+					ensure!(x != &metadata, Error::<T>::MetadataNotChange);
+					ensure!(x.decimals == metadata.decimals, Error::<T>::ShouldNotChangeDecimals);
+				},
+				None => {},
 			}
 
 			asset_info.metadata = Some(metadata.clone());
@@ -323,14 +322,13 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 			});
 		}
 		let mut asset_info = DicoAssetsInfo::<T>::get(currency_id).ok_or(Error::<T>::AssetNotExists)?;
-		if asset_info.metadata.is_some() {
-			Ok(asset_info.metadata.unwrap())
-		} else {
-			Err(Error::<T>::MetadataNotExists)?
+		match asset_info.metadata {
+			Some(x) => Ok(x),
+			None => Err(Error::<T>::MetadataNotExists)?,
 		}
 	}
 
-	fn do_create(user: T::AccountId, currency_id: AssetId, amount: BalanceOf<T>, is_swap_deposit: bool) -> DispatchResult {
+	fn do_create(user: T::AccountId, currency_id: AssetId, metadata: Option<DicoAssetMetadata>, amount: BalanceOf<T>, is_swap_deposit: bool) -> DispatchResult {
 		ensure!(
 			!Self::is_exists_metadata(currency_id)
 				&& T::MultiCurrency::total_issuance(currency_id) == BalanceOf::<T>::from(0u32),
@@ -349,7 +347,7 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 			currency_id,
 			DicoAssetInfo {
 				owner: user.clone(),
-				metadata: None,
+				metadata: metadata,
 			},
 		);
 
@@ -362,18 +360,15 @@ impl<T: Config> Pallet<T> {
 		if currency_id == T::GetNativeCurrencyId::get() {
 			return true;
 		}
-
-		let mut asset_info_opt = DicoAssetsInfo::<T>::get(currency_id);
-		if asset_info_opt.is_some() {
-			let asset_info = asset_info_opt.unwrap();
-			if asset_info.metadata.is_some() {
-				true
-			} else {
-				false
-			}
-		} else {
-			false
+		match DicoAssetsInfo::<T>::get(currency_id).as_ref() {
+			Some(x) => {
+				if x.metadata.is_some() {
+					return true;
+				}
+			},
+			None => {},
 		}
+		false
 	}
 
 	fn is_currency_id_too_large(currency_id: AssetId) -> bool {
