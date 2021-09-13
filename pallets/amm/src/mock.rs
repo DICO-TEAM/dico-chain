@@ -10,7 +10,8 @@ use orml_traits::parameter_type_with_key;
 use sp_core::{H256};
 use sp_runtime::{testing::Header, traits::{BlakeTwo256, IdentityLookup, Zero}};
 use frame_support::traits::GenesisBuild;
-use dico_primitives::{AssetId, Balance};
+use dico_primitives::{AssetId, Balance, BlockNumber};
+use dico_currencies::BasicCurrencyAdapter;
 
 pub type Amount = i128;
 pub type AccountId = u64;
@@ -34,7 +35,9 @@ frame_support::construct_runtime!(
 	 {
 		 System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
 		 AMM: amm::{Pallet, Call, Storage, Event<T>},
-		 Currency: orml_tokens::{Pallet, Event<T>},
+		 Tokens: orml_tokens::{Pallet, Event<T>},
+		 Currency: dico_currencies::{Pallet, Event<T>, Call, Storage},
+		 Balances: pallet_balances::{Pallet, Event<T>},
 	 }
 );
 
@@ -63,12 +66,24 @@ impl system::Config for Test {
 	type DbWeight = ();
 	type Version = ();
 	type PalletInfo = PalletInfo;
-	type AccountData = ();
+	type AccountData = pallet_balances::AccountData<Balance>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
+}
+
+impl pallet_balances::Config for Test {
+	type MaxLocks = ();
+	type MaxReserves = ();
+	type Balance = Balance;
+	type Event = Event;
+	type DustRemoval = ();
+	type ExistentialDeposit = ();
+	type AccountStore = frame_system::Pallet<Test>;
+	type WeightInfo = ();
+	type ReserveIdentifier = ();
 }
 
 parameter_type_with_key! {
@@ -88,6 +103,20 @@ impl orml_tokens::Config for Test {
 	type OnDust = ();
 	type MaxLocks = ();
 	type DustRemovalWhitelist = ();
+}
+
+parameter_types! {
+	pub const CreateConsume: Balance = 0;
+	pub const DICOAssetId: AssetId = 0;
+}
+
+impl dico_currencies::Config for Test {
+	type Event = Event;
+	type MultiCurrency = Tokens;
+	type NativeCurrency = BasicCurrencyAdapter<Test, Balances, Amount, BlockNumber>;
+	type GetNativeCurrencyId = DICOAssetId;
+	type WeightInfo = ();
+	type CreateConsume = CreateConsume;
 }
 
 
@@ -110,12 +139,12 @@ impl Default for ExtBuilder {
 	fn default() -> Self {
 		Self {
 			endowed_accounts: vec![
-				(ALICE, DICO, DEFAULT_ASSET_AMOUNT),
-				(BOB, DICO, DEFAULT_ASSET_AMOUNT),
-				(ALICE, USDT, DEFAULT_ASSET_AMOUNT),
-				(BOB, USDT, DEFAULT_ASSET_AMOUNT),
-				(ALICE, DOT, DEFAULT_ASSET_AMOUNT),
-				(BOB, DOT, DEFAULT_ASSET_AMOUNT),
+				// (ALICE, DICO, DEFAULT_ASSET_AMOUNT),
+				// (BOB, DICO, DEFAULT_ASSET_AMOUNT),
+				// (ALICE, USDT, DEFAULT_ASSET_AMOUNT),
+				// (BOB, USDT, DEFAULT_ASSET_AMOUNT),
+				// (ALICE, DOT, DEFAULT_ASSET_AMOUNT),
+				// (BOB, DOT, DEFAULT_ASSET_AMOUNT),
 			],
 		}
 	}
