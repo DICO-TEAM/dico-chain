@@ -30,7 +30,6 @@ dico-primitives = { package = 'dico-primitives', default-features = false, path 
 
 
 # Local Dependencies
-currencies      = { package = 'currencies', default-features = false, path = "../../pallets/currencies"}
 orml-oracle     = { package = 'orml-oracle', default-features = false,path = '../../pallets/orml-oracle'}
 pallet-pricedao = { package = 'pallet-pricedao', default-features = false,path = '../../pallets/pricedao'}
 pallet-amm      = { package = 'pallet-amm',default-features = false, path = '../../pallets/amm'}
@@ -38,6 +37,10 @@ pallet-farm     = { package = 'pallet-farm',default-features = false, path = '..
 pallet-lbp      = { package = 'pallet-lbp', default-features = false, path = '../../pallets/lbp'}
 pallet-kyc      = { package = 'pallet-kyc', default-features = false , path = '../../pallets/kyc'}
 pallet-template = { package = 'pallet-template', default-features = false , path = '../../pallets/template'}
+currencies      = { version = "1.0.0", default-features = false, path = "../../pallets/currencies"}
+ico             = { version = "1.0.0", path = "../../pallets/ico", default-features = false}
+dao             = { path = "../../pallets/dao", version = "1.0.0", default-features = false}
+dico-treasury   = { path = "../../pallets/treasury", version = "1.0.0", default-features = false}
 
 
 
@@ -202,6 +205,10 @@ std = [
     "pallet-lbp/std",
     "pallet-pricedao/std",
     "orml-oracle/std",
+	"currencies/std",
+	"ico/std",
+	"dao/std",
+	"dico-treasury/std",
 ]
 runtime-benchmarks = [
     "frame-benchmarking",
