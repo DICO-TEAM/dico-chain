@@ -199,7 +199,7 @@ pub mod module {
 			Ok(().into())
 		}
 
-		#[pallet::weight((<T as Config<I>>::WeightInfo::withdraw(), DispatchClass::Operational))]
+		#[pallet::weight((<T as Config<I>>::WeightInfo::get_price(), DispatchClass::Operational))]
 		pub fn get_price(origin: OriginFor<T>,currency_id1: CurrencyId, currency_id2: CurrencyId) -> DispatchResultWithPostInfo {
 			let price = <Self as PriceProvider<CurrencyId>>::get_price_from_swap(currency_id1,currency_id2)?;
 			Self::deposit_event(Event::GetPrice(currency_id1,price));
@@ -290,6 +290,8 @@ impl<T: Config<I>, I: 'static> Pallet<T, I>  {
 impl<T: Config<I>, I: 'static> PriceProvider<CurrencyId> for Pallet<T, I> {
 	type Price = Price;
 	fn get_price_from_swap(currency_id1: CurrencyId, currency_id2: CurrencyId) -> sp_std::result::Result<U256, ArithmeticError>{
+		// currency_id1: the queried currency
+		// currency_id2: stable coin's currency id,such as usdt
 		let liquidity = pallet_amm::Pallet::<T>::get_liquidity(Pair::new(currency_id1,currency_id2)).ok_or(ArithmeticError::DivisionByZero)?;
 		if currency_id1 < currency_id2 {
 			pallet_amm::math::get_amount_out(U256::from(1),U256::from(liquidity.0),U256::from(liquidity.1))
