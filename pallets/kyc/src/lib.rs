@@ -59,7 +59,7 @@ mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
-mod types;
+pub mod types;
 pub mod weights;
 
 #[frame_support::pallet]

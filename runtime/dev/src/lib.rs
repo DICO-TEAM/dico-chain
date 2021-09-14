@@ -7,7 +7,7 @@ use dico_primitives::{
 	constants::{currency::*, time::*},
 	AccountIndex, Balance, BlockNumber, Hash, Index, Moment, AssetId, Amount,CurrencyId, Price
 };
-use currencies::{BasicCurrencyAdapter};
+use pallet_currencies::{BasicCurrencyAdapter};
 pub use dico_primitives::{AccountId, Signature};
 use frame_support::{
 	construct_runtime, parameter_types,PalletId,
@@ -1155,7 +1155,7 @@ parameter_types! {
 	pub const DICOAssetId: AssetId = 0;
 }
 
-impl currencies::Config for Runtime {
+impl pallet_currencies::Config for Runtime {
 	type Event = Event;
 	type MultiCurrency = Tokens;
 
@@ -1299,6 +1299,88 @@ impl pallet_pricedao::Config<pallet_pricedao::Instance1> for Runtime {
 }
 
 
+parameter_types! {
+	pub const InitiatorPledge: Balance = 100 * DOLLARS;
+	pub const RequestPledge: Balance = 300 * DOLLARS;
+	pub const RequestExpire: BlockNumber = 5 * DAYS;
+	pub const MinProportion: Percent = Percent::from_percent(0u8);
+	pub const IcoTotalReward: Balance = 20_0000_0000 * DOLLARS;
+	pub const InitiatorBond: Percent = Percent::from_percent(1u8);
+	pub const TerminateProtectPeriod: Percent = Percent::from_percent(33);
+	pub const ReleaseProtectPeriod: Percent = Percent::from_percent(33);
+	pub const ChillDuration: BlockNumber = 10 * MINUTES;
+	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
+	pub const InviteeRewardProportion: Percent = Percent::from_percent(5u8);
+
+}
+
+impl pallet_ico::Config for Runtime {
+	type Event = Event;
+	type PermitIcoOrigin = pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>;
+	type RejectIcoOrigin = pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>;
+	type PermitReleaseOrigin = pallet_dao::EnsureProportionAtLeast<Runtime, _1, _2, AccountId>;
+	type TerminateIcoOrigin = pallet_dao::EnsureProportionAtLeast<Runtime, _1, _2, AccountId>;
+	type OnSlash = ();
+	type MultiCurrency = Currencies;
+	type NativeCurrency = Balances;
+	type GetNativeCurrencyId = DICOAssetId;
+	type InitiatorPledge = InitiatorPledge;
+	type RequestPledge = RequestPledge;
+	type RequestExpire = RequestExpire;
+	// type NativeMultiple = NativeMultiple;
+	type CurrenciesHandler = Currencies;
+	type IcoTotalReward = IcoTotalReward;
+	type DicoTreasuryHandler = DicoTreasury;
+	type InitiatorBond = InitiatorBond;
+	type TerminateProtectPeriod = TerminateProtectPeriod;
+	type ReleaseProtectPeriod = ReleaseProtectPeriod;
+	type ChillDuration = ChillDuration;
+	type InviterRewardProportion = InviterRewardProportion;
+	type InviteeRewardProportion = InviteeRewardProportion;
+}
+
+parameter_types! {
+	pub const DicoMotionDuration: BlockNumber = 5 * DAYS;
+	pub const DicoMaxProposals: u32 = 100;
+}
+
+impl pallet_dao::Config for Runtime {
+	type Origin = Origin;
+	type Proposal = Call;
+	type Event = Event;
+	type MotionDuration = DicoMotionDuration;
+	type MaxProposals = DicoMaxProposals;
+	type WeightInfo = ();
+	type IcoHandler = Ico;
+}
+
+parameter_types! {
+	pub const DicoProposalBond: Balance = 100 * DOLLARS;
+	pub const DicoSpendPeriod: BlockNumber = 7 * DAYS;
+
+}
+
+impl pallet_dico_treasury::Config for Runtime {
+	type ApproveOrigin = EnsureOneOf<
+		AccountId,
+		EnsureRoot<AccountId>,
+		pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>,
+	>;
+	type PalletId = TreasuryPalletId;
+	type MultiCurrency = Currencies;
+	type RejectOrigin = EnsureOneOf<
+		AccountId,
+		EnsureRoot<AccountId>,
+		pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>,
+	>;
+
+	type Event = Event;
+	type GetNativeCurrencyId = DICOAssetId;
+	type ProposalBond = DicoProposalBond;
+	type SpendPeriod = DicoSpendPeriod;
+	type WeightInfo = ();
+}
+
 
 
 
@@ -1353,7 +1435,7 @@ construct_runtime!(
 
 		// ORML related modules
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
-		Currencies: currencies::{Pallet, Event<T>, Call, Storage},
+		Currencies: pallet_currencies::{Pallet, Event<T>, Call, Storage},
 		DicoOracle: orml_oracle::<Instance1>::{Pallet, Storage, Call, Event<T>},
 
 		// dico-chain related modules
@@ -1362,6 +1444,9 @@ construct_runtime!(
 		LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>},
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>},
 		PriceDao: pallet_pricedao::<Instance1>::{Pallet, Call, Storage, Event<T>},
+		Ico: pallet_ico::{Pallet, Event<T>, Call, Storage},
+		Dao: pallet_dao::{Pallet, Origin<T>, Event<T>, Call, Storage},
+		DicoTreasury: pallet_dico_treasury::{Pallet, Call, Storage, Event<T>},
 	}
 );
 
