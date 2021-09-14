@@ -86,7 +86,5 @@ impl<T: frame_system::Config> WeightInfo for PriceWeight<T> {
             .saturating_add(T::DbWeight::get().reads(11 as Weight))
             .saturating_add(T::DbWeight::get().writes(3 as Weight))
     }
-
-
 }
 

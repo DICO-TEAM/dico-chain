@@ -1247,11 +1247,11 @@ parameter_types! {
 	pub const withdrawExpirationPeriod: BlockNumber = 10 * MINUTES;   // TODO: 5 * DAYS;
 }
 
-type DicoDataProvider = orml_oracle::Instance1;
-impl orml_oracle::Config<DicoDataProvider> for Runtime {
+type DicoDataProvider = pallet_oracle::Instance1;
+impl pallet_oracle::Config<DicoDataProvider> for Runtime {
 	type Event = Event;
 	type OnNewData = ();
-	type CombineData = orml_oracle::DefaultCombineData<Runtime, MinimumCount, ExpiresIn, DicoDataProvider>;
+	type CombineData = pallet_oracle::DefaultCombineData<Runtime, MinimumCount, ExpiresIn, DicoDataProvider>;
 	type Time = Timestamp;
 	type OracleKey = CurrencyId;
 	type OracleValue = Price;
@@ -1292,7 +1292,7 @@ impl pallet_pricedao::Config<pallet_pricedao::Instance1> for Runtime {
 	type FeedOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
 	type MembershipInitialized = DicoOracle;
 	type DicoTreasuryModuleId = DicoTreasuryModuleId;
-	type Currency = Balances;
+	type BaseCurrency = Balances;
 	type PledgedBalance = FeedPledgedBalance;
 	type WithdrawExpirationPeriod = withdrawExpirationPeriod;
 	type WeightInfo = pallet_pricedao::weights::PriceWeight<Runtime>;
@@ -1435,8 +1435,8 @@ construct_runtime!(
 
 		// ORML related modules
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
+		DicoOracle: pallet_oracle::<Instance1>::{Pallet, Storage, Call, Event<T>},
 		Currencies: pallet_currencies::{Pallet, Event<T>, Call, Storage},
-		DicoOracle: orml_oracle::<Instance1>::{Pallet, Storage, Call, Event<T>},
 
 		// dico-chain related modules
 		AMM: pallet_amm::{Pallet, Call, Storage, Event<T>},

@@ -29,7 +29,7 @@ use serde::{Deserialize, Serialize};
 use orml_traits::{MultiCurrency, MultiCurrencyExtended};
 use dico_currencies::{DicoAssetMetadata};
 
-mod math;
+pub mod math;
 mod benchmarking;
 pub mod weights;
 
