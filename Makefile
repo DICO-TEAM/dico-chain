@@ -41,7 +41,7 @@ fix:
 
 .PHONY: dev
 dev:
-	./target/release/dico-dev --dev --ws-external
+	./target/debug/dico-dev --dev --ws-external
 
 # -------------------------------------cargo-------------------------------------
 
