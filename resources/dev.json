@@ -396,8 +396,8 @@
     "tags": "Vec<(Balance, Balance)>",
     "total": "Balance",
     "released": "Balance",
-    "is_terminated": "bool",
-    "is_already_get_reward": "Option<bool>"
+    "refund": "Balance",
+    "reward": "Option<Balance>"
   },
   "IcoInfo": {
     "desc": "Vec<u8>",
@@ -405,6 +405,7 @@
     "is_already_kyc": "bool",
     "initiator": "AccountId",
     "total_usdt": "Balance",
+    "tag": "Option<Balance>",
     "is_terminated": "bool",
     "project_name": "Vec<u8>",
     "token_symbol": "Vec<u8>",
