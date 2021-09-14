@@ -1,3 +1,12 @@
+.PHONY: kill
+kill:
+	bash scripts/kill.sh
+
+.PHONY: purge
+purge:
+	bash scripts/purge.sh
+
+
 .PHONY: install
 install:
 	cargo install --force --path .
@@ -33,6 +42,13 @@ fix:
 .PHONY: dev
 dev:
 	./target/release/dico-dev --dev --ws-external
+
+# -------------------------------------cargo-------------------------------------
+
+.PHONY: meta
+meta:
+	cargo metadata --verbose --format-version 1 --all-features
+
 
 # -------------------------------------git-------------------------------------
 .PHONY: diff
