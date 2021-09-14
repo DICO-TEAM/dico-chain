@@ -28,7 +28,7 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Module, Call, Config, Storage, Event<T>},
-		DicoOracle: orml_oracle::{Module, Storage, Call, Config<T>, Event<T>},
+		DicoOracle: pallet_oracle::{Module, Storage, Call, Config<T>, Event<T>},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		PriceDao: pallet_price::{Module, Storage, Call, Config<T>, Event<T>},
 
@@ -98,14 +98,15 @@ impl system::Config for Test {
 	type SS58Prefix = ();
 }
 
-impl orml_oracle::Config for Test {
+impl pallet_oracle::Config for Test {
 	type Event = Event;
 	type OnNewData = ();
-	type CombineData = orml_oracle::DefaultCombineData<Self, MinimumCount, ExpiresIn>;
+	type CombineData = pallet_oracle::DefaultCombineData<Self, MinimumCount, ExpiresIn>;
 	type Time = Timestamp;
 	type OracleKey = Key;
 	type OracleValue = Value;
 	type RootOperatorAccountId = GetRootOperatorAccountId;
+	type MaxOracleSize = u32;
 	type WeightInfo = ();
 }
 
@@ -115,7 +116,7 @@ impl Config for Test {
 	type Source = MockDataProvider;
 	type FeedOrigin = EnsureSignedBy<One, AccountId>;
 	type MembershipInitialized = DicoOracle;
-	type Currency = Balances;
+	type BaseCurrency = Balances;
 	type PledgedBalance = FeedPledgedBalance;
 	type DicoTreasuryModuleId = TreasuryModuleId;
 	type WithdrawExpirationPeriod = withdrawExpirationPeriod;
