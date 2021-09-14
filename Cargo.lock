@@ -1826,7 +1826,6 @@ dependencies = [
  "hex-literal",
  "log",
  "max-encoded-len",
- "orml-oracle",
  "orml-tokens",
  "orml-traits",
  "pallet-amm",
@@ -1862,6 +1861,7 @@ dependencies = [
  "pallet-multisig",
  "pallet-offences",
  "pallet-offences-benchmarking",
+ "pallet-oracle",
  "pallet-pricedao",
  "pallet-proxy",
  "pallet-randomness-collective-flip",
@@ -4900,21 +4900,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "orml-oracle"
-version = "1.0.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "orml-traits",
- "orml-utilities",
- "parity-scale-codec",
- "serde",
- "sp-io 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
- "sp-runtime",
- "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
-]
-
-[[package]]
 name = "orml-tokens"
 version = "0.4.1-dev"
 source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git?rev=650ef607d023e4537d3f2932baa5e50bc3a349cb#650ef607d023e4537d3f2932baa5e50bc3a349cb"
@@ -5658,6 +5643,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-oracle"
+version = "1.0.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "orml-traits",
+ "orml-utilities",
+ "parity-scale-codec",
+ "serde",
+ "sp-io 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
+ "sp-runtime",
+ "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
+]
+
+[[package]]
 name = "pallet-pricedao"
 version = "1.0.0"
 dependencies = [
@@ -5665,10 +5665,11 @@ dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "orml-oracle",
  "orml-traits",
  "orml-utilities",
+ "pallet-amm",
  "pallet-balances",
+ "pallet-oracle",
  "parity-scale-codec",
  "serde",
  "sp-core 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",

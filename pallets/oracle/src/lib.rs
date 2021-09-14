@@ -46,7 +46,7 @@ mod default_weight;
 mod mock;
 mod tests;
 mod traits;
-pub use traits::UpdateFeedMembers;
+pub use traits::UpdateOraclesStorgage;
 
 pub use module::*;
 
@@ -330,7 +330,7 @@ impl<T: Config<I>, I: 'static> Pallet<T, I> {
 	}
 }
 
-impl<T: Config<I>, I: 'static> UpdateFeedMembers<T::AccountId> for Pallet<T, I> {
+impl<T: Config<I>, I: 'static> UpdateOraclesStorgage<T::AccountId,T::OracleKey> for Pallet<T, I> {
 	fn initialize_members(members: Vec<T::AccountId>) {
 		if !members.is_empty() {
 			assert!(Members::<T, I>::get().0.is_empty(), "Members are already initialized!");
@@ -359,6 +359,10 @@ impl<T: Config<I>, I: 'static> UpdateFeedMembers<T::AccountId> for Pallet<T, I> 
 				keys.remove(m);
 			})
 		});
+	}
+
+	fn unlock_price(currency_id: T::OracleKey){
+		LockedPrice::<T, I>::remove(currency_id);
 	}
 
 }
