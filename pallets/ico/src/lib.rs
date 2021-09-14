@@ -1250,6 +1250,9 @@ impl<T: Config> Module<T> {
 				}
 				new_info.total_usdt = new_info.total_usdt.saturating_add(total_usdt);
 				new_info.total = new_info.total.saturating_add(total);
+				if new_info.inviter.is_none() {
+					new_info.inviter = inviter.clone();
+				}
 		    } else {
 				if is_terminated.is_some() {
 				    new_info.refund = total;
