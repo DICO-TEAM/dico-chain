@@ -40,7 +40,7 @@ pub mod traits;
 
 const ICO_ID: LockIdentifier = *b"ico     ";
 const HalfDuration: u128 = 200_000_000u128 * USDT;
-const USDT: u128 = 1000_000_000_000_000_000u128;
+const USDT: u128 = 1000_000u128;
 
 
 pub(crate) type MultiBalanceOf<T> =
@@ -1250,6 +1250,9 @@ impl<T: Config> Module<T> {
 				}
 				new_info.total_usdt = new_info.total_usdt.saturating_add(total_usdt);
 				new_info.total = new_info.total.saturating_add(total);
+				if new_info.inviter.is_none() {
+					new_info.inviter = inviter.clone();
+				}
 		    } else {
 				if is_terminated.is_some() {
 				    new_info.refund = total;
@@ -1650,6 +1653,66 @@ impl<T: Config> Module<T> {
     pub fn get_reward_amount(user: T::AccountId, currency_id: AssetId, index: u32) -> MultiBalanceOf<T> {
 		Self::do_reward(&user, currency_id, index, false).unwrap_or_default()
     }
+
+
+	/// the total amount that can join ico
+	/// Provided for RPC use
+	pub fn can_join_amount(user: T::AccountId, currency_id: AssetId, index: u32) -> MultiBalanceOf<T> {
+		let ico = match <Ico<T>>::get(currency_id, index) {
+			None => return MultiBalanceOf::<T>::from(0u32),
+			Some(x) => x,
+		};
+		let exchange_token_id = ico.exchange_token;
+		let max_times = ico.user_ico_max_times;
+		let user_max_amount = ico.user_max_amount;
+		if user == ico.initiator {
+			return MultiBalanceOf::<T>::from(0u32);
+		}
+		let exchange_token_decimals = match T::CurrenciesHandler::get_metadata(exchange_token_id) {
+			Ok(x) => x.decimals,
+			_ => return MultiBalanceOf::<T>::from(0u32),
+		};
+		if Self::is_ico_expire(&ico) {
+			return MultiBalanceOf::<T>::from(0u32);
+		}
+
+		match ico.start_time {
+			Some(time) => {
+				if Self::now() < time {
+					return MultiBalanceOf::<T>::from(0u32);
+				}
+			}
+			None => return MultiBalanceOf::<T>::from(0u32),
+		}
+
+		let remain_usdt = match Self::get_unrelease_asset_info(&user, currency_id, index) {
+			Some(x) => {
+				if max_times <= 1 && x.tags.len() > 0 {
+					return MultiBalanceOf::<T>::from(0u32);
+				}
+				else {
+					user_max_amount.min(IcoMaxUsdtAmount::<T>::get()).saturating_sub(x.total_usdt)
+				}
+			},
+			None => user_max_amount.min(IcoMaxUsdtAmount::<T>::get()),
+		};
+
+		let price = Self::get_token_price(exchange_token_id);
+		if price == MultiBalanceOf::<T>::from(0u32) {
+			return MultiBalanceOf::<T>::from(0u32);
+		}
+
+		let decimals_amount = 10u128
+			.saturating_pow(exchange_token_decimals as u32)
+			.saturated_into::<MultiBalanceOf<T>>();
+		let num = Self::u256_convert_to_balance(Self::balance_convert_to_u256(remain_usdt) * Self::balance_convert_to_u256(decimals_amount) / Self::balance_convert_to_u256(price));
+		let remain_exchange_amount = match Self::get_unrelease_asset_info(&ico.initiator, currency_id, index) {
+			None => ico.exchange_token_total_amount,
+			Some(x) => ico.exchange_token_total_amount.saturating_sub(x.total),
+		};
+
+		remain_exchange_amount.min(num)
+	}
 }
 
 decl_storage! {
