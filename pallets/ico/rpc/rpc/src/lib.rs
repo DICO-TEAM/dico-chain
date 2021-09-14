@@ -20,12 +20,14 @@ type FutureResult<T> = Box<dyn rpc_future::Future<Item = T, Error = RpcError> + 
 /// Ico RPC method
 #[rpc]
 pub trait IcoApi<AccountId, CurrencyId, Index, Balance> {
-    #[rpc(name = "ico_canReleaseAmount", alias("can_ReleaseAmount"))]
+    #[rpc(name = "ico_canReleaseAmount", alias("canReleaseAmount"))]
     fn can_release_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
     #[rpc(name = "ico_getRewardAmount", alias("getRewardAmount"))]
     fn get_reward_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
     #[rpc(name = "ico_canUnlockAmount", alias("canUnlockAmount"))]
     fn can_unlock_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
+    #[rpc(name = "ico_canJoinAmount", alias("canJoinAmount"))]
+    fn can_join_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
 }
 
 pub struct FullIco<C, B> {
@@ -97,6 +99,32 @@ where
         };
 
         Box::new(result(get_release_amount()))
+    }
+
+    fn can_join_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex> {
+        let can_join_amount = || {
+        let api = self.client.runtime_api();
+        let best = self.client.info().best_hash;
+        let at = BlockId::hash(best);
+
+        let amount = api.can_join_amount(&at, account, currency_id, index).map_err(|e| RpcError {
+            code: ErrorCode::ServerError(Error::RuntimeError.into()),
+            message: "Unable to dry run extrinsic.".into(),
+            data: Some(format!("{:?}", e).into()),
+        })?;
+
+        let try_into_rpc_balance = |value: Balance| {
+            value.try_into().map_err(|_| RpcError {
+                code: ErrorCode::InvalidParams,
+                message: format!("{} doesn't fit in NumberOrHex representation", value),
+                data: None,
+            })
+        };
+        try_into_rpc_balance(amount)
+
+        };
+
+        Box::new(result(can_join_amount()))
     }
 
     fn get_reward_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex> {

@@ -465,9 +465,9 @@
     "reserved": "Balance",
     "frozen": "Balance"
   },
-  "IcoMultiple": {
-    "numerator": "u32",
-    "denominator": "u32"
+  "PowerMultiple": {
+    "upr": "u32",
+    "down": "u32"
   },
   "PendingInfo": {
     "ico": "IcoInfo",
