@@ -13,6 +13,7 @@ pub trait WeightInfo {
     fn insert_feed_account(c: u32) -> Weight;
     fn withdraw() -> Weight;
     fn exit_feed() -> Weight;
+    fn get_price() -> Weight;
 }
 
 impl  WeightInfo for () {
@@ -49,6 +50,11 @@ impl  WeightInfo for () {
             .saturating_add(DbWeight::get().writes(3 as Weight))
     }
 
+    fn get_price() -> Weight {
+        (70_000_000 as Weight)
+            .saturating_add(DbWeight::get().reads(11 as Weight))
+            .saturating_add(DbWeight::get().writes(3 as Weight))
+    }
 
 }
 
@@ -85,6 +91,12 @@ impl<T: frame_system::Config> WeightInfo for PriceWeight<T> {
         (70_000_000 as Weight)
             .saturating_add(T::DbWeight::get().reads(11 as Weight))
             .saturating_add(T::DbWeight::get().writes(3 as Weight))
+    }
+
+    fn get_price() -> Weight {
+        (70_000_000 as Weight)
+            .saturating_add(DbWeight::get().reads(11 as Weight))
+            .saturating_add(DbWeight::get().writes(3 as Weight))
     }
 }
 

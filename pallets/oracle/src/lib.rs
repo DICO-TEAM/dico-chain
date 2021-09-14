@@ -139,7 +139,6 @@ pub mod module {
 	pub(crate) type HasDispatched<T: Config<I>, I: 'static = ()> =
 		StorageValue<_, OrderedSet<T::AccountId,T::MaxOracleSize>, ValueQuery>;
 
-	// TODO: this shouldn't be required https://github.com/paritytech/substrate/issues/6041
 	/// The current members of the collective. This is stored sorted (just by
 	/// value).
 	#[pallet::storage]
