@@ -1549,6 +1549,18 @@ impl_runtime_apis! {
 		}
 	}
 
+	impl pallet_ico_rpc_runtime_api::IcoAmountApi<Block, AccountId, AssetId, Index, Balance> for Runtime {
+		fn can_release_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
+			Ico::can_release_amount(account, currency_id, index)
+		}
+		fn get_reward_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
+			Ico::get_reward_amount(account, currency_id, index)
+		}
+		fn can_unlock_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
+			Ico::can_unlock_amount(account, currency_id, index)
+		}
+	}
+
 	impl fg_primitives::GrandpaApi<Block> for Runtime {
 		fn grandpa_authorities() -> GrandpaAuthorityList {
 			Grandpa::grandpa_authorities()

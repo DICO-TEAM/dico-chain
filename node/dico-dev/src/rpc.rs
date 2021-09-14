@@ -1,4 +1,4 @@
-use dico_primitives::{AccountId, Balance, Block, BlockNumber, Hash, Index};
+use dico_primitives::{AccountId, Balance, Block, BlockNumber, Hash, Index, AssetId};
 use grandpa::{FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState};
 use sc_client_api::AuxStore;
 use sc_consensus_babe::{Config, Epoch};
@@ -15,6 +15,11 @@ use sp_consensus_babe::BabeApi;
 use sp_keystore::SyncCryptoStorePtr;
 use sp_transaction_pool::TransactionPool;
 use std::sync::Arc;
+
+// local
+use pallet_ico_rpc::{FullIco, IcoApi};
+use pallet_ico_rpc_runtime_api::IcoAmountApi;
+
 
 /// Light client extra dependencies.
 pub struct LightDeps<C, F, P> {
@@ -89,6 +94,7 @@ where
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: BabeApi<Block>,
 	C::Api: BlockBuilder<Block>,
+	C::Api: IcoAmountApi<Block, AccountId, AssetId, Index, Balance>,
 	P: TransactionPool + 'static,
 	SC: SelectChain<Block> + 'static,
 	B: sc_client_api::Backend<Block> + Send + Sync + 'static,
@@ -126,6 +132,11 @@ where
 	io.extend_with(SystemApi::to_delegate(FullSystem::new(
 		client.clone(),
 		pool,
+		deny_unsafe,
+	)));
+
+	io.extend_with(IcoApi::to_delegate(FullIco::new(
+		client.clone(),
 		deny_unsafe,
 	)));
 	// Making synchronous calls in light client freezes the browser currently,

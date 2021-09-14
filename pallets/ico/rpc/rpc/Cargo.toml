@@ -15,21 +15,15 @@ version = "2.0.0"
 package = "parity-scale-codec"
 
 [dependencies]
-jsonrpc-derive = {version = "15.1.0"}
-jsonrpc-core = {version = "15.1.0"}
-sc-rpc-api = { version = "0.9.0"}
+jsonrpc-derive      = { version = "15.1.0"}
+jsonrpc-core        = { version = "15.1.0"}
+sc-rpc-api          = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 jsonrpc-core-client = { version = "15.1.0"}
-sp-api = "3.0.0"
-sp-rpc = "3.0.0"
-sp-runtime = "3.0.0"
-sp-blockchain = "3.0.0"
+sp-api              = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+sp-rpc              = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+sp-runtime          = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+sp-blockchain       = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+
 
 # local
 pallet-ico-rpc-runtime-api = { path = "../runtime-api"}
-
-
-#[features]
-#default = ["std"]
-#std = [
-#    "jsonrpc-derive/std",
-#]
