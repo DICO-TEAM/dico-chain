@@ -41,6 +41,7 @@ pallet-currencies      = { version = "1.0.0", default-features = false, path = "
 pallet-ico             = { version = "1.0.0", path = "../../pallets/ico", default-features = false}
 pallet-dao             = { path = "../../pallets/dao", version = "1.0.0", default-features = false}
 pallet-dico-treasury   = { path = "../../pallets/treasury", version = "1.0.0", default-features = false}
+pallet-ico-rpc-runtime-api = { path = "../../pallets/ico/rpc/runtime-api", version = "1.0.0", default-features = false}
 
 
 
@@ -208,6 +209,7 @@ std = [
 	"pallet-ico/std",
 	"pallet-dao/std",
 	"pallet-dico-treasury/std",
+    "pallet-ico-rpc-runtime-api/std",
 ]
 runtime-benchmarks = [
     "frame-benchmarking",

@@ -1731,6 +1731,8 @@ dependencies = [
  "nix",
  "node-inspect",
  "pallet-contracts-rpc",
+ "pallet-ico-rpc",
+ "pallet-ico-rpc-runtime-api",
  "pallet-im-online",
  "pallet-mmr-rpc",
  "pallet-transaction-payment",
@@ -1848,6 +1850,7 @@ dependencies = [
  "pallet-gilt",
  "pallet-grandpa",
  "pallet-ico",
+ "pallet-ico-rpc-runtime-api",
  "pallet-identity",
  "pallet-im-online",
  "pallet-indices",
@@ -5396,6 +5399,30 @@ dependencies = [
  "sp-io 3.0.0 (git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.8)",
  "sp-runtime",
  "sp-std 3.0.0 (git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.8)",
+]
+
+[[package]]
+name = "pallet-ico-rpc"
+version = "1.0.0"
+dependencies = [
+ "jsonrpc-core",
+ "jsonrpc-core-client",
+ "jsonrpc-derive",
+ "pallet-ico-rpc-runtime-api",
+ "parity-scale-codec",
+ "sc-rpc-api",
+ "sp-api",
+ "sp-blockchain",
+ "sp-rpc",
+ "sp-runtime",
+]
+
+[[package]]
+name = "pallet-ico-rpc-runtime-api"
+version = "1.0.0"
+dependencies = [
+ "parity-scale-codec",
+ "sp-api",
 ]
 
 [[package]]

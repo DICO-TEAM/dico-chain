@@ -37,6 +37,9 @@ rand         = { version = "0.7.2" }
 jsonrpc-core = { version = "15.1.0" }
 structopt    = { version = "0.3.8", optional = true }
 
+# local
+pallet-ico-rpc-runtime-api = { path = "../../pallets/ico/rpc/runtime-api", version = "1.0.0"}
+pallet-ico-rpc             = { path = "../../pallets/ico/rpc/rpc", version = "1.0.0" }
 
 
 # primitives
