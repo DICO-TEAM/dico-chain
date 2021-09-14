@@ -29,7 +29,7 @@ build:
 
 .PHONY: build-dev
 build-dev:
-	cargo build --bin dico-dev --locked
+	cargo build --bin dico-dev
 
 .PHONY: release
 release: clear
