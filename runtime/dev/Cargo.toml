@@ -44,6 +44,8 @@ pallet-ico-rpc-runtime-api = { path = "../../pallets/ico/rpc/runtime-api", versi
 
 
 
+
+
 # orml
 orml-tokens = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
 orml-traits = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
