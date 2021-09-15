@@ -1749,6 +1749,7 @@ dependencies = [
  "nix",
  "node-inspect",
  "pallet-contracts-rpc",
+ "pallet-farm-rpc",
  "pallet-im-online",
  "pallet-mmr-rpc",
  "pallet-transaction-payment",
@@ -1861,6 +1862,7 @@ dependencies = [
  "pallet-election-provider-multi-phase",
  "pallet-elections-phragmen",
  "pallet-farm",
+ "pallet-farm-rpc-runtime-api",
  "pallet-gilt",
  "pallet-grandpa",
  "pallet-identity",
@@ -5294,6 +5296,39 @@ dependencies = [
  "serde",
  "sp-core",
  "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "substrate-wasm-builder 3.0.0",
+]
+
+[[package]]
+name = "pallet-farm-rpc"
+version = "1.0.0"
+dependencies = [
+ "jsonrpc-core",
+ "jsonrpc-core-client",
+ "jsonrpc-derive",
+ "pallet-farm-rpc-runtime-api",
+ "parity-scale-codec",
+ "primitive-types 0.10.1",
+ "sc-rpc-api",
+ "serde",
+ "sp-api",
+ "sp-blockchain",
+ "sp-rpc",
+ "sp-runtime",
+ "sp-std",
+ "substrate-wasm-builder 3.0.0",
+]
+
+[[package]]
+name = "pallet-farm-rpc-runtime-api"
+version = "1.0.0"
+dependencies = [
+ "parity-scale-codec",
+ "primitive-types 0.10.1",
+ "serde",
+ "sp-api",
  "sp-runtime",
  "sp-std",
  "substrate-wasm-builder 3.0.0",

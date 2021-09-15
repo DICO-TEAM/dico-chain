@@ -30,14 +30,16 @@ dico-primitives = { package = 'dico-primitives', default-features = false, path 
 
 
 # Local Dependencies
-currencies      = { package = 'currencies', default-features = false, path = "../../pallets/currencies"}
-orml-oracle     = { package = 'orml-oracle', default-features = false,path = '../../pallets/orml-oracle'}
-pallet-pricedao = { package = 'pallet-pricedao', default-features = false,path = '../../pallets/pricedao'}
-pallet-amm      = { package = 'pallet-amm',default-features = false, path = '../../pallets/amm'}
-pallet-farm     = { package = 'pallet-farm',default-features = false, path = '../../pallets/farm'}
-pallet-lbp      = { package = 'pallet-lbp', default-features = false, path = '../../pallets/lbp'}
-pallet-kyc      = { package = 'pallet-kyc', default-features = false , path = '../../pallets/kyc'}
-pallet-template = { package = 'pallet-template', default-features = false , path = '../../pallets/template'}
+currencies                  = { package = 'currencies', default-features = false, path = "../../pallets/currencies"}
+orml-oracle                 = { package = 'orml-oracle', default-features = false,path = '../../pallets/orml-oracle'}
+pallet-pricedao             = { package = 'pallet-pricedao', default-features = false,path = '../../pallets/pricedao'}
+pallet-amm                  = { package = 'pallet-amm',default-features = false, path = '../../pallets/amm'}
+pallet-farm                 = { package = 'pallet-farm',default-features = false, path = '../../pallets/farm'}
+pallet-lbp                  = { package = 'pallet-lbp', default-features = false, path = '../../pallets/lbp'}
+pallet-kyc                  = { package = 'pallet-kyc', default-features = false , path = '../../pallets/kyc'}
+pallet-template             = { package = 'pallet-template', default-features = false , path = '../../pallets/template'}
+pallet-farm-rpc-runtime-api = { package = 'pallet-farm-rpc-runtime-api', default-features = false, path = "../../pallets/farm/rpc/runtime-api" }
+
 
 
 
@@ -202,6 +204,7 @@ std = [
     "pallet-lbp/std",
     "pallet-pricedao/std",
     "orml-oracle/std",
+    'pallet-farm-rpc-runtime-api/std',
 ]
 runtime-benchmarks = [
     "frame-benchmarking",
