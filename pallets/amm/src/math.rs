@@ -9,7 +9,7 @@ use frame_support::ensure;
 #[cfg(test)]
 pub const TEST_DECIMAL: u128 = 10_000_000_000u128;
 
-pub const MINIMUM_LIQUIDITY: u128 = 1000u128;
+pub const MINIMUM_LIQUIDITY: u128 = 0u128;
 pub const LIQUIDITY_DECIMALS: u8 = 10;
 
 /// Given a certain amount of asset A and a trading pair reserve,
@@ -282,6 +282,14 @@ mod tests {
 		assert_eq!(
 			calc_liquidity_add(U256::from(10000), U256::from(40000), U256::from(10000), U256::from(40000), U256::from(19000), U256::from(1000)),
 			Ok(U256::from(19000))
+		);
+		assert_eq!(
+			calc_liquidity_add(U256::from(0), U256::from(0), U256::from(10000), U256::from(40000), U256::from(0), U256::from(0)),
+			Ok(U256::from(20000))
+		);
+		assert_eq!(
+			calc_liquidity_add(U256::from(10000), U256::from(40000), U256::from(10000), U256::from(40000), U256::from(20000), U256::from(0)),
+			Ok(U256::from(20000))
 		);
 	}
 }
