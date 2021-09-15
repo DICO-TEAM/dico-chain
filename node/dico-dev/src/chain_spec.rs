@@ -10,6 +10,7 @@ use sc_chain_spec::ChainSpecExtension;
 use sc_service::ChainType;
 use sc_telemetry::TelemetryEndpoints;
 use serde::{Deserialize, Serialize};
+use serde_json::{map::Map, value::Value};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
@@ -155,7 +156,7 @@ pub fn staging_testnet_config() -> ChainSpec {
 				.expect("Staging telemetry url is valid; qed"),
 		),
 		None,
-		None,
+		Some(get_properties()),
 		Default::default(),
 	)
 }
@@ -353,10 +354,19 @@ pub fn development_config() -> ChainSpec {
 		vec![],
 		None,
 		None,
-		None,
+		Some(get_properties()),
 		Default::default(),
 	)
 }
+
+fn get_properties() -> Map<String, Value> {
+	let mut properties = Map::new();
+	properties.insert("tokenSymbol".into(), "DICO".into());
+	properties.insert("tokenDecimals".into(), 14.into());
+	properties
+}
+
+
 
 fn local_testnet_genesis() -> GenesisConfig {
 	testnet_genesis(
@@ -377,7 +387,7 @@ pub fn local_testnet_config() -> ChainSpec {
 		vec![],
 		None,
 		None,
-		None,
+		Some(get_properties()),
 		Default::default(),
 	)
 }

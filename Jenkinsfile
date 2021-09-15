@@ -4,6 +4,7 @@ pipeline {
         stage('build'){
             steps {
                 echo "-----------------make install---------------------------"
+                sh 'make clear'
                 sh 'make build-dev'
                 echo "-----------------make install---------------------------"
             }
