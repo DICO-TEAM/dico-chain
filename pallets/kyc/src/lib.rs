@@ -533,7 +533,7 @@ pub mod pallet {
 
 			let app_form = ApplicationForm {
 				ias: Self::random_admin(&kyc_fields, &search_fee, true)?,
-				supervisor: Self::random_admin(&kyc_fields, &search_fee, true)?,
+				supervisor: Self::random_admin(&kyc_fields, &search_fee, false)?,
 				progress: Progress::Pending,
 			};
 
