@@ -21,7 +21,7 @@ use sp_runtime::{DispatchError, DispatchResult, FixedU128};
 pub use primitives::{Price, CurrencyId, Balance, Moment, CORE_ASSET_ID};
 // use frame_support::traits::Instance;
 
-mod traits;
+pub mod traits;
 mod tests;
 mod mock;
 pub mod weights;
@@ -29,7 +29,7 @@ pub mod weights;
 pub use weights::WeightInfo;
 
 pub use module::*;
-use traits::{PriceProvider, PriceData};
+pub use traits::{PriceProvider, PriceData};
 use sp_core::U256;
 use sp_runtime::traits::CheckedConversion;
 
