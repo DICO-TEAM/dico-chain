@@ -27,4 +27,4 @@ impl OnUnbalanced<NegativeImbalance> for Author {
 		Balances::resolve_creating(&Authorship::author(), amount);
 	}
 }
-pub type TimeStampedPrice = orml_oracle::TimestampedValue<Price, Moment>;
+pub type TimeStampedPrice = pallet_oracle::TimestampedValue<Price, Moment>;

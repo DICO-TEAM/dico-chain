@@ -1,13 +1,12 @@
 [package]
 edition     =  "2018"
-name        =  "orml-oracle"
+name        =  "pallet-oracle"
 authors     =  ["DICO-TEAM"]
 description =  'orml oracle.'
 license     =  'Apache 2.0'
 version     =  '1.0.0'
 homepage    =  'https://github.com/DICO-TEAM/dico-chain'
 repository  =  'https://github.com/DICO-TEAM/dico-chain'
-
 
 [dependencies]
 serde           = { version = "1.0.111", optional = true }

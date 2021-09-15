@@ -84,7 +84,8 @@ pub enum TokenSymbol {
 }
 
 pub type CurrencyId = u32;
-pub type Price = FixedU128;
+// pub type Price = FixedU128;
+pub type Price = Balance;
 pub type ExchangeRate = FixedU128;
 pub type Ratio = FixedU128;
 pub type Rate = FixedU128;

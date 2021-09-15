@@ -1,5 +1,5 @@
 [package]
-name        = 'currencies'
+name        = 'pallet-currencies'
 authors     = ["DICO-TEAM"]
 description = 'currencies'
 license     = 'Apache 2.0'
@@ -43,5 +43,5 @@ std = [
     "dico-primitives/std",
     "orml-tokens/std",
     "orml-tokens/std",
-    "sp-core/std",
+#    "sp-core/std",
 ]

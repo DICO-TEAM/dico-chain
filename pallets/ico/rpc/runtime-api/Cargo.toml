@@ -1,0 +1,22 @@
+[package]
+name       = "pallet-ico-rpc-runtime-api"
+authors    = ["DICO-TEAM"]
+version    = "1.0.0"
+license    = 'Apache 2.0'
+homepage   = 'https://github.com/DICO-TEAM/dico-chain'
+repository = 'https://github.com/DICO-TEAM/dico-chain'
+edition    = '2018'
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sp-api = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+codec  = { package = "parity-scale-codec", version = "2.0.0", default-features = false }
+
+[features]
+default = ["std"]
+std = [
+    "sp-api/std",
+    "codec/std",
+]
