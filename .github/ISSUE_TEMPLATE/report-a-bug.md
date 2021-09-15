@@ -1,7 +1,7 @@
 ---
 name: Report a Bug
 about: Report a problem.
-title: '[Bug]:'
+title: ''
 labels: bug
 assignees: 'DICO-TEAM'
 ---
