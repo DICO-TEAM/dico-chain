@@ -21,4 +21,4 @@
 
 *.wasm
 *.state
-dico-dev
+/dico-dev

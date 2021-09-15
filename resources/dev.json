@@ -347,7 +347,7 @@
   },
   "CurrencyId": "u32",
   "OracleKey": "CurrencyId",
-  "Price": "FixedU128",
+  "Price": "u128",
   "OracleValue": "Price",
   "TimestampedValue": {
     "value": "OracleValue",
@@ -551,5 +551,9 @@
     "step": "u32",
     "next_block": "BlockNumber"
   },
-  "LbpId": "u32"
+  "LbpId": "u32",
+  "DepositBalanceInfo": {
+      "amount": "Balance",
+      "expiration": "BlockNumber"
+  }
 }

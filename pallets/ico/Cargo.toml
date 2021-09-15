@@ -31,6 +31,7 @@ currencies      = { package = "pallet-currencies", path = '../currencies', defau
 pallet-kyc      = { path = "../kyc", default-features = false,  version = "1.0.0"}
 dico-primitives = { path = "../../primitives", default-features = false,  version = "1.0.0"}
 dico-treasury   = { package = "pallet-dico-treasury", path = "../treasury", default-features = false,  version = "1.0.0" }
+pallet-pricedao = { path = "../pricedao", default-features = false}
 
 
 [features]
