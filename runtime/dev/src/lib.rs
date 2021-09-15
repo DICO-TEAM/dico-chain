@@ -1311,7 +1311,7 @@ parameter_types! {
 	pub const ChillDuration: BlockNumber = 10 * MINUTES;
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(5u8);
-	pub const UsdtCurrencyId: AssetId = 1;
+	pub const UsdtCurrencyId: AssetId = 5;
 
 }
 
