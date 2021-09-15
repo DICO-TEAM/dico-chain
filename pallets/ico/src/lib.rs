@@ -704,11 +704,11 @@ impl<T: Config> Module<T> {
     }
 
     fn get_uesr_area(who: &T::AccountId) -> Option<AreaCode> {
-		T::KycHandler::get_uesr_area(who)
+		T::KycHandler::get_user_area(who)
     }
 
     fn is_already_kyc(who: &T::AccountId) -> bool {
-		if T::KycHandler::get_uesr_area(who).is_none() {
+		if T::KycHandler::get_user_area(who).is_none() {
 			return false;
 		}
 		true

@@ -1,3 +1,3 @@
 pub trait KycHandler<AccountId, AreaCode> {
-    fn get_uesr_area(user: &AccountId) -> Option<AreaCode>;
+    fn get_user_area(user: &AccountId) -> Option<AreaCode>;
 }

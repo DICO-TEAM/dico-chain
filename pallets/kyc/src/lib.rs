@@ -1202,7 +1202,7 @@ pub mod pallet {
 }
 
 impl<T: Config> KycHandler<T::AccountId, AreaCode> for Pallet<T> {
-	fn get_uesr_area(user: &T::AccountId) -> Option<AreaCode> {
+	fn get_user_area(user: &T::AccountId) -> Option<AreaCode> {
 		match <KYCOf<T>>::get(user) {
 			Some(info) => {
 				return Some(info.info.area);
