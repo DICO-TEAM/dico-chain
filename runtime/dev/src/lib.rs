@@ -5,7 +5,8 @@
 use codec::{Decode, Encode};
 use dico_primitives::{
 	constants::{currency::*, time::*},
-	AccountIndex, Balance, BlockNumber, Hash, Index, Moment, AssetId, Amount,CurrencyId, Price
+	AccountIndex, Balance, BlockNumber, Hash, Index, Moment, AssetId, Amount,CurrencyId, Price,
+	PoolId,
 };
 use pallet_currencies::{BasicCurrencyAdapter};
 pub use dico_primitives::{AccountId, Signature};
@@ -82,7 +83,7 @@ pub use pallet_farm;
 pub use pallet_lbp;
 pub use pallet_pricedao;
 
-
+use pallet_farm_rpc_runtime_api as farm_rpc;
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]
@@ -1745,6 +1746,14 @@ impl_runtime_apis! {
 		) -> Result<(), mmr::Error> {
 			let node = mmr::DataOrHash::Data(leaf.into_opaque_leaf());
 			pallet_mmr::verify_leaf_proof::<mmr::Hashing, _>(root, node, proof)
+		}
+	}
+
+	impl farm_rpc::FarmApi<Block, AccountId, PoolId, Balance> for Runtime {
+		fn get_participant_reward(account: AccountId, pid: PoolId) -> Balance {
+			let reward = Farm::get_participant_reward(account, pid);
+
+			reward
 		}
 	}
 

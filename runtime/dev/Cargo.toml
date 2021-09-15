@@ -29,18 +29,19 @@ log               = { version = "0.4.14", default-features = false }
 dico-primitives = { package = 'dico-primitives', default-features = false, path = "../../primitives" }
 
 # Local Dependencies
-pallet-oracle   = { path = '../../pallets/oracle', default-features = false}
-pallet-pricedao = { default-features = false,path = '../../pallets/pricedao'}
-pallet-amm      = { package = 'pallet-amm',default-features = false, path = '../../pallets/amm'}
-pallet-farm     = { package = 'pallet-farm',default-features = false, path = '../../pallets/farm'}
-pallet-lbp      = { package = 'pallet-lbp', default-features = false, path = '../../pallets/lbp'}
-pallet-kyc      = { package = 'pallet-kyc', default-features = false , path = '../../pallets/kyc'}
-pallet-template = { package = 'pallet-template', default-features = false , path = '../../pallets/template'}
-pallet-currencies      = { version = "1.0.0", default-features = false, path = "../../pallets/currencies"}
-pallet-ico             = { version = "1.0.0", path = "../../pallets/ico", default-features = false}
-pallet-dao             = { path = "../../pallets/dao", version = "1.0.0", default-features = false}
-pallet-dico-treasury   = { path = "../../pallets/treasury", version = "1.0.0", default-features = false}
-pallet-ico-rpc-runtime-api = { path = "../../pallets/ico/rpc/runtime-api", version = "1.0.0", default-features = false}
+pallet-oracle               = { package = 'pallet-oracle', default-features = false, path = '../../pallets/oracle'}
+pallet-pricedao             = { package = 'pallet-pricedao', default-features = false, path = '../../pallets/pricedao'}
+pallet-amm                  = { package = 'pallet-amm', default-features = false, path = '../../pallets/amm'}
+pallet-farm                 = { package = 'pallet-farm', default-features = false, path = '../../pallets/farm'}
+pallet-lbp                  = { package = 'pallet-lbp', default-features = false, path = '../../pallets/lbp'}
+pallet-kyc                  = { package = 'pallet-kyc', default-features = false , path = '../../pallets/kyc'}
+pallet-template             = { package = 'pallet-template', default-features = false , path = '../../pallets/template'}
+pallet-currencies           = { package = "pallet-currencies", default-features = false, path = "../../pallets/currencies"}
+pallet-ico                  = { package = "pallet-ico", default-features = false, path = "../../pallets/ico"}
+pallet-dao                  = { package = "pallet-dao", default-features = false, path = "../../pallets/dao"}
+pallet-dico-treasury        = { package = "pallet-dico-treasury", default-features = false, path = "../../pallets/treasury"}
+pallet-ico-rpc-runtime-api  = { package = "pallet-ico-rpc-runtime-api", default-features = false, path = "../../pallets/ico/rpc/runtime-api"}
+pallet-farm-rpc-runtime-api = { package = 'pallet-farm-rpc-runtime-api', default-features = false, path = "../../pallets/farm/rpc/runtime-api" }
 
 
 
@@ -205,11 +206,12 @@ std = [
     "pallet-farm/std",
     "pallet-lbp/std",
     "pallet-pricedao/std",
+    'pallet-farm-rpc-runtime-api/std',
     "pallet-oracle/std",
-	"pallet-currencies/std",
-	"pallet-ico/std",
-	"pallet-dao/std",
-	"pallet-dico-treasury/std",
+    "pallet-currencies/std",
+    "pallet-ico/std",
+    "pallet-dao/std",
+    "pallet-dico-treasury/std",
     "pallet-ico-rpc-runtime-api/std",
 ]
 runtime-benchmarks = [
