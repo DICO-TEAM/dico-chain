@@ -1286,11 +1286,11 @@ type EnsureRootOrTwoThirdsGeneralCouncil = EnsureOneOf<
 	pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>,
 >;
 
-impl pallet_pricedao::Config<pallet_pricedao::Instance1> for Runtime {
+impl pallet_pricedao::Config for Runtime {
 	type Event = Event;
 	type Source = AggregatedDataProvider;
 	type FeedOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type MembershipInitialized = DicoOracle;
+	type UpdateOraclesStorgage = DicoOracle;
 	type DicoTreasuryModuleId = DicoTreasuryModuleId;
 	type BaseCurrency = Balances;
 	type PledgedBalance = FeedPledgedBalance;
@@ -1443,7 +1443,7 @@ construct_runtime!(
 		Farm: pallet_farm::{Pallet, Call, Storage, Event<T>},
 		LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>},
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>},
-		PriceDao: pallet_pricedao::<Instance1>::{Pallet, Call, Storage, Event<T>},
+		PriceDao: pallet_pricedao::{Pallet, Call, Storage, Event<T>},
 		Ico: pallet_ico::{Pallet, Event<T>, Call, Storage},
 		Dao: pallet_dao::{Pallet, Origin<T>, Event<T>, Call, Storage},
 		DicoTreasury: pallet_dico_treasury::{Pallet, Call, Storage, Event<T>},

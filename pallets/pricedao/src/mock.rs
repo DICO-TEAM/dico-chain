@@ -115,7 +115,7 @@ impl Config for Test {
 	type Event = Event;
 	type Source = MockDataProvider;
 	type FeedOrigin = EnsureSignedBy<One, AccountId>;
-	type MembershipInitialized = DicoOracle;
+	type UpdateOraclesStorgage = DicoOracle;
 	type BaseCurrency = Balances;
 	type PledgedBalance = FeedPledgedBalance;
 	type DicoTreasuryModuleId = TreasuryModuleId;
