@@ -1286,11 +1286,11 @@ type EnsureRootOrTwoThirdsGeneralCouncil = EnsureOneOf<
 	pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>,
 >;
 
-impl pallet_pricedao::Config<pallet_pricedao::Instance1> for Runtime {
+impl pallet_pricedao::Config for Runtime {
 	type Event = Event;
 	type Source = AggregatedDataProvider;
 	type FeedOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
-	type MembershipInitialized = DicoOracle;
+	type UpdateOraclesStorgage = DicoOracle;
 	type DicoTreasuryModuleId = DicoTreasuryModuleId;
 	type BaseCurrency = Balances;
 	type PledgedBalance = FeedPledgedBalance;
@@ -1311,6 +1311,7 @@ parameter_types! {
 	pub const ChillDuration: BlockNumber = 10 * MINUTES;
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(5u8);
+	pub const UsdtCurrencyId: AssetId = 1;
 
 }
 
@@ -1327,7 +1328,6 @@ impl pallet_ico::Config for Runtime {
 	type InitiatorPledge = InitiatorPledge;
 	type RequestPledge = RequestPledge;
 	type RequestExpire = RequestExpire;
-	// type NativeMultiple = NativeMultiple;
 	type CurrenciesHandler = Currencies;
 	type IcoTotalReward = IcoTotalReward;
 	type DicoTreasuryHandler = DicoTreasury;
@@ -1337,6 +1337,9 @@ impl pallet_ico::Config for Runtime {
 	type ChillDuration = ChillDuration;
 	type InviterRewardProportion = InviterRewardProportion;
 	type InviteeRewardProportion = InviteeRewardProportion;
+	type PriceData = PriceDao;
+	type UsdtCurrencyId = UsdtCurrencyId;
+	type KycHandler = Kyc;
 }
 
 parameter_types! {
@@ -1443,7 +1446,7 @@ construct_runtime!(
 		Farm: pallet_farm::{Pallet, Call, Storage, Event<T>},
 		LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>},
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>},
-		PriceDao: pallet_pricedao::<Instance1>::{Pallet, Call, Storage, Event<T>},
+		PriceDao: pallet_pricedao::{Pallet, Call, Storage, Event<T>},
 		Ico: pallet_ico::{Pallet, Event<T>, Call, Storage},
 		Dao: pallet_dao::{Pallet, Origin<T>, Event<T>, Call, Storage},
 		DicoTreasury: pallet_dico_treasury::{Pallet, Call, Storage, Event<T>},

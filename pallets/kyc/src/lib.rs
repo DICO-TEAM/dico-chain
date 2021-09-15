@@ -61,6 +61,10 @@ mod tests;
 mod benchmarking;
 pub mod types;
 pub mod weights;
+pub mod traits;
+use traits::KycHandler;
+use crate::types::{KYCInfo, AreaCode};
+use frame_system::Account;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -1193,6 +1197,17 @@ pub mod pallet {
 			}
 			<KYCOf<T>>::insert(who, registration);
 			Ok(())
+		}
+	}
+}
+
+impl<T: Config> KycHandler<T::AccountId, AreaCode> for Pallet<T> {
+	fn get_uesr_area(user: &T::AccountId) -> Option<AreaCode> {
+		match <KYCOf<T>>::get(user) {
+			Some(info) => {
+				return Some(info.info.area);
+			},
+			None => None,
 		}
 	}
 }

@@ -5378,6 +5378,7 @@ dependencies = [
  "pallet-currencies",
  "pallet-dico-treasury",
  "pallet-kyc",
+ "pallet-pricedao",
  "parity-scale-codec",
  "primitive-types 0.9.1",
  "sp-core 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
