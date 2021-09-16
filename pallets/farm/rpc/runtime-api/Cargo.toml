@@ -1,0 +1,37 @@
+[package]
+name        = 'pallet-farm-rpc-runtime-api'
+authors     = ["DICO-TEAM"]
+description = 'dico-chain farm pallet rpc runtime api'
+license     = 'Apache 2.0'
+version     = '1.0.0'
+homepage    = 'https://github.com/DICO-TEAM/dico-chain'
+repository  = 'https://github.com/DICO-TEAM/dico-chain'
+edition     = '2018'
+
+
+[package.metadata.docs.rs]
+targets = ['x86_64-unknown-linux-gnu']
+
+[build-dependencies]
+substrate-wasm-builder = { package = 'substrate-wasm-builder', version = '3.0.0' }
+
+[dependencies]
+primitive-types = { default-features = false, version = '0.10.1' }
+serde           = { features = ['derive'], optional = true, version = '1.0.101' }
+codec           = { package = "parity-scale-codec", version = "2.2.0", default-features = false, features = ["derive"] }
+
+# Substrate dependencies
+sp-std     = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+sp-api     = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+sp-runtime = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+
+
+[features]
+default = ["std"]
+std = [
+    "serde",
+    "codec/std",
+    "sp-api/std",
+    "sp-runtime/std",
+    "sp-std/std",
+]

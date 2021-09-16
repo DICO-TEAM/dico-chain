@@ -160,6 +160,8 @@ pub mod pallet {
 		InsufficientWithdrawAmount,
 		/// No pool id available.
 		NoPoolIdAvailable,
+		/// Pool liquidity balance is zero.
+		PoolLiquidityBalanceIsZero,
 	}
 
 	#[pallet::event]
@@ -564,6 +566,46 @@ impl<T: Config> Pallet<T> {
 		block_reward = block_reward.checked_add(y_block_reward).ok_or(ArithmeticError::Overflow)?;
 
 		to_balance!(block_reward)
+	}
+
+	fn calc_participant_reward(
+		account: T::AccountId,
+		pid: T::PoolId
+	) -> sp_std::result::Result<Balance, DispatchErrorWithPostInfo> {
+		let pool = Pools::<T>::get(pid).ok_or(Error::<T>::PoolNotFind)?;
+		let participant = Participants::<T>::get(pid, account).ok_or(Error::<T>::UserNotFindInPool)?;
+
+		let block_reward = Self::get_dico_block_reward(T::BlockNumber::from(pool.last_reward_block))?;
+		let dico_reward = to_u256!(block_reward)
+			.checked_mul(to_u256!(pool.alloc_point)).ok_or(ArithmeticError::Overflow)?
+			.checked_div(Self::total_alloc_point()).ok_or(ArithmeticError::Overflow)?;
+
+		let module_account_id = Self::account_id();
+		let lp_supply = T::Currency::free_balance(pool.liquidity_id, &module_account_id);
+		ensure!(!lp_supply.is_zero(), Error::<T>::PoolLiquidityBalanceIsZero);
+
+		let acc_dico_per_share = pool.acc_dico_per_share
+			.checked_add(
+				dico_reward
+					.checked_mul(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?
+					.checked_div(to_u256!(lp_supply)).ok_or(ArithmeticError::Overflow)?
+			).ok_or(ArithmeticError::Overflow)?;
+
+		let pending_reward = to_u256!(participant.amount)
+			.checked_mul(to_u256!(acc_dico_per_share)).ok_or(ArithmeticError::Overflow)?
+			.checked_div(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?
+			.checked_sub(to_u256!(participant.reward_debt)).ok_or(ArithmeticError::Overflow)?;
+
+		let pending_reward = to_balance!(pending_reward)?;
+		Ok(pending_reward)
+	}
+
+	pub fn get_participant_reward(account: T::AccountId, pid: T::PoolId) -> Balance {
+		if let Ok(pending_reward) = Self::calc_participant_reward(account, pid) {
+			return pending_reward;
+		}
+
+		Balance::zero()
 	}
 
 	fn update_pool(pid: &T::PoolId) -> sp_std::result::Result<(), DispatchErrorWithPostInfo> {
