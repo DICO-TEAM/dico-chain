@@ -414,8 +414,8 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::AssetMetadataInvalid
 		);
 
-		let mut liquidity_symbol = "a".as_bytes().to_vec();
-		liquidity_symbol.extend(asset_a_metadata.symbol.clone());
+		let mut liquidity_symbol = asset_a_metadata.symbol.clone();
+		liquidity_symbol.extend("-".bytes());
 		liquidity_symbol.extend(asset_b_metadata.symbol.clone());
 
 		let mut liquidity_name = "Amm ".as_bytes().to_vec();
