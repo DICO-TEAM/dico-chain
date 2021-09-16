@@ -1566,6 +1566,10 @@ impl_runtime_apis! {
 		fn can_join_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
 			Ico::can_join_amount(account, currency_id, index)
 		}
+
+		fn get_token_price(currency_id: CurrencyId) -> Balance {
+			Ico::get_token_price(currency_id)
+		}
 	}
 
 	impl fg_primitives::GrandpaApi<Block> for Runtime {

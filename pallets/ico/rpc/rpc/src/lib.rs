@@ -28,6 +28,8 @@ pub trait IcoApi<AccountId, CurrencyId, Index, Balance> {
     fn can_unlock_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
     #[rpc(name = "ico_canJoinAmount", alias("canJoinAmount"))]
     fn can_join_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
+    #[rpc(name = "ico_getTokenPrice", alias("getTokenPrice"))]
+    fn get_token_price(&self, currency_id: CurrencyId) -> FutureResult<NumberOrHex>;
 }
 
 pub struct FullIco<C, B> {
@@ -99,6 +101,32 @@ where
         };
 
         Box::new(result(get_release_amount()))
+    }
+
+    fn get_token_price(&self, currency_id: CurrencyId) -> FutureResult<NumberOrHex> {
+        let get_token_price = || {
+            let api = self.client.runtime_api();
+            let best = self.client.info().best_hash;
+            let at = BlockId::hash(best);
+
+            let amount = api.get_token_price(&at, currency_id).map_err(|e| RpcError {
+                code: ErrorCode::ServerError(Error::RuntimeError.into()),
+                message: "Unable to dry run extrinsic.".into(),
+                data: Some(format!("{:?}", e).into()),
+            })?;
+
+            let try_into_rpc_balance = |value: Balance| {
+                value.try_into().map_err(|_| RpcError {
+                    code: ErrorCode::InvalidParams,
+                    message: format!("{} doesn't fit in NumberOrHex representation", value),
+                    data: None,
+                })
+            };
+            try_into_rpc_balance(amount)
+
+        };
+
+        Box::new(result(get_token_price()))
     }
 
     fn can_join_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex> {

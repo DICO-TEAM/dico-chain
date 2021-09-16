@@ -969,10 +969,13 @@ impl<T: Config> Module<T> {
 		Ok(this_time_project_token_amount)
     }
 
-    fn get_token_price(currency_id: AssetId) -> MultiBalanceOf<T> {
+    pub fn get_token_price(currency_id: AssetId) -> MultiBalanceOf<T> {
 		match T::PriceData::get_price(currency_id, T::UsdtCurrencyId::get()) {
-			Some(x) => x.saturated_into::<MultiBalanceOf<T>>(),
-			None => MultiBalanceOf::<T>::from(0u32),
+			Some(x) => {
+				runtime_print!(" ---------------the token {:?}, price is {:?} ------------------", currency_id, x);
+				return x.saturated_into::<MultiBalanceOf<T>>();
+			},
+			None => return MultiBalanceOf::<T>::from(0u32),
 		}
     }
 
@@ -1664,7 +1667,7 @@ impl<T: Config> Module<T> {
 					return MultiBalanceOf::<T>::from(0u32);
 				}
 				else {
-					user_max_amount.min(IcoMaxUsdtAmount::<T>::get()).saturating_sub(x.total_usdt)
+					(user_max_amount.min(IcoMaxUsdtAmount::<T>::get())).saturating_sub(x.total_usdt)
 				}
 			},
 			None => user_max_amount.min(IcoMaxUsdtAmount::<T>::get()),
