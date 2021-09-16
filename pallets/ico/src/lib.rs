@@ -21,7 +21,7 @@ use orml_traits::{BalanceStatus, MultiCurrency, MultiReservableCurrency};
 pub use primitive_types::U256;
 use dico_primitives::time::*;
 use sp_runtime::app_crypto::sp_core::sandbox::ERR_EXECUTION;
-use sp_runtime::traits::{CheckedAdd, StaticLookup};
+use sp_runtime::traits::{CheckedAdd, StaticLookup, CheckedSub};
 use sp_runtime::{
     traits::CheckedMul,
     traits::{AccountIdConversion, CheckedDiv, Saturating, Zero},
@@ -30,7 +30,7 @@ use sp_runtime::{
 pub use sp_std::convert::{Into, TryFrom, TryInto};
 use sp_std::vec::Vec;
 use sp_std::{collections::btree_map::BTreeMap, prelude::*, result};
-use traits::{IcoHandler};
+use traits::{IcoHandler, PowerHandler};
 use dico_treasury::traits::DicoTreasuryHandler;
 pub use dico_primitives::{CurrencyId, AssetId};
 use pallet_pricedao::traits::PriceData;
@@ -477,6 +477,7 @@ decl_module! {
 			// Must be at the end
 			ico.total_usdt = new_total_usdt;
 			Ico::<T>::insert(currency_id, index, &ico);
+			Self::add_user_power(&user, total_usdt)?;
 
 			Self::deposit_event(RawEvent::Join(user, currency_id, index, amount, user_exchange_amount));
 		}
@@ -1708,6 +1709,8 @@ decl_storage! {
 
 		pub PowerMultipleOf get(fn power_multiple_of): map hasher(identity) AssetId => PowerMultiple;
 
+		pub TotalPowerOf get(fn total_power_of): map hasher(identity) T::AccountId => MultiBalanceOf<T>;
+
 	}
 }
 
@@ -1738,6 +1741,23 @@ for Module<T>
 		let amount = Self::u256_convert_to_balance(result);
 		Ok(amount)
     }
+}
+
+impl<T: Config> PowerHandler<T::AccountId, DispatchResult, MultiBalanceOf<T>> for Module<T> {
+	fn sub_user_power(user: &T::AccountId, amount: MultiBalanceOf<T>) -> DispatchResult {
+		let old = TotalPowerOf::<T>::get(user);
+		let new = old.checked_sub(&amount).ok_or(Error::<T>::Overflow)?;
+		TotalPowerOf::<T>::insert(user, new);
+		Ok(())
+	}
+
+	fn add_user_power(user: &T::AccountId, amount: MultiBalanceOf<T>) -> DispatchResult {
+		let old = TotalPowerOf::<T>::get(user);
+		let new = old.checked_add(&amount).ok_or(Error::<T>::Overflow)?;
+		TotalPowerOf::<T>::insert(user, new);
+
+		Ok(())
+	}
 }
 
 decl_event!(
