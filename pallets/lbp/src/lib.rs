@@ -62,21 +62,21 @@ pub struct LbpInfo<AccountId> {
 	pub end_block: BlockNumber,
 	pub steps: u32,
 	pub owner: AccountId,
-	// Investors pay for asset
-	pub supply_asset: AssetId,
-	// Asset purchased by investors
-	pub target_asset: AssetId,
-	pub initial_supply_balance: Balance,
-	pub initial_target_balance: Balance,
-	pub initial_supply_start_weight: u128,
-	pub initial_supply_end_weight: u128,
-	pub initial_target_start_weight: u128,
-	pub initial_target_end_weight: u128,
+	// available-for-sale asset
+	pub afs_asset: AssetId,
+	// project fundraising asset
+	pub fundraising_asset: AssetId,
+	pub initial_afs_balance: Balance,
+	pub initial_fundraising_balance: Balance,
+	pub initial_afs_start_weight: u128,
+	pub initial_afs_end_weight: u128,
+	pub initial_fundraising_start_weight: u128,
+	pub initial_fundraising_end_weight: u128,
 
-	pub supply_balance: Balance,
-	pub target_balance: Balance,
-	pub supply_weight: u128,
-	pub target_weight: u128,
+	pub afs_balance: Balance,
+	pub fundraising_balance: Balance,
+	pub afs_weight: u128,
+	pub fundraising_weight: u128,
 	pub status: LbpStatus,
 	pub step: u32,
 	pub next_block: BlockNumber,
@@ -88,32 +88,32 @@ impl<AccountId> LbpInfo<AccountId> {
 		end_block: BlockNumber,
 		steps: u32,
 		owner: AccountId,
-		supply_asset: AssetId,
-		target_asset: AssetId,
-		initial_supply_balance: u128,
-		initial_target_balance: u128,
-		initial_supply_start_weight: u128,
-		initial_supply_end_weight: u128,
-		initial_target_start_weight: u128,
-		initial_target_end_weight: u128,
+		afs_asset: AssetId,
+		fundraising_asset: AssetId,
+		initial_afs_balance: Balance,
+		initial_fundraising_balance: Balance,
+		initial_afs_start_weight: u128,
+		initial_afs_end_weight: u128,
+		initial_fundraising_start_weight: u128,
+		initial_fundraising_end_weight: u128,
 	) -> Self {
 		Self {
 			start_block,
 			end_block,
 			steps,
 			owner,
-			supply_asset,
-			target_asset,
-			initial_supply_balance,
-			initial_target_balance,
-			initial_supply_start_weight,
-			initial_supply_end_weight,
-			initial_target_start_weight,
-			initial_target_end_weight,
-			supply_balance: initial_supply_balance,
-			target_balance: initial_target_balance,
-			supply_weight: initial_supply_start_weight,
-			target_weight: initial_target_start_weight,
+			afs_asset,
+			fundraising_asset,
+			initial_afs_balance,
+			initial_fundraising_balance,
+			initial_afs_start_weight,
+			initial_afs_end_weight,
+			initial_fundraising_start_weight,
+			initial_fundraising_end_weight,
+			afs_balance: initial_afs_balance,
+			fundraising_balance: initial_fundraising_balance,
+			afs_weight: initial_afs_start_weight,
+			fundraising_weight: initial_fundraising_start_weight,
 			status: LbpStatus::Pending,
 			step: 0u32,
 			next_block: BlockNumber::zero(),
@@ -124,13 +124,13 @@ impl<AccountId> LbpInfo<AccountId> {
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct LbpPair {
-	pub supply_asset: AssetId,
-	pub target_asset: AssetId,
+	pub asset_a: AssetId,
+	pub asset_b: AssetId,
 }
 
 impl LbpPair {
-	pub fn new(supply_asset: AssetId, target_asset: AssetId) -> Self {
-		Self { supply_asset, target_asset }
+	pub fn new(asset_a: AssetId, asset_b: AssetId) -> Self {
+		if asset_a < asset_b { Self { asset_a, asset_b } } else { Self { asset_b, asset_a } }
 	}
 }
 
@@ -171,6 +171,7 @@ pub mod pallet {
 
 	#[pallet::error]
 	pub enum Error<T> {
+		MustBeDifferentAsset,
 		NoLbpIdAvailable,
 		LbpNotFind,
 		OngoingLbpNotFind,
@@ -178,16 +179,11 @@ pub mod pallet {
 		MustBeOwner,
 		MustBeNonTradingStatus,
 		MustBeNotEndStatus,
-		IncorrectSupplyAsset,
-		IncorrectTargetAsset,
 		MustBeInProgressStatus,
-		InvalidSupplyAmount,
 		InvalidTargetAmount,
 		UnacceptableSupplyAmount,
 		UnacceptableTargetAmount,
 		ErrMathApprox,
-		ErrMaxSupplyRatio,
-		ErrMaxTargetRatio,
 		ErrMinSteps,
 		ErrMaxSteps,
 		ErrMinWeight,
@@ -195,7 +191,6 @@ pub mod pallet {
 		ErrStartEndBlock,
 		ErrMaxDurationBlock,
 		ErrMinDurationBlock,
-		UnacceptablePrice,
 		StartBlockOutDate,
 	}
 
@@ -237,20 +232,21 @@ pub mod pallet {
 		#[transactional]
 		pub fn create_lbp(
 			origin: OriginFor<T>,
-			supply_asset: AssetId,
-			target_asset: AssetId,
-			supply_balance: Balance,
-			target_balance: Balance,
-			supply_start_weight: u128,
-			supply_end_weight: u128,
-			target_start_weight: u128,
-			target_end_weight: u128,
+			afs_asset: AssetId,
+			fundraising_asset: AssetId,
+			afs_balance: Balance,
+			fundraising_balance: Balance,
+			afs_start_weight: u128,
+			afs_end_weight: u128,
+			fundraising_start_weight: u128,
+			fundraising_end_weight: u128,
 			start_block: T::BlockNumber,
 			end_block: T::BlockNumber,
 			steps: u32,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 
+			ensure!(afs_asset != fundraising_asset, Error::<T>::MustBeDifferentAsset);
 			ensure!(steps >= MIN_STEPS, Error::<T>::ErrMinSteps);
 			ensure!(steps <= MAX_STEPS, Error::<T>::ErrMaxSteps);
 			ensure!(start_block < end_block, Error::<T>::ErrStartEndBlock);
@@ -262,12 +258,12 @@ pub mod pallet {
 			ensure!(duration_block <= MAX_DURATION_BLOCK, Error::<T>::ErrMaxDurationBlock);
 			ensure!(duration_block >= MIN_DURATION_BLOCK, Error::<T>::ErrMinDurationBlock);
 
-			Self::ensure_weight(supply_start_weight)?;
-			Self::ensure_weight(supply_end_weight)?;
-			Self::ensure_weight(target_start_weight)?;
-			Self::ensure_weight(target_end_weight)?;
+			Self::ensure_weight(afs_start_weight)?;
+			Self::ensure_weight(afs_end_weight)?;
+			Self::ensure_weight(fundraising_start_weight)?;
+			Self::ensure_weight(fundraising_end_weight)?;
 
-			let lbp_pair = LbpPair::new(supply_asset, target_asset);
+			let lbp_pair = LbpPair::new(afs_asset, fundraising_asset);
 			ensure!(!OngoingLbps::<T>::contains_key(lbp_pair), Error::<T>::LbpPairOngoing);
 
 			let current_block_number = frame_system::pallet::Pallet::<T>::block_number();
@@ -282,14 +278,14 @@ pub mod pallet {
 				initial_end_block,
 				steps,
 				who.clone(),
-				supply_asset,
-				target_asset,
-				supply_balance,
-				target_balance,
-				supply_start_weight,
-				supply_end_weight,
-				target_start_weight,
-				target_end_weight,
+				afs_asset,
+				fundraising_asset,
+				afs_balance,
+				fundraising_balance,
+				afs_start_weight,
+				afs_end_weight,
+				fundraising_start_weight,
+				fundraising_end_weight,
 			);
 
 			if block_number == initial_start_block {
@@ -298,15 +294,15 @@ pub mod pallet {
 
 			let module_account_id = Self::account_id();
 
-			T::Currency::transfer(supply_asset, &who, &module_account_id, supply_balance)?;
-			T::Currency::transfer(target_asset, &who, &module_account_id, target_balance)?;
+			T::Currency::transfer(afs_asset, &who, &module_account_id, afs_balance)?;
+			T::Currency::transfer(fundraising_asset, &who, &module_account_id, fundraising_balance)?;
 
 			Lbps::<T>::insert(lbp_id, lbp_info);
 			OngoingLbps::<T>::insert(lbp_pair, (who.clone(), lbp_id));
 
 			Self::deposit_event(
-				Event::LbpCreated(who, lbp_id, supply_asset,
-								  target_asset, supply_balance, target_balance)
+				Event::LbpCreated(who, lbp_id, afs_asset,
+								  fundraising_asset, afs_balance, fundraising_balance)
 			);
 
 			Ok(().into())
@@ -329,19 +325,19 @@ pub mod pallet {
 
 			let module_account_id = Self::account_id();
 
-			T::Currency::transfer(lbp_info.supply_asset.clone(), &module_account_id,
-								  &who, lbp_info.supply_balance)?;
-			T::Currency::transfer(lbp_info.target_asset.clone(), &module_account_id,
-								  &who, lbp_info.target_balance)?;
+			T::Currency::transfer(lbp_info.afs_asset.clone(), &module_account_id,
+								  &who, lbp_info.afs_balance)?;
+			T::Currency::transfer(lbp_info.fundraising_asset.clone(), &module_account_id,
+								  &who, lbp_info.fundraising_balance)?;
 
-			lbp_info.supply_balance = Balance::zero();
-			lbp_info.target_balance = Balance::zero();
+			lbp_info.afs_balance = Balance::zero();
+			lbp_info.fundraising_balance = Balance::zero();
 			if lbp_info.status == LbpStatus::Pending {
 				lbp_info.status = LbpStatus::Cancelled;
 			}
 
-			let lbp_pair = LbpPair::new(lbp_info.supply_asset.clone(),
-										lbp_info.target_asset.clone());
+			let lbp_pair = LbpPair::new(lbp_info.afs_asset.clone(),
+										lbp_info.fundraising_asset.clone());
 			OngoingLbps::<T>::remove(lbp_pair);
 
 			Lbps::<T>::insert(lbp_id, lbp_info);
@@ -359,11 +355,8 @@ pub mod pallet {
 			supply_amount: Balance,
 			target_asset: AssetId,
 			min_target_amount: Balance,
-			max_price: u128,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
-			// let test_swap_fee = 1500000000000000u128;
-			let test_swap_fee: u128 = 0;
 
 			let lbp_pair = LbpPair::new(supply_asset, target_asset);
 			let ongoing_lbp = OngoingLbps::<T>::try_get(lbp_pair).
@@ -373,74 +366,68 @@ pub mod pallet {
 			let mut lbp_info = Lbps::<T>::get(lbp_id)
 				.ok_or(Error::<T>::LbpNotFind)?;
 
-			ensure!(lbp_info.supply_asset == supply_asset, Error::<T>::IncorrectSupplyAsset);
-			ensure!(lbp_info.target_asset == target_asset, Error::<T>::IncorrectTargetAsset);
 			ensure!(lbp_info.status == LbpStatus::InProgress, Error::<T>::MustBeInProgressStatus);
-			ensure!(min_target_amount <= lbp_info.target_balance, Error::<T>::InvalidTargetAmount);
-			ensure!(
-				to_u256!(supply_amount) <= bmul(
-					to_u256!(lbp_info.supply_balance),
-					to_u256!(MAX_IN_RATIO)
-				).ok_or(ArithmeticError::Overflow)?,
-				Error::<T>::ErrMaxSupplyRatio
-			);
 
-			let spot_price_before =
-				calc_spot_price(to_u256!(lbp_info.supply_balance),
-								to_u256!(lbp_info.supply_weight),
-								to_u256!(lbp_info.target_balance),
-								to_u256!(lbp_info.target_weight),
-								to_u256!(test_swap_fee),
+			let target_amount = if supply_asset == lbp_info.afs_asset {
+				let target_amount = Self::get_amount_out(
+					lbp_info.afs_balance,
+					lbp_info.afs_weight,
+					lbp_info.fundraising_balance,
+					lbp_info.fundraising_weight,
+					supply_amount,
+					min_target_amount,
 				)?;
 
-			let target_amount =
-				calc_out_given_in(to_u256!(lbp_info.supply_balance),
-								  to_u256!(lbp_info.supply_weight),
-								  to_u256!(lbp_info.target_balance),
-								  to_u256!(lbp_info.target_weight),
-								  to_u256!(supply_amount),
-								  to_u256!(test_swap_fee),
+				lbp_info.afs_balance = to_balance!(
+					badd(to_u256!(lbp_info.afs_balance), to_u256!(supply_amount))
+					.ok_or(ArithmeticError::Overflow)?
 				)?;
 
-			ensure!(target_amount >= to_u256!(min_target_amount), Error::<T>::UnacceptableTargetAmount);
-			ensure!(
-				spot_price_before <= bdiv(to_u256!(supply_amount), target_amount).ok_or(ArithmeticError::Overflow)?,
-				Error::<T>::ErrMathApprox
-			);
-
-			lbp_info.supply_balance = to_balance!(
-				badd(to_u256!(lbp_info.supply_balance), to_u256!(supply_amount)).ok_or(ArithmeticError::Overflow)?
-			)?;
-
-			lbp_info.target_balance = to_balance!(
-				bsub(to_u256!(lbp_info.target_balance), target_amount).ok_or(ArithmeticError::Overflow)?
-			)?;
-
-			let spot_price_after =
-				calc_spot_price(to_u256!(lbp_info.supply_balance),
-								to_u256!(lbp_info.supply_weight),
-								to_u256!(lbp_info.target_balance),
-								to_u256!(lbp_info.target_weight),
-								to_u256!(test_swap_fee),
+				lbp_info.fundraising_balance = to_balance!(
+					bsub(to_u256!(lbp_info.fundraising_balance), to_u256!(target_amount))
+					.ok_or(ArithmeticError::Overflow)?
 				)?;
 
-			ensure!(spot_price_after >= spot_price_before, Error::<T>::ErrMathApprox);
-			ensure!(spot_price_after <= to_u256!(max_price), Error::<T>::UnacceptablePrice);
+				target_amount
+			} else {
+				// supply_asset = lbp_info.fundraising_asset
+				let target_amount = Self::get_amount_out(
+					lbp_info.fundraising_balance,
+					lbp_info.fundraising_weight,
+					lbp_info.afs_balance,
+					lbp_info.afs_weight,
+					supply_amount,
+					min_target_amount,
+				)?;
+
+				lbp_info.fundraising_balance = to_balance!(
+					badd(to_u256!(lbp_info.fundraising_balance), to_u256!(supply_amount))
+					.ok_or(ArithmeticError::Overflow)?
+				)?;
+
+				lbp_info.afs_balance = to_balance!(
+					bsub(to_u256!(lbp_info.afs_balance), to_u256!(target_amount))
+					.ok_or(ArithmeticError::Overflow)?
+				)?;
+
+				target_amount
+			};
 
 			let module_account_id = Self::account_id();
 
-			T::Currency::transfer(supply_asset, &who,
-								  &module_account_id, supply_amount)?;
-			T::Currency::transfer(target_asset, &module_account_id,
-								  &who, to_balance!(target_amount)?)?;
+			T::Currency::transfer(supply_asset, &who, &module_account_id, supply_amount)?;
+			T::Currency::transfer(target_asset, &module_account_id, &who, target_amount)?;
 
 			Lbps::<T>::insert(lbp_id, lbp_info);
 
-			Self::deposit_event(
-				Event::Swapped(who, lbp_id, supply_asset,
-							   target_asset, supply_amount, to_balance!(target_amount)?,
-				)
-			);
+			Self::deposit_event(Event::Swapped(
+				who,
+				lbp_id,
+				supply_asset,
+				target_asset,
+				supply_amount,
+				target_amount,
+			));
 
 			Ok(().into())
 		}
@@ -453,7 +440,6 @@ pub mod pallet {
 			max_supply_amount: Balance,
 			target_asset: AssetId,
 			target_amount: Balance,
-			max_price: u128,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 
@@ -465,60 +451,52 @@ pub mod pallet {
 			let mut lbp_info = Lbps::<T>::get(lbp_id)
 				.ok_or(Error::<T>::LbpNotFind)?;
 
-			ensure!(lbp_info.supply_asset == supply_asset, Error::<T>::IncorrectSupplyAsset);
-			ensure!(lbp_info.target_asset == target_asset, Error::<T>::IncorrectTargetAsset);
 			ensure!(lbp_info.status == LbpStatus::InProgress, Error::<T>::MustBeInProgressStatus);
-			ensure!(target_amount <= lbp_info.target_balance, Error::<T>::InvalidTargetAmount);
-			ensure!(
-				to_u256!(target_amount) <= bmul(
-					to_u256!(lbp_info.target_balance),
-					to_u256!(MAX_OUT_RATIO)
-				).ok_or(ArithmeticError::Overflow)?,
-				Error::<T>::ErrMaxTargetRatio
-			);
 
-			let spot_price_before =
-				calc_spot_price(to_u256!(lbp_info.supply_balance),
-								to_u256!(lbp_info.supply_weight),
-								to_u256!(lbp_info.target_balance),
-								to_u256!(lbp_info.target_weight),
-								to_u256!(0),
-				)?;
-			ensure!(spot_price_before <= to_u256!(max_price), Error::<T>::UnacceptablePrice);
-
-			let supply_amount =
-				calc_in_given_out(to_u256!(lbp_info.supply_balance),
-								  to_u256!(lbp_info.supply_weight),
-								  to_u256!(lbp_info.target_balance),
-								  to_u256!(lbp_info.target_weight),
-								  to_u256!(target_amount),
-								  to_u256!(0),
+			let supply_amount = if supply_asset == lbp_info.afs_asset {
+				let supply_amount = Self::get_amount_in(
+					lbp_info.afs_balance,
+					lbp_info.afs_weight,
+					lbp_info.fundraising_balance,
+					lbp_info.fundraising_weight,
+					target_amount,
+					max_supply_amount,
 				)?;
 
-			ensure!(supply_amount <= to_u256!(max_supply_amount), Error::<T>::UnacceptableSupplyAmount);
-
-			lbp_info.supply_balance = to_balance!(
-				badd(to_u256!(lbp_info.supply_balance), supply_amount).ok_or(ArithmeticError::Overflow)?
-			)?;
-
-			lbp_info.target_balance = to_balance!(
-				bsub(to_u256!(lbp_info.target_balance), to_u256!(target_amount)).ok_or(ArithmeticError::Overflow)?
-			)?;
-
-			let spot_price_after =
-				calc_spot_price(to_u256!(lbp_info.supply_balance),
-								to_u256!(lbp_info.supply_weight),
-								to_u256!(lbp_info.target_balance),
-								to_u256!(lbp_info.target_weight),
-								to_u256!(0),
+				lbp_info.afs_balance = to_balance!(
+					badd(to_u256!(lbp_info.afs_balance), to_u256!(supply_amount))
+					.ok_or(ArithmeticError::Overflow)?
 				)?;
 
-			ensure!(spot_price_after >= spot_price_before, Error::<T>::ErrMathApprox);
-			ensure!(spot_price_after <= to_u256!(max_price), Error::<T>::UnacceptablePrice);
-			ensure!(
-				spot_price_before <= bdiv(supply_amount, to_u256!(target_amount)).ok_or(ArithmeticError::Overflow)?,
-				Error::<T>::ErrMathApprox
-			);
+				lbp_info.fundraising_balance = to_balance!(
+					bsub(to_u256!(lbp_info.fundraising_balance), to_u256!(target_amount))
+					.ok_or(ArithmeticError::Overflow)?
+				)?;
+
+				supply_amount
+			} else {
+				// supply_asset = lbp_info.fundraising_asset
+				let supply_amount = Self::get_amount_in(
+					lbp_info.fundraising_balance,
+					lbp_info.fundraising_weight,
+					lbp_info.afs_balance,
+					lbp_info.afs_weight,
+					target_amount,
+					max_supply_amount,
+				)?;
+
+				lbp_info.fundraising_balance = to_balance!(
+					badd(to_u256!(lbp_info.fundraising_balance), to_u256!(supply_amount))
+					.ok_or(ArithmeticError::Overflow)?
+				)?;
+
+				lbp_info.afs_balance = to_balance!(
+					bsub(to_u256!(lbp_info.afs_balance), to_u256!(target_amount))
+					.ok_or(ArithmeticError::Overflow)?
+				)?;
+
+				supply_amount
+			};
 
 			let module_account_id = Self::account_id();
 
@@ -529,11 +507,14 @@ pub mod pallet {
 
 			Lbps::<T>::insert(lbp_id, lbp_info);
 
-			Self::deposit_event(
-				Event::Swapped(who, lbp_id, supply_asset,
-							   target_asset, to_balance!(supply_amount)?, target_amount,
-				)
-			);
+			Self::deposit_event(Event::Swapped(
+				who,
+				lbp_id,
+				supply_asset,
+				target_asset,
+				supply_amount,
+				target_amount,
+			));
 
 			Ok(().into())
 		}
@@ -560,7 +541,7 @@ impl<T: Config> Pallet<T> {
 		Ok(().into())
 	}
 
-	fn put_price_history(lbp_id: T::LbpId, now: BlockNumber, supply_balance: Balance,
+	fn insert_price_history(lbp_id: T::LbpId, now: BlockNumber, supply_balance: Balance,
 						 target_balance: Balance, supply_weight: u128, target_weight: u128) {
 		let mut history = PriceHistory::<T>::get(lbp_id);
 		history.push((now, supply_balance, target_balance, supply_weight, target_weight));
@@ -573,6 +554,104 @@ impl<T: Config> Pallet<T> {
 		for (_, lbp_id) in ongoing_lbps {
 			let _ = Self::update_weight(block_number, lbp_id);
 		}
+	}
+
+	fn get_amount_out(
+		asset_balance_in: Balance,
+		asset_weight_in: u128,
+		asset_balance_out: Balance,
+		asset_weight_out: u128,
+		supply_amount: Balance,
+		min_target_amount: Balance,
+	) -> sp_std::result::Result<Balance, DispatchErrorWithPostInfo> {
+		ensure!(min_target_amount <= asset_balance_out, Error::<T>::InvalidTargetAmount);
+
+		let spot_price_before =
+			calc_spot_price(to_u256!(asset_balance_in),
+							to_u256!(asset_weight_in),
+							to_u256!(asset_balance_out),
+							to_u256!(asset_weight_out),
+							to_u256!(SWAP_FEE))?;
+
+		let target_amount =
+			calc_out_given_in(to_u256!(asset_balance_in),
+							  to_u256!(asset_weight_in),
+							  to_u256!(asset_balance_out),
+							  to_u256!(asset_weight_out),
+							  to_u256!(supply_amount),
+							  to_u256!(SWAP_FEE))?;
+
+		ensure!(target_amount >= to_u256!(min_target_amount), Error::<T>::UnacceptableTargetAmount);
+		ensure!(
+			spot_price_before <= bdiv(to_u256!(supply_amount), target_amount).ok_or(ArithmeticError::Overflow)?,
+			Error::<T>::ErrMathApprox
+		);
+
+		let new_asset_balance_in = badd(to_u256!(asset_balance_in), to_u256!(supply_amount))
+			.ok_or(ArithmeticError::Overflow)?;
+		let new_asset_balance_out = bsub(to_u256!(asset_balance_out), target_amount)
+			.ok_or(ArithmeticError::Overflow)?;
+
+		let spot_price_after =
+			calc_spot_price(new_asset_balance_in,
+							to_u256!(asset_weight_in),
+							new_asset_balance_out,
+							to_u256!(asset_weight_out),
+							to_u256!(SWAP_FEE))?;
+
+		ensure!(spot_price_after >= spot_price_before, Error::<T>::ErrMathApprox);
+
+		let target_balance = to_balance!(target_amount)?;
+		Ok(target_balance)
+	}
+
+	fn get_amount_in(
+		asset_balance_in: Balance,
+		asset_weight_in: u128,
+		asset_balance_out: Balance,
+		asset_weight_out: u128,
+		target_amount: Balance,
+		max_supply_amount: Balance,
+	) -> sp_std::result::Result<Balance, DispatchErrorWithPostInfo> {
+		ensure!(target_amount <= asset_balance_out, Error::<T>::InvalidTargetAmount);
+
+		let spot_price_before =
+			calc_spot_price(to_u256!(asset_balance_in),
+							to_u256!(asset_weight_in),
+							to_u256!(asset_balance_out),
+							to_u256!(asset_weight_out),
+							to_u256!(SWAP_FEE))?;
+
+		let supply_amount =
+			calc_in_given_out(to_u256!(asset_balance_in),
+							  to_u256!(asset_weight_in),
+							  to_u256!(asset_balance_out),
+							  to_u256!(asset_weight_out),
+							  to_u256!(target_amount),
+							  to_u256!(SWAP_FEE))?;
+
+		ensure!(supply_amount <= to_u256!(max_supply_amount), Error::<T>::UnacceptableSupplyAmount);
+
+		let new_asset_balance_in = badd(to_u256!(asset_balance_in), supply_amount)
+			.ok_or(ArithmeticError::Overflow)?;
+		let new_asset_balance_out = bsub(to_u256!(asset_balance_out), to_u256!(target_amount))
+			.ok_or(ArithmeticError::Overflow)?;
+
+		let spot_price_after =
+			calc_spot_price(new_asset_balance_in,
+							to_u256!(asset_weight_in),
+							new_asset_balance_out,
+							to_u256!(asset_weight_out),
+							to_u256!(SWAP_FEE))?;
+
+		ensure!(spot_price_after >= spot_price_before, Error::<T>::ErrMathApprox);
+		ensure!(
+			spot_price_before <= bdiv(supply_amount, to_u256!(target_amount)).ok_or(ArithmeticError::Overflow)?,
+			Error::<T>::ErrMathApprox
+		);
+
+		let supply_balance = to_balance!(supply_amount)?;
+		Ok(supply_balance)
 	}
 
 	fn update_weight(
@@ -591,30 +670,30 @@ impl<T: Config> Pallet<T> {
 			}
 
 			if now >= lbp_info.next_block && lbp_info.status == LbpStatus::InProgress {
-				let supply_adjust_weight = calc_adjust_weight(
-					to_u256!(lbp_info.initial_supply_start_weight),
-					to_u256!(lbp_info.initial_supply_end_weight),
+				let afs_adjust_weight = calc_adjust_weight(
+					to_u256!(lbp_info.initial_afs_start_weight),
+					to_u256!(lbp_info.initial_afs_end_weight),
 					to_u256!(lbp_info.steps),
 					to_u256!(lbp_info.step),
 				).ok_or(ArithmeticError::Overflow)?;
 
-				let target_adjust_weight = calc_adjust_weight(
-					to_u256!(lbp_info.initial_target_start_weight),
-					to_u256!(lbp_info.initial_target_end_weight),
+				let fundraising_adjust_weight = calc_adjust_weight(
+					to_u256!(lbp_info.initial_fundraising_start_weight),
+					to_u256!(lbp_info.initial_fundraising_end_weight),
 					to_u256!(lbp_info.steps),
 					to_u256!(lbp_info.step),
 				).ok_or(ArithmeticError::Overflow)?;
 
-				lbp_info.supply_weight = to_balance!(supply_adjust_weight)?;
-				lbp_info.target_weight = to_balance!(target_adjust_weight)?;
+				lbp_info.afs_weight = to_balance!(afs_adjust_weight)?;
+				lbp_info.fundraising_weight = to_balance!(fundraising_adjust_weight)?;
 
-				Self::put_price_history(
+				Self::insert_price_history(
 					lbp_id,
 					now,
-					lbp_info.supply_balance,
-					lbp_info.target_balance,
-					lbp_info.supply_weight,
-					lbp_info.target_weight,
+					lbp_info.afs_balance,
+					lbp_info.fundraising_balance,
+					lbp_info.afs_weight,
+					lbp_info.fundraising_weight,
 				);
 
 				lbp_info.step = lbp_info.step.checked_add(u32::one())
