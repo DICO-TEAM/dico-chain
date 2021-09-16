@@ -196,8 +196,8 @@ fn exit_lbp_should_work() {
 		assert_eq!(Currency::free_balance(USDT, &ALICE), DEFAULT_ASSET_AMOUNT);
 
 		lbp_info.status = LbpStatus::Cancelled;
-		lbp_info.supply_balance = 0;
-		lbp_info.target_balance = 0;
+		lbp_info.afs_balance = 0;
+		lbp_info.fundraising_balance = 0;
 		assert_eq!(Lbps::<Test>::get(0), Some(lbp_info));
 
 		let lbp_pair = LbpPair::new(DICO, USDT);
@@ -255,12 +255,11 @@ fn swap_exact_amount_supply_should_work() {
 			USDT,
 			86034000000000000000000u128,
 			DICO,
-			0,
-			2_000_000_000_000_000_000u128,
+			0
 		));
 
-		lbp_info.supply_balance += 86034000000000000000000u128;
-		lbp_info.target_balance -= 51927050621361330000000u128;
+		lbp_info.afs_balance += 86034000000000000000000u128;
+		lbp_info.fundraising_balance -= 51927050621361330000000u128;
 		assert_eq!(Lbps::<Test>::get(0), Some(lbp_info));
 
 		assert_eq!(Currency::free_balance(DICO, &module_id_account),
@@ -326,12 +325,11 @@ fn swap_exact_amount_target_should_work() {
 			USDT,
 			986034000000000000000000u128,
 			DICO,
-			51927050621361330000000u128,
-			2_000_000_000_000_000_000u128,
+			51927050621361330000000u128
 		));
 
-		lbp_info.supply_balance += 86033999974477294587667u128;
-		lbp_info.target_balance -= 51927050621361330000000u128;
+		lbp_info.afs_balance += 86033999974477294587667u128;
+		lbp_info.fundraising_balance -= 51927050621361330000000u128;
 		assert_eq!(Lbps::<Test>::get(0), Some(lbp_info));
 
 		assert_eq!(Currency::free_balance(DICO, &module_id_account),
