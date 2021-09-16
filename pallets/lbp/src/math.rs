@@ -8,21 +8,9 @@ use dico_primitives::BlockNumber;
 
 
 pub const BONE: u128 = 1_000_000_000_000_000_000u128;
-// pub const MIN_BOUND_TOKENS: u128 = 2u128;
-// pub const MAX_BOUND_TOKENS: u128 = 8u128;
-// pub const MIN_FEE: u128 = BONE / 1000_000u128;
-// pub const MAX_FEE: u128 = BONE / 10u128;
-// pub const EXIT_FEE: u128 = 0u128;
-// pub const MIN_WEIGHT: u128 = BONE;
-// pub const MAX_WEIGHT: u128 = BONE * 50u128;
-// pub const MAX_TOTAL_WEIGHT: u128 = BONE * 50u128;
-// pub const MIN_BALANCE: u128 = BONE / 1000_000_000_000u128;
-// pub const INIT_POOL_SUPPLY: u128 = BONE / 100u128;
 pub const MIN_BPOW_BASE: u128 = 1u128;
 pub const MAX_BPOW_BASE: u128 = 2u128 * BONE - 1u128;
 pub const BPOW_PRECISION: u128 = BONE / 10_000_000_000u128;
-pub const MAX_IN_RATIO: u128 = BONE / 2u128;
-pub const MAX_OUT_RATIO: u128 = (BONE / 3u128) + 1u128;
 pub const MAX_DURATION_BLOCK: BlockNumber = 43200;
 pub const MIN_DURATION_BLOCK: BlockNumber = 100;
 pub const MAX_STEPS: u32 = 432;
@@ -30,7 +18,7 @@ pub const MIN_STEPS: u32 = 1;
 pub const WEIGHT_ONE: u128 = 10_000_000_000u128;
 pub const MAX_WEIGHT: u128 = 100 * WEIGHT_ONE;
 pub const MIN_WEIGHT: u128 = WEIGHT_ONE;
-
+pub const SWAP_FEE: u128 = 0u128;
 
 #[cfg(test)]
 const TEST_SWAP_FEE: u128 = 1_500_000_000u128;
@@ -150,23 +138,23 @@ fn bpow_approx(base: U256, exp: U256, precision: U256) -> Option<U256> {
 // *******************************************************************************************//
 //  calc_spot_price                                                                           //
 //  sP = spot_price                                                                           //
-//  bI = token_balance_in              ( bI / wI )         1                                  //
-//  bO = token_balance_out       sP =  -----------  *  ----------                             //
-//  wI = token_weight_in               ( bO / wO )     ( 1 - sF )                             //
-//  wO = token_weight_out                                                                     //
+//  bI = asset_balance_in              ( bI / wI )         1                                  //
+//  bO = asset_balance_out       sP =  -----------  *  ----------                             //
+//  wI = asset_weight_in               ( bO / wO )     ( 1 - sF )                             //
+//  wO = asset_weight_out                                                                     //
 //  sF = swap_fee                                                                             //
 // *******************************************************************************************//
 pub fn calc_spot_price(
-	token_balance_in: U256,
-	token_weight_in: U256,
-	token_balance_out: U256,
-	token_weight_out: U256,
+	asset_balance_in: U256,
+	asset_weight_in: U256,
+	asset_balance_out: U256,
+	asset_weight_out: U256,
 	swap_fee: U256,
 ) -> sp_std::result::Result<U256, ArithmeticError> {
 	let bone = U256::from(BONE);
 
-	let numerator = bdiv(token_balance_in, token_weight_in).ok_or(ArithmeticError::Overflow)?;
-	let denominator = bdiv(token_balance_out, token_weight_out).ok_or(ArithmeticError::Overflow)?;
+	let numerator = bdiv(asset_balance_in, asset_weight_in).ok_or(ArithmeticError::Overflow)?;
+	let denominator = bdiv(asset_balance_out, asset_weight_out).ok_or(ArithmeticError::Overflow)?;
 	let ratio = bdiv(numerator, denominator).ok_or(ArithmeticError::Overflow)?;
 	let scale = bdiv(
 		bone,
@@ -180,68 +168,68 @@ pub fn calc_spot_price(
 
 //********************************************************************************************//
 // calc_out_given_in                                                                          //
-// aO = token_amount_out                                                                      //
-// bO = token_balance_out                                                                     //
-// bI = token_balance_in               /      /            bI             \    (wI / wO) \    //
-// aI = token_amount_in     aO = bO * |  1 - | --------------------------  | ^            |   //
-// wI = token_weight_in                \      \ ( bI + ( aI * ( 1 - sF )) /              /    //
-// wO = token_weight_out                                                                      //
+// aO = asset_amount_out                                                                      //
+// bO = asset_balance_out                                                                     //
+// bI = asset_balance_in               /      /            bI             \    (wI / wO) \    //
+// aI = asset_amount_in     aO = bO * |  1 - | --------------------------  | ^            |   //
+// wI = asset_weight_in                \      \ ( bI + ( aI * ( 1 - sF )) /              /    //
+// wO = asset_weight_out                                                                      //
 // sF = swap_fee                                                                              //
 //********************************************************************************************//
 pub fn calc_out_given_in(
-	token_balance_in: U256,
-	token_weight_in: U256,
-	token_balance_out: U256,
-	token_weight_out: U256,
-	token_amount_in: U256,
+	asset_balance_in: U256,
+	asset_weight_in: U256,
+	asset_balance_out: U256,
+	asset_weight_out: U256,
+	asset_amount_in: U256,
 	swap_fee: U256,
 ) -> sp_std::result::Result<U256, ArithmeticError> {
 	let bone = U256::from(BONE);
 
-	let weight_ratio = bdiv(token_weight_in, token_weight_out).ok_or(ArithmeticError::Overflow)?;
+	let weight_ratio = bdiv(asset_weight_in, asset_weight_out).ok_or(ArithmeticError::Overflow)?;
 	let mut adjusted_in = bsub(bone, swap_fee).ok_or(ArithmeticError::Overflow)?;
-	adjusted_in = bmul(token_amount_in, adjusted_in).ok_or(ArithmeticError::Overflow)?;
-	let x = badd(token_balance_in, adjusted_in).ok_or(ArithmeticError::Overflow)?;
-	let y = bdiv(token_balance_in, x).ok_or(ArithmeticError::Overflow)?;
+	adjusted_in = bmul(asset_amount_in, adjusted_in).ok_or(ArithmeticError::Overflow)?;
+	let x = badd(asset_balance_in, adjusted_in).ok_or(ArithmeticError::Overflow)?;
+	let y = bdiv(asset_balance_in, x).ok_or(ArithmeticError::Overflow)?;
 	let foo = bpow(y, weight_ratio).ok_or(ArithmeticError::Overflow)?;
 	let bar = bsub(bone, foo).ok_or(ArithmeticError::Overflow)?;
 
-	let token_amount_out = bmul(token_balance_out, bar).ok_or(ArithmeticError::Overflow)?;
-	Ok(token_amount_out)
+	let asset_amount_out = bmul(asset_balance_out, bar).ok_or(ArithmeticError::Overflow)?;
+	Ok(asset_amount_out)
 }
 
 
 //********************************************************************************************//
 // calc_in_given_out                                                                          //
-// aI = token_amount_in                                                                       //
-// bO = token_balance_out                  /  /     bO      \    (wO / wI)      \             //
-// bI = token_balance_in             bI * |  | ------------  | ^            - 1  |            //
-// aO = token_amount_out       aI =        \  \ ( bO - aO ) /                   /             //
-// wI = token_weight_in              --------------------------------------------             //
-// wO = token_weight_out                             ( 1 - sF )                               //
+// aI = asset_amount_in                                                                       //
+// bO = asset_balance_out                  /  /     bO      \    (wO / wI)      \             //
+// bI = asset_balance_in             bI * |  | ------------  | ^            - 1  |            //
+// aO = asset_amount_out       aI =        \  \ ( bO - aO ) /                   /             //
+// wI = asset_weight_in              --------------------------------------------             //
+// wO = asset_weight_out                             ( 1 - sF )                               //
 // sF = swap_fee                                                                              //
 //********************************************************************************************//
 pub fn calc_in_given_out(
-	token_balance_in: U256,
-	token_weight_in: U256,
-	token_balance_out: U256,
-	token_weight_out: U256,
-	token_amount_out: U256,
+	asset_balance_in: U256,
+	asset_weight_in: U256,
+	asset_balance_out: U256,
+	asset_weight_out: U256,
+	asset_amount_out: U256,
 	swap_fee: U256,
 ) -> sp_std::result::Result<U256, ArithmeticError> {
 	let bone = U256::from(BONE);
 
-	let weight_radio = bdiv(token_weight_out, token_weight_in).ok_or(ArithmeticError::Overflow)?;
-	let diff = bsub(token_balance_out, token_amount_out).ok_or(ArithmeticError::Overflow)?;
-	let y = bdiv(token_balance_out, diff).ok_or(ArithmeticError::Overflow)?;
+	let weight_radio = bdiv(asset_weight_out, asset_weight_in).ok_or(ArithmeticError::Overflow)?;
+	let diff = bsub(asset_balance_out, asset_amount_out).ok_or(ArithmeticError::Overflow)?;
+	let y = bdiv(asset_balance_out, diff).ok_or(ArithmeticError::Overflow)?;
 	let mut foo = bpow(y, weight_radio).ok_or(ArithmeticError::Overflow)?;
 	foo = bsub(foo, bone).ok_or(ArithmeticError::Overflow)?;
-	let mut token_amount_in = bsub(bone, swap_fee).ok_or(ArithmeticError::Overflow)?;
-	token_amount_in = bdiv(
-		bmul(token_balance_in, foo).ok_or(ArithmeticError::Overflow)?,
-		token_amount_in).ok_or(ArithmeticError::Overflow)?;
+	let mut asset_amount_in = bsub(bone, swap_fee).ok_or(ArithmeticError::Overflow)?;
+	asset_amount_in = bdiv(
+		bmul(asset_balance_in, foo).ok_or(ArithmeticError::Overflow)?,
+		asset_amount_in).ok_or(ArithmeticError::Overflow)?;
 
-	Ok(token_amount_in)
+	Ok(asset_amount_in)
 }
 
 

@@ -27,23 +27,23 @@ benchmarks! {
 	create_lbp {
 		let caller = funded_account::<T>("caller", 0);
 
-		let supply_asset: AssetId = USDC;
-		let target_asset: AssetId = DOT;
-		let supply_balance = 10_000_000_000_000u128;
-		let target_balance = 100_000_000_000_000u128;
-		let supply_start_weight = 10u128 * WEIGHT_ONE;
-		let supply_end_weight = 90u128 * WEIGHT_ONE;
-		let target_start_weight = 10u128 * WEIGHT_ONE;
-		let target_end_weight = 90u128 * WEIGHT_ONE;
+		let afs_asset: AssetId = USDC;
+		let fundraising_asset: AssetId = DOT;
+		let afs_balance = 10_000_000_000_000u128;
+		let fundraising_balance = 100_000_000_000_000u128;
+		let afs_start_weight = 10u128 * WEIGHT_ONE;
+		let afs_end_weight = 90u128 * WEIGHT_ONE;
+		let fundraising_start_weight = 10u128 * WEIGHT_ONE;
+		let fundraising_end_weight = 90u128 * WEIGHT_ONE;
 		let start_block = T::BlockNumber::from(100u32);
 		let end_block = T::BlockNumber::from(1000u32);
 		let steps = BlockNumber::from(100u32);
-	}: _(RawOrigin::Signed(caller.clone()), supply_asset, target_asset, supply_balance,
-		target_balance, supply_start_weight, supply_end_weight, target_start_weight,
-		target_end_weight, start_block, end_block, steps)
+	}: _(RawOrigin::Signed(caller.clone()), afs_asset, fundraising_asset, afs_balance,
+		fundraising_balance, afs_start_weight, afs_end_weight, fundraising_start_weight,
+		fundraising_end_weight, start_block, end_block, steps)
 	verify {
-		assert_eq!(T::Currency::free_balance(target_asset, &caller), 10_000_000_000_000_000_000_000_000_000 - 100_000_000_000_000);
-		assert_eq!(T::Currency::free_balance(supply_asset, &caller), 10_000_000_000_000_000_000_000_000_000 - 10_000_000_000_000);
+		assert_eq!(T::Currency::free_balance(fundraising_asset, &caller), 10_000_000_000_000_000_000_000_000_000 - 100_000_000_000_000);
+		assert_eq!(T::Currency::free_balance(afs_asset, &caller), 10_000_000_000_000_000_000_000_000_000 - 10_000_000_000_000);
 	}
 
 	exit_lbp {
@@ -93,7 +93,7 @@ benchmarks! {
 		assert_eq!(T::Currency::free_balance(USDC, &saler), 10_000_000_000_000_000_000_000_000_000 - 1333333000000000000000000);
 		assert_eq!(T::Currency::free_balance(DOT, &saler), 10_000_000_000_000_000_000_000_000_000 - 7500000000000000000000000);
 
-	}: _(RawOrigin::Signed(buyer.clone()), USDC, 86034000000000000000000u128, DOT, 0, 2_000_000_000_000_000_000u128)
+	}: _(RawOrigin::Signed(buyer.clone()), USDC, 86034000000000000000000u128, DOT, 0)
 	verify {
 		assert_eq!(T::Currency::free_balance(USDC, &buyer), 10_000_000_000_000_000_000_000_000_000 - 86034000000000000000000);
 		assert_eq!(T::Currency::free_balance(DOT, &buyer), 10_000_000_000_000_000_000_000_000_000 + 51927050621361330000000);
@@ -120,7 +120,7 @@ benchmarks! {
 		assert_eq!(T::Currency::free_balance(USDC, &saler), 10_000_000_000_000_000_000_000_000_000 - 1333333000000000000000000);
 		assert_eq!(T::Currency::free_balance(DOT, &saler), 10_000_000_000_000_000_000_000_000_000 - 7500000000000000000000000);
 
-	}: _(RawOrigin::Signed(buyer.clone()), USDC, 986034000000000000000000u128, DOT, 51927050621361330000000u128, 2_000_000_000_000_000_000u128)
+	}: _(RawOrigin::Signed(buyer.clone()), USDC, 986034000000000000000000u128, DOT, 51927050621361330000000u128)
 	verify {
 		assert_eq!(T::Currency::free_balance(USDC, &buyer), 10_000_000_000_000_000_000_000_000_000 - 86033999974477294587667);
 		assert_eq!(T::Currency::free_balance(DOT, &buyer), 10_000_000_000_000_000_000_000_000_000 + 51927050621361330000000);
