@@ -17,7 +17,6 @@ pub use frame_system::{self as system, ensure_none, ensure_root, ensure_signed};
 use orml_tokens::BalanceLock;
 use orml_tokens::{self as tokens, Locks};
 use orml_traits::{BalanceStatus, MultiCurrency, MultiReservableCurrency};
-use pallet_kyc::types::AreaCode;
 pub use primitive_types::U256;
 use dico_primitives::time::*;
 use sp_runtime::app_crypto::sp_core::sandbox::ERR_EXECUTION;
@@ -33,6 +32,9 @@ use sp_std::{collections::btree_map::BTreeMap, prelude::*, result};
 use traits::{IcoHandler};
 use dico_treasury::traits::DicoTreasuryHandler;
 pub use dico_primitives::{CurrencyId, AssetId};
+use pallet_pricedao::traits::PriceData;
+use dico_primitives::{Price, Balance};
+use pallet_kyc::{traits::KycHandler, types::AreaCode};
 
 pub mod mock;
 pub mod tests;
@@ -276,6 +278,12 @@ pub trait Config: system::Config + tokens::Config {
     type InviterRewardProportion: Get<Percent>;
 
     type InviteeRewardProportion: Get<Percent>;
+
+	type PriceData: PriceData<AssetId, Price = Balance>;
+
+	type UsdtCurrencyId: Get<AssetId>;
+
+	type KycHandler: KycHandler<Self::AccountId, AreaCode>;
 }
 
 decl_module! {
@@ -695,14 +703,15 @@ impl<T: Config> Module<T> {
 		<system::Pallet<T>>::block_number()
     }
 
-    ///  todo
     fn get_uesr_area(who: &T::AccountId) -> Option<AreaCode> {
-		Some(AreaCode::AF)
+		T::KycHandler::get_user_area(who)
     }
 
-    /// todo
     fn is_already_kyc(who: &T::AccountId) -> bool {
-		false
+		if T::KycHandler::get_user_area(who).is_none() {
+			return false;
+		}
+		true
     }
 
     fn is_pending_ico(currency_id: &AssetId) -> bool {
@@ -958,9 +967,11 @@ impl<T: Config> Module<T> {
 		Ok(this_time_project_token_amount)
     }
 
-    /// todo
     fn get_token_price(currency_id: AssetId) -> MultiBalanceOf<T> {
-		(2u128 * USDT).saturated_into::<MultiBalanceOf<T>>()
+		match T::PriceData::get_price(currency_id, T::UsdtCurrencyId::get()) {
+			Some(x) => x.saturated_into::<MultiBalanceOf<T>>(),
+			None => MultiBalanceOf::<T>::from(0u32),
+		}
     }
 
     fn exchange_token_convert_usdt(
@@ -969,6 +980,7 @@ impl<T: Config> Module<T> {
 		amount: MultiBalanceOf<T>,
     ) -> result::Result<MultiBalanceOf<T>, DispatchError> {
 		let price = Self::get_token_price(currency_id);
+		ensure!(price != MultiBalanceOf::<T>::from(0u32), Error::<T>::PriceNotExists);
 		let decimals_amount = 10u128
 		    .saturating_pow(decimals as u32)
 		    .saturated_into::<MultiBalanceOf<T>>();
@@ -1867,5 +1879,6 @@ decl_error! {
 		MultipleNotChange,
 		DownIsZero,
 		PowerIsZero,
+		PriceNotExists,
 	}
 }

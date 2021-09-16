@@ -21,7 +21,7 @@ use sp_runtime::{DispatchError, DispatchResult, FixedU128};
 pub use primitives::{Price, CurrencyId, Balance, Moment, CORE_ASSET_ID};
 // use frame_support::traits::Instance;
 
-mod traits;
+pub mod traits;
 mod tests;
 mod mock;
 pub mod weights;
@@ -300,8 +300,6 @@ impl<T: Config> PriceProvider<CurrencyId> for Pallet<T> {
 		// if locked price exists, return it, otherwise return latest price from oracle.
 		T::Source::get(&currency_id)
 	}
-
-	///
 
 	fn get_price_from_swap(currency_id1: CurrencyId, currency_id2: CurrencyId) -> Option<Price> {
 		// currency_id1: the queried currency

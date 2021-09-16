@@ -1,4 +1,4 @@
-use dico_primitives::{AccountId, Balance, Block, BlockNumber, Hash, Index, AssetId};
+use dico_primitives::{AccountId, Balance, Block, BlockNumber, Hash, Index, AssetId, PoolId};
 use grandpa::{FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState};
 use sc_client_api::AuxStore;
 use sc_consensus_babe::{Config, Epoch};
@@ -94,6 +94,7 @@ where
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: BabeApi<Block>,
 	C::Api: BlockBuilder<Block>,
+	C::Api: pallet_farm_rpc::FarmRuntimeApi<Block, AccountId, PoolId, Balance>,
 	C::Api: IcoAmountApi<Block, AccountId, AssetId, Index, Balance>,
 	P: TransactionPool + 'static,
 	SC: SelectChain<Block> + 'static,
@@ -155,6 +156,12 @@ where
 		select_chain,
 		deny_unsafe,
 	)));
+	io.extend_with(pallet_farm_rpc::FarmApi::to_delegate(
+		pallet_farm_rpc::Farm::new(
+			client.clone(),
+			deny_unsafe,
+		),
+	));
 	io.extend_with(sc_finality_grandpa_rpc::GrandpaApi::to_delegate(
 		GrandpaRpcHandler::new(
 			shared_authority_set.clone(),

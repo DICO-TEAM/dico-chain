@@ -106,6 +106,7 @@ pallet-transaction-payment-rpc = { git = 'https://github.com/paritytech/substrat
 # node-specific dependencies
 dico-runtime    = { version = "1.0.0", path = "../../runtime/dev" }
 dico-primitives = { version = "1.0.0", path = "../../primitives" }
+pallet-farm-rpc = { package = 'pallet-farm-rpc', path = "../../pallets/farm/rpc" }
 
 
 # CLI-specific dependencies

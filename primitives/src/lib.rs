@@ -63,6 +63,9 @@ pub type Timestamp = u64;
 /// Signed version of Balance
 pub type Amount = i128;
 
+/// Farm pool id.
+pub type PoolId = u32;
+
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
 /// Header type.
