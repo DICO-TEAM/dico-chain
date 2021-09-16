@@ -4,6 +4,7 @@ use codec::{Decode, Encode};
 use currencies::{currencies_trait::CurrenciesHandler, DicoAssetInfo, DicoAssetMetadata};
 use frame_support::traits::ExistenceRequirement;
 pub use frame_support::{
+	transactional,
     debug, decl_error, decl_event, decl_module, decl_storage, ensure, runtime_print,
     traits::{
 		BalanceStatus as Status, Currency, EnsureOrigin,
@@ -447,6 +448,7 @@ decl_module! {
 
 		/// User participation in ICO
 		#[weight = 10_000 + T::DbWeight::get().reads_writes(16, 7)]
+		#[transactional]
 		fn join(origin, currency_id: AssetId, index: u32, amount: MultiBalanceOf<T>, inviter: Option<<T::Lookup as StaticLookup>::Source>) {
 			let user = ensure_signed(origin)?;
 
@@ -929,36 +931,25 @@ impl<T: Config> Module<T> {
 		Ok(true)
     }
 
+	#[transactional]
     fn swap(
 		who: &T::AccountId,
 		amount: MultiBalanceOf<T>,
 		ico: &IcoInfo<T::BlockNumber, MultiBalanceOf<T>, AssetId, AreaCode, T::AccountId>,
     ) -> result::Result<MultiBalanceOf<T>, DispatchError> {
-		let project_token_id = ico.currency_id;
-		let exchange_token_id = ico.exchange_token;
 		let initiator = &ico.initiator;
 		let this_time_project_token_amount = Self::get_swap_token_amount(true, amount, &ico);
 
-		ensure!(
-			Self::is_can_reserve(ico.exchange_token, &initiator)?,
-			Error::<T>::BalanceInsufficient
-		);
-		ensure!(
-			T::MultiCurrency::reserved_balance(project_token_id, &initiator) >= this_time_project_token_amount,
-			Error::<T>::BalanceInsufficient
-		);
-
-		Self::transfer(
-		    exchange_token_id,
+		T::MultiCurrency::transfer(
+			ico.exchange_token,
 		    &who,
 		    &initiator,
 		    amount,
-		    ExistenceRequirement::KeepAlive,
 		)?;
-		Self::reserve(ico.exchange_token, &initiator, amount)?;
+		T::MultiCurrency::reserve(ico.exchange_token, &initiator, amount)?;
 
 		T::MultiCurrency::repatriate_reserved(
-		    project_token_id,
+			ico.currency_id,
 		    &initiator,
 		    who,
 		    this_time_project_token_amount,
@@ -1039,21 +1030,6 @@ impl<T: Config> Module<T> {
 		true
     }
 
-    fn is_can_reserve(currency_id: AssetId, who: &T::AccountId) -> result::Result<bool, DispatchError> {
-		if currency_id == T::GetNativeCurrencyId::get() {
-		    let free_amount = T::NativeCurrency::free_balance(&who);
-		    T::NativeCurrency::ensure_can_withdraw(
-				&who,
-				BalanceOf::<T>::from(2u32),
-				WithdrawReasons::RESERVE,
-				free_amount,
-		    )?;
-		} else {
-		    let free_amount = T::MultiCurrency::free_balance(currency_id, &who);
-		    T::MultiCurrency::ensure_can_withdraw(currency_id, &who, free_amount)?;
-		}
-		Ok(true)
-    }
 
     fn get_request_release_info(
 		currency_id: AssetId,
@@ -1093,26 +1069,6 @@ impl<T: Config> Module<T> {
 		<RequestReleaseInfo<T>>::put(release_info);
     }
 
-    fn transfer(
-		currency_id: AssetId,
-		who: &T::AccountId,
-		dest: &T::AccountId,
-		amount: MultiBalanceOf<T>,
-		requirement: ExistenceRequirement,
-    ) -> DispatchResult {
-		if currency_id == T::GetNativeCurrencyId::get() {
-		    T::NativeCurrency::transfer(
-				who,
-				dest,
-				amount.saturated_into::<u128>().saturated_into::<BalanceOf<T>>(),
-				ExistenceRequirement::KeepAlive,
-		    )?;
-		} else {
-		    T::MultiCurrency::transfer(currency_id, who, dest, amount)?;
-		}
-		Ok(())
-    }
-
     fn unlock_asset(
 		who: &T::AccountId,
 		currency_id: &AssetId,
@@ -1130,7 +1086,7 @@ impl<T: Config> Module<T> {
 		    if locks[i].unlock_duration == T::BlockNumber::from(0u32) {
 				let unlock_amount = locks[i].total_amount.saturating_sub(locks[i].unlock_amount);
 				if is_do {
-				    Self::unreserve(*currency_id, &who, unlock_amount);
+				    T::MultiCurrency::unreserve(*currency_id, &who, unlock_amount);
 				}
 				total += unlock_amount;
 		    } else {
@@ -1143,7 +1099,7 @@ impl<T: Config> Module<T> {
 				let this_time_unlock_amount = total_unlock_amount.saturating_sub(locks[i].unlock_amount);
 				if is_do {
 				    locks[i].unlock_amount = total_unlock_amount;
-				    Self::unreserve(*currency_id, &who, this_time_unlock_amount);
+				    T::MultiCurrency::unreserve(*currency_id, &who, this_time_unlock_amount);
 				}
 				total += this_time_unlock_amount;
 		    }
@@ -1313,12 +1269,12 @@ impl<T: Config> Module<T> {
 		let project_currency_id = ico.exchange_token;
 		let index = ico.index.unwrap();
 		if user == ico.initiator {
-			Self::unreserve(project_currency_id, &ico.initiator, thistime_release_amount);
+			T::MultiCurrency::unreserve(project_currency_id, &ico.initiator, thistime_release_amount);
 		} else {
 		    let user_keep_lock_amount = ico.lock_proportion * thistime_release_amount;
 		    let user_unlock_amount = thistime_release_amount.saturating_sub(user_keep_lock_amount);
 			if user_unlock_amount > MultiBalanceOf::<T>::from(0u32) {
-				Self::unreserve(ico.currency_id, &user, user_unlock_amount);
+				T::MultiCurrency::unreserve(ico.currency_id, &user, user_unlock_amount);
 			}
 			if user_keep_lock_amount > MultiBalanceOf::<T>::from(0u32) {
 				<IcoLocks<T>>::mutate(&user, ico.currency_id, |h| {
@@ -1507,14 +1463,6 @@ impl<T: Config> Module<T> {
 		Self::get_total_and_released_amount(currency_id, index, &who).2
     }
 
-    fn reserve(currency_id: AssetId, who: &T::AccountId, amount: MultiBalanceOf<T>) -> DispatchResult {
-		if currency_id == T::GetNativeCurrencyId::get() {
-		    T::NativeCurrency::reserve(&who, amount.saturated_into::<u128>().saturated_into::<BalanceOf<T>>())?;
-		} else {
-		    T::MultiCurrency::reserve(currency_id, &who, amount)?;
-		}
-		Ok(())
-    }
 
     fn reward(user: &T::AccountId, inviter: Option<T::AccountId>, amount: MultiBalanceOf<T>, is_do: bool) -> MultiBalanceOf<T> {
 		let mut user_total_amount = amount;
