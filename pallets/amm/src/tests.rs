@@ -86,7 +86,7 @@ fn add_liquidity_should_work() {
 		assert_eq!(Currency::free_balance(asset_b, &module_id_account), 100_000_000_000_000);
 		assert_eq!(Currency::free_balance(asset_a, &ALICE), DEFAULT_ASSET_AMOUNT - 100_000_000_000_000);
 		assert_eq!(Currency::free_balance(asset_b, &ALICE), DEFAULT_ASSET_AMOUNT - 100_000_000_000_000);
-		assert_eq!(Currency::free_balance(liquidity_id, &ALICE), 100_000_000_000_000 - 1000);
+		assert_eq!(Currency::free_balance(liquidity_id, &ALICE), 100_000_000_000_000);
 		assert_eq!(Currency::total_issuance(liquidity_id), 100_000_000_000_000);
 		assert_eq!(
 			Liquidity::<Test>::get(pair).unwrap(),
@@ -147,7 +147,7 @@ fn remove_liquidity_should_work() {
 			Origin::signed(ALICE),
 			asset_a,
 			asset_b,
-			100_000_000_000_000 - 1000,
+			100_000_000_000_000,
 			0,
 			0
 		));
@@ -157,19 +157,19 @@ fn remove_liquidity_should_work() {
 		let liquidity_info = Liquidity::<Test>::get(pair).unwrap();
 		let liquidity_id = liquidity_info.2;
 
-		assert_eq!(Currency::free_balance(asset_a, &module_id_account), 1000);
-		assert_eq!(Currency::free_balance(asset_b, &module_id_account), 1000);
-		assert_eq!(Currency::free_balance(asset_a, &ALICE), DEFAULT_ASSET_AMOUNT - 100_000_000_000_000 + 99999999999000);
-		assert_eq!(Currency::free_balance(asset_b, &ALICE), DEFAULT_ASSET_AMOUNT - 100_000_000_000_000 + 99999999999000);
+		assert_eq!(Currency::free_balance(asset_a, &module_id_account), 0);
+		assert_eq!(Currency::free_balance(asset_b, &module_id_account), 0);
+		assert_eq!(Currency::free_balance(asset_a, &ALICE), DEFAULT_ASSET_AMOUNT);
+		assert_eq!(Currency::free_balance(asset_b, &ALICE), DEFAULT_ASSET_AMOUNT);
 		assert_eq!(Currency::free_balance(liquidity_id, &ALICE), 0);
-		assert_eq!(Currency::total_issuance(liquidity_id), 1000);
+		assert_eq!(Currency::total_issuance(liquidity_id), 0);
 
 		let pair = AMM::pair_for(asset_a, asset_b);
-		assert_eq!(Liquidity::<Test>::get(pair).unwrap(), LiquidityInfo(1000, 1000, 20000000));
+		assert_eq!(Liquidity::<Test>::get(pair).unwrap(), LiquidityInfo(0, 0, 20000000));
 
 		expect_events(vec![Event::LiquidityRemoved(ALICE, liquidity_id,
 												   asset_a, asset_b,
-												   100_000_000_000_000 - 1000).into()]);
+												   100_000_000_000_000).into()]);
 	});
 }
 
