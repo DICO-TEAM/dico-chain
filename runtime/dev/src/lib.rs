@@ -1202,6 +1202,7 @@ impl pallet_lbp::Config for Runtime {
 	type PalletId = LBPPalletId;
 	type LbpId = u32;
 	type WeightInfo = pallet_lbp::weights::DicoWeight<Runtime>;
+	type TreasuryHandler = DicoTreasury;
 }
 
 /// Configure the pallet template in pallets/template.

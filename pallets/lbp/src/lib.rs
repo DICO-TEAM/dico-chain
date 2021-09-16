@@ -26,6 +26,8 @@ use dico_primitives::{to_u256, to_balance};
 
 use orml_traits::{MultiCurrency, MultiCurrencyExtended};
 
+use pallet_dico_treasury::traits::DicoTreasuryHandler;
+
 mod benchmarking;
 
 pub mod weights;
@@ -167,6 +169,8 @@ pub mod pallet {
 
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
+
+		type TreasuryHandler: DicoTreasuryHandler<Self::AccountId>;
 	}
 
 	#[pallet::error]
@@ -300,10 +304,14 @@ pub mod pallet {
 			Lbps::<T>::insert(lbp_id, lbp_info);
 			OngoingLbps::<T>::insert(lbp_pair, (who.clone(), lbp_id));
 
-			Self::deposit_event(
-				Event::LbpCreated(who, lbp_id, afs_asset,
-								  fundraising_asset, afs_balance, fundraising_balance)
-			);
+			Self::deposit_event(Event::LbpCreated(
+				who,
+				lbp_id,
+				afs_asset,
+				fundraising_asset,
+				afs_balance,
+				fundraising_balance
+			));
 
 			Ok(().into())
 		}
@@ -368,8 +376,8 @@ pub mod pallet {
 
 			ensure!(lbp_info.status == LbpStatus::InProgress, Error::<T>::MustBeInProgressStatus);
 
-			let target_amount = if supply_asset == lbp_info.afs_asset {
-				let target_amount = Self::get_amount_out(
+			let (crowdfunding_amount, target_amount) = if supply_asset == lbp_info.afs_asset {
+				let (crowdfunding_amount, target_amount) = Self::get_amount_out(
 					lbp_info.afs_balance,
 					lbp_info.afs_weight,
 					lbp_info.fundraising_balance,
@@ -379,7 +387,7 @@ pub mod pallet {
 				)?;
 
 				lbp_info.afs_balance = to_balance!(
-					badd(to_u256!(lbp_info.afs_balance), to_u256!(supply_amount))
+					badd(to_u256!(lbp_info.afs_balance), to_u256!(crowdfunding_amount))
 					.ok_or(ArithmeticError::Overflow)?
 				)?;
 
@@ -388,10 +396,10 @@ pub mod pallet {
 					.ok_or(ArithmeticError::Overflow)?
 				)?;
 
-				target_amount
+				(crowdfunding_amount, target_amount)
 			} else {
 				// supply_asset = lbp_info.fundraising_asset
-				let target_amount = Self::get_amount_out(
+				let (crowdfunding_amount, target_amount) = Self::get_amount_out(
 					lbp_info.fundraising_balance,
 					lbp_info.fundraising_weight,
 					lbp_info.afs_balance,
@@ -401,7 +409,7 @@ pub mod pallet {
 				)?;
 
 				lbp_info.fundraising_balance = to_balance!(
-					badd(to_u256!(lbp_info.fundraising_balance), to_u256!(supply_amount))
+					badd(to_u256!(lbp_info.fundraising_balance), to_u256!(crowdfunding_amount))
 					.ok_or(ArithmeticError::Overflow)?
 				)?;
 
@@ -410,13 +418,18 @@ pub mod pallet {
 					.ok_or(ArithmeticError::Overflow)?
 				)?;
 
-				target_amount
+				(crowdfunding_amount, target_amount)
 			};
 
 			let module_account_id = Self::account_id();
 
-			T::Currency::transfer(supply_asset, &who, &module_account_id, supply_amount)?;
+			T::Currency::transfer(supply_asset, &who, &module_account_id, crowdfunding_amount)?;
 			T::Currency::transfer(target_asset, &module_account_id, &who, target_amount)?;
+
+			let treasury_account_id = T::TreasuryHandler::get_treasury_account_id();
+			let crowdfunding_fee = supply_amount
+				.checked_sub(crowdfunding_amount).ok_or(ArithmeticError::Overflow)?;
+			T::Currency::transfer(supply_asset, &who, &treasury_account_id, crowdfunding_fee)?;
 
 			Lbps::<T>::insert(lbp_id, lbp_info);
 
@@ -453,8 +466,8 @@ pub mod pallet {
 
 			ensure!(lbp_info.status == LbpStatus::InProgress, Error::<T>::MustBeInProgressStatus);
 
-			let supply_amount = if supply_asset == lbp_info.afs_asset {
-				let supply_amount = Self::get_amount_in(
+			let (crowdfunding_amount, supply_amount) = if supply_asset == lbp_info.afs_asset {
+				let (crowdfunding_amount, supply_amount) = Self::get_amount_in(
 					lbp_info.afs_balance,
 					lbp_info.afs_weight,
 					lbp_info.fundraising_balance,
@@ -464,7 +477,7 @@ pub mod pallet {
 				)?;
 
 				lbp_info.afs_balance = to_balance!(
-					badd(to_u256!(lbp_info.afs_balance), to_u256!(supply_amount))
+					badd(to_u256!(lbp_info.afs_balance), to_u256!(crowdfunding_amount))
 					.ok_or(ArithmeticError::Overflow)?
 				)?;
 
@@ -473,10 +486,10 @@ pub mod pallet {
 					.ok_or(ArithmeticError::Overflow)?
 				)?;
 
-				supply_amount
+				(crowdfunding_amount, supply_amount)
 			} else {
 				// supply_asset = lbp_info.fundraising_asset
-				let supply_amount = Self::get_amount_in(
+				let (crowdfunding_amount, supply_amount) = Self::get_amount_in(
 					lbp_info.fundraising_balance,
 					lbp_info.fundraising_weight,
 					lbp_info.afs_balance,
@@ -486,7 +499,7 @@ pub mod pallet {
 				)?;
 
 				lbp_info.fundraising_balance = to_balance!(
-					badd(to_u256!(lbp_info.fundraising_balance), to_u256!(supply_amount))
+					badd(to_u256!(lbp_info.fundraising_balance), to_u256!(crowdfunding_amount))
 					.ok_or(ArithmeticError::Overflow)?
 				)?;
 
@@ -495,15 +508,20 @@ pub mod pallet {
 					.ok_or(ArithmeticError::Overflow)?
 				)?;
 
-				supply_amount
+				(crowdfunding_amount, supply_amount)
 			};
 
 			let module_account_id = Self::account_id();
 
 			T::Currency::transfer(supply_asset, &who,
-								  &module_account_id, to_balance!(supply_amount)?)?;
+								  &module_account_id, to_balance!(crowdfunding_amount)?)?;
 			T::Currency::transfer(target_asset, &module_account_id,
 								  &who, target_amount)?;
+
+			let treasury_account_id = T::TreasuryHandler::get_treasury_account_id();
+			let crowdfunding_fee = supply_amount
+				.checked_sub(crowdfunding_amount).ok_or(ArithmeticError::Overflow)?;
+			T::Currency::transfer(supply_asset, &who, &treasury_account_id, crowdfunding_fee)?;
 
 			Lbps::<T>::insert(lbp_id, lbp_info);
 
@@ -563,8 +581,13 @@ impl<T: Config> Pallet<T> {
 		asset_weight_out: u128,
 		supply_amount: Balance,
 		min_target_amount: Balance,
-	) -> sp_std::result::Result<Balance, DispatchErrorWithPostInfo> {
+	) -> sp_std::result::Result<(Balance, Balance), DispatchErrorWithPostInfo> {
 		ensure!(min_target_amount <= asset_balance_out, Error::<T>::InvalidTargetAmount);
+
+		let crowdfunding_amount = calc_crowdfunding_amount(
+			to_u256!(supply_amount),
+			to_u256!(math::CROWDFUNDING_FEE)
+		).ok_or(ArithmeticError::Overflow)?;
 
 		let spot_price_before =
 			calc_spot_price(to_u256!(asset_balance_in),
@@ -578,16 +601,16 @@ impl<T: Config> Pallet<T> {
 							  to_u256!(asset_weight_in),
 							  to_u256!(asset_balance_out),
 							  to_u256!(asset_weight_out),
-							  to_u256!(supply_amount),
+							  to_u256!(crowdfunding_amount),
 							  to_u256!(SWAP_FEE))?;
 
 		ensure!(target_amount >= to_u256!(min_target_amount), Error::<T>::UnacceptableTargetAmount);
 		ensure!(
-			spot_price_before <= bdiv(to_u256!(supply_amount), target_amount).ok_or(ArithmeticError::Overflow)?,
+			spot_price_before <= bdiv(to_u256!(crowdfunding_amount), target_amount).ok_or(ArithmeticError::Overflow)?,
 			Error::<T>::ErrMathApprox
 		);
 
-		let new_asset_balance_in = badd(to_u256!(asset_balance_in), to_u256!(supply_amount))
+		let new_asset_balance_in = badd(to_u256!(asset_balance_in), to_u256!(crowdfunding_amount))
 			.ok_or(ArithmeticError::Overflow)?;
 		let new_asset_balance_out = bsub(to_u256!(asset_balance_out), target_amount)
 			.ok_or(ArithmeticError::Overflow)?;
@@ -601,8 +624,9 @@ impl<T: Config> Pallet<T> {
 
 		ensure!(spot_price_after >= spot_price_before, Error::<T>::ErrMathApprox);
 
+		let crowdfunding_amount = to_balance!(crowdfunding_amount)?;
 		let target_balance = to_balance!(target_amount)?;
-		Ok(target_balance)
+		Ok((crowdfunding_amount, target_balance))
 	}
 
 	fn get_amount_in(
@@ -612,7 +636,7 @@ impl<T: Config> Pallet<T> {
 		asset_weight_out: u128,
 		target_amount: Balance,
 		max_supply_amount: Balance,
-	) -> sp_std::result::Result<Balance, DispatchErrorWithPostInfo> {
+	) -> sp_std::result::Result<(Balance, Balance), DispatchErrorWithPostInfo> {
 		ensure!(target_amount <= asset_balance_out, Error::<T>::InvalidTargetAmount);
 
 		let spot_price_before =
@@ -622,7 +646,7 @@ impl<T: Config> Pallet<T> {
 							to_u256!(asset_weight_out),
 							to_u256!(SWAP_FEE))?;
 
-		let supply_amount =
+		let crowdfunding_amount =
 			calc_in_given_out(to_u256!(asset_balance_in),
 							  to_u256!(asset_weight_in),
 							  to_u256!(asset_balance_out),
@@ -630,9 +654,15 @@ impl<T: Config> Pallet<T> {
 							  to_u256!(target_amount),
 							  to_u256!(SWAP_FEE))?;
 
+		let supply_amount = calc_supply_amount_with_fee(
+			to_u256!(crowdfunding_amount),
+			to_u256!(math::CROWDFUNDING_FEE)
+		).ok_or(ArithmeticError::Overflow)?;
+
+		ensure!(supply_amount >= crowdfunding_amount, Error::<T>::ErrMathApprox);
 		ensure!(supply_amount <= to_u256!(max_supply_amount), Error::<T>::UnacceptableSupplyAmount);
 
-		let new_asset_balance_in = badd(to_u256!(asset_balance_in), supply_amount)
+		let new_asset_balance_in = badd(to_u256!(asset_balance_in), crowdfunding_amount)
 			.ok_or(ArithmeticError::Overflow)?;
 		let new_asset_balance_out = bsub(to_u256!(asset_balance_out), to_u256!(target_amount))
 			.ok_or(ArithmeticError::Overflow)?;
@@ -646,12 +676,13 @@ impl<T: Config> Pallet<T> {
 
 		ensure!(spot_price_after >= spot_price_before, Error::<T>::ErrMathApprox);
 		ensure!(
-			spot_price_before <= bdiv(supply_amount, to_u256!(target_amount)).ok_or(ArithmeticError::Overflow)?,
+			spot_price_before <= bdiv(crowdfunding_amount, to_u256!(target_amount)).ok_or(ArithmeticError::Overflow)?,
 			Error::<T>::ErrMathApprox
 		);
 
+		let crowdfunding_amount = to_balance!(crowdfunding_amount)?;
 		let supply_balance = to_balance!(supply_amount)?;
-		Ok(supply_balance)
+		Ok((crowdfunding_amount, supply_balance))
 	}
 
 	fn update_weight(
