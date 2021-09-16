@@ -60,7 +60,7 @@ impl Participant {
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct PoolInfo {
-	pub liquidity_id: AssetId,
+	pub currency_id: AssetId,
 	pub alloc_point: U256,
 	pub last_reward_block: BlockNumber,
 	pub acc_dico_per_share: U256,
@@ -70,7 +70,7 @@ pub struct PoolInfo {
 impl Default for PoolInfo {
 	fn default() -> Self {
 		Self {
-			liquidity_id: AssetId::zero(),
+			currency_id: AssetId::zero(),
 			alloc_point: U256::zero(),
 			last_reward_block: BlockNumber::zero(),
 			acc_dico_per_share: U256::zero(),
@@ -80,9 +80,9 @@ impl Default for PoolInfo {
 }
 
 impl PoolInfo {
-	pub fn new(liquidity_id: AssetId, alloc_point: U256, last_reward_block: BlockNumber) -> Self {
+	pub fn new(currency_id: AssetId, alloc_point: U256, last_reward_block: BlockNumber) -> Self {
 		Self {
-			liquidity_id,
+			currency_id,
 			alloc_point,
 			last_reward_block,
 			acc_dico_per_share: U256::zero(),
@@ -322,16 +322,16 @@ pub mod pallet {
 		#[transactional]
 		pub fn create_pool(
 			origin: OriginFor<T>,
-			liquidity_id: AssetId,
+			currency_id: AssetId,
 			alloc_point: U256,
 		) -> DispatchResultWithPostInfo {
 			T::FounderSetOrigin::ensure_origin(origin)?;
 
-			let total_issuance = T::Currency::total_issuance(liquidity_id);
+			let total_issuance = T::Currency::total_issuance(currency_id);
 			ensure!(total_issuance != 0, Error::<T>::LiquidityIdZeroIssuance);
 
 			for (_, pool_info) in Pools::<T>::iter() {
-				ensure!(pool_info.liquidity_id != liquidity_id, Error::<T>::LiquidityIdCreated);
+				ensure!(pool_info.currency_id != currency_id, Error::<T>::LiquidityIdCreated);
 			}
 
 			let start_block = Self::start_block();
@@ -349,7 +349,7 @@ pub mod pallet {
 				.checked_add(alloc_point).ok_or(ArithmeticError::Overflow)?;
 			TotalAllocPoint::<T>::put(total_alloc_point);
 
-			let pool_info = PoolInfo::new(liquidity_id, alloc_point, last_reward_block_hp);
+			let pool_info = PoolInfo::new(currency_id, alloc_point, last_reward_block_hp);
 			Pools::<T>::insert(next_pool_id, pool_info);
 			Self::deposit_event(Event::PoolCreated(next_pool_id));
 
@@ -391,7 +391,7 @@ pub mod pallet {
 			}
 
 			if amount > Balance::zero() {
-				T::Currency::transfer(pool.liquidity_id, &who, &module_account_id, amount)?;
+				T::Currency::transfer(pool.currency_id, &who, &module_account_id, amount)?;
 				let total_amount = user_amount_hp
 					.checked_add(amount_hp).ok_or(ArithmeticError::Overflow)?;
 				participant.amount = to_balance!(total_amount)?;
@@ -450,7 +450,7 @@ pub mod pallet {
 					.checked_sub(to_u256!(amount)).ok_or(ArithmeticError::Overflow)?)?;
 				pool.total_amount = to_balance!(to_u256!(pool.total_amount)
 					.checked_sub(to_u256!(amount)).ok_or(ArithmeticError::Overflow)?)?;
-				T::Currency::transfer(pool.liquidity_id, &module_account_id, &who, amount)?;
+				T::Currency::transfer(pool.currency_id, &module_account_id, &who, amount)?;
 			}
 
 			participant.reward_debt = to_balance!(to_u256!(participant.amount)
@@ -581,7 +581,7 @@ impl<T: Config> Pallet<T> {
 			.checked_div(Self::total_alloc_point()).ok_or(ArithmeticError::Overflow)?;
 
 		let module_account_id = Self::account_id();
-		let lp_supply = T::Currency::free_balance(pool.liquidity_id, &module_account_id);
+		let lp_supply = T::Currency::free_balance(pool.currency_id, &module_account_id);
 		ensure!(!lp_supply.is_zero(), Error::<T>::PoolLiquidityBalanceIsZero);
 
 		let acc_dico_per_share = pool.acc_dico_per_share
@@ -620,7 +620,7 @@ impl<T: Config> Pallet<T> {
 
 			let module_account_id = Self::account_id();
 			let native_asset = T::NativeAssetId::get();
-			let lp_supply = T::Currency::free_balance(pool.liquidity_id, &module_account_id);
+			let lp_supply = T::Currency::free_balance(pool.currency_id, &module_account_id);
 			if lp_supply.is_zero() {
 				pool.last_reward_block = block_number_hp;
 				return Ok(());

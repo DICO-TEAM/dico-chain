@@ -512,7 +512,7 @@
     "reward_debt": "Balance"
   },
   "PoolInfo": {
-    "liquidity_id": "AssetId",
+    "currency_id": "AssetId",
     "alloc_point": "U256",
     "last_reward_block": "BlockNumber",
     "acc_dico_per_share": "U256",
