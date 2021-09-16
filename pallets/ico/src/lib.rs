@@ -67,6 +67,15 @@ impl Default for IcoStatus {
 }
 
 #[derive(PartialEq, Encode, Decode, RuntimeDebug, Clone)]
+pub struct InviteInfo<AccountId, Balance, AssetId> {
+	inviter: AccountId,
+	invitee: AccountId,
+	currency_id: AssetId,
+	index: u32,
+	reward: Option<Balance>,
+}
+
+#[derive(PartialEq, Encode, Decode, RuntimeDebug, Clone)]
 pub struct InitiatedIco<CurrencyId, Status, Balance> {
     desc: Vec<u8>,
     currency_id: CurrencyId,
@@ -472,12 +481,13 @@ decl_module! {
 
 			let user_exchange_amount = Self::swap(&user, amount, &ico)?;
 
-			Self::insert_ico_assets_info(&user, &ico, amount, total_usdt, inviter);
+			Self::insert_ico_assets_info(&user, &ico, amount, total_usdt, &inviter);
 			Self::update_user_icoes(&user, currency_id, index);
 			// Must be at the end
 			ico.total_usdt = new_total_usdt;
 			Ico::<T>::insert(currency_id, index, &ico);
 			Self::add_user_power(&user, total_usdt)?;
+			Self::insert_invite_info(&user, inviter, currency_id, index);
 
 			Self::deposit_event(RawEvent::Join(user, currency_id, index, amount, user_exchange_amount));
 		}
@@ -1153,7 +1163,7 @@ impl<T: Config> Module<T> {
 		ico: &IcoInfo<T::BlockNumber, MultiBalanceOf<T>, AssetId, AreaCode, T::AccountId>,
 		amount: MultiBalanceOf<T>,
 		total_usdt: MultiBalanceOf<T>,
-		inviter: Option<T::AccountId>,
+		inviter: &Option<T::AccountId>,
     ) {
 		Self::update_user_unreleased_assets_info(
 		    &who,
@@ -1465,7 +1475,7 @@ impl<T: Config> Module<T> {
     }
 
 
-    fn reward(user: &T::AccountId, inviter: Option<T::AccountId>, amount: MultiBalanceOf<T>, is_do: bool) -> MultiBalanceOf<T> {
+    fn reward(user: &T::AccountId, inviter: Option<T::AccountId>, amount: MultiBalanceOf<T>, is_do: bool, currency_id: AssetId, index: u32) -> MultiBalanceOf<T> {
 		let mut user_total_amount = amount;
 		if let Some(inviter) = inviter {
 		    let user_p = T::InviteeRewardProportion::get() * amount;
@@ -1477,11 +1487,13 @@ impl<T: Config> Module<T> {
 				    user_p,
 				);
 
+				let inviter_reward = T::InviterRewardProportion::get() * amount;
 				T::MultiCurrency::deposit(
 				    T::GetNativeCurrencyId::get(),
 				    &inviter,
-				    T::InviterRewardProportion::get() * amount,
+				    inviter_reward,
 				);
+				Self::update_invite_info(&user, &inviter, currency_id, index, inviter_reward);
 		    }
 		}
 		if is_do {
@@ -1566,7 +1578,7 @@ impl<T: Config> Module<T> {
 		let classify = Self::split_user_amount(ico.total_usdt, tags);
 		let mut reward = Self::caculate_user_reward(classify, ico.total_usdt, total_reward);
 		ensure!(reward > MultiBalanceOf::<T>::from(0u32), Error::<T>::RewardIsZero);
-		reward = Self::reward(&user, asset_info.inviter, reward, is_do);
+		reward = Self::reward(&user, asset_info.inviter, reward, is_do, currency_id, index);
 		if is_do {
 		    UnReleaseAssets::<T>::mutate(user.clone(), |vec| {
 				if let Some(pos) = vec.iter().position(|h| h.currency_id == currency_id && h.index == index) {
@@ -1674,6 +1686,40 @@ impl<T: Config> Module<T> {
 
 		remain_exchange_amount.min(num)
 	}
+
+
+	fn insert_invite_info(invitee: &T::AccountId, inviter: Option<T::AccountId>, currency_id: AssetId, index: u32) {
+		match inviter {
+			Some(inviter) => {
+				let invitees = InviteInfoOf::<T>::get(&inviter, currency_id);
+				if let None = invitees.iter().position(|h| &h.invitee == invitee && h.currency_id == currency_id && h.index == index ) {
+					InviteInfoOf::<T>::mutate(&inviter, currency_id, |k| k.push(
+						InviteInfo {
+							inviter: inviter.clone(),
+							invitee: invitee.clone(),
+							currency_id: currency_id,
+							index: index,
+							reward: None,
+						}
+					));
+				}
+			},
+			None => {},
+		}
+
+	}
+
+	fn update_invite_info(inviter: &T::AccountId, invitee: &T::AccountId, currency_id: AssetId, index: u32, reward: MultiBalanceOf<T>) {
+		let mut invitees = InviteInfoOf::<T>::get(&inviter, currency_id);
+		if let Some(x) = invitees.iter().position(|h| &h.invitee == invitee && h.currency_id == currency_id && h.index == index ) {
+			let mut info = invitees.swap_remove(x);
+			if info.reward.is_none() {
+				info.reward = Some(reward);
+				invitees.push(info);
+				InviteInfoOf::<T>::insert(&inviter, currency_id, invitees);
+			}
+		}
+	}
 }
 
 decl_storage! {
@@ -1711,6 +1757,8 @@ decl_storage! {
 
 		pub TotalPowerOf get(fn total_power_of): map hasher(identity) T::AccountId => MultiBalanceOf<T>;
 
+		pub InviteInfoOf get(fn invite_info_of): double_map hasher(identity) T::AccountId, hasher(identity) AssetId => Vec<InviteInfo<T::AccountId, MultiBalanceOf<T>, AssetId>>;
+
 	}
 }
 
@@ -1744,6 +1792,7 @@ for Module<T>
 }
 
 impl<T: Config> PowerHandler<T::AccountId, DispatchResult, MultiBalanceOf<T>> for Module<T> {
+
 	fn sub_user_power(user: &T::AccountId, amount: MultiBalanceOf<T>) -> DispatchResult {
 		let old = TotalPowerOf::<T>::get(user);
 		let new = old.checked_sub(&amount).ok_or(Error::<T>::Overflow)?;

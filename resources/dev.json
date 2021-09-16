@@ -555,5 +555,12 @@
   "DepositBalanceInfo": {
       "amount": "Balance",
       "expiration": "BlockNumber"
+  },
+  "InviteInfo": {
+    "inviter": "AccountId",
+    "invitee": "AccountId",
+    "currency_id": "AssetId",
+    "index": "u32",
+    "reward": "Option<Balance>"
   }
 }
