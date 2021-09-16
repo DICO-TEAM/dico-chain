@@ -5523,6 +5523,7 @@ dependencies = [
  "frame-system-benchmarking",
  "orml-tokens",
  "orml-traits",
+ "pallet-dico-treasury",
  "parity-scale-codec",
  "primitive-types 0.10.1",
  "serde",

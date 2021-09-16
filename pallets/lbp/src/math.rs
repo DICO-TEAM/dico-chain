@@ -19,6 +19,7 @@ pub const WEIGHT_ONE: u128 = 10_000_000_000u128;
 pub const MAX_WEIGHT: u128 = 100 * WEIGHT_ONE;
 pub const MIN_WEIGHT: u128 = WEIGHT_ONE;
 pub const SWAP_FEE: u128 = 0u128;
+pub const CROWDFUNDING_FEE: u128 = 5000000000000000u128; // 0.5% * BONE
 
 #[cfg(test)]
 const TEST_SWAP_FEE: u128 = 1_500_000_000u128;
@@ -277,10 +278,51 @@ pub fn calc_adjust_weight(start_weight: U256, end_weight: U256, steps: U256, ste
 	}
 }
 
+pub fn calc_crowdfunding_amount(supply_amount: U256, crowdfunding_fee: U256) -> Option<U256> {
+	bsub(U256::from(BONE), U256::from(crowdfunding_fee))
+		.and_then(|x| bmul(U256::from(supply_amount), x))
+}
+
+pub fn calc_supply_amount_with_fee(supply_amount: U256, crowdfunding_fee: U256) -> Option<U256> {
+	bsub(U256::from(BONE), U256::from(crowdfunding_fee))
+		.and_then(|x| bdiv(U256::from(supply_amount), x))
+}
 
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	#[test]
+	fn test_calc_supply_amount_with_fee() {
+		assert_eq!(
+			calc_supply_amount_with_fee(U256::from(10000000000000u128), U256::from(CROWDFUNDING_FEE)),
+			Some(U256::from(10050251256281u128)),
+		);
+		assert_eq!(
+			calc_crowdfunding_amount(U256::from(10050251256281u128), U256::from(CROWDFUNDING_FEE)),
+			Some(U256::from(10000000000000u128)),
+		);
+		assert_eq!(
+			calc_supply_amount_with_fee(U256::from(86033999974477294587667u128), U256::from(CROWDFUNDING_FEE)),
+			Some(U256::from(86466331632640497073032u128)),
+		);
+	}
+
+	#[test]
+	fn test_calc_crowdfunding_fee() {
+		assert_eq!(
+			calc_crowdfunding_amount(U256::from(10000000000000u128), U256::from(CROWDFUNDING_FEE)),
+			Some(U256::from(9950000000000u128)),
+		);
+		assert_eq!(
+			calc_crowdfunding_amount(U256::from(12356789876540u128), U256::from(CROWDFUNDING_FEE)),
+			Some(U256::from(12295005927157u128)),
+		);
+		assert_eq!(
+			calc_crowdfunding_amount(U256::from(86034000000000000000000u128), U256::from(CROWDFUNDING_FEE)),
+			Some(U256::from(85603830000000000000000u128))
+		);
+	}
 
 	#[test]
 	fn test_calc_adjust_weight() {

@@ -11,12 +11,14 @@ use sp_core::{H256};
 use sp_runtime::{testing::Header, traits::{BlakeTwo256, IdentityLookup, Zero}};
 use frame_support::traits::GenesisBuild;
 use dico_primitives::{AssetId, Balance};
+use pallet_dico_treasury::traits::DicoTreasuryHandler;
 
 pub type Amount = i128;
 pub type AccountId = u64;
 
 pub const ALICE: AccountId = 1;
 pub const BOB: AccountId = 2;
+pub const TREASURY_ACCOUNT: AccountId = 10;
 
 pub const DICO: AssetId = 1000;
 pub const DOT: AssetId = 2000;
@@ -95,12 +97,21 @@ ord_parameter_types! {
 	pub const Two: u64 = 2;
 	pub const Three: u64 = 3;
 }
+
+pub struct Treasury();
+impl DicoTreasuryHandler<AccountId> for Treasury {
+	fn get_treasury_account_id() -> AccountId {
+		TREASURY_ACCOUNT
+	}
+}
+
 impl Config for Test {
 	type Event = Event;
 	type Currency = Currency;
 	type PalletId = LbpPalletId;
 	type LbpId = u32;
 	type WeightInfo = ();
+	type TreasuryHandler = Treasury;
 }
 
 pub struct ExtBuilder {
