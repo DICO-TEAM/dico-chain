@@ -125,17 +125,13 @@ impl<AccountId> LbpInfo<AccountId> {
 
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct LbpPair {
-	pub asset_a: AssetId,
-	pub asset_b: AssetId,
-}
+pub struct LbpPair(pub AssetId, pub AssetId);
 
 impl LbpPair {
 	pub fn new(asset_a: AssetId, asset_b: AssetId) -> Self {
-		if asset_a < asset_b { Self { asset_a, asset_b } } else { Self { asset_b, asset_a } }
+		if asset_a < asset_b { Self(asset_a, asset_b) } else { Self(asset_b, asset_a) }
 	}
 }
-
 // Re-export pallet items so that they can be accessed from the crate namespace.
 pub use pallet::*;
 

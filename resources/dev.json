@@ -526,10 +526,7 @@
       "Finished"
     ]
   },
-  "LbpPair": {
-    "asset_a": "AssetId",
-    "asset_b": "AssetId"
-  },
+  "LbpPair": "(AssetId, AssetId)",
   "LbpInfo": {
     "start_block": "BlockNumber",
     "end_block": "BlockNumber",
