@@ -4,17 +4,17 @@
 
 use sp_core::U256;
 use sp_runtime::ArithmeticError;
-use dico_primitives::BlockNumber;
+use dico_primitives::{BlockNumber, constants::time::{DAYS, MINUTES}};
 
 
 pub const BONE: u128 = 1_000_000_000_000_000_000u128;
 pub const MIN_BPOW_BASE: u128 = 1u128;
 pub const MAX_BPOW_BASE: u128 = 2u128 * BONE - 1u128;
 pub const BPOW_PRECISION: u128 = BONE / 10_000_000_000u128;
-pub const MAX_DURATION_BLOCK: BlockNumber = 43200;
-pub const MIN_DURATION_BLOCK: BlockNumber = 100;
-pub const MAX_STEPS: u32 = 432;
-pub const MIN_STEPS: u32 = 1;
+pub const MAX_DURATION_BLOCK: BlockNumber = 3 * DAYS;		// 43200 blocks if secs_per_block = 6
+pub const MIN_DURATION_BLOCK: BlockNumber = 30 * MINUTES;	// 300 blocks if secs_per_block = 6
+pub const MAX_STEPS: u32 = MAX_DURATION_BLOCK / 100;		// 432
+pub const MIN_STEPS: u32 = MIN_DURATION_BLOCK / 100;		// 3
 pub const WEIGHT_ONE: u128 = 10_000_000_000u128;
 pub const MAX_WEIGHT: u128 = 100 * WEIGHT_ONE;
 pub const MIN_WEIGHT: u128 = WEIGHT_ONE;
