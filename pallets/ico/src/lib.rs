@@ -233,15 +233,15 @@ pub struct IcoInfo<BlockNumber, Balance, CurrencyId, AreaCode, AccountId> {
     user_min_amount: Balance,
     /// Maximum number of USdT users can participate in.
     user_max_amount: Balance,
-    /// The asset_id of token required by the initiator
+    /// The asset_id of token required by the initiator.
     exchange_token: CurrencyId,
-    /// The total amount of token required by the initiator
+    /// The total amount of token required by the initiator.
     exchange_token_total_amount: Balance,
-    /// AreaCode these not participate in the ico
+    /// AreaCode these not participate in the ico.
     exclude_area: Vec<AreaCode>,
-    /// The proportion of lock-ups required
+    /// The proportion of lock-ups required.
     lock_proportion: Percent,
-    /// How often to unlock
+    /// How often to unlock.
     unlock_duration: BlockNumber,
     per_duration_unlock_amount: Balance,
 }

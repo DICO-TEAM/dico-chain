@@ -394,7 +394,7 @@
     "index": "u32",
     "unreleased_currency_id": "CurrencyId",
     "total_usdt": "Balance",
-    "tags": "Vec<(Balance, Balance)>",
+    "tags": "Vec<(Balance, Balance, Balance, Balance)>",
     "total": "Balance",
     "released": "Balance",
     "refund": "Balance",
