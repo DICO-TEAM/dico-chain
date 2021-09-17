@@ -31,6 +31,8 @@ sp-io              = { git = 'https://github.com/paritytech/substrate.git', bran
 
 pallet-amm         = { path = '../../pallets/amm', default-features = false}
 pallet-oracle      = { path = '../oracle', default-features = false}
+dico-currencies	   = { package = "pallet-currencies", path = "../currencies", default-features = false }
+
 
 
 
@@ -57,8 +59,8 @@ std = [
 	"sp-io/std",
 	"sp-runtime/std",
 	"orml-traits/std",
-#	"sp-application-crypto/std",
 	"orml-utilities/std",
+	"dico-currencies/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking",

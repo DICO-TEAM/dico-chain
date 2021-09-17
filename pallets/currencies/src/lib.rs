@@ -173,7 +173,7 @@ pub mod module {
 	#[pallet::storage]
 	#[pallet::getter(fn asset_info)]
 	/// Metadata of an asset.
-	pub(super) type DicoAssetsInfo<T: Config> =
+	pub type DicoAssetsInfo<T: Config> =
 	StorageMap<_, Blake2_128Concat, AssetId, DicoAssetInfo<T::AccountId, DicoAssetMetadata>>;
 
 	#[pallet::pallet]

@@ -5706,6 +5706,7 @@ dependencies = [
  "orml-utilities",
  "pallet-amm",
  "pallet-balances",
+ "pallet-currencies",
  "pallet-oracle",
  "parity-scale-codec",
  "serde",
