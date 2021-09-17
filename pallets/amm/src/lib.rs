@@ -94,6 +94,8 @@ pub mod pallet {
 	pub enum Error<T> {
 		/// Must use different assets to add liquidity.
 		MustBeDifferentAsset,
+		/// Liquid asset can not add liquidity pool.
+		MustBeNonLiquidAsset,
 		/// The number of added liquid assets must be greater than 0.
 		MustAddNonZeroAmount,
 		/// The asset exchange path does not exist.
@@ -166,6 +168,10 @@ pub mod pallet {
 
 			ensure!(asset_a != asset_b, Error::<T>::MustBeDifferentAsset);
 			ensure!(amount_a_desired != 0 && amount_b_desired != 0, Error::<T>::MustAddNonZeroAmount);
+			ensure!(
+				asset_a <= T::LiquidityAssetIdBase::get() && asset_b <= T::LiquidityAssetIdBase::get(),
+				Error::<T>::MustBeNonLiquidAsset
+			);
 
 			let pair = Self::pair_for(asset_a, asset_b);
 			let mut liquidity_info = Liquidity::<T>::get(pair).unwrap_or_default();

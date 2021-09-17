@@ -1154,6 +1154,7 @@ impl orml_tokens::Config for Runtime {
 parameter_types! {
 	pub const CreateConsume: Balance = 100 * DOLLARS;
 	pub const DICOAssetId: AssetId = 0;
+	pub const MaxCreatableCurrencyId: AssetId = 4_000_000_000;
 }
 
 impl pallet_currencies::Config for Runtime {
@@ -1167,10 +1168,10 @@ impl pallet_currencies::Config for Runtime {
 	type WeightInfo = ();
 
 	type CreateConsume = CreateConsume;
+	type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
 }
 
 parameter_types! {
-	pub const AmmLiquidityAssetIdBase: AssetId = 20_000_000;
 	pub const AmmPalletId: PalletId = PalletId(*b"dico/amm");
 	pub const FarmPalletId: PalletId = PalletId(*b"dico/fam");
 	pub const LBPPalletId: PalletId = PalletId(*b"dico/lbp");
@@ -1179,7 +1180,7 @@ parameter_types! {
 impl pallet_amm::Config for Runtime {
 	type Event = Event;
 	type Currency = Currencies;
-	type LiquidityAssetIdBase = AmmLiquidityAssetIdBase;
+	type LiquidityAssetIdBase = MaxCreatableCurrencyId;
 	type PalletId = AmmPalletId;
 	type WeightInfo = pallet_amm::weights::DicoWeight<Runtime>;
 }
