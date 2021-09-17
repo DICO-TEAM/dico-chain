@@ -132,7 +132,11 @@ pub struct LbpPair {
 
 impl LbpPair {
 	pub fn new(asset_a: AssetId, asset_b: AssetId) -> Self {
-		if asset_a < asset_b { Self { asset_a, asset_b } } else { Self { asset_b, asset_a } }
+		if asset_a < asset_b {
+			Self { asset_a, asset_b }
+		} else {
+			Self { asset_a: asset_b, asset_b: asset_a }
+		}
 	}
 }
 
