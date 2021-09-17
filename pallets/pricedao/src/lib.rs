@@ -307,7 +307,7 @@ impl<T: Config> PriceProvider<CurrencyId> for Pallet<T> {
 		// currency_id2: stable coin's currency id,such as usdt
 		let queried_currency_info = dico_currencies::Pallet::<T>::asset_info(currency_id1)?;
 		let metadata = queried_currency_info.metadata?;
-		let uint = U256::from(10u32.pow(metadata.decimals.into()));
+		let uint = U256::from(10u128.pow(metadata.decimals.into()));
 		let liquidity = pallet_amm::Pallet::<T>::get_liquidity(Pair::new(currency_id1, currency_id2))?;
 		let price: U256;
 		if currency_id1 < currency_id2 {
