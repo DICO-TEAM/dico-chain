@@ -169,7 +169,7 @@ pub mod pallet {
 			ensure!(asset_a != asset_b, Error::<T>::MustBeDifferentAsset);
 			ensure!(amount_a_desired != 0 && amount_b_desired != 0, Error::<T>::MustAddNonZeroAmount);
 			ensure!(
-				asset_a <= T::LiquidityAssetIdBase::get(),
+				asset_a <= T::LiquidityAssetIdBase::get() && asset_b <= T::LiquidityAssetIdBase::get(),
 				Error::<T>::MustBeNonLiquidAsset
 			);
 
