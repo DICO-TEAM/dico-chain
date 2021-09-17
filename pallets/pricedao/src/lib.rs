@@ -12,6 +12,7 @@ use frame_support::{
 };
 use pallet_oracle::UpdateOraclesStorgage;
 use pallet_amm::Pair;
+use dico_currencies;
 // use frame_support::log;
 // use serde::{Deserialize, Serialize};
 
@@ -304,12 +305,17 @@ impl<T: Config> PriceProvider<CurrencyId> for Pallet<T> {
 	fn get_price_from_swap(currency_id1: CurrencyId, currency_id2: CurrencyId) -> Option<Price> {
 		// currency_id1: the queried currency
 		// currency_id2: stable coin's currency id,such as usdt
+		let queried_currency_info = dico_currencies::Pallet::<T>::asset_info(currency_id1)?;
+		let metadata = queried_currency_info.metadata?;
+		let uint = U256::from(10u32.pow(metadata.decimals.into()));
 		let liquidity = pallet_amm::Pallet::<T>::get_liquidity(Pair::new(currency_id1, currency_id2))?;
 		let price: U256;
 		if currency_id1 < currency_id2 {
-			price = pallet_amm::math::get_amount_out(U256::from(1), U256::from(liquidity.0), U256::from(liquidity.1)).ok()?;
+			let reserve_out = U256::from(liquidity.1).checked_div(uint)?;
+			price = pallet_amm::math::get_amount_out(U256::from(1), U256::from(liquidity.0), reserve_out).ok()?;
 		} else {
-			price = pallet_amm::math::get_amount_out(U256::from(1), U256::from(liquidity.1), U256::from(liquidity.0)).ok()?;
+			let reserve_out = U256::from(liquidity.0).checked_div(uint)?;
+			price = pallet_amm::math::get_amount_out(U256::from(1), U256::from(liquidity.1), reserve_out).ok()?;
 		}
 		Balance::checked_from(price)
 	}
