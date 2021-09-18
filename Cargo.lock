@@ -1861,6 +1861,7 @@ dependencies = [
  "pallet-membership",
  "pallet-mmr",
  "pallet-multisig",
+ "pallet-nft",
  "pallet-offences",
  "pallet-offences-benchmarking",
  "pallet-oracle",
@@ -5622,6 +5623,22 @@ dependencies = [
  "frame-support",
  "frame-system",
  "parity-scale-codec",
+ "sp-core 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
+ "sp-io 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
+ "sp-runtime",
+ "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
+]
+
+[[package]]
+name = "pallet-nft"
+version = "3.0.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "max-encoded-len",
+ "pallet-ico",
+ "parity-scale-codec",
+ "serde",
  "sp-core 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
  "sp-io 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
  "sp-runtime",
