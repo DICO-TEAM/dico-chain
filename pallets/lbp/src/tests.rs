@@ -348,4 +348,72 @@ fn swap_exact_amount_target_should_work() {
 	});
 }
 
+#[test]
+fn swap_exact_amount_target_should_work2() {
+	new_test_ext().execute_with(|| {
+		assert_ok!(Lbp::create_lbp(
+			Origin::signed(ALICE),
+			DICO,
+			USDT,
+			1333333000000000000000000u128,
+			7500000000000000000000000u128,
+			36 * WEIGHT_ONE,
+			12 * WEIGHT_ONE,
+			4 * WEIGHT_ONE,
+			28 * WEIGHT_ONE,
+			1,
+			1001,
+			100,
+		));
+
+		assert_eq!(NextLbpId::<Test>::get(), 1);
+
+		let lbp_pair = LbpPair::new(USDT, DICO);
+		assert_eq!(OngoingLbps::<Test>::get(lbp_pair), Some((ALICE, 0)));
+
+		let mut lbp_info = LbpInfo::new(1, 1001, 100, ALICE,
+										DICO, USDT, 1333333000000000000000000u128,
+										7500000000000000000000000u128, 36 * WEIGHT_ONE, 12 * WEIGHT_ONE,
+										4 * WEIGHT_ONE, 28 * WEIGHT_ONE);
+		lbp_info.status = LbpStatus::InProgress;
+		assert_eq!(Lbps::<Test>::get(0), Some(lbp_info));
+
+		let module_id_account = Lbp::account_id();
+		assert_eq!(Currency::free_balance(USDT, &module_id_account), 7500000000000000000000000u128);
+		assert_eq!(Currency::free_balance(DICO, &module_id_account), 1333333000000000000000000u128);
+		assert_eq!(Currency::free_balance(USDT, &ALICE), DEFAULT_ASSET_AMOUNT - 7500000000000000000000000u128);
+		assert_eq!(Currency::free_balance(DICO, &ALICE), DEFAULT_ASSET_AMOUNT - 1333333000000000000000000u128);
+
+		expect_events(
+			vec![Event::LbpCreated(ALICE, 0, DICO, USDT,
+								   1333333000000000000000000u128, 7500000000000000000000000u128).into()]
+		);
+
+		assert_ok!(Lbp::swap_exact_amount_target(
+			Origin::signed(BOB),
+			USDT,
+			7500000000000000000000000u128,
+			DICO,
+			51927050621361330000000u128
+		));
+
+		lbp_info.afs_balance -= 51927050621361330000000u128;
+		lbp_info.fundraising_balance += 3223295933112765945000000u128;
+		assert_eq!(Lbps::<Test>::get(0), Some(lbp_info));
+
+		assert_eq!(Currency::free_balance(DICO, &module_id_account),
+				   1333333000000000000000000u128 - 51927050621361330000000u128);
+		assert_eq!(Currency::free_balance(USDT, &module_id_account),
+				   7500000000000000000000000u128 + 3223295933112765945000000u128);
+		assert_eq!(Currency::free_balance(DICO, &BOB),
+				   DEFAULT_ASSET_AMOUNT + 51927050621361330000000u128);
+		assert_eq!(Currency::free_balance(USDT, &BOB),
+				   DEFAULT_ASSET_AMOUNT - 3239493400113332608040201u128);
+
+		expect_events(
+			vec![Event::Swapped(BOB, 0, USDT, DICO,
+								3239493400113332608040201u128, 51927050621361330000000u128).into()]
+		);
+	});
+}
 
