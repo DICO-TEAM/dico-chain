@@ -42,6 +42,7 @@ pallet-dao                  = { package = "pallet-dao", default-features = false
 pallet-dico-treasury        = { package = "pallet-dico-treasury", default-features = false, path = "../../pallets/treasury"}
 pallet-ico-rpc-runtime-api  = { package = "pallet-ico-rpc-runtime-api", default-features = false, path = "../../pallets/ico/rpc/runtime-api"}
 pallet-farm-rpc-runtime-api = { package = 'pallet-farm-rpc-runtime-api', default-features = false, path = "../../pallets/farm/rpc/runtime-api" }
+pallet-nft                  = { package = "pallet-nft", default-features = false, path = "../../pallets/nft"}
 
 
 
@@ -213,6 +214,7 @@ std = [
     "pallet-dao/std",
     "pallet-dico-treasury/std",
     "pallet-ico-rpc-runtime-api/std",
+    "pallet-nft/std",
 ]
 runtime-benchmarks = [
     "frame-benchmarking",
