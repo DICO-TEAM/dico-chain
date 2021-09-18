@@ -45,16 +45,15 @@ use frame_support::{
 	pallet_prelude::*,
 	traits::{
 		Currency as PalletCurrency, ExistenceRequirement, Get, LockableCurrency as PalletLockableCurrency,
-		OnUnbalanced, ReservableCurrency as PalletReservableCurrency, WithdrawReasons,
+		ReservableCurrency as PalletReservableCurrency, WithdrawReasons,
 	},
-	weights::Weight,
 };
 use frame_system::{ensure_root, ensure_signed, pallet_prelude::*};
 use sp_std::vec::Vec;
 
 use orml_traits::{
 	arithmetic::{Signed, SimpleArithmetic},
-	currency::TransferAll,
+	// currency::TransferAll,
 	BalanceStatus,
 	BasicCurrency,
 	BasicCurrencyExtended,
@@ -133,6 +132,9 @@ pub mod module {
 		type WeightInfo: WeightInfo;
 
 		type CreateConsume: Get<BalanceOf<Self>>;
+
+		/// Maximum assets that can be created
+		type MaxCreatableCurrencyId: Get<AssetId>;
 	}
 
 	#[pallet::error]
@@ -321,7 +323,7 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 				decimals: 14u8,
 			});
 		}
-		let mut asset_info = DicoAssetsInfo::<T>::get(currency_id).ok_or(Error::<T>::AssetNotExists)?;
+		let asset_info = DicoAssetsInfo::<T>::get(currency_id).ok_or(Error::<T>::AssetNotExists)?;
 		match asset_info.metadata {
 			Some(x) => Ok(x),
 			None => Err(Error::<T>::MetadataNotExists)?,
@@ -372,7 +374,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn is_currency_id_too_large(currency_id: AssetId) -> bool {
-		if currency_id >= 2000_0000 {
+		if currency_id >= T::MaxCreatableCurrencyId::get() {
 			return true;
 		}
 		false
