@@ -1387,6 +1387,24 @@ impl pallet_dico_treasury::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	pub const MaxClassMetadata: u32 = 1024;
+    pub const MaxTokenMetadata: u32 = 1024;
+	pub const  MaxTokenAttribute: u32 = 1024;
+
+}
+
+impl pallet_nft::Config for Runtime {
+	type Event = Event;
+	type ClassId = u32;
+	type TokenId = u32;
+	type Currency = Balances;
+	type MaxClassMetadata = ();
+	type MaxTokenMetadata = ();
+	type MaxTokenAttribute = ();
+	type PowerHandler = Ico;
+}
+
 
 
 
@@ -1453,6 +1471,7 @@ construct_runtime!(
 		Ico: pallet_ico::{Pallet, Event<T>, Call, Storage},
 		Dao: pallet_dao::{Pallet, Origin<T>, Event<T>, Call, Storage},
 		DicoTreasury: pallet_dico_treasury::{Pallet, Call, Storage, Event<T>},
+		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>},
 	}
 );
 
