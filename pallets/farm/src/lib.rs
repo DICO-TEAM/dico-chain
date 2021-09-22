@@ -38,17 +38,11 @@ mod mock;
 mod tests;
 
 
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
+#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, Default, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Participant {
 	pub amount: Balance,
 	pub reward_debt: Balance,
-}
-
-impl Default for Participant {
-	fn default() -> Self {
-		Self { amount: Balance::zero(), reward_debt: Balance::zero() }
-	}
 }
 
 impl Participant {
@@ -57,36 +51,34 @@ impl Participant {
 	}
 }
 
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
+#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, Default, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct PoolInfo {
 	pub currency_id: AssetId,
-	pub alloc_point: U256,
+	pub alloc_point: u128,
 	pub last_reward_block: BlockNumber,
-	pub acc_dico_per_share: U256,
+	pub acc_dico_per_share: Balance,
 	pub total_amount: Balance,
-}
-
-impl Default for PoolInfo {
-	fn default() -> Self {
-		Self {
-			currency_id: AssetId::zero(),
-			alloc_point: U256::zero(),
-			last_reward_block: BlockNumber::zero(),
-			acc_dico_per_share: U256::zero(),
-			total_amount: Balance::zero(),
-		}
-	}
+	pub start_block: BlockNumber,
+	pub end_block: BlockNumber,
 }
 
 impl PoolInfo {
-	pub fn new(currency_id: AssetId, alloc_point: U256, last_reward_block: BlockNumber) -> Self {
+	pub fn new(
+		currency_id: AssetId,
+		alloc_point: u128,
+		last_reward_block: BlockNumber,
+		start_block: BlockNumber,
+		end_block: BlockNumber,
+	) -> Self {
 		Self {
 			currency_id,
 			alloc_point,
 			last_reward_block,
-			acc_dico_per_share: U256::zero(),
+			acc_dico_per_share: Balance::zero(),
 			total_amount: Balance::zero(),
+			start_block,
+			end_block,
 		}
 	}
 }
@@ -144,6 +136,8 @@ pub mod pallet {
 
 	#[pallet::error]
 	pub enum Error<T> {
+		/// Block configured is invalid.
+		InvalidBlockConfigured,
 		/// Liquidity already exists.
 		LiquidityIdCreated,
 		/// The total issuance of liquid assets is zero.
@@ -180,7 +174,7 @@ pub mod pallet {
 		/// The mining pool was created. [pool id]
 		PoolCreated(T::PoolId),
 		/// The allocated points of each designated mining pool was updated. [pool id, alloc point]
-		PoolAllocPointUpdated(T::PoolId, U256),
+		PoolAllocPointUpdated(T::PoolId, u128),
 	}
 
 	#[pallet::storage]
@@ -208,7 +202,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn total_alloc_point)]
-	pub type TotalAllocPoint<T: Config> = StorageValue<_, U256, ValueQuery>;
+	pub type TotalAllocPoint<T: Config> = StorageValue<_, u128, ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn start_block)]
@@ -291,7 +285,7 @@ pub mod pallet {
 		pub fn update_pool_alloc_point(
 			origin: OriginFor<T>,
 			pool_id: T::PoolId,
-			alloc_point: U256,
+			alloc_point: u128,
 		) -> DispatchResultWithPostInfo {
 			T::FounderSetOrigin::ensure_origin(origin)?;
 
@@ -323,9 +317,15 @@ pub mod pallet {
 		pub fn create_pool(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
-			alloc_point: U256,
+			alloc_point: u128,
+			start_block: BlockNumber,
+			end_block: BlockNumber,
 		) -> DispatchResultWithPostInfo {
 			T::FounderSetOrigin::ensure_origin(origin)?;
+
+			let farm_start_block: BlockNumber = Self::start_block().saturated_into();
+			ensure!(start_block < end_block && start_block >= farm_start_block,
+				Error::<T>::InvalidBlockConfigured);
 
 			let total_issuance = T::Currency::total_issuance(currency_id);
 			ensure!(total_issuance != 0, Error::<T>::LiquidityIdZeroIssuance);
@@ -334,22 +334,27 @@ pub mod pallet {
 				ensure!(pool_info.currency_id != currency_id, Error::<T>::LiquidityIdCreated);
 			}
 
-			let start_block = Self::start_block();
-			let block_number = frame_system::pallet::Pallet::<T>::block_number();
+			let block_number: BlockNumber = frame_system::pallet::Pallet::<T>::block_number().saturated_into();
 
 			let next_pool_id = Self::get_next_pool_id()?;
 
 			Self::mass_update_pools()?;
 
-			let last_reward_block = if block_number > start_block { block_number } else { start_block };
-			let last_reward_block_hp: BlockNumber = last_reward_block.saturated_into();
+			let block_arr = vec![block_number, start_block, farm_start_block];
+			let last_reward_block = *block_arr.iter().max().ok_or(Error::<T>::InvalidBlockConfigured)?;
 
 			let mut total_alloc_point = TotalAllocPoint::<T>::get();
 			total_alloc_point = total_alloc_point
 				.checked_add(alloc_point).ok_or(ArithmeticError::Overflow)?;
 			TotalAllocPoint::<T>::put(total_alloc_point);
 
-			let pool_info = PoolInfo::new(currency_id, alloc_point, last_reward_block_hp);
+			let pool_info = PoolInfo::new(
+				currency_id,
+				alloc_point,
+				last_reward_block,
+				start_block,
+				end_block,
+			);
 			Pools::<T>::insert(next_pool_id, pool_info);
 			Self::deposit_event(Event::PoolCreated(next_pool_id));
 
@@ -481,19 +486,18 @@ impl<T: Config> Pallet<T> {
 
 	/// Calculate the number of halving of the specified block,
 	/// the return value is 0,1,...N, which means the Nth halving
-	fn phase(block_number: T::BlockNumber) -> sp_std::result::Result<U256, ArithmeticError> {
-		let halving_period: u32 = Self::halving_period().saturated_into();
-		let start_block: u32 = Self::start_block().saturated_into();
-		let block_number_int: u32 = block_number.saturated_into();
+	fn phase(block_number: BlockNumber) -> sp_std::result::Result<U256, ArithmeticError> {
+		let halving_period: BlockNumber = Self::halving_period().saturated_into();
+		let start_block: BlockNumber = Self::start_block().saturated_into();
 
 		let (halving_period_hp, start_block_hp, block_number_hp)
-			= to_u256!(halving_period, start_block, block_number_int);
+			= to_u256!(halving_period, start_block, block_number);
 
 		if halving_period.is_zero() {
 			return Ok(U256::zero());
 		}
 
-		if block_number_int > start_block {
+		if block_number > start_block {
 			let halving_number = block_number_hp
 				.checked_sub(start_block_hp).ok_or(ArithmeticError::Overflow)?
 				.checked_sub(U256::one()).ok_or(ArithmeticError::Overflow)?
@@ -508,60 +512,57 @@ impl<T: Config> Pallet<T> {
 	/// Calculate the number of DICOs produced by the specified block. This is easy to calculate.
 	/// Divide the DicoPerBlock set at the initial stage by the Nth power of 2,
 	/// where N represents the number of halvings.
-	fn reward(block_number: T::BlockNumber) -> sp_std::result::Result<Balance, ArithmeticError> {
-		let phase_hp: U256 = Self::phase(block_number)?;
+	fn reward(block_number: BlockNumber) -> sp_std::result::Result<Balance, ArithmeticError> {
+		let phase = Self::phase(block_number)?;
 
 		let dico_per_block = to_u256!(Self::dico_per_block());
 		let rewards = dico_per_block
 			.checked_div(U256::from(2)
-				.checked_pow(phase_hp).ok_or(ArithmeticError::Overflow)?)
+				.checked_pow(phase).ok_or(ArithmeticError::Overflow)?)
 			.ok_or(ArithmeticError::Overflow)?;
 
 		to_balance!(rewards)
 	}
 
-	/// Calculate the number of DICOs produced from the last reward block to the current block cycle.
-	fn get_dico_block_reward(last_reward_block: T::BlockNumber) -> sp_std::result::Result<Balance, ArithmeticError> {
+	/// Calculate the number of DICOs produced from the last reward block to the specific block cycle.
+	fn get_dico_block_reward(
+		last_reward_block: BlockNumber,
+		specific_block: BlockNumber
+	) -> sp_std::result::Result<Balance, ArithmeticError> {
 		let mut block_reward = U256::zero();
-		let halving_period: u32 = Self::halving_period().saturated_into();
-		let start_block: u32 = Self::start_block().saturated_into();
-		let last_reward_block_int: u32 = last_reward_block.saturated_into();
-		let block_number = frame_system::pallet::Pallet::<T>::block_number();
-		let block_number_int: u32 = block_number.saturated_into();
+		let halving_period: BlockNumber = Self::halving_period().saturated_into();
+		let start_block: BlockNumber = Self::start_block().saturated_into();
 
-		if block_number_int <= last_reward_block_int {
+		if specific_block <= last_reward_block {
 			return to_balance!(0);
 		}
 
-		let (halving_period_hp, start_block_hp, block_number_hp)
-			= to_u256!(halving_period, start_block, block_number_int);
-
-		let mut last_reward_block_hp = to_u256!(last_reward_block_int);
-
 		let mut n = Self::phase(last_reward_block)?;
-		let m = Self::phase(block_number)?;
+		let m = Self::phase(specific_block)?;
+
+		let mut last_reward_block = to_u256!(last_reward_block);
 
 		while n < m {
 			n = n.checked_add(U256::one()).ok_or(ArithmeticError::Overflow)?;
 			let r = n
-				.checked_mul(halving_period_hp).ok_or(ArithmeticError::Overflow)?
-				.checked_add(start_block_hp).ok_or(ArithmeticError::Overflow)?;
+				.checked_mul(to_u256!(halving_period)).ok_or(ArithmeticError::Overflow)?
+				.checked_add(to_u256!(start_block)).ok_or(ArithmeticError::Overflow)?;
 
 			ensure!(r <= to_u256!(BlockNumber::MAX), ArithmeticError::Overflow);
 
-			let r_reward = Self::reward(T::BlockNumber::from(r.as_u32()))?;
+			let r_reward = Self::reward(BlockNumber::from(r.as_u32()))?;
 			let r_block_reward = r
-				.checked_sub(last_reward_block_hp).ok_or(ArithmeticError::Overflow)?
+				.checked_sub(last_reward_block).ok_or(ArithmeticError::Overflow)?
 				.checked_mul(to_u256!(r_reward)).ok_or(ArithmeticError::Overflow)?;
 
 			block_reward = block_reward
 				.checked_add(r_block_reward).ok_or(ArithmeticError::Overflow)?;
-			last_reward_block_hp = r;
+			last_reward_block = r;
 		}
 
-		let y_block_reward = block_number_hp
-			.checked_sub(last_reward_block_hp).ok_or(ArithmeticError::Overflow)?
-			.checked_mul(to_u256!(Self::reward(block_number)?)).ok_or(ArithmeticError::Overflow)?;
+		let y_block_reward = to_u256!(specific_block)
+			.checked_sub(to_u256!(last_reward_block)).ok_or(ArithmeticError::Overflow)?
+			.checked_mul(to_u256!(Self::reward(specific_block)?)).ok_or(ArithmeticError::Overflow)?;
 
 		block_reward = block_reward.checked_add(y_block_reward).ok_or(ArithmeticError::Overflow)?;
 
@@ -570,21 +571,32 @@ impl<T: Config> Pallet<T> {
 
 	fn calc_participant_reward(
 		account: T::AccountId,
-		pid: T::PoolId
+		pid: T::PoolId,
 	) -> sp_std::result::Result<Balance, DispatchErrorWithPostInfo> {
 		let pool = Pools::<T>::get(pid).ok_or(Error::<T>::PoolNotFind)?;
 		let participant = Participants::<T>::get(pid, account).ok_or(Error::<T>::UserNotFindInPool)?;
 
-		let block_reward = Self::get_dico_block_reward(T::BlockNumber::from(pool.last_reward_block))?;
+		let block_number: BlockNumber = frame_system::pallet::Pallet::<T>::block_number().saturated_into();
+
+		if block_number <= pool.last_reward_block
+			|| block_number < pool.start_block {
+			return Ok(Balance::zero());
+		}
+
+		let reward_block = if block_number > pool.last_reward_block && block_number >= pool.end_block {
+			pool.end_block
+		} else { block_number };
+
+		let block_reward = Self::get_dico_block_reward(pool.last_reward_block, reward_block)?;
 		let dico_reward = to_u256!(block_reward)
 			.checked_mul(to_u256!(pool.alloc_point)).ok_or(ArithmeticError::Overflow)?
-			.checked_div(Self::total_alloc_point()).ok_or(ArithmeticError::Overflow)?;
+			.checked_div(to_u256!(Self::total_alloc_point())).ok_or(ArithmeticError::Overflow)?;
 
 		let module_account_id = Self::account_id();
 		let lp_supply = T::Currency::free_balance(pool.currency_id, &module_account_id);
 		ensure!(!lp_supply.is_zero(), Error::<T>::PoolLiquidityBalanceIsZero);
 
-		let acc_dico_per_share = pool.acc_dico_per_share
+		let acc_dico_per_share = to_u256!(pool.acc_dico_per_share)
 			.checked_add(
 				dico_reward
 					.checked_mul(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?
@@ -612,50 +624,53 @@ impl<T: Config> Pallet<T> {
 		Pools::<T>::try_mutate(pid, |maybe_pool| -> sp_std::result::Result<(), DispatchErrorWithPostInfo> {
 			let pool = maybe_pool.as_mut().ok_or(Error::<T>::PoolNotFind)?;
 
-			let block_number = frame_system::pallet::Pallet::<T>::block_number();
-			let block_number_hp: BlockNumber = block_number.saturated_into();
-			if block_number_hp <= pool.last_reward_block {
+			let block_number: BlockNumber = frame_system::pallet::Pallet::<T>::block_number().saturated_into();
+
+			if block_number <= pool.last_reward_block
+				|| block_number < pool.start_block
+				|| pool.last_reward_block >= pool.end_block {
 				return Ok(());
 			}
+
+			let reward_block = if block_number > pool.last_reward_block && block_number >= pool.end_block {
+				pool.end_block
+			} else { block_number };
 
 			let module_account_id = Self::account_id();
 			let native_asset = T::NativeAssetId::get();
 			let lp_supply = T::Currency::free_balance(pool.currency_id, &module_account_id);
 			if lp_supply.is_zero() {
-				pool.last_reward_block = block_number_hp;
+				pool.last_reward_block = reward_block;
 				return Ok(());
 			}
 
 			// Calculate the number of DICOs produced from the last reward block to the current block cycle.
-			let last_reward_block_hp = T::BlockNumber::from(pool.last_reward_block);
-			let block_reward = Self::get_dico_block_reward(last_reward_block_hp)?;
+			let block_reward = Self::get_dico_block_reward(pool.last_reward_block, reward_block)?;
 			if block_reward.is_zero() {
 				return Ok(());
 			}
 
 			// According to the mining weight value of the mining pool,
 			// the number of DICOs that the mining pool can allocate in this period is calculated.
-			let block_reward_hp = to_u256!(block_reward);
-			let total_alloc_point_hp = Self::total_alloc_point();
+			let total_alloc_point = to_u256!(Self::total_alloc_point());
 
-			ensure!(total_alloc_point_hp != U256::zero(), Error::<T>::TotalAllocPointIsZero);
+			ensure!(total_alloc_point != U256::zero(), Error::<T>::TotalAllocPointIsZero);
 
-			let dico_reward = block_reward_hp
-				.checked_mul(pool.alloc_point).ok_or(ArithmeticError::Overflow)?
-				.checked_div(total_alloc_point_hp).ok_or(ArithmeticError::Overflow)?;
+			let dico_reward = to_u256!(block_reward)
+				.checked_mul(to_u256!(pool.alloc_point)).ok_or(ArithmeticError::Overflow)?
+				.checked_div(total_alloc_point).ok_or(ArithmeticError::Overflow)?;
 
 			// Call the minting interface to mint DICO for the module.
 			T::Currency::deposit(native_asset, &module_account_id, to_balance!(dico_reward)?)?;
-			let lp_supply_hp = to_u256!(lp_supply);
 
-			pool.acc_dico_per_share = pool.acc_dico_per_share
+			pool.acc_dico_per_share = to_balance!(to_u256!(pool.acc_dico_per_share)
 				.checked_add(
 					dico_reward
 						.checked_mul(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?
-						.checked_div(lp_supply_hp).ok_or(ArithmeticError::Overflow)?
-				).ok_or(ArithmeticError::Overflow)?;
+						.checked_div( to_u256!(lp_supply)).ok_or(ArithmeticError::Overflow)?
+				).ok_or(ArithmeticError::Overflow)?)?;
 
-			pool.last_reward_block = block_number_hp;
+			pool.last_reward_block = reward_block;
 
 			Ok(())
 		})

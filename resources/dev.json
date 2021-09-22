@@ -513,10 +513,12 @@
   },
   "PoolInfo": {
     "currency_id": "AssetId",
-    "alloc_point": "U256",
+    "alloc_point": "u128",
     "last_reward_block": "BlockNumber",
-    "acc_dico_per_share": "U256",
-    "total_amount": "Balance"
+    "acc_dico_per_share": "Balance",
+    "total_amount": "Balance",
+    "start_block": "BlockNumber",
+    "end_block": "BlockNumber"
   },
   "LbpStatus": {
     "_enum": [
