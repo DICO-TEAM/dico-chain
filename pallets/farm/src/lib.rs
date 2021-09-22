@@ -16,6 +16,7 @@ use frame_support::{
 	sp_runtime::traits::{Zero, One, AtLeast32Bit, CheckedAdd},
 	dispatch::DispatchErrorWithPostInfo,
 };
+use sp_std::{vec, vec::Vec};
 use frame_system::pallet_prelude::*;
 use dico_primitives::{AssetId, Balance, Amount, BlockNumber, to_u256, to_balance};
 use sp_runtime::{ArithmeticError, traits::{AccountIdConversion, SaturatedConversion}};
@@ -97,7 +98,7 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config> Hooks<T::BlockNumber> for Pallet<T> {
 		fn on_finalize(now: T::BlockNumber) {
-			Self::update_pool_alloc_point_gradually(now);
+			let _ = Self::update_pool_alloc_point_gradually(now);
 		}
 	}
 
