@@ -564,7 +564,16 @@
   },
   "TokenId":"u32",
   "ClassId": "u32",
-  "Attributes": "BTreeMap<Vec<u8>, Vec<u8>>",
+  "SaleInfoOf": "SaleInfo",
+  "TokenInfoOf": "TokenInfo",
+  "ClassInfoOf": "ClassInfo",
+  "str": "Vec<u8>",
+  "Attributes": "BTreeMap<str, str>",
+  "TokenInfo": {
+    "metadata": "Vec<u8>",
+    "owner": "Option<AccountId>",
+    "data": "TokenData"
+  },
   "ClassInfo": {
     "metadata": "Vec<u8>",
     "total_issuance": "TokenId",
@@ -588,12 +597,12 @@
   },
   "NftLevel": {
     "_enum": {
-      "Rookie": "null",
-      "Angle": "null",
-      "WallStreetElite": "null",
-      "UnicornHunter": "null",
-      "Mafia": "null",
-      "GrandMaster": "null",
+      "Rookie": null,
+      "Angle": null,
+      "WallStreetElite": null,
+      "UnicornHunter": null,
+      "Mafia": null,
+      "GrandMaster": null,
       "Other": "Vec<u8>"
     }
   },
@@ -603,12 +612,7 @@
     "price": "Balance",
     "start_block": "BlockNumber"
   },
-  "ClassInfo": {
-    "metadata": "Vec<u8>",
-    "total_issuance": "TokenId",
-    "issuer": "AccountId",
-    "data": "ClassData"
-  },
+  "ClassDataOf": "ClassData",
   "ClassData": {
     "level": "NftLevel",
     "power_threshold": "Balance",
