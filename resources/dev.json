@@ -559,5 +559,59 @@
     "currency_id": "AssetId",
     "index": "u32",
     "reward": "Option<Balance>"
+  },
+  "TokenId":"u32",
+  "ClassId": "u32",
+  "Attributes": "BTreeMap<Vec<u8>, Vec<u8>>",
+  "ClassInfo": {
+    "metadata": "Vec<u8>",
+    "total_issuance": "TokenId",
+    "issuer": "AccountId",
+    "data": "TokenData"
+  },
+  "TokenData": {
+    "class_id": "ClassId",
+    "hash": "Hash",
+    "power_threshold": "Balance",
+    "claim_payment": "Balance",
+    "attribute": "Attribute",
+    "image_hash": "Vec<u8>",
+    "sell_records": "Vec<(AccountId, Balance)>",
+    "status": "NftStatus"
+  },
+  "NftStatus": {
+    "is_in_sale": "bool",
+    "is_active_image": "bool",
+    "is_claimed": "bool"
+  },
+  "NftLevel": {
+    "_enum": {
+      "Rookie": "null",
+      "Angle": "null",
+      "WallStreetElite": "null",
+      "UnicornHunter": "null",
+      "Mafia": "null",
+      "GrandMaster": "null",
+      "Other": "Vec<u8>"
+    }
+  },
+  "SaleInfo": {
+    "seller": "AccountId",
+    "token_id": "TokenId",
+    "price": "Balance",
+    "start_block": "BlockNumber"
+  },
+  "ClassInfo": {
+    "metadata": "Vec<u8>",
+    "total_issuance": "TokenId",
+    "issuer": "AccountId",
+    "data": "ClassData"
+  },
+  "ClassData": {
+    "level": "NftLevel",
+    "power_threshold": "Balance",
+    "claim_payment": "Balance",
+    "images_hash": "Option<Vec<u8>>",
+    "maximum_quantity": "TokenId"
   }
 }

@@ -57,12 +57,12 @@ pub struct ClassInfo<TokenId, AccountId, Data, ClassMetadataOf> {
 
 
 /// class data
-#[derive(Encode, Decode, Clone, Eq, PartialEq, MaxEncodedLen, RuntimeDebug)]
-pub struct ClassData<NftLevel, Hash, Balance, TokenId> {
+#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug)]
+pub struct ClassData<NftLevel, Balance, TokenId> {
 	level: NftLevel,
 	power_threshold: Balance,
 	claim_payment: Balance,
-	images_hash: Option<Hash>,
+	images_hash: Option<Vec<u8>>,
 	maximum_quantity: TokenId,
 }
 
@@ -74,7 +74,7 @@ pub struct TokenData<Hash, AccountId, Attribute, Balance, NftStatus, ClassId> {
 	power_threshold: Balance,
 	claim_payment: Balance,
 	attribute: Attribute,
-	image_hash: Hash,
+	image_hash: Vec<u8>,
 	sell_records: Vec<(AccountId, Balance)>,
 	status: NftStatus,
 }
@@ -169,7 +169,7 @@ pub mod module {
 	pub type TokenMetadataOf<T> = BoundedVec<u8, <T as Config>::MaxTokenMetadata>;
 	pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 	pub type TokenDataOf<T> = TokenData<<T as frame_system::Config>::Hash, <T as frame_system::Config>::AccountId, Attributes,  BalanceOf<T>, NftStatus, <T as Config>::ClassId>;
-	pub type ClassDataOf<T> = ClassData<NftLevel, <T as frame_system::Config>::Hash, BalanceOf<T>, <T as Config>::TokenId>;
+	pub type ClassDataOf<T> = ClassData<NftLevel, BalanceOf<T>, <T as Config>::TokenId>;
 	pub type ClassInfoOf<T> = ClassInfo<
 		<T as Config>::TokenId,
 		<T as frame_system::Config>::AccountId,
@@ -191,6 +191,8 @@ pub mod module {
 		WithdrawSale(T::ClassId, T::TokenId),
 		BuyToken(T::AccountId, T::ClassId, T::TokenId, BalanceOf<T>),
 		DestroyClass(T::AccountId, T::ClassId),
+		Active((T::ClassId, T::TokenId)),
+		Inactive((T::ClassId, T::TokenId)),
 	}
 
 	/// Error for non-fungible-token module.
@@ -219,6 +221,7 @@ pub mod module {
 		OwnerIsExists,
 		NotOwner,
 		NotInSale,
+		Inactive,
 	}
 
 	/// Next available class ID.
@@ -304,7 +307,7 @@ pub mod module {
 			class_id: T::ClassId,
 			metadata: Vec<u8>,
 			attribute: Attributes,
-			image_hash: T::Hash
+			image_hash: Vec<u8>
 		) -> DispatchResult {
 			let issuer = ensure_signed(origin)?;
 			let token_id = Self::do_mint(&issuer, class_id, metadata, attribute, image_hash)?;
@@ -367,6 +370,32 @@ pub mod module {
 			Ok(())
 		}
 
+		#[pallet::weight(10_000)]
+		pub fn active(
+			origin: OriginFor<T>,
+			token: (T::ClassId, T::TokenId)
+		) -> DispatchResult {
+			let owner = ensure_signed(origin)?;
+			TokensOf::<T>::get(&owner).iter().for_each(|t| {
+				Self::do_active_or_not(&owner, *t, false);
+			});
+
+			Self::do_active_or_not(&owner, token, true)?;
+			Self::deposit_event(Event::<T>::Active(token));
+
+			Ok(())
+		}
+
+		#[pallet::weight(10_000)]
+		pub fn inactive(
+			origin: OriginFor<T>,
+			token: (T::ClassId, T::TokenId)
+		) -> DispatchResult {
+			let owner = ensure_signed(origin)?;
+			Self::do_active_or_not(&owner, token, false)?;
+			Self::deposit_event(Event::<T>::Inactive(token));
+			Ok(())
+		}
 
 
 	}
@@ -409,6 +438,7 @@ impl<T: Config> Pallet<T> {
 			let mut info = token_info.as_mut().ok_or(Error::<T>::TokenNotFound)?;
 
 			ensure!(!info.data.status.is_in_sale && info.data.status.is_claimed, Error::<T>::InSale);
+			ensure!(info.data.status.is_active_image, Error::<T>::Inactive);
 			ensure!(info.owner == Some(from.clone()), Error::<T>::NoPermission);
 
 			if from == to {
@@ -427,7 +457,7 @@ impl<T: Config> Pallet<T> {
 		class_id: T::ClassId,
 		metadata: Vec<u8>,
 		attribute: Attributes,
-		image_hash: T::Hash,
+		image_hash: Vec<u8>,
 	) -> Result<T::TokenId, DispatchError> {
 		NextTokenId::<T>::try_mutate(class_id, |id| -> Result<T::TokenId, DispatchError> {
 
@@ -473,6 +503,19 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
+	fn do_active_or_not(owner: &T::AccountId, token: (T::ClassId, T::TokenId), is_active: bool) -> DispatchResult {
+		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
+			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
+			ensure!(t.owner == Some(owner.clone()), Error::<T>::NotOwner);
+			match is_active {
+				true => t.data.status.is_active_image = true,
+				_ => t.data.status.is_active_image = false,
+			}
+			*token_info = Some(t);
+			Ok(())
+		})
+	}
+
 
 	fn do_claim(owner: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) -> DispatchResult {
 		Tokens::<T>::try_mutate_exists(class_id, token_id, |token_info| -> DispatchResult {
@@ -487,7 +530,7 @@ impl<T: Config> Pallet<T> {
 			t.data.status = NftStatus {
 				is_claimed: true,
 				is_in_sale: false,
-				is_active_image: true,
+				is_active_image: false,
 			};
 			Self::update_no_owner_tokens_vec(class_id, token_id, true);
 			*token_info = Some(t);
@@ -500,7 +543,7 @@ impl<T: Config> Pallet<T> {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
 			ensure!(t.owner == Some(owner.clone()), Error::<T>::NoPermission);
-
+			ensure!(t.data.status.is_active_image, Error::<T>::Inactive);
 			Classes::<T>::try_mutate(token.0, |class_info| -> DispatchResult {
 				let info = class_info.as_mut().ok_or(Error::<T>::ClassNotFound)?;
 				info.total_issuance = info
@@ -530,8 +573,10 @@ impl<T: Config> Pallet<T> {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
 			ensure!(t.owner == Some(user.clone()), Error::<T>::NotOwner);
+			ensure!(t.data.status.is_active_image, Error::<T>::Inactive);
 			ensure!(!Self::is_in_sale(token.0, token.1), Error::<T>::InSale);
 			t.data.status.is_in_sale = true;
+			// t.data.status.is_active_image = false;
 			Self::insert_token_to_sale_vec(&user,token.0, token.1, price);
 			*token_info = Some(t);
 			Ok(())
