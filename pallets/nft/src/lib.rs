@@ -143,7 +143,6 @@ pub mod module {
 	use super::*;
 	use pallet_ico::system::pallet_prelude::OriginFor;
 	use pallet_ico::ensure_signed;
-	use crate::Error::TokenNotFound;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -222,6 +221,7 @@ pub mod module {
 		NotOwner,
 		NotInSale,
 		Inactive,
+		ActiveNft,
 	}
 
 	/// Next available class ID.
@@ -438,7 +438,7 @@ impl<T: Config> Pallet<T> {
 			let mut info = token_info.as_mut().ok_or(Error::<T>::TokenNotFound)?;
 
 			ensure!(!info.data.status.is_in_sale && info.data.status.is_claimed, Error::<T>::InSale);
-			ensure!(info.data.status.is_active_image, Error::<T>::Inactive);
+			ensure!(!info.data.status.is_active_image, Error::<T>::ActiveNft);
 			ensure!(info.owner == Some(from.clone()), Error::<T>::NoPermission);
 
 			if from == to {
@@ -543,7 +543,7 @@ impl<T: Config> Pallet<T> {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
 			ensure!(t.owner == Some(owner.clone()), Error::<T>::NoPermission);
-			ensure!(t.data.status.is_active_image, Error::<T>::Inactive);
+			ensure!(!t.data.status.is_active_image, Error::<T>::ActiveNft);
 			Classes::<T>::try_mutate(token.0, |class_info| -> DispatchResult {
 				let info = class_info.as_mut().ok_or(Error::<T>::ClassNotFound)?;
 				info.total_issuance = info
@@ -573,7 +573,7 @@ impl<T: Config> Pallet<T> {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
 			ensure!(t.owner == Some(user.clone()), Error::<T>::NotOwner);
-			ensure!(t.data.status.is_active_image, Error::<T>::Inactive);
+			ensure!(!t.data.status.is_active_image, Error::<T>::ActiveNft);
 			ensure!(!Self::is_in_sale(token.0, token.1), Error::<T>::InSale);
 			t.data.status.is_in_sale = true;
 			// t.data.status.is_active_image = false;
@@ -602,6 +602,7 @@ impl<T: Config> Pallet<T> {
 			let sale_info = Self::get_in_sale_token(token.0, token.1).ok_or(Error::<T>::NotInSale)?;
 			T::Currency::transfer(&buyer, &sale_info.seller, sale_info.price, ExistenceRequirement::KeepAlive)?;
 			Self::remove_token_from_sale_vec(token.0, token.1);
+			t.data.sell_records.push((sale_info.seller, sale_info.price));
 			t.data.status.is_in_sale = false;
 			t.owner = Some(buyer.clone());
 			*token_info = Some(t);
