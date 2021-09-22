@@ -19,7 +19,7 @@ use dico_currencies;
 use orml_utilities::with_transaction_result;
 use sp_runtime::{DispatchError, DispatchResult, FixedU128};
 // use support::{DEXManager, ExchangeRateProvider, Price, PriceProvider};
-pub use primitives::{Price, CurrencyId, Balance, Moment, CORE_ASSET_ID};
+pub use primitives::{Price, CurrencyId, Balance, Moment, CORE_ASSET_ID,currency::DOLLARS};
 // use frame_support::traits::Instance;
 
 pub mod traits;
@@ -129,6 +129,9 @@ pub mod module {
 		SlashAccounts(Vec<T::AccountId>),
 		///
 		GetPrice(CurrencyId,Price),
+		GetOraclePrice(CurrencyId,Price),
+		GetSwapPrice(CurrencyId,Price),
+
 	}
 
 
@@ -144,6 +147,9 @@ pub mod module {
 		ExpirationNotEmpty,
 		/// Not expired
 		NotExpired,
+		///
+		Overflow,
+
 	}
 
 	#[pallet::hooks]
@@ -202,7 +208,7 @@ pub mod module {
 
 		#[pallet::weight((<T as Config>::WeightInfo::get_price(), DispatchClass::Operational))]
 		pub fn get_price(origin: OriginFor<T>,currency_id1: CurrencyId, currency_id2: CurrencyId) -> DispatchResultWithPostInfo {
-			let price = <Self as PriceData<CurrencyId>>::get_price(currency_id1,currency_id2).ok_or(ArithmeticError::DivisionByZero)?;
+			let price = <Self as PriceData<CurrencyId>>::get_price(currency_id1,currency_id2).ok_or(Error::<T>::Overflow)?;
 			Self::deposit_event(Event::GetPrice(currency_id1,price));
 			Ok(().into())
 		}
@@ -299,25 +305,45 @@ impl<T: Config> PriceProvider<CurrencyId> for Pallet<T> {
 	type Price = Price;
 	fn get_price_from_oracle(currency_id: CurrencyId) -> Option<Price> {
 		// if locked price exists, return it, otherwise return latest price from oracle.
-		T::Source::get(&currency_id)
+		let price = T::Source::get(&currency_id)?;
+		Self::deposit_event(Event::GetOraclePrice(currency_id,price));
+		Some(price)
 	}
 
-	fn get_price_from_swap(currency_id1: CurrencyId, currency_id2: CurrencyId) -> Option<Price> {
+	fn get_price_from_swap(currency_id0: CurrencyId, currency_id1: CurrencyId) -> Option<Price> {
 		// currency_id1: the queried currency
 		// currency_id2: stable coin's currency id,such as usdt
-		let queried_currency_info = dico_currencies::Pallet::<T>::asset_info(currency_id1)?;
+		log::info!("****************get_price_from_swap:{:?}********************",currency_id0);
+		let query_currency_uint = Self::get_uint(currency_id0)?;
+		log::info!("------query_currency_uint:{:?}------",query_currency_uint);
+		// let stable_currency_uint = Self::get_uint(currency_id1)?;
+		let liquidity = pallet_amm::Pallet::<T>::get_liquidity(Pair::new(currency_id0, currency_id1))?;
+		let price: U256;
+		if currency_id0 < currency_id1 {
+			// currency_id0_liquidity/query_currency_uint
+			let reserve_in = U256::from(liquidity.0).checked_div(query_currency_uint)?;
+			log::info!("------reserve_in {:?}------",reserve_in);
+			// currency_id1_liquidity*stable_currency_uint
+			let reserve_out = U256::from(liquidity.1); //.checked_mul(stable_currency_uint)?;
+			price = pallet_amm::math::get_amount_out(U256::from(1), reserve_in, reserve_out).ok()?;
+		} else {  // reverse
+			let reserve_in = U256::from(liquidity.1).checked_div(query_currency_uint)?;
+			let reserve_out = U256::from(liquidity.0); //.checked_mul(stable_currency_uint)?;
+			price = pallet_amm::math::get_amount_out(U256::from(1), reserve_in, reserve_out).ok()?;
+		}
+		let p = Balance::checked_from(price)?;
+		Self::deposit_event(Event::GetSwapPrice(currency_id0,p));
+		Some(p)
+	}
+
+	fn get_uint(currency_id: CurrencyId) -> Option<U256>{
+		if currency_id == 0 {
+			return Some(U256::from(DOLLARS));
+		}
+		let queried_currency_info = dico_currencies::Pallet::<T>::asset_info(currency_id)?;
 		let metadata = queried_currency_info.metadata?;
 		let uint = U256::from(10u128.pow(metadata.decimals.into()));
-		let liquidity = pallet_amm::Pallet::<T>::get_liquidity(Pair::new(currency_id1, currency_id2))?;
-		let price: U256;
-		if currency_id1 < currency_id2 {
-			let reserve_out = U256::from(liquidity.1).checked_div(uint)?;
-			price = pallet_amm::math::get_amount_out(U256::from(1), U256::from(liquidity.0), reserve_out).ok()?;
-		} else {
-			let reserve_out = U256::from(liquidity.0).checked_div(uint)?;
-			price = pallet_amm::math::get_amount_out(U256::from(1), U256::from(liquidity.1), reserve_out).ok()?;
-		}
-		Balance::checked_from(price)
+		return Some(uint);
 	}
 
 }
