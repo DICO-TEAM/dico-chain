@@ -9,7 +9,6 @@
 #![allow(clippy::upper_case_acronyms)]
 
 use codec::{Decode, Encode};
-use sp_std::vec;
 use core::convert::{TryFrom};
 use frame_support::{
 	traits::{Get, EnsureOrigin},
