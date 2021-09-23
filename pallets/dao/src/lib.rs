@@ -1,7 +1,5 @@
-// This file is part of DICO.
-
-// Copyright (C) 2020-2021 transxask <orwx71@163.com>.
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2021 DICO  Developer.
+// This file is part of DICO
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

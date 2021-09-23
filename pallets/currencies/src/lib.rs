@@ -1,40 +1,17 @@
-//! # Currencies Module
-//!
-//! ## Overview
-//!
-//! The currencies module provides a mixed currencies system, by configuring a
-//! native currency which implements `BasicCurrencyExtended`, and a
-//! multi-currency which implements `MultiCurrency`.
-//!
-//! It also provides an adapter, to adapt `frame_support::traits::Currency`
-//! implementations into `BasicCurrencyExtended`.
-//!
-//! The currencies module provides functionality of both `MultiCurrencyExtended`
-//! and `BasicCurrencyExtended`, via unified interfaces, and all calls would be
-//! delegated to the underlying multi-currency and base currency system.
-//! A native currency ID could be set by `Config::GetNativeCurrencyId`, to
-//! identify the native currency.
-//!
-//! ### Implementations
-//!
-//! The currencies module provides implementations for following traits.
-//!
-//! - `MultiCurrency` - Abstraction over a fungible multi-currency system.
-//! - `MultiCurrencyExtended` - Extended `MultiCurrency` with additional helper
-//!   types and methods, like updating balance
-//! by a given signed integer amount.
-//!
-//! ## Interface
-//!
-//! ### Dispatchable Functions
-//!
-//! - `transfer` - Transfer some balance to another account, in a given
-//!   currency.
-//! - `transfer_native_currency` - Transfer some balance to another account, in
-//!   native currency set in
-//! `Config::NativeCurrency`.
-//! - `update_balance` - Update balance by signed integer amount, in a given
-//!   currency, root origin required.
+// Copyright 2021 DICO  Developer.
+// This file is part of DICO
+
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
