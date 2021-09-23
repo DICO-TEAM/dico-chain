@@ -1,9 +1,11 @@
 [package]
-name = "pallet-nft"
-license = "Apache-2.0"
-version = "3.0.0"
-authors = ["barbara <dicobarbara@protonmail.com>"]
-edition = "2018"
+name       = "pallet-nft"
+authors    = ["DICO-TEAM"]
+license    = 'Apache 2.0'
+version    = '1.0.0'
+homepage   = 'https://github.com/DICO-TEAM/dico-chain'
+repository = 'https://github.com/DICO-TEAM/dico-chain'
+edition    = '2018'
 
 [dependencies]
 serde           = { version = "1.0.124", optional = true }
