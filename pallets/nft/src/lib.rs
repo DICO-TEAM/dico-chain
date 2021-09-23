@@ -1,22 +1,17 @@
-//! # Non Fungible Token
-//! The module provides implementations for non-fungible-token.
-//!
-//! - [`Config`](./trait.Config.html)
-//! - [`Call`](./enum.Call.html)
-//! - [`Module`](./struct.Module.html)
-//!
-//! ## Overview
-//!
-//! This module provides basic functions to create and manager
-//! NFT(non fungible token) such as `create_class`, `transfer`, `mint`, `burn`.
+// Copyright 2021 DICO  Developer.
+// This file is part of DICO
 
-//! ### Module Functions
-//!
-//! - `create_class` - Create NFT(non fungible token) class
-//! - `transfer` - Transfer NFT(non fungible token) to another account.
-//! - `mint` - Mint NFT(non fungible token)
-//! - `burn` - Burn NFT(non fungible token)
-//! - `destroy_class` - Destroy NFT(non fungible token) class
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
@@ -162,12 +157,12 @@ pub mod module {
 		type PowerHandler: pallet_ico::traits::PowerHandler<Self::AccountId, DispatchResult, BalanceOf<Self>>;
 
 	}
-
+	pub type AttributeOf<T> = BoundedVec<u8, <T as Config>::MaxTokenAttribute>;
 	pub type ClassMetadataOf<T> = BoundedVec<u8, <T as Config>::MaxClassMetadata>;
 	pub type SaleInfoOf<T> = SaleInfo<<T as Config>::TokenId, <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance, <T as frame_system::Config>::BlockNumber, <T as frame_system::Config>::AccountId>;
 	pub type TokenMetadataOf<T> = BoundedVec<u8, <T as Config>::MaxTokenMetadata>;
 	pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-	pub type TokenDataOf<T> = TokenData<<T as frame_system::Config>::Hash, <T as frame_system::Config>::AccountId, Attributes,  BalanceOf<T>, NftStatus, <T as Config>::ClassId>;
+	pub type TokenDataOf<T> = TokenData<<T as frame_system::Config>::Hash, <T as frame_system::Config>::AccountId, AttributeOf<T>,  BalanceOf<T>, NftStatus, <T as Config>::ClassId>;
 	pub type ClassDataOf<T> = ClassData<NftLevel, BalanceOf<T>, <T as Config>::TokenId>;
 	pub type ClassInfoOf<T> = ClassInfo<
 		<T as Config>::TokenId,
@@ -222,6 +217,7 @@ pub mod module {
 		NotInSale,
 		Inactive,
 		ActiveNft,
+		MaxAttributeExceeded,
 	}
 
 	/// Next available class ID.
@@ -306,7 +302,7 @@ pub mod module {
 			origin: OriginFor<T>,
 			class_id: T::ClassId,
 			metadata: Vec<u8>,
-			attribute: Attributes,
+			attribute: Vec<u8>,
 			image_hash: Vec<u8>
 		) -> DispatchResult {
 			let issuer = ensure_signed(origin)?;
@@ -456,13 +452,16 @@ impl<T: Config> Pallet<T> {
 		issuer: &T::AccountId,
 		class_id: T::ClassId,
 		metadata: Vec<u8>,
-		attribute: Attributes,
+		attribute: Vec<u8>,
 		image_hash: Vec<u8>,
 	) -> Result<T::TokenId, DispatchError> {
 		NextTokenId::<T>::try_mutate(class_id, |id| -> Result<T::TokenId, DispatchError> {
 
 			let bounded_metadata: BoundedVec<u8, T::MaxTokenMetadata> =
 				metadata.try_into().map_err(|_| Error::<T>::MaxMetadataExceeded)?;
+
+			let attribute: BoundedVec<u8, T::MaxTokenAttribute> =
+				attribute.try_into().map_err(|_| Error::<T>::MaxAttributeExceeded)?;
 
 			let token_id = *id;
 			*id = id.checked_add(&One::one()).ok_or(Error::<T>::NoAvailableTokenId)?;

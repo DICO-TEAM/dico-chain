@@ -567,8 +567,6 @@
   "SaleInfoOf": "SaleInfo",
   "TokenInfoOf": "TokenInfo",
   "ClassInfoOf": "ClassInfo",
-  "str": "Vec<u8>",
-  "Attributes": "BTreeMap<str, str>",
   "TokenInfo": {
     "metadata": "Vec<u8>",
     "owner": "Option<AccountId>",
@@ -585,7 +583,7 @@
     "hash": "Hash",
     "power_threshold": "Balance",
     "claim_payment": "Balance",
-    "attribute": "Attribute",
+    "attribute": "Vec<u8>",
     "image_hash": "Vec<u8>",
     "sell_records": "Vec<(AccountId, Balance)>",
     "status": "NftStatus"

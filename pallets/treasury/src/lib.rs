@@ -15,13 +15,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// NOTICE
-// This module is changed from the treasury module in Substrate.
-// You can find the Treasury at
-//
-// https://github.com/paritytech/substrate/tree/master/frame/treasury
-//
-
 #![cfg_attr(not(feature = "std"), no_std)]
 
 mod benchmarking;
