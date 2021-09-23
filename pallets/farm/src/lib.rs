@@ -9,7 +9,6 @@
 #![allow(clippy::upper_case_acronyms)]
 
 use codec::{Decode, Encode};
-use sp_std::vec;
 use core::convert::{TryFrom};
 use frame_support::{
 	traits::{Get, EnsureOrigin},
@@ -17,6 +16,7 @@ use frame_support::{
 	sp_runtime::traits::{Zero, One, AtLeast32Bit, CheckedAdd},
 	dispatch::DispatchErrorWithPostInfo,
 };
+use sp_std::{vec, vec::Vec};
 use frame_system::pallet_prelude::*;
 use dico_primitives::{AssetId, Balance, Amount, BlockNumber, to_u256, to_balance};
 use sp_runtime::{ArithmeticError, traits::{AccountIdConversion, SaturatedConversion}};
@@ -96,7 +96,11 @@ pub mod pallet {
 	pub struct Pallet<T>(_);
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<T::BlockNumber> for Pallet<T> {}
+	impl<T: Config> Hooks<T::BlockNumber> for Pallet<T> {
+		fn on_finalize(now: T::BlockNumber) {
+			let _ = Self::update_pool_alloc_point_gradually(now);
+		}
+	}
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -619,6 +623,32 @@ impl<T: Config> Pallet<T> {
 		}
 
 		Balance::zero()
+	}
+
+	pub fn update_pool_alloc_point_gradually(
+		block_number: T::BlockNumber
+	) -> sp_std::result::Result<(), DispatchErrorWithPostInfo> {
+		let block_number: BlockNumber = block_number.saturated_into();
+		let pools = Pools::<T>::iter().collect::<Vec<_>>();
+		let mut mass_update_pool = false;
+		for (pid, mut pool) in pools {
+			if block_number >= pool.end_block && pool.alloc_point > 0u128 {
+				if !mass_update_pool {
+					Self::mass_update_pools()?;
+					mass_update_pool = true;
+				}
+
+				let mut total_alloc_point = TotalAllocPoint::<T>::get();
+				total_alloc_point = total_alloc_point
+					.checked_sub(pool.alloc_point).ok_or(ArithmeticError::Overflow)?;
+				TotalAllocPoint::<T>::put(total_alloc_point);
+
+				pool.alloc_point = 0u128;
+				Pools::<T>::insert(pid, pool);
+			}
+		}
+
+		Ok(())
 	}
 
 	fn update_pool(pid: &T::PoolId) -> sp_std::result::Result<(), DispatchErrorWithPostInfo> {
