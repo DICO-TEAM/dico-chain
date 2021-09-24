@@ -75,18 +75,15 @@ fn set_start_block_should_work() {
 fn create_pool_should_work() {
 	new_test_ext().execute_with(|| {
 		let alloc_point = 1000u128;
-		let (start_block, end_block) = (BlockNumber::from(1000u32), BlockNumber::from(10000u32));
 
 		assert_ok!(Farm::create_pool(
 			Origin::signed(ALICE),
 			PDOTUSDT,
-			alloc_point,
-			start_block,
-			end_block,
+			alloc_point
 		));
 
 		assert_eq!(TotalAllocPoint::<Test>::get(), alloc_point);
-		let pool_info = PoolInfo::new(PDOTUSDT, alloc_point, start_block, start_block, end_block);
+		let pool_info = PoolInfo::new(PDOTUSDT, alloc_point, 1);
 		assert_eq!(Pools::<Test>::get(0).unwrap(), pool_info);
 
 		expect_events(vec![Event::PoolCreated(0).into()]);
@@ -98,18 +95,15 @@ fn create_pool_should_work() {
 fn update_pool_alloc_point_should_work() {
 	new_test_ext().execute_with(|| {
 		let alloc_point = 1000u128;
-		let (start_block, end_block) = (BlockNumber::from(1000u32), BlockNumber::from(10000u32));
 
 		assert_ok!(Farm::create_pool(
 			Origin::signed(ALICE),
 			PDOTUSDT,
-			alloc_point,
-			start_block,
-			end_block
+			alloc_point
 		));
 
 		assert_eq!(TotalAllocPoint::<Test>::get(), alloc_point);
-		let pool_info = PoolInfo::new(PDOTUSDT, alloc_point, start_block, start_block, end_block);
+		let pool_info = PoolInfo::new(PDOTUSDT, alloc_point, 1);
 		assert_eq!(Pools::<Test>::get(0).unwrap(), pool_info);
 
 		expect_events(vec![Event::PoolCreated(0).into()]);
@@ -121,7 +115,7 @@ fn update_pool_alloc_point_should_work() {
 		));
 
 		assert_eq!(TotalAllocPoint::<Test>::get(), 10000u128);
-		let pool_info = PoolInfo::new(PDOTUSDT, 10000u128, start_block, start_block, end_block);
+		let pool_info = PoolInfo::new(PDOTUSDT, 10000u128, 1);
 		assert_eq!(Pools::<Test>::get(0).unwrap(), pool_info);
 
 		expect_events(vec![Event::PoolAllocPointUpdated(0, 10000u128).into()]);
@@ -149,18 +143,15 @@ fn deposit_lp_should_work() {
 
 		let liquidity_id: AssetId = DOT;
 		let alloc_point = 1000u128;
-		let (start_block, end_block) = (BlockNumber::from(1000u32), BlockNumber::from(20000u32));
 
 		assert_ok!(Farm::create_pool(
 			Origin::signed(ALICE),
 			liquidity_id,
-			alloc_point,
-			start_block,
-			end_block
+			alloc_point
 		));
 
 		assert_eq!(TotalAllocPoint::<Test>::get(), alloc_point);
-		let pool_info = PoolInfo::new(liquidity_id, alloc_point, 1000, start_block, end_block);
+		let pool_info = PoolInfo::new(liquidity_id, alloc_point, 1000);
 		assert_eq!(Pools::<Test>::get(0).unwrap(), pool_info);
 		expect_events(vec![Event::PoolCreated(0).into()]);
 
@@ -170,7 +161,7 @@ fn deposit_lp_should_work() {
 			100_000_000_000_000
 		));
 
-		let mut pool_info = PoolInfo::new(liquidity_id, alloc_point, 1000, start_block, end_block);
+		let mut pool_info = PoolInfo::new(liquidity_id, alloc_point, 1000);
 		pool_info.total_amount = 100_000_000_000_000;
 		assert_eq!(Pools::<Test>::get(0).unwrap(), pool_info);
 
@@ -192,7 +183,7 @@ fn deposit_lp_should_work() {
 			200_000_000_000_000
 		));
 
-		let mut pool_info = PoolInfo::new(liquidity_id, alloc_point, 1, start_block, end_block);
+		let mut pool_info = PoolInfo::new(liquidity_id, alloc_point, 1);
 		pool_info.total_amount = 300_000_000_000_000;
 		pool_info.acc_dico_per_share = Balance::from(8750125000000000u64);
 		pool_info.last_reward_block = 16001;
@@ -203,111 +194,6 @@ fn deposit_lp_should_work() {
 
 		let participant = Participant::new(200_000_000_000_000, 1750025000000000000);
 		assert_eq!(Participants::<Test>::get(0, BOB).unwrap(), participant);
-
-		System::set_block_number(30000);
-
-		assert_ok!(Farm::deposit_lp(
-			Origin::signed(BOB),
-			0,
-			200_000_000_000_000
-		));
-
-		let mut pool_info = PoolInfo::new(liquidity_id, alloc_point, 1, start_block, end_block);
-		pool_info.total_amount = 500_000_000_000_000;
-		pool_info.acc_dico_per_share = Balance::from(8916750000000000u64);
-		pool_info.last_reward_block = end_block;
-		assert_eq!(Pools::<Test>::get(0).unwrap(), pool_info);
-	});
-}
-
-#[test]
-fn deposit_lp_should_work2() {
-	new_test_ext().execute_with(|| {
-		assert_ok!(Farm::set_halving_period(
-			Origin::signed(ALICE),
-			5000
-		));
-
-		assert_ok!(Farm::set_dico_per_block(
-			Origin::signed(ALICE),
-			100_000_000_000_000
-		));
-
-		assert_ok!(Farm::set_start_block(
-			Origin::signed(ALICE),
-			1000
-		));
-
-		let liquidity_id: AssetId = DOT;
-		let alloc_point = 1000u128;
-		let (start_block, end_block) = (BlockNumber::from(1500u32), BlockNumber::from(20000u32));
-
-		assert_ok!(Farm::create_pool(
-			Origin::signed(ALICE),
-			liquidity_id,
-			alloc_point,
-			start_block,
-			end_block
-		));
-
-		assert_eq!(TotalAllocPoint::<Test>::get(), alloc_point);
-		let pool_info = PoolInfo::new(liquidity_id, alloc_point, start_block, start_block, end_block);
-		assert_eq!(Pools::<Test>::get(0).unwrap(), pool_info);
-		expect_events(vec![Event::PoolCreated(0).into()]);
-
-		assert_ok!(Farm::deposit_lp(
-			Origin::signed(ALICE),
-			0,
-			100_000_000_000_000
-		));
-
-		let mut pool_info = PoolInfo::new(liquidity_id, alloc_point, start_block, start_block, end_block);
-		pool_info.total_amount = 100_000_000_000_000;
-		assert_eq!(Pools::<Test>::get(0).unwrap(), pool_info);
-
-		let participant = Participant::new(100_000_000_000_000, 0);
-		assert_eq!(Participants::<Test>::get(0, ALICE).unwrap(), participant);
-
-		let module_id_account = Farm::account_id();
-
-		assert_eq!(Currency::free_balance(liquidity_id, &module_id_account), 100_000_000_000_000);
-		assert_eq!(Currency::free_balance(liquidity_id, &ALICE), DEFAULT_ASSET_AMOUNT - 100_000_000_000_000);
-
-		expect_events(vec![Event::LpDeposited(ALICE, 0, 100_000_000_000_000).into()]);
-
-		System::set_block_number(16001);
-
-		assert_ok!(Farm::deposit_lp(
-			Origin::signed(BOB),
-			0,
-			200_000_000_000_000
-		));
-
-		let mut pool_info = PoolInfo::new(liquidity_id, alloc_point, 1, start_block, end_block);
-		pool_info.total_amount = 300_000_000_000_000;
-		pool_info.acc_dico_per_share = Balance::from(8250125000000000u64);
-		pool_info.last_reward_block = 16001;
-		assert_eq!(Pools::<Test>::get(0).unwrap(), pool_info);
-
-		let participant = Participant::new(100_000_000_000_000, 0);
-		assert_eq!(Participants::<Test>::get(0, ALICE).unwrap(), participant);
-
-		let participant = Participant::new(200_000_000_000_000, 1650025000000000000);
-		assert_eq!(Participants::<Test>::get(0, BOB).unwrap(), participant);
-
-		System::set_block_number(30000);
-
-		assert_ok!(Farm::deposit_lp(
-			Origin::signed(BOB),
-			0,
-			200_000_000_000_000
-		));
-
-		let mut pool_info = PoolInfo::new(liquidity_id, alloc_point, 1, start_block, end_block);
-		pool_info.total_amount = 500_000_000_000_000;
-		pool_info.acc_dico_per_share = Balance::from(8416750000000000u64);
-		pool_info.last_reward_block = end_block;
-		assert_eq!(Pools::<Test>::get(0).unwrap(), pool_info);
 	});
 }
 
@@ -317,7 +203,6 @@ fn withdraw_lp_should_work() {
 	new_test_ext().execute_with(|| {
 		let liquidity_id: AssetId = DOT;
 		let alloc_point = 1000u128;
-		let (start_block, end_block) = (BlockNumber::from(1000u32), BlockNumber::from(20000u32));
 
 		assert_ok!(Farm::set_halving_period(
 			Origin::signed(ALICE),
@@ -337,9 +222,7 @@ fn withdraw_lp_should_work() {
 		assert_ok!(Farm::create_pool(
 			Origin::signed(ALICE),
 			liquidity_id,
-			alloc_point,
-			start_block,
-			end_block
+			alloc_point
 		));
 
 		assert_ok!(Farm::deposit_lp(
@@ -356,7 +239,7 @@ fn withdraw_lp_should_work() {
 			0
 		));
 
-		let mut pool_info = PoolInfo::new(liquidity_id, alloc_point, 1, start_block, end_block);
+		let mut pool_info = PoolInfo::new(liquidity_id, alloc_point, 1);
 		pool_info.total_amount = 100_000_000_000_000;
 		pool_info.acc_dico_per_share = Balance::from(8750125000000000u64);
 		pool_info.last_reward_block = 16001;
@@ -377,7 +260,6 @@ fn withdraw_lp_2_should_work() {
 	new_test_ext().execute_with(|| {
 		let liquidity_id: AssetId = DOT;
 		let alloc_point = 1000u128;
-		let (start_block, end_block) = (BlockNumber::from(1000u32), BlockNumber::from(20000u32));
 
 		assert_ok!(Farm::set_halving_period(
 			Origin::signed(ALICE),
@@ -397,9 +279,7 @@ fn withdraw_lp_2_should_work() {
 		assert_ok!(Farm::create_pool(
 			Origin::signed(ALICE),
 			liquidity_id,
-			alloc_point,
-			start_block,
-			end_block
+			alloc_point
 		));
 
 		assert_ok!(Farm::deposit_lp(
@@ -416,7 +296,7 @@ fn withdraw_lp_2_should_work() {
 			50_000_000_000_000
 		));
 
-		let mut pool_info = PoolInfo::new(liquidity_id, alloc_point, 1, start_block, end_block);
+		let mut pool_info = PoolInfo::new(liquidity_id, alloc_point, 1);
 		pool_info.total_amount = 50_000_000_000_000;
 		pool_info.acc_dico_per_share = Balance::from(8750125000000000u64);
 		pool_info.last_reward_block = 16001;
