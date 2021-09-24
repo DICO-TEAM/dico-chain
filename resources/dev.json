@@ -518,7 +518,15 @@
     "acc_dico_per_share": "Balance",
     "total_amount": "Balance",
     "start_block": "BlockNumber",
-    "end_block": "BlockNumber"
+    "end_block": "BlockNumber",
+    "status": "PoolStatus",
+  },
+  "PoolStatus": {
+    "_enum": [
+      "Pending",
+      "InProgress",
+      "Finished"
+    ]
   },
   "LbpStatus": {
     "_enum": [
