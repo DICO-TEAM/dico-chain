@@ -117,7 +117,7 @@ impl dico_currencies::Config for Test {
 	type GetNativeCurrencyId = DICOAssetId;
 	type WeightInfo = ();
 	type CreateConsume = CreateConsume;
-	type MaxCreatableCurrencyId = ();
+	type MaxCreatableCurrencyId = AmmLiquidityAssetIdBase;
 }
 
 

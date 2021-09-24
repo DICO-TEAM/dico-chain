@@ -219,13 +219,6 @@ mod tests {
 			get_amount_out(U256::from(50 * TEST_DECIMAL), U256::from(100 * TEST_DECIMAL), U256::from(200 * TEST_DECIMAL)),
 			Ok(U256::from(665331998665u128))
 		);
-		let dico =  U256::from(1_000_000_000_000u128);
-		let reserve_in = U256::from(1010000u128).checked_mul(dico).unwrap().checked_div(dico).unwrap();
-		let reserve_out = U256::from(99).checked_mul(dico).unwrap().checked_div(U256::from(1000)).unwrap();
-		assert_eq!(
-		get_amount_out(U256::from(1), reserve_in, reserve_out),
-		Ok(U256::from(1u128))
-		);
 	}
 
 	#[test]
