@@ -32,8 +32,127 @@ fn expect_events(e: Vec<TestEvent>) {
 
 
 #[test]
+fn fundraising_update_should_work() {
+	new_test_ext().execute_with(|| {
+		Lbp::add_fundraising(1000, 100000);
+		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(1000, 100000)]));
+		assert_eq!(Lbp::ensure_fundraising(1000, 100000), Ok(()));
+		assert_err!(Lbp::ensure_fundraising(1000, 100), Error::<Test>::InvalidFundraisingAmount);
+		assert_err!(Lbp::ensure_fundraising(10000, 10000), Error::<Test>::InvalidFundraisingAsset);
+		Lbp::add_fundraising(1000, 1000);
+		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(1000, 1000)]));
+		Lbp::add_fundraising(100, 1000);
+		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(1000, 1000), (100, 1000)]));
+		Lbp::add_fundraising(100, 100);
+		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(1000, 1000), (100, 100)]));
+		Lbp::remove_fundraising(100);
+		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(1000, 1000)]));
+		Lbp::remove_fundraising(1000);
+		assert_eq!(SupportFundraisingAssets::<Test>::get(), None);
+		Lbp::remove_fundraising(1000);
+		assert_eq!(SupportFundraisingAssets::<Test>::get(), None);
+		Lbp::add_fundraising(1000, 100000);
+		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(1000, 100000)]));
+	});
+}
+
+#[test]
+fn fundraising_asset_update_should_work() {
+	new_test_ext().execute_with(|| {
+		assert_ok!(Lbp::add_fundraising_asset(
+			Origin::signed(ALICE),
+			USDT,
+			100_000_000_000_000_000u128
+		));
+		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(USDT, 100_000_000_000_000_000u128)]));
+		expect_events(
+			vec![Event::FundraisingAssetAdded(USDT, 100_000_000_000_000_000u128).into()]
+		);
+
+		assert_ok!(Lbp::add_fundraising_asset(
+			Origin::signed(ALICE),
+			USDT,
+			1000_000_000_000_000_000u128
+		));
+		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(USDT, 1000_000_000_000_000_000u128)]));
+
+		assert_ok!(Lbp::add_fundraising_asset(
+			Origin::signed(ALICE),
+			DICO,
+			1000_000_000_000_000_000_000u128
+		));
+		assert_eq!(
+			SupportFundraisingAssets::<Test>::get(),
+			Some(vec![(USDT, 1000_000_000_000_000_000u128), (DICO, 1000_000_000_000_000_000_000u128)])
+		);
+
+		assert_ok!(Lbp::remove_fundraising_asset(
+			Origin::signed(ALICE),
+			USDT
+		));
+		assert_eq!(
+			SupportFundraisingAssets::<Test>::get(),
+			Some(vec![(DICO, 1000_000_000_000_000_000_000u128)])
+		);
+		expect_events(
+			vec![Event::FundraisingAssetRemoved(USDT).into()]
+		);
+
+		assert_ok!(Lbp::remove_fundraising_asset(
+			Origin::signed(ALICE),
+			DICO
+		));
+		assert_eq!(
+			SupportFundraisingAssets::<Test>::get(),
+			None
+		);
+	});
+}
+
+#[test]
 fn create_lbp_should_work() {
 	new_test_ext().execute_with(|| {
+		assert_err!(Lbp::create_lbp(
+			Origin::signed(ALICE),
+			USDT,
+			DICO,
+			10_000_000_000_000u128,
+			100_000_000_000_000u128,
+			10 * WEIGHT_ONE,
+			90 * WEIGHT_ONE,
+			90 * WEIGHT_ONE,
+			10 * WEIGHT_ONE,
+			100,
+			1000,
+			100,
+		), Error::<Test>::InvalidFundraisingAsset);
+
+		assert_ok!(Lbp::add_fundraising_asset(
+			Origin::signed(ALICE),
+			DICO,
+			100_000_000_000_000_000u128
+		));
+		assert_err!(Lbp::create_lbp(
+			Origin::signed(ALICE),
+			USDT,
+			DICO,
+			10_000_000_000_000u128,
+			100_000_000_000_000u128,
+			10 * WEIGHT_ONE,
+			90 * WEIGHT_ONE,
+			90 * WEIGHT_ONE,
+			10 * WEIGHT_ONE,
+			100,
+			1000,
+			100,
+		), Error::<Test>::InvalidFundraisingAmount);
+
+		assert_ok!(Lbp::add_fundraising_asset(
+			Origin::signed(ALICE),
+			DICO,
+			100_000_000_000_000u128
+		));
+
 		assert_ok!(Lbp::create_lbp(
 			Origin::signed(ALICE),
 			USDT,
@@ -152,6 +271,11 @@ fn create_lbp_should_work() {
 fn exit_lbp_should_work() {
 	new_test_ext().execute_with(|| {
 		// preset storage
+		assert_ok!(Lbp::add_fundraising_asset(
+			Origin::signed(ALICE),
+			USDT,
+			10_000_000_000_000u128
+		));
 		assert_ok!(Lbp::create_lbp(
 			Origin::signed(ALICE),
 			DICO,
@@ -212,6 +336,12 @@ fn exit_lbp_should_work() {
 #[test]
 fn swap_exact_amount_supply_should_work() {
 	new_test_ext().execute_with(|| {
+		assert_ok!(Lbp::add_fundraising_asset(
+			Origin::signed(ALICE),
+			DICO,
+			10_000_000_000_000u128
+		));
+
 		assert_ok!(Lbp::create_lbp(
 			Origin::signed(ALICE),
 			USDT,
@@ -282,6 +412,12 @@ fn swap_exact_amount_supply_should_work() {
 #[test]
 fn swap_exact_amount_target_should_work() {
 	new_test_ext().execute_with(|| {
+		assert_ok!(Lbp::add_fundraising_asset(
+			Origin::signed(ALICE),
+			DICO,
+			10_000_000_000_000u128
+		));
+
 		assert_ok!(Lbp::create_lbp(
 			Origin::signed(ALICE),
 			USDT,
@@ -351,6 +487,11 @@ fn swap_exact_amount_target_should_work() {
 #[test]
 fn swap_exact_amount_target_should_work2() {
 	new_test_ext().execute_with(|| {
+		assert_ok!(Lbp::add_fundraising_asset(
+			Origin::signed(ALICE),
+			USDT,
+			10_000_000_000_000u128
+		));
 		assert_ok!(Lbp::create_lbp(
 			Origin::signed(ALICE),
 			DICO,

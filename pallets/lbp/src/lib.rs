@@ -19,7 +19,7 @@ use frame_support::{
 };
 use frame_system::pallet_prelude::*;
 use dico_primitives::{AssetId, Balance, Amount, BlockNumber};
-use sp_std::{vec::Vec};
+use sp_std::{vec::Vec, vec};
 use sp_runtime::{ArithmeticError, traits::{AccountIdConversion, SaturatedConversion}, RuntimeDebug};
 use sp_core::U256;
 use dico_primitives::{to_u256, to_balance};
@@ -167,6 +167,9 @@ pub mod pallet {
 		type WeightInfo: WeightInfo;
 
 		type TreasuryHandler: DicoTreasuryHandler<Self::AccountId>;
+
+		/// The origin that is allowed to set or update parameter.
+		type FounderSetOrigin: EnsureOrigin<Self::Origin>;
 	}
 
 	#[pallet::error]
@@ -180,6 +183,8 @@ pub mod pallet {
 		MustBeNonTradingStatus,
 		MustBeNotEndStatus,
 		MustBeInProgressStatus,
+		InvalidFundraisingAsset,
+		InvalidFundraisingAmount,
 		InvalidTargetAmount,
 		UnacceptableSupplyAmount,
 		UnacceptableTargetAmount,
@@ -197,6 +202,8 @@ pub mod pallet {
 	#[pallet::event]
 	#[pallet::generate_deposit(pub (crate) fn deposit_event)]
 	pub enum Event<T: Config> {
+		FundraisingAssetAdded(AssetId, Balance),
+		FundraisingAssetRemoved(AssetId),
 		/// Deposit test asset.
 		AssetDeposited(T::AccountId, AssetId, Balance),
 		LbpCreated(T::AccountId, T::LbpId, AssetId, AssetId, Balance, Balance),
@@ -221,6 +228,10 @@ pub mod pallet {
 	>;
 
 	#[pallet::storage]
+	#[pallet::getter(fn get_all_sfa)]
+	pub type SupportFundraisingAssets<T: Config> = StorageValue<_, Vec<(AssetId, Balance)>, OptionQuery>;
+
+	#[pallet::storage]
 	#[pallet::getter(fn get_history)]
 	pub type PriceHistory<T: Config> = StorageMap<
 		_, Blake2_128Concat, T::LbpId, Vec<(BlockNumber, Balance, Balance, u128, u128)>, ValueQuery
@@ -228,6 +239,34 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
+		#[pallet::weight(< T as Config >::WeightInfo::create_lbp())]
+		#[transactional]
+		pub fn add_fundraising_asset(
+			origin: OriginFor<T>,
+			fundraising: AssetId,
+			min_fundraising_amount: Balance
+		) -> DispatchResultWithPostInfo {
+			T::FounderSetOrigin::ensure_origin(origin)?;
+			Self::add_fundraising(fundraising, min_fundraising_amount);
+			Self::deposit_event(Event::FundraisingAssetAdded(
+				fundraising,
+				min_fundraising_amount
+			));
+			Ok(().into())
+		}
+
+		#[pallet::weight(< T as Config >::WeightInfo::create_lbp())]
+		#[transactional]
+		pub fn remove_fundraising_asset(
+			origin: OriginFor<T>,
+			fundraising: AssetId,
+		) -> DispatchResultWithPostInfo {
+			T::FounderSetOrigin::ensure_origin(origin)?;
+			Self::remove_fundraising(fundraising);
+			Self::deposit_event(Event::FundraisingAssetRemoved(fundraising));
+			Ok(().into())
+		}
+
 		#[pallet::weight(< T as Config >::WeightInfo::create_lbp())]
 		#[transactional]
 		pub fn create_lbp(
@@ -250,6 +289,7 @@ pub mod pallet {
 			ensure!(steps >= MIN_STEPS, Error::<T>::ErrMinSteps);
 			ensure!(steps <= MAX_STEPS, Error::<T>::ErrMaxSteps);
 			ensure!(start_block < end_block, Error::<T>::ErrStartEndBlock);
+			Self::ensure_fundraising(fundraising_asset, fundraising_balance)?;
 
 			let initial_start_block: BlockNumber = start_block.saturated_into();
 			let initial_end_block: BlockNumber = end_block.saturated_into();
@@ -546,6 +586,52 @@ impl<T: Config> Pallet<T> {
 		NextLbpId::<T>::put(new_lbp_id);
 
 		Ok(next_lbp_id)
+	}
+
+	fn ensure_fundraising(
+		fundraising: AssetId,
+		fundraising_amount: Balance
+	) -> sp_std::result::Result<(), DispatchErrorWithPostInfo> {
+		let sfa = SupportFundraisingAssets::<T>::get().ok_or(Error::<T>::InvalidFundraisingAsset)?;
+		for (asset, min_fundraising_amount) in sfa.into_iter() {
+			if asset == fundraising {
+				ensure!(fundraising_amount >= min_fundraising_amount, Error::<T>::InvalidFundraisingAmount);
+				return Ok(());
+			}
+		}
+
+		Err(Error::<T>::InvalidFundraisingAsset)?
+	}
+
+	fn add_fundraising(fundraising: AssetId, min_fundraising_amount: Balance) {
+		let sfa = SupportFundraisingAssets::<T>::get().and_then(|mut x| {
+			for (asset, amount) in x.iter_mut() {
+				if *asset == fundraising && *amount != min_fundraising_amount {
+					*amount = min_fundraising_amount;
+				}
+			}
+			Some(x)
+		}).and_then(|mut x|{
+			if !x.contains(&(fundraising, min_fundraising_amount)) {
+				x.push((fundraising, min_fundraising_amount));
+			}
+			Some(x)
+		}).unwrap_or(vec![(fundraising, min_fundraising_amount)]);
+
+		SupportFundraisingAssets::<T>::put(sfa);
+	}
+
+	fn remove_fundraising(fundraising: AssetId) {
+		let sfa = SupportFundraisingAssets::<T>::get().and_then(|mut x| {
+			x.retain(|x| x.0 != fundraising);
+			return if !x.is_empty() {Some(x)} else { None };
+		});
+
+		if let Some(val) = sfa {
+			SupportFundraisingAssets::<T>::put(val);
+		} else {
+			SupportFundraisingAssets::<T>::kill();
+		}
 	}
 
 	fn ensure_weight(weight: u128) -> DispatchResultWithPostInfo {

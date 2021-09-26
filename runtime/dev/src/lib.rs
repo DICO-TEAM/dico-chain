@@ -1204,6 +1204,8 @@ impl pallet_lbp::Config for Runtime {
 	type LbpId = u32;
 	type WeightInfo = pallet_lbp::weights::DicoWeight<Runtime>;
 	type TreasuryHandler = DicoTreasury;
+	type FounderSetOrigin =
+		pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
 }
 
 /// Configure the pallet template in pallets/template.
