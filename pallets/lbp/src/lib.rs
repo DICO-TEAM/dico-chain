@@ -239,7 +239,7 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight(< T as Config >::WeightInfo::create_lbp())]
+		#[pallet::weight(< T as Config >::WeightInfo::add_fundraising_asset())]
 		#[transactional]
 		pub fn add_fundraising_asset(
 			origin: OriginFor<T>,
@@ -255,7 +255,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(< T as Config >::WeightInfo::create_lbp())]
+		#[pallet::weight(< T as Config >::WeightInfo::remove_fundraising_asset())]
 		#[transactional]
 		pub fn remove_fundraising_asset(
 			origin: OriginFor<T>,
