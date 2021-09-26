@@ -30,6 +30,8 @@ use sp_std::marker::PhantomData;
 
 /// Weight functions needed for lbp.
 pub trait WeightInfo {
+	fn add_fundraising_asset() -> Weight;
+	fn remove_fundraising_asset() -> Weight;
 	fn create_lbp() -> Weight;
 	fn exit_lbp() -> Weight;
 	fn swap_exact_amount_supply() -> Weight;
@@ -40,6 +42,16 @@ pub trait WeightInfo {
 pub struct DicoWeight<T>(PhantomData<T>);
 
 impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
+	fn add_fundraising_asset() -> Weight {
+		(55_321_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(8 as Weight))
+			.saturating_add(T::DbWeight::get().writes(8 as Weight))
+	}
+	fn remove_fundraising_asset() -> Weight {
+		(42_321_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(8 as Weight))
+			.saturating_add(T::DbWeight::get().writes(8 as Weight))
+	}
 	fn create_lbp() -> Weight {
 		(107_321_000 as Weight)
 			.saturating_add(T::DbWeight::get().reads(8 as Weight))
@@ -64,6 +76,16 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
+	fn add_fundraising_asset() -> Weight {
+		(55_321_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(8 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(8 as Weight))
+	}
+	fn remove_fundraising_asset() -> Weight {
+		(42_321_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(8 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(8 as Weight))
+	}
 	fn create_lbp() -> Weight {
 		(107_321_000 as Weight)
 			.saturating_add(RocksDbWeight::get().reads(8 as Weight))

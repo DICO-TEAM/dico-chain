@@ -12,6 +12,7 @@ use sp_runtime::{testing::Header, traits::{BlakeTwo256, IdentityLookup, Zero}};
 use frame_support::traits::GenesisBuild;
 use dico_primitives::{AssetId, Balance};
 use pallet_dico_treasury::traits::DicoTreasuryHandler;
+use frame_system::EnsureSignedBy;
 
 pub type Amount = i128;
 pub type AccountId = u64;
@@ -112,6 +113,7 @@ impl Config for Test {
 	type LbpId = u32;
 	type WeightInfo = ();
 	type TreasuryHandler = Treasury;
+	type FounderSetOrigin = EnsureSignedBy<One, u64>;
 }
 
 pub struct ExtBuilder {
