@@ -1054,9 +1054,10 @@ impl<T: Config> Module<T> {
 		ico: &IcoInfo<T::BlockNumber, MultiBalanceOf<T>, AssetId, AreaCode, T::AccountId>,
     ) -> bool {
 		if let Some(time) = ico.start_time {
-			if ico.is_terminated && (time + ico.ico_duration > Self::now()) {
+			if !(ico.is_terminated || (time + ico.ico_duration < Self::now())) {
 				return false;
 			}
+
 		}
 		true
     }
