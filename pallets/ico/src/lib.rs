@@ -1661,14 +1661,16 @@ impl<T: Config> Module<T> {
 		if user == ico.initiator {
 			return MultiBalanceOf::<T>::from(0u32);
 		}
+		runtime_print!("user is {:?}", user);
 		let exchange_token_decimals = match T::CurrenciesHandler::get_metadata(exchange_token_id) {
 			Ok(x) => x.decimals,
 			_ => return MultiBalanceOf::<T>::from(0u32),
 		};
+		runtime_print!("exchange_token_decimals is {:?}", exchange_token_id);
 		if Self::is_ico_expire(&ico) {
 			return MultiBalanceOf::<T>::from(0u32);
 		}
-
+		runtime_print!("ico is not expire");
 		match ico.start_time {
 			Some(time) => {
 				if Self::now() < time {
@@ -1689,21 +1691,25 @@ impl<T: Config> Module<T> {
 			},
 			None => user_max_amount.min(IcoMaxUsdtAmount::<T>::get()),
 		};
+		runtime_print!("remain usdt amount is {:?}", remain_usdt);
 
 		let price = Self::get_token_price(exchange_token_id);
 		if price == MultiBalanceOf::<T>::from(0u32) {
 			return MultiBalanceOf::<T>::from(0u32);
 		}
+		runtime_print!("the token price is {:?}", price);
 
 		let decimals_amount = 10u128
 			.saturating_pow(exchange_token_decimals as u32)
 			.saturated_into::<MultiBalanceOf<T>>();
+
 		let num = Self::u256_convert_to_balance(Self::balance_convert_to_u256(remain_usdt) * Self::balance_convert_to_u256(decimals_amount) / Self::balance_convert_to_u256(price));
+		runtime_print!("user can join exchange token amount is {:?}", num);
 		let remain_exchange_amount = match Self::get_unrelease_asset_info(&ico.initiator, currency_id, index) {
 			None => ico.exchange_token_total_amount,
 			Some(x) => ico.exchange_token_total_amount.saturating_sub(x.total),
 		};
-
+		runtime_print!("project can join exchange token amount is {:?}", remain_exchange_amount);
 		remain_exchange_amount.min(num)
 	}
 
