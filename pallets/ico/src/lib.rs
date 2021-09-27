@@ -931,6 +931,7 @@ impl<T: Config> Module<T> {
 				    .ok_or(Error::<T>::Overflow)?;
 		    }
 		}
+		runtime_print!("total_usdt: {:?}, user_min_amount: {:?}, user_max_amount: {:?}", total_usdt, ico.user_min_amount, ico.user_max_amount);
 		ensure!(
 			total_usdt >= ico.user_min_amount && total_usdt <= ico.user_max_amount,
 			Error::<T>::AmountNotMeetProjectRequirement
