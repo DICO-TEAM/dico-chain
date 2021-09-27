@@ -986,14 +986,13 @@ impl<T: Config> Module<T> {
     }
 
     pub fn get_token_price(currency_id: AssetId) -> MultiBalanceOf<T> {
-		// match T::PriceData::get_price(currency_id, T::UsdtCurrencyId::get()) {
-		// 	Some(x) => {
-		// 		runtime_print!(" ---------------the token {:?}, price is {:?} ------------------", currency_id, x);
-		// 		return x.saturated_into::<MultiBalanceOf<T>>();
-		// 	},
-		// 	None => return MultiBalanceOf::<T>::from(0u32),
-		// }
-		MultiBalanceOf::<T>::from(2 * USDT as u32)
+		match T::PriceData::get_price(currency_id, T::UsdtCurrencyId::get()) {
+			Some(x) => {
+				runtime_print!(" ---------------the token {:?}, price is {:?} ------------------", currency_id, x);
+				return x.saturated_into::<MultiBalanceOf<T>>();
+			},
+			None => return MultiBalanceOf::<T>::from(0u32),
+		}
     }
 
     fn exchange_token_convert_usdt(
@@ -1667,7 +1666,7 @@ impl<T: Config> Module<T> {
 			Ok(x) => x.decimals,
 			_ => return MultiBalanceOf::<T>::from(0u32),
 		};
-		runtime_print!("exchange_token_decimals is {:?}", exchange_token_id);
+		runtime_print!("exchange_token_decimals is {:?}", exchange_token_decimals);
 		if Self::is_ico_expire(&ico) {
 			return MultiBalanceOf::<T>::from(0u32);
 		}
