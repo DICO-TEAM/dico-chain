@@ -41,7 +41,7 @@ pub trait IcoApi<AccountId, CurrencyId, Index, Balance> {
     #[rpc(name = "ico_canUnlockAmount", alias("canUnlockAmount"))]
     fn can_unlock_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
     #[rpc(name = "ico_canJoinAmount", alias("canJoinAmount"))]
-    fn can_join_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
+    fn can_join_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<(NumberOrHex, NumberOrHex)>;
     #[rpc(name = "ico_getTokenPrice", alias("getTokenPrice"))]
     fn get_token_price(&self, currency_id: CurrencyId) -> FutureResult<NumberOrHex>;
 }
@@ -143,7 +143,7 @@ where
         Box::new(result(get_token_price()))
     }
 
-    fn can_join_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex> {
+    fn can_join_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<(NumberOrHex, NumberOrHex)> {
         let can_join_amount = || {
         let api = self.client.runtime_api();
         let best = self.client.info().best_hash;
@@ -155,14 +155,28 @@ where
             data: Some(format!("{:?}", e).into()),
         })?;
 
-        let try_into_rpc_balance = |value: Balance| {
-            value.try_into().map_err(|_| RpcError {
-                code: ErrorCode::InvalidParams,
-                message: format!("{} doesn't fit in NumberOrHex representation", value),
-                data: None,
-            })
+        let try_into_rpc_balance = |value: Vec<Balance>| {
+            let mut new_value = vec![];
+            for i in value {
+                let j = i.try_into().ok();
+                match j {
+                    Some(x) => new_value.push(x),
+                    _ => {},
+                }
+            }
+            if new_value.len() == 2 {
+                let mut new_value_iter = new_value.iter();
+                let res = (new_value_iter.next().unwrap().clone(), new_value_iter.next().unwrap().clone());
+                Ok(res)
+            } else {
+                Err(RpcError {
+                    code: ErrorCode::InvalidParams,
+                    message: format!("doesn't fit in NumberOrHex representation"),
+                    data: None,
+                })
+            }
         };
-        try_into_rpc_balance(amount)
+        try_into_rpc_balance(vec![amount.0, amount.1])
 
         };
 

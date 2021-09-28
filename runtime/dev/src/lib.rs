@@ -1586,7 +1586,7 @@ impl_runtime_apis! {
 		fn can_unlock_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
 			Ico::can_unlock_amount(account, currency_id, index)
 		}
-		fn can_join_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
+		fn can_join_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> (Balance, Balance) {
 			Ico::can_join_amount(account, currency_id, index)
 		}
 

@@ -1650,40 +1650,43 @@ impl<T: Config> Module<T> {
 
 	/// the total amount that can join ico
 	/// Provided for RPC use
-	pub fn can_join_amount(user: T::AccountId, currency_id: AssetId, index: u32) -> MultiBalanceOf<T> {
+	pub fn can_join_amount(user: T::AccountId, currency_id: AssetId, index: u32) -> (MultiBalanceOf<T>, MultiBalanceOf<T>) {
 		let ico = match <Ico<T>>::get(currency_id, index) {
-			None => return MultiBalanceOf::<T>::from(0u32),
+			None => return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32)),
 			Some(x) => x,
 		};
 		let exchange_token_id = ico.exchange_token;
 		let max_times = ico.user_ico_max_times;
 		let user_max_amount = ico.user_max_amount;
+		let mut user_min_amount = ico.user_min_amount.max(IcoMinUsdtAmount::<T>::get());
+
 		if user == ico.initiator {
-			return MultiBalanceOf::<T>::from(0u32);
+			return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32))
 		}
-		runtime_print!("user is {:?}", user);
+		runtime_print!("the user is {:?}", user);
 		let exchange_token_decimals = match T::CurrenciesHandler::get_metadata(exchange_token_id) {
 			Ok(x) => x.decimals,
-			_ => return MultiBalanceOf::<T>::from(0u32),
+			_ => return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32))
 		};
-		runtime_print!("exchange_token_decimals is {:?}", exchange_token_decimals);
+		runtime_print!("exchange token decimals is {:?}", exchange_token_decimals);
 		if Self::is_ico_expire(&ico) {
-			return MultiBalanceOf::<T>::from(0u32);
+			return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32))
 		}
-		runtime_print!("ico is not expire");
+		runtime_print!("the ico is not expire");
 		match ico.start_time {
 			Some(time) => {
 				if Self::now() < time {
-					return MultiBalanceOf::<T>::from(0u32);
+					return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32))
 				}
 			}
-			None => return MultiBalanceOf::<T>::from(0u32),
+			None => return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32))
 		}
 
-		let remain_usdt = match Self::get_unrelease_asset_info(&user, currency_id, index) {
+		let user_remain_usdt = match Self::get_unrelease_asset_info(&user, currency_id, index) {
 			Some(x) => {
+				user_min_amount = user_min_amount.saturating_sub(x.total_usdt);
 				if max_times <= 1 && x.tags.len() > 0 {
-					return MultiBalanceOf::<T>::from(0u32);
+					return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32))
 				}
 				else {
 					(user_max_amount.min(IcoMaxUsdtAmount::<T>::get())).saturating_sub(x.total_usdt)
@@ -1691,26 +1694,33 @@ impl<T: Config> Module<T> {
 			},
 			None => user_max_amount.min(IcoMaxUsdtAmount::<T>::get()),
 		};
-		runtime_print!("remain usdt amount is {:?}", remain_usdt);
+		runtime_print!("remain usdt amount is {:?}", user_remain_usdt);
 
 		let price = Self::get_token_price(exchange_token_id);
 		if price == MultiBalanceOf::<T>::from(0u32) {
-			return MultiBalanceOf::<T>::from(0u32);
+			return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32))
 		}
 		runtime_print!("the token price is {:?}", price);
 
-		let decimals_amount = 10u128
+		let decimals_convert_amount = 10u128
 			.saturating_pow(exchange_token_decimals as u32)
 			.saturated_into::<MultiBalanceOf<T>>();
 
-		let num = Self::u256_convert_to_balance(Self::balance_convert_to_u256(remain_usdt) * Self::balance_convert_to_u256(decimals_amount) / Self::balance_convert_to_u256(price));
-		runtime_print!("user can join exchange token amount is {:?}", num);
-		let remain_exchange_amount = match Self::get_unrelease_asset_info(&ico.initiator, currency_id, index) {
+		let user_remain_exchange_amount = Self::u256_convert_to_balance(Self::balance_convert_to_u256(user_remain_usdt) * Self::balance_convert_to_u256(decimals_convert_amount) / Self::balance_convert_to_u256(price));
+		runtime_print!("user can join exchange token amount is {:?}", user_remain_exchange_amount);
+		let project_remain_exchange_amount = match Self::get_unrelease_asset_info(&ico.initiator, currency_id, index) {
 			None => ico.exchange_token_total_amount,
 			Some(x) => ico.exchange_token_total_amount.saturating_sub(x.total),
 		};
-		runtime_print!("project can join exchange token amount is {:?}", remain_exchange_amount);
-		remain_exchange_amount.min(num)
+
+		let max_join_amount = project_remain_exchange_amount.min(user_remain_exchange_amount);
+		runtime_print!("project can join exchange token amount is {:?}", project_remain_exchange_amount);
+		let min_join_amount = Self::u256_convert_to_balance(Self::balance_convert_to_u256(user_min_amount) * Self::balance_convert_to_u256(decimals_convert_amount) / Self::balance_convert_to_u256(price));
+		runtime_print!("the min amount more than the max amount");
+		if min_join_amount > max_join_amount {
+			return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32))
+		}
+		(min_join_amount, max_join_amount)
 	}
 
 

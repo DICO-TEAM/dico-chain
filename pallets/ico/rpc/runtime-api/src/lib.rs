@@ -24,7 +24,7 @@ sp_api::decl_runtime_apis! {
 		fn can_release_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance;
 		fn get_reward_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance;
 		fn can_unlock_amount(user: AccountId, currency_id: CurrencyId, index: Index) -> Balance;
-		fn can_join_amount(user: AccountId, currency_id: CurrencyId, index: Index) -> Balance;
+		fn can_join_amount(user: AccountId, currency_id: CurrencyId, index: Index) -> (Balance, Balance);
 		fn get_token_price(currency_id: CurrencyId) -> Balance;
 	}
 
