@@ -151,9 +151,9 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub (crate) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Liquidity was Withdrawn. [who, pool id, liquidity amount]
-		AssetExtendWithdrawn(T::AccountId, T::PoolExtendId, Balance),
+		AssetWithdrawn(T::AccountId, T::PoolExtendId, Balance),
 		/// Liquidity was deposited. [who, pool id, liquidity amount]
-		AssetExtendDeposited(T::AccountId, T::PoolExtendId, Balance),
+		AssetDeposited(T::AccountId, T::PoolExtendId, Balance),
 		/// The mining pool was created. [pool id]
 		PoolExtendCreated(T::AccountId, T::PoolExtendId, AssetId, Balance, AssetId),
 	}
@@ -283,7 +283,7 @@ pub mod pallet {
 
 			PoolExtends::<T>::insert(pool_extend_id, pool_extend);
 			ParticipantExtends::<T>::insert(pool_extend_id, &who, participant_extend);
-			Self::deposit_event(Event::AssetExtendDeposited(who, pool_extend_id, amount));
+			Self::deposit_event(Event::AssetDeposited(who, pool_extend_id, amount));
 
 			Ok(().into())
 		}
@@ -295,6 +295,41 @@ pub mod pallet {
 			pool_extend_id: T::PoolExtendId,
 			amount: Balance,
 		) -> DispatchResultWithPostInfo {
+			let who = ensure_signed(origin)?;
+
+			let mut participant_extend = ParticipantExtends::<T>::get(pool_extend_id, &who).ok_or(Error::<T>::UserNotFindInPoolExtend)?;
+			ensure!(participant_extend.amount >= amount, Error::<T>::InsufficientWithdrawAmount);
+
+			Self::update_pool_extend(&pool_extend_id)?;
+
+			let mut pool_extend = PoolExtends::<T>::get(pool_extend_id).ok_or(Error::<T>::PoolExtendNotFind)?;
+
+			let pending_reward = to_balance!(to_u256!(participant_extend.amount)
+				.checked_mul(to_u256!(pool_extend.acc_reward_per_share)).ok_or(ArithmeticError::Overflow)?
+				.checked_div(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?
+				.checked_sub(to_u256!(participant_extend.reward_debt)).ok_or(ArithmeticError::Overflow)?)?;
+
+			let module_account_id = Self::account_id();
+
+			if pending_reward > Balance::zero() {
+				T::Currency::transfer(pool_extend.currency_id, &module_account_id, &who, pending_reward)?;
+			}
+
+			if amount > Balance::zero() {
+				participant_extend.amount = to_balance!(to_u256!(participant_extend.amount)
+					.checked_sub(to_u256!(amount)).ok_or(ArithmeticError::Overflow)?)?;
+				pool_extend.total_stake_amount = to_balance!(to_u256!(pool_extend.total_stake_amount)
+					.checked_sub(to_u256!(amount)).ok_or(ArithmeticError::Overflow)?)?;
+				T::Currency::transfer(pool_extend.stake_currency_id, &module_account_id, &who, amount)?;
+			}
+
+			participant_extend.reward_debt = to_balance!(to_u256!(participant_extend.amount)
+				.checked_mul(to_u256!(pool_extend.acc_reward_per_share)).ok_or(ArithmeticError::Overflow)?
+				.checked_div(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?)?;
+
+			PoolExtends::<T>::insert(pool_extend_id, pool_extend);
+			ParticipantExtends::<T>::insert(pool_extend_id, &who, participant_extend);
+			Self::deposit_event(Event::AssetWithdrawn(who, pool_extend_id, amount));
 
 			Ok(().into())
 		}
