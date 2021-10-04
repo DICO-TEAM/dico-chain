@@ -89,16 +89,11 @@ impl orml_tokens::Config for Test {
 	type DustRemovalWhitelist = ();
 }
 
-ord_parameter_types! {
-	pub const One: u64 = 1;
-}
-
 impl Config for Test {
 	type Event = Event;
 	type Currency = Currency;
 	type PalletId = FarmExtendPalletId;
 	type PoolExtendId = u32;
-	type FounderSetOrigin = EnsureSignedBy<One, u64>;
 }
 
 pub struct ExtBuilder {

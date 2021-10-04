@@ -82,6 +82,7 @@ pub use pallet_amm;
 pub use pallet_farm;
 pub use pallet_lbp;
 pub use pallet_pricedao;
+pub use pallet_farm_extend;
 
 use pallet_farm_rpc_runtime_api as farm_rpc;
 
@@ -1175,6 +1176,7 @@ parameter_types! {
 	pub const AmmPalletId: PalletId = PalletId(*b"dico/amm");
 	pub const FarmPalletId: PalletId = PalletId(*b"dico/fam");
 	pub const LBPPalletId: PalletId = PalletId(*b"dico/lbp");
+	pub const FarmExtendPalletId: PalletId = PalletId(*b"dico/fme");
 }
 
 impl pallet_amm::Config for Runtime {
@@ -1196,6 +1198,12 @@ impl pallet_farm::Config for Runtime {
 	type WeightInfo = pallet_farm::weights::DicoWeight<Runtime>;
 }
 
+impl pallet_farm_extend::Config for Runtime {
+	type Event = Event;
+	type Currency = Currencies;
+	type PalletId = FarmExtendPalletId;
+	type PoolExtendId = u32;
+}
 
 impl pallet_lbp::Config for Runtime {
 	type Event = Event;
@@ -1467,6 +1475,7 @@ construct_runtime!(
 		// dico-chain related modules
 		AMM: pallet_amm::{Pallet, Call, Storage, Event<T>},
 		Farm: pallet_farm::{Pallet, Call, Storage, Event<T>},
+		FarmExtend: pallet_farm_extend::{Pallet, Call, Storage, Event<T>},
 		LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>},
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>},
 		PriceDao: pallet_pricedao::{Pallet, Call, Storage, Event<T>},

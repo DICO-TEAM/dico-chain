@@ -121,9 +121,6 @@ pub mod pallet {
 			Amount=Amount
 		>;
 
-		/// The origin that is allowed to set or update parameter.
-		type FounderSetOrigin: EnsureOrigin<Self::Origin>;
-
 		/// The mining pool's module id, keep all assets in pool.
 		#[pallet::constant]
 		type PalletId: Get<PalletId>;
