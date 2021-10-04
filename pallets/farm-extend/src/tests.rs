@@ -9,6 +9,7 @@ pub use crate::mock::{
 	DEFAULT_ASSET_AMOUNT,
 };
 use frame_support::{assert_ok};
+use sp_core::crypto::Ss58AddressFormat::DockMainAccount;
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut ext = ExtBuilder::default().build();
@@ -43,7 +44,7 @@ fn create_pool_should_work() {
 			DICO
 		));
 
-		let currency_amount: Balance = (1100 - 100 + 1) * 1_000_000_000;
+		let currency_amount: Balance = (1100 - 100) * 1_000_000_000;
 		let pool_extend_info = PoolExtendInfo::new(
 			DOT,
 			currency_amount,
@@ -52,8 +53,7 @@ fn create_pool_should_work() {
 			1100,
 			1_000_000_000,
 			100,
-			DICO,
-			PoolExtendStatus::Pending
+			DICO
 		);
 		assert_eq!(NextPoolExtendId::<Test>::get(), 1);
 		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
@@ -70,3 +70,123 @@ fn create_pool_should_work() {
 		assert_eq!(Currency::free_balance(DOT, &ALICE), DEFAULT_ASSET_AMOUNT - currency_amount);
 	});
 }
+
+#[test]
+fn deposit_asset_should_work() {
+	new_test_ext().execute_with(|| {
+		assert_ok!(FarmExtend::create_pool(
+			Origin::signed(ALICE),
+			DOT,
+			100,
+			1100,
+			1_000_000_000,
+			DICO
+		));
+
+		assert_ok!(FarmExtend::deposit_asset(
+			Origin::signed(ALICE),
+			0,
+			1000_000_000_000,
+		));
+		let currency_amount: Balance = (1100 - 100) * 1_000_000_000;
+		let mut pool_extend_info = PoolExtendInfo::new(
+			DOT,
+			currency_amount,
+			ALICE,
+			100,
+			1100,
+			1_000_000_000,
+			100,
+			DICO
+		);
+		pool_extend_info.total_stake_amount = 1000_000_000_000;
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+
+		let participant_extend = ParticipantExtend::new(1000_000_000_000, 0);
+		assert_eq!(ParticipantExtends::<Test>::get(0, ALICE), Some(participant_extend));
+
+		let module_id_account = FarmExtend::account_id();
+		assert_eq!(Currency::free_balance(DICO, &module_id_account), 1000_000_000_000);
+		assert_eq!(Currency::free_balance(DICO, &ALICE), DEFAULT_ASSET_AMOUNT - 1000_000_000_000);
+		expect_events(vec![Event::AssetExtendDeposited(
+			ALICE,
+			0,
+			1000_000_000_000
+		).into()]);
+
+		System::set_block_number(100);
+		assert_ok!(FarmExtend::deposit_asset(
+			Origin::signed(BOB),
+			0,
+			1000_000_000_000,
+		));
+		pool_extend_info.total_stake_amount = 2000_000_000_000;
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+		let participant_extend = ParticipantExtend::new(1000_000_000_000, 0);
+		assert_eq!(ParticipantExtends::<Test>::get(0, BOB), Some(participant_extend));
+
+		let module_id_account = FarmExtend::account_id();
+		assert_eq!(Currency::free_balance(DICO, &module_id_account), 2000_000_000_000);
+		assert_eq!(Currency::free_balance(DICO, &BOB), DEFAULT_ASSET_AMOUNT - 1000_000_000_000);
+
+		System::set_block_number(200);
+		assert_ok!(FarmExtend::deposit_asset(
+			Origin::signed(BOB),
+			0,
+			1000_000_000_000,
+		));
+		pool_extend_info.total_stake_amount = 3000_000_000_000;
+		pool_extend_info.last_reward_block = 200;
+		// acc_reward_per_share = (200 - 100) * 1000000000 * 1e12 / 2000000000000 = 50000000000
+		pool_extend_info.acc_reward_per_share = 50000000000;
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+		let participant_extend = ParticipantExtend::new(1000_000_000_000, 0);
+		assert_eq!(ParticipantExtends::<Test>::get(0, ALICE), Some(participant_extend));
+		// reward_debt = 2000000000000 * 50000000000 / 1e12 =100000000000
+		let participant_extend = ParticipantExtend::new(2000_000_000_000, 100000000000);
+		assert_eq!(ParticipantExtends::<Test>::get(0, BOB), Some(participant_extend));
+
+		let module_id_account = FarmExtend::account_id();
+		assert_eq!(Currency::free_balance(DICO, &module_id_account), 3000_000_000_000);
+		assert_eq!(Currency::free_balance(DICO, &BOB), DEFAULT_ASSET_AMOUNT - 2000_000_000_000);
+
+		System::set_block_number(2000);
+		assert_ok!(FarmExtend::deposit_asset(
+			Origin::signed(ALICE),
+			0,
+			1000_000_000_000,
+		));
+		pool_extend_info.total_stake_amount = 4000_000_000_000;
+		pool_extend_info.last_reward_block = 1100;
+		// add_reward_per_share = (1100 - 200) * 1000000000 * 1e12 / 3000000000000 = 300000000000
+		// acc_reward_per_share = 50000000000 + 300000000000 = 350000000000
+		pool_extend_info.acc_reward_per_share = 350000000000;
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+
+		// reward_debt = 2000000000000 * 350000000000 / 1e12 =700000000000
+		let participant_extend = ParticipantExtend::new(2000_000_000_000, 700000000000);
+		assert_eq!(ParticipantExtends::<Test>::get(0, ALICE), Some(participant_extend));
+
+		System::set_block_number(3000);
+		assert_ok!(FarmExtend::deposit_asset(
+			Origin::signed(BOB),
+			0,
+			1000_000_000_000,
+		));
+		pool_extend_info.total_stake_amount = 5000_000_000_000;
+		pool_extend_info.last_reward_block = 1100;
+		// add_reward_per_share = (1100 - 1100) * 1000000000 * 1e12 / 3000000000000 = 0
+		// acc_reward_per_share = 0 + 350000000000 = 350000000000
+		pool_extend_info.acc_reward_per_share = 350000000000;
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+
+		// reward_debt = 3000000000000 * 350000000000 / 1e12 =1050000000000
+		let participant_extend = ParticipantExtend::new(3000_000_000_000, 1050000000000);
+		assert_eq!(ParticipantExtends::<Test>::get(0, BOB), Some(participant_extend));
+
+		assert_eq!(Currency::free_balance(DOT, &module_id_account), 0);
+		assert_eq!(Currency::free_balance(DOT, &ALICE), DEFAULT_ASSET_AMOUNT - currency_amount + 350000000000);
+		assert_eq!(Currency::free_balance(DOT, &BOB), DEFAULT_ASSET_AMOUNT + 50000000000 + 600000000000);
+	});
+}
+

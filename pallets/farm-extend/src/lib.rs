@@ -32,15 +32,6 @@ mod mock;
 mod tests;
 
 
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum PoolExtendStatus {
-	Pending,
-	Cancelled,
-	InProgress,
-	Finished,
-}
-
 #[derive(Encode, Decode, Default, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct ParticipantExtend {
@@ -67,7 +58,6 @@ pub struct PoolExtendInfo<AccountId> {
 	pub acc_reward_per_share: Balance,
 	pub stake_currency_id: AssetId,
 	pub total_stake_amount: Balance,
-	pub status: PoolExtendStatus,
 }
 
 impl<AccountId> PoolExtendInfo<AccountId> {
@@ -80,7 +70,6 @@ impl<AccountId> PoolExtendInfo<AccountId> {
 		reward_per_block: Balance,
 		last_reward_block: BlockNumber,
 		stake_currency_id: AssetId,
-		status: PoolExtendStatus,
 	) -> Self {
 		Self {
 			currency_id,
@@ -93,7 +82,6 @@ impl<AccountId> PoolExtendInfo<AccountId> {
 			acc_reward_per_share: Balance::zero(),
 			stake_currency_id,
 			total_stake_amount: Balance::zero(),
-			status,
 		}
 	}
 }
@@ -147,16 +135,12 @@ pub mod pallet {
 		InvalidBlockConfigure,
 		StartBlockOutDate,
 		InvalidRewardPerBlock,
-		/// Liquidity already exists.
-		LiquidityIdCreated,
-		/// The total issuance of liquid assets is zero.
-		LiquidityIdZeroIssuance,
 		/// Pool already exists.
-		PoolExisted,
+		PoolExtendExisted,
 		/// The mining pool does not exist.
-		PoolNotFind,
+		PoolExtendNotFind,
 		/// The user does not exist in the mining pool.
-		UserNotFindInPool,
+		UserNotFindInPoolExtend,
 		/// Invalid withdrawal amount.
 		InsufficientWithdrawAmount,
 		/// No pool id available.
@@ -167,9 +151,9 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub (crate) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Liquidity was Withdrawn. [who, pool id, liquidity amount]
-		LpExtendWithdrawn(T::AccountId, T::PoolExtendId, Balance),
+		AssetExtendWithdrawn(T::AccountId, T::PoolExtendId, Balance),
 		/// Liquidity was deposited. [who, pool id, liquidity amount]
-		LpExtendDeposited(T::AccountId, T::PoolExtendId, Balance),
+		AssetExtendDeposited(T::AccountId, T::PoolExtendId, Balance),
 		/// The mining pool was created. [pool id]
 		PoolExtendCreated(T::AccountId, T::PoolExtendId, AssetId, Balance, AssetId),
 	}
@@ -223,17 +207,13 @@ pub mod pallet {
 			ensure!(block_number <= start_block, Error::<T>::StartBlockOutDate);
 
 			let block_delta = end_block
-				.checked_sub(start_block).ok_or(ArithmeticError::Overflow)?
-				.checked_add(BlockNumber::one()).ok_or(ArithmeticError::Overflow)?;
+				.checked_sub(start_block).ok_or(ArithmeticError::Overflow)?;
 			let currency_amount = to_balance!(
 				to_u256!(block_delta).checked_mul(to_u256!(reward_per_block)).ok_or(ArithmeticError::Overflow)?
-			).map_err(|_| ArithmeticError::Overflow)?;
+			)?;
 
 			let module_account_id = Self::account_id();
 			T::Currency::transfer(currency_id, &who, &module_account_id, currency_amount)?;
-
-			let pool_extend_status = if block_number == start_block { PoolExtendStatus::InProgress
-			} else { PoolExtendStatus::Pending };
 
 			let pool_extend_info = PoolExtendInfo::new(
 				currency_id,
@@ -244,7 +224,6 @@ pub mod pallet {
 				reward_per_block,
 				start_block,
 				stake_currency_id,
-				pool_extend_status,
 			);
 
 			let pool_extend_id = Self::get_next_pool_extend_id()?;
@@ -261,6 +240,64 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[transactional]
+		pub fn deposit_asset(
+			origin: OriginFor<T>,
+			pool_extend_id: T::PoolExtendId,
+			amount: Balance,
+		) -> DispatchResultWithPostInfo {
+			let who = ensure_signed(origin)?;
+
+			Self::update_pool_extend(&pool_extend_id)?;
+			let mut pool_extend = PoolExtends::<T>::get(pool_extend_id).ok_or(Error::<T>::PoolExtendNotFind)?;
+			let mut participant_extend = ParticipantExtends::<T>::get(pool_extend_id, &who).unwrap_or_default();
+
+			let module_account_id = Self::account_id();
+			if participant_extend.amount > Balance::zero() {
+				let pending_reward = to_balance!(
+					to_u256!(participant_extend.amount)
+					.checked_mul(to_u256!(pool_extend.acc_reward_per_share)).ok_or(ArithmeticError::Overflow)?
+					.checked_div(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?
+					.checked_sub(to_u256!(participant_extend.reward_debt)).ok_or(ArithmeticError::Overflow)?
+				)?;
+
+				if pending_reward > Balance::zero() {
+					T::Currency::transfer(pool_extend.currency_id, &module_account_id, &who, pending_reward)?;
+				}
+			}
+
+			if amount > Balance::zero() {
+				T::Currency::transfer(pool_extend.stake_currency_id, &who, &module_account_id, amount)?;
+				participant_extend.amount = participant_extend.amount
+					.checked_add(amount).ok_or(ArithmeticError::Overflow)?;
+				pool_extend.total_stake_amount = pool_extend.total_stake_amount
+					.checked_add(amount).ok_or(ArithmeticError::Overflow)?;
+			}
+
+			participant_extend.reward_debt = to_balance!(
+				to_u256!(participant_extend.amount)
+				.checked_mul(to_u256!(pool_extend.acc_reward_per_share)).ok_or(ArithmeticError::Overflow)?
+				.checked_div(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?
+			)?;
+
+			PoolExtends::<T>::insert(pool_extend_id, pool_extend);
+			ParticipantExtends::<T>::insert(pool_extend_id, &who, participant_extend);
+			Self::deposit_event(Event::AssetExtendDeposited(who, pool_extend_id, amount));
+
+			Ok(().into())
+		}
+
+		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[transactional]
+		pub fn withdraw_asset(
+			origin: OriginFor<T>,
+			pool_extend_id: T::PoolExtendId,
+			amount: Balance,
+		) -> DispatchResultWithPostInfo {
+
+			Ok(().into())
+		}
 	}
 }
 
@@ -275,6 +312,40 @@ impl<T: Config> Pallet<T> {
 		NextPoolExtendId::<T>::put(new_pool_extend_id);
 
 		Ok(next_pool_extend_id)
+	}
+
+	fn update_pool_extend(
+		pid: &T::PoolExtendId
+	) -> sp_std::result::Result<(), DispatchErrorWithPostInfo> {
+		PoolExtends::<T>::try_mutate(pid, |maybe_pool_extend| -> sp_std::result::Result<(), DispatchErrorWithPostInfo> {
+			let pool_extend = maybe_pool_extend.as_mut().ok_or(Error::<T>::PoolExtendNotFind)?;
+			let block_number: BlockNumber = frame_system::pallet::Pallet::<T>::block_number().saturated_into();
+			if block_number <= pool_extend.last_reward_block {
+				return Ok(());
+			}
+
+			let reward_block = if block_number < pool_extend.end_block {block_number} else {pool_extend.end_block};
+			let block_delta = reward_block
+				.checked_sub(pool_extend.last_reward_block).ok_or(ArithmeticError::Overflow)?;
+			if block_delta == BlockNumber::zero() {
+				return Ok(());
+			}
+
+			let block_rewards = to_balance!(
+				to_u256!(block_delta).checked_mul(to_u256!(pool_extend.reward_per_block)).ok_or(ArithmeticError::Overflow)?
+			)?;
+
+			pool_extend.acc_reward_per_share = to_balance!(
+				to_u256!(pool_extend.acc_reward_per_share).checked_add(
+					to_u256!(block_rewards)
+					.checked_mul(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?
+					.checked_div(to_u256!(pool_extend.total_stake_amount)).ok_or(ArithmeticError::Overflow)?
+				).ok_or(ArithmeticError::Overflow)?
+			)?;
+			pool_extend.last_reward_block = reward_block;
+
+			Ok(())
+		})
 	}
 }
 
