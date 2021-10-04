@@ -1847,6 +1847,7 @@ dependencies = [
  "pallet-election-provider-multi-phase",
  "pallet-elections-phragmen",
  "pallet-farm",
+ "pallet-farm-extend",
  "pallet-farm-rpc-runtime-api",
  "pallet-gilt",
  "pallet-grandpa",
@@ -5313,6 +5314,27 @@ dependencies = [
 
 [[package]]
 name = "pallet-farm"
+version = "1.0.0"
+dependencies = [
+ "dico-primitives",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "frame-system-benchmarking",
+ "orml-tokens",
+ "orml-traits",
+ "parity-scale-codec",
+ "primitive-types 0.10.1",
+ "serde",
+ "sp-core 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
+ "sp-io 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
+ "sp-runtime",
+ "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
+ "substrate-wasm-builder 3.0.0",
+]
+
+[[package]]
+name = "pallet-farm-extend"
 version = "1.0.0"
 dependencies = [
  "dico-primitives",

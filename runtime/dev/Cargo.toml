@@ -43,7 +43,7 @@ pallet-dico-treasury        = { package = "pallet-dico-treasury", default-featur
 pallet-ico-rpc-runtime-api  = { package = "pallet-ico-rpc-runtime-api", default-features = false, path = "../../pallets/ico/rpc/runtime-api"}
 pallet-farm-rpc-runtime-api = { package = 'pallet-farm-rpc-runtime-api', default-features = false, path = "../../pallets/farm/rpc/runtime-api" }
 pallet-nft                  = { package = "pallet-nft", default-features = false, path = "../../pallets/nft"}
-
+pallet-farm-extend          = { package = 'pallet-farm-extend', default-features = false, path = '../../pallets/farm-extend'}
 
 
 
