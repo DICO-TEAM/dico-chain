@@ -25,6 +25,10 @@ use orml_traits::{MultiCurrency, MultiCurrencyExtended};
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 
+mod benchmarking;
+pub mod weights;
+use weights::WeightInfo;
+
 #[cfg(test)]
 mod mock;
 
@@ -124,6 +128,9 @@ pub mod pallet {
 		/// The mining pool's module id, keep all assets in pool.
 		#[pallet::constant]
 		type PalletId: Get<PalletId>;
+
+		/// Weight information for the extrinsics in this module.
+		type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::error]
@@ -182,7 +189,7 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(< T as Config >::WeightInfo::create_pool())]
 		#[transactional]
 		pub fn create_pool(
 			origin: OriginFor<T>,
@@ -237,7 +244,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(< T as Config >::WeightInfo::deposit_asset())]
 		#[transactional]
 		pub fn deposit_asset(
 			origin: OriginFor<T>,
@@ -285,7 +292,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(< T as Config >::WeightInfo::withdraw_asset())]
 		#[transactional]
 		pub fn withdraw_asset(
 			origin: OriginFor<T>,

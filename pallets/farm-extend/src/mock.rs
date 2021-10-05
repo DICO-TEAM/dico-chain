@@ -94,6 +94,7 @@ impl Config for Test {
 	type Currency = Currency;
 	type PalletId = FarmExtendPalletId;
 	type PoolExtendId = u32;
+	type WeightInfo = ();
 }
 
 pub struct ExtBuilder {

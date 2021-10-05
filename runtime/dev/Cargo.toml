@@ -206,6 +206,7 @@ std = [
     "pallet-amm/std",
     "pallet-farm/std",
     "pallet-lbp/std",
+    "pallet-farm-extend/std",
     "pallet-pricedao/std",
     'pallet-farm-rpc-runtime-api/std',
     "pallet-oracle/std",
@@ -256,6 +257,7 @@ runtime-benchmarks = [
     "pallet-amm/frame-benchmarking",
     "pallet-farm/frame-benchmarking",
     'pallet-lbp/runtime-benchmarks',
+    "pallet-farm-extend/frame-benchmarking",
     "hex-literal",
 ]
 try-runtime = [

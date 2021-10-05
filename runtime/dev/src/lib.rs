@@ -1203,6 +1203,7 @@ impl pallet_farm_extend::Config for Runtime {
 	type Currency = Currencies;
 	type PalletId = FarmExtendPalletId;
 	type PoolExtendId = u32;
+	type WeightInfo = pallet_farm_extend::weights::DicoWeight<Runtime>;
 }
 
 impl pallet_lbp::Config for Runtime {
@@ -1883,6 +1884,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, amm, AMM);
 			add_benchmark!(params, batches, farm, Farm);
 			add_benchmark!(params, batches, lbp, LBP);
+			add_benchmark!(params, batches, farm_extend, FarmExtend);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
