@@ -43,7 +43,7 @@ pallet-dico-treasury        = { package = "pallet-dico-treasury", default-featur
 pallet-ico-rpc-runtime-api  = { package = "pallet-ico-rpc-runtime-api", default-features = false, path = "../../pallets/ico/rpc/runtime-api"}
 pallet-farm-rpc-runtime-api = { package = 'pallet-farm-rpc-runtime-api', default-features = false, path = "../../pallets/farm/rpc/runtime-api" }
 pallet-nft                  = { package = "pallet-nft", default-features = false, path = "../../pallets/nft"}
-
+pallet-farm-extend          = { package = 'pallet-farm-extend', default-features = false, path = '../../pallets/farm-extend'}
 
 
 
@@ -206,6 +206,7 @@ std = [
     "pallet-amm/std",
     "pallet-farm/std",
     "pallet-lbp/std",
+    "pallet-farm-extend/std",
     "pallet-pricedao/std",
     'pallet-farm-rpc-runtime-api/std',
     "pallet-oracle/std",
@@ -256,6 +257,7 @@ runtime-benchmarks = [
     "pallet-amm/frame-benchmarking",
     "pallet-farm/frame-benchmarking",
     'pallet-lbp/runtime-benchmarks',
+    "pallet-farm-extend/frame-benchmarking",
     "hex-literal",
 ]
 try-runtime = [

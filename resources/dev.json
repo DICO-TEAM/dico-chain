@@ -615,5 +615,21 @@
     "claim_payment": "Balance",
     "images_hash": "Option<Vec<u8>>",
     "maximum_quantity": "TokenId"
+  },
+  "PoolExtendId": "u32",
+  "ParticipantExtend": {
+    "amount": "Balance",
+    "reward_debt": "Balance"
+  },
+  "PoolExtendInfo": {
+    "currency_id": "AssetId",
+    "currency_amount": "Balance",
+    "owner": "AccountId",
+    "start_block": "BlockNumber",
+    "end_block": "BlockNumber",
+    "last_reward_block": "BlockNumber",
+    "acc_reward_per_share": "Balance",
+    "stake_currency_id": "AssetId",
+    "total_stake_amount": "Balance"
   }
 }
