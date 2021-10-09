@@ -360,7 +360,7 @@
   "CurrencyIdOf": "AssetId",
   "IcoCollectiveVotes": {
     "index": "u32",
-    "reason": "Option<Vec<u8>>",
+    "reason": "Vec<u8>",
     "threshold": "Percent",
     "ayes": "Vec<(AccountId, Balance)>",
     "nays": "Vec<(AccountId, Balance)>",
