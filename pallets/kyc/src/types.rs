@@ -5,7 +5,7 @@ use sp_std::prelude::*;
 use sp_std::{fmt::Debug, iter::once, ops::Add};
 
 pub type KYCIndex = u32;
-pub type ExchangeKey = [u8; 32];
+pub type CurvePubicKey = [u8; 32];
 pub type Message = [u8; 128];
 pub type Data = Vec<u8>;
 
@@ -73,9 +73,9 @@ impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> Judgement
 pub enum Authentication {
     /// pending status
     Pending,
-    /// Success： The supervisor believes that the certification is successful
+    /// Success： The SwordHolder believes that the certification is successful
     Success,
-    /// Failure: The supervisor believes that the certification is not
+    /// Failure: The SwordHolder believes that the certification is not
     /// successful
     Failure,
 }
@@ -144,7 +144,7 @@ impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> Decode fo
 pub enum KYCFields {
     Name,
     Area,
-    ExchangeKey,
+    CurvePubicKey,
     Email,
 }
 
@@ -166,7 +166,7 @@ pub struct KYCInfo {
 
     /// public key to exchange
     /// Stored as UTF-8.
-    pub exchange_key: Vec<u8>,
+    pub curve_public_key: Vec<u8>,
 
     /// email
     /// Stored as UTF-8.
@@ -230,7 +230,7 @@ pub struct IASInfo<
 
     /// public key to exchange
     /// Stored as UTF-8.
-    pub exchange_key: ExchangeKey,
+    pub curve_public_key: CurvePubicKey,
 
     /// Relevant fields for this registrar. Registrar judgements are limited to
     /// attestations on these fields.
@@ -251,8 +251,8 @@ impl<
         self
     }
 
-    pub fn set_exchange_key(&mut self, exchange_key: ExchangeKey) -> &mut Self {
-        self.exchange_key = exchange_key;
+    pub fn set_curve_public_key(&mut self, curve_public_key: CurvePubicKey) -> &mut Self {
+        self.curve_public_key = curve_public_key;
         self
     }
 
@@ -274,9 +274,8 @@ pub struct ApplicationForm<
 
     /// Amount required to be given to the registrar for them to provide
     /// judgement.
-    pub supervisor: (KYCIndex, IASInfo<Balance, AccountId>),
+    pub sword_holder: (KYCIndex, IASInfo<Balance, AccountId>),
 
-    /// public key to exchange
     /// Stored as UTF-8.
     pub progress: Progress,
 }
@@ -291,8 +290,8 @@ impl<
         self
     }
 
-    pub fn set_supervisor(&mut self, index: KYCIndex, supervisor: IASInfo<Balance, AccountId>) -> &mut Self {
-        self.supervisor = (index, supervisor);
+    pub fn set_sword_holder(&mut self, index: KYCIndex, sword_holder: IASInfo<Balance, AccountId>) -> &mut Self {
+        self.sword_holder = (index, sword_holder);
         self
     }
 
@@ -305,7 +304,7 @@ impl<
         match self {
             Self {
                 ias,
-                supervisor,
+                sword_holder,
                 progress,
             } => {
                 // When Progress is Failure, can apply again.
@@ -329,12 +328,12 @@ pub enum Progress {
     IasDoing,
     /// IAS Done this progress
     IasDone,
-    /// Supervisor Done this progress
-    SupervisorDone,
-    /// Success： The ias/supervisor believes that the certification is
+    /// sword_holder Done this progress
+    SwordHolderDone,
+    /// Success： The ias/SwordHolder believes that the certification is
     /// successful
     Success,
-    /// Failure: The ias/supervisor believes that the certification is not
+    /// Failure: The ias/SwordHolder believes that the certification is not
     /// successful
     Failure,
 }
