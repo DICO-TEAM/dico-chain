@@ -87,9 +87,9 @@ pub mod pallet {
 	};
 
 	pub(crate) type BalanceOf<T> =
-		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 	pub(crate) type NegativeImbalanceOf<T> =
-		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
+	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -115,7 +115,7 @@ pub mod pallet {
 		#[pallet::constant]
 		type MaxIAS: Get<u32>;
 
-		/// MaxSupervisor:
+		/// MaxSwordHolder:
 		#[pallet::constant]
 		type MaxSwordHolder: Get<u32>;
 
@@ -155,31 +155,31 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn kyc)]
 	pub(super) type KYCOf<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, Registration<BalanceOf<T>>, OptionQuery>;
+	StorageMap<_, Twox64Concat, T::AccountId, Registration<BalanceOf<T>>, OptionQuery>;
 
 	/// the black list of kyc user
 	#[pallet::storage]
 	#[pallet::getter(fn blacklist)]
 	pub(super) type BlackListOf<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, BlackInfo<BalanceOf<T>>, OptionQuery>;
+	StorageMap<_, Twox64Concat, T::AccountId, BlackInfo<BalanceOf<T>>, OptionQuery>;
 
 	/// List of identity authentication service(IAS) in a  kyc field
 	#[pallet::storage]
 	#[pallet::getter(fn ias_list)]
 	pub(super) type IASListOf<T: Config> =
-		StorageMap<_, Twox64Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
+	StorageMap<_, Twox64Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
 
 	/// List of SwordHolder in a  kyc field
 	#[pallet::storage]
 	#[pallet::getter(fn sword_holder)]
 	pub(super) type SwordHolderOf<T: Config> =
-		StorageMap<_, Twox64Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
+	StorageMap<_, Twox64Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
 
 	/// Records Of IAS/SwordHolder
 	#[pallet::storage]
 	#[pallet::getter(fn records)]
 	pub(super) type RecordsOf<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, Vec<Record<T::AccountId>>, ValueQuery>;
+	StorageMap<_, Twox64Concat, T::AccountId, Vec<Record<T::AccountId>>, ValueQuery>;
 
 	/// Unique information storage filtering
 	#[pallet::storage]
@@ -190,18 +190,18 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn message)]
 	pub(super) type MessageList<T: Config> =
-		StorageDoubleMap<_, Blake2_128Concat, T::AccountId, Blake2_128Concat, T::AccountId, Vec<Message>, ValueQuery>;
+	StorageDoubleMap<_, Blake2_128Concat, T::AccountId, Blake2_128Concat, T::AccountId, Vec<Message>, ValueQuery>;
 
 	///ApplicationFormList: AccountId -> Vec<ApplicationForm>
 	#[pallet::storage]
 	#[pallet::getter(fn application_form)]
 	pub(super) type ApplicationFormList<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
+	StorageMap<_, Twox64Concat, T::AccountId, Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
 
 	#[pallet::event]
 	#[pallet::metadata(
-		T::AccountId = "AccountId",
-		BalanceOf<T> = "Balance"
+	T::AccountId = "AccountId",
+	BalanceOf<T> = "Balance"
 	)]
 	#[pallet::generate_deposit(pub (super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -223,10 +223,10 @@ pub mod pallet {
 		SwordHolderKilled(T::AccountId),
 		/// A kyc was cleared, and the given balance returned. \[who, deposit\]
 		KYCCleared(T::AccountId, BalanceOf<T>),
-		/// Randomly get identity authentication service(IAS) provider.\[kyc_index,exchange_key\]
-		GetIAS(KYCIndex, ExchangeKey),
-		/// Randomly get a sword holder  provider. \[kyc_index, exchange_key\]
-		GetSwordHolder(KYCIndex, ExchangeKey),
+		/// Randomly get identity authentication service(IAS) provider.\[kyc_index,curve_public_key\]
+		GetIAS(KYCIndex, CurvePubicKey),
+		/// Randomly get a sword holder  provider. \[kyc_index, curve_public_key\]
+		GetSwordHolder(KYCIndex, CurvePubicKey),
 		/// A judgement was asked from a registrar. \[who, kyc_index\]
 		JudgementRequested(T::AccountId, KYCIndex),
 		/// A judgement request was retracted. \[who, kyc_index\]
@@ -259,8 +259,8 @@ pub mod pallet {
 		NotFound,
 		/// NO IAS
 		NoIAS,
-		/// No IAS OrS wordHolder
-		NoIASOrSwordHolder,
+		/// this fee not found ias or sword holder
+		ThisFeeNotFoundIASOrSwordHolder,
 		/// Fee is not enough.
 		FeeNotEnough,
 		/// Fee is changed.
@@ -321,7 +321,7 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::add_ias(
-			T::MaxIAS::get().into()
+		T::MaxIAS::get().into()
 		))]
 		pub fn add_ias(
 			origin: OriginFor<T>,
@@ -349,7 +349,7 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::add_sword_holder(
-			T::MaxSwordHolder::get().into()
+		T::MaxSwordHolder::get().into()
 		))]
 		pub fn add_sword_holder(
 			origin: OriginFor<T>,
@@ -375,7 +375,7 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::remove_kyc(
-			T::MaxSwordHolder::get().into(), // R
+		T::MaxSwordHolder::get().into(), // R
 		))]
 		pub fn remove_kyc(
 			origin: OriginFor<T>,
@@ -412,7 +412,7 @@ pub mod pallet {
 			Ok(Some(T::WeightInfo::remove_kyc(
 				T::MaxSwordHolder::get().into(), // R
 			))
-			.into())
+				.into())
 		}
 
 		/// User setting KYC
@@ -427,8 +427,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::set_kyc(
-			T::MaxIAS::get().into(), // R
-			T::MaxSwordHolder::get().into(), // X
+		T::MaxIAS::get().into(), // R
+		T::MaxSwordHolder::get().into(), // X
 		))]
 		pub fn set_kyc(origin: OriginFor<T>, info: KYCInfo) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
@@ -464,7 +464,7 @@ pub mod pallet {
 				T::MaxIAS::get().into(),         // R
 				T::MaxSwordHolder::get().into(), // X
 			))
-			.into())
+				.into())
 		}
 
 		/// Users clean up their own KYC
@@ -477,8 +477,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::clear_kyc(
-			T::MaxIAS::get().into(), // R
-			T::MaxSwordHolder::get().into(), // X
+		T::MaxIAS::get().into(), // R
+		T::MaxSwordHolder::get().into(), // X
 		))]
 		pub fn clear_kyc(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
@@ -495,7 +495,7 @@ pub mod pallet {
 				T::MaxIAS::get().into(),         // R
 				T::MaxSwordHolder::get().into(), // X
 			))
-			.into())
+				.into())
 		}
 
 		/// The user applies for verification by ias
@@ -511,8 +511,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::apply_certification(
-			T::MaxIAS::get().into(), // R
-			T::MaxSwordHolder::get().into(), // X
+		T::MaxIAS::get().into(), // R
+		T::MaxSwordHolder::get().into(), // X
 		))]
 		pub fn apply_certification(
 			origin: OriginFor<T>,
@@ -537,7 +537,7 @@ pub mod pallet {
 
 			let app_form = ApplicationForm {
 				ias: Self::random_admin(&kyc_fields, &search_fee, true)?,
-				supervisor: Self::random_admin(&kyc_fields, &search_fee, false)?,
+				sword_holder: Self::random_admin(&kyc_fields, &search_fee, false)?,
 				progress: Progress::Pending,
 			};
 
@@ -568,8 +568,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::request_judgement(
-			T::MaxIAS::get().into(), // R
-			T::MaxSwordHolder::get().into(), // X
+		T::MaxIAS::get().into(), // R
+		T::MaxSwordHolder::get().into(), // X
 		))]
 		pub fn request_judgement(
 			origin: OriginFor<T>,
@@ -584,7 +584,7 @@ pub mod pallet {
 				T::MaxIAS::get().into(),         // R
 				T::MaxSwordHolder::get().into(), // X
 			))
-			.into())
+				.into())
 		}
 
 		/// IAS sets its own service fees
@@ -598,7 +598,7 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::ias_set_fee(
-			T::MaxIAS::get().into()
+		T::MaxIAS::get().into()
 		))]
 		pub fn ias_set_fee(
 			origin: OriginFor<T>,
@@ -631,8 +631,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::ias_provide_judgement(
-			T::MaxIAS::get().into(), // R
-			T::MaxSwordHolder::get().into(), // X
+		T::MaxIAS::get().into(), // R
+		T::MaxSwordHolder::get().into(), // X
 		))]
 		pub fn ias_provide_judgement(
 			origin: OriginFor<T>,
@@ -655,7 +655,7 @@ pub mod pallet {
 				T::MaxIAS::get().into(),         // R
 				T::MaxSwordHolder::get().into(), // X
 			))
-			.into())
+				.into())
 		}
 
 		/// sword holder set fee
@@ -669,7 +669,7 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::sword_holder_set_fee(
-			T::MaxSwordHolder::get().into()
+		T::MaxSwordHolder::get().into()
 		))]
 		pub fn sword_holder_set_fee(
 			origin: OriginFor<T>,
@@ -697,8 +697,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::sword_holder_provide_judgement(
-			T::MaxIAS::get().into(), // R
-			T::MaxSwordHolder::get().into(), // X
+		T::MaxIAS::get().into(), // R
+		T::MaxSwordHolder::get().into(), // X
 		))]
 		pub fn sword_holder_provide_judgement(
 			origin: OriginFor<T>,
@@ -717,7 +717,7 @@ pub mod pallet {
 				T::MaxIAS::get().into(),         // R
 				T::MaxSwordHolder::get().into(), // X
 			))
-			.into())
+				.into())
 		}
 	}
 
@@ -785,7 +785,7 @@ pub mod pallet {
 
 			let ias_size = &res_list.len();
 
-			ensure!(ias_size > &(0 as usize), Error::<T>::NoIASOrSwordHolder);
+			ensure!(ias_size > &(0 as usize), Error::<T>::ThisFeeNotFoundIASOrSwordHolder);
 
 			let random_index = random_number % ias_size;
 			Self::increment_nonce()?;
@@ -856,7 +856,7 @@ pub mod pallet {
 			let mut app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
 				<ApplicationFormList<T>>::get(who);
 
-			if let Some(ApplicationForm { ias, supervisor, progress }) = app_list
+			if let Some(ApplicationForm { ias, sword_holder, progress }) = app_list
 				.iter()
 				.filter(|item| matches!(item, Some(item) if item.ias.1.fields == kyc_fields && item.ias.0 == kyc_index && item.progress == Progress::Pending))
 				.next()
@@ -864,7 +864,7 @@ pub mod pallet {
 				let mut registration = <KYCOf<T>>::get(&who).ok_or(Error::<T>::NoKYC)?;
 
 				let pay_fee = ias.1.fee
-					.checked_add(&supervisor.1.fee)
+					.checked_add(&sword_holder.1.fee)
 					.ok_or_else(|| DispatchError::from(Error::<T>::InvalidFee))?;
 
 				let item = (
@@ -886,7 +886,7 @@ pub mod pallet {
 					fields: kyc_fields,
 				};
 				Self::update_application_form(&who, ias.1.account.clone(), ias.0,
-											  supervisor.1.account.clone(), supervisor.0,
+											  sword_holder.1.account.clone(), sword_holder.0,
 											  ias.1.fields, Progress::IasDoing)?;
 
 				// add record to ias records
@@ -910,7 +910,7 @@ pub mod pallet {
 				<ApplicationFormList<T>>::get(target);
 			let mut app_list_cp = app_list.clone();
 
-			if let Some(ApplicationForm { ias, supervisor, progress }) = app_list_cp
+			if let Some(ApplicationForm { ias, sword_holder, progress }) = app_list_cp
 				.iter()
 				.filter(|item| matches!(item, Some(item) if item.ias.1.fields == kyc_fields && item.ias.1.account == who.clone() && item.ias.0 == kyc_index && item.progress == Progress::IasDoing))
 				.next()
@@ -936,16 +936,16 @@ pub mod pallet {
 				for record in record_list.iter_mut() {
 					if record.account == who.clone() && record.fields == kyc_fields.clone() {
 						record.progress = Progress::IasDone;
-						Self::add_record_list(&supervisor.1.account, record.clone());
+						Self::add_record_list(&sword_holder.1.account, record.clone());
 					}
 				}
 				<RecordsOf<T>>::insert(who, record_list);
 
 				Self::add_unique_id_list(&kyc_fields, id);
 				Self::update_application_form(target, ias.1.account.clone(), ias.0,
-											  supervisor.1.account.clone(), supervisor.0,
+											  sword_holder.1.account.clone(), sword_holder.0,
 											  ias.1.fields, Progress::IasDone)?;
-				Self::add_message_list(who, &supervisor.1.account, message)?;
+				Self::add_message_list(who, &sword_holder.1.account, message)?;
 			}
 
 			Ok(())
@@ -967,26 +967,26 @@ pub mod pallet {
 				<ApplicationFormList<T>>::get(target);
 			let mut app_list_cp = app_list.clone();
 
-			if let Some(ApplicationForm { ias, supervisor, progress }) = app_list_cp
+			if let Some(ApplicationForm { ias, sword_holder, progress }) = app_list_cp
 				.iter()
-				.filter(|item| matches!(item, Some(item) if item.supervisor.1.fields == kyc_fields && item.supervisor.1.account == who.clone() && item.supervisor.0 == kyc_index && item.progress == Progress::IasDone))
+				.filter(|item| matches!(item, Some(item) if item.sword_holder.1.fields == kyc_fields && item.sword_holder.1.account == who.clone() && item.sword_holder.0 == kyc_index && item.progress == Progress::IasDone))
 				.next()
 				.ok_or(Error::<T>::NoApplication)? {
 				if authentication.has_failure() {
 					let pay_fee = ias.1.fee
-						.checked_add(&supervisor.1.fee)
+						.checked_add(&sword_holder.1.fee)
 						.ok_or_else(|| DispatchError::from(Error::<T>::InvalidFee))?;
 					Self::update_record_list(&ias.1.account, target, &kyc_fields, Progress::Failure);
-					Self::update_record_list(&supervisor.1.account, target, &kyc_fields, Progress::Failure);
+					Self::update_record_list(&sword_holder.1.account, target, &kyc_fields, Progress::Failure);
 					Self::update_application_form(target, ias.1.account.clone(), ias.0,
-												  supervisor.1.account.clone(), supervisor.0,
+												  sword_holder.1.account.clone(), sword_holder.0,
 												  ias.1.fields, Progress::Failure)?;
 					Self::update_kyc_auth(target,&kyc_fields,ias.0,authentication);
 					T::Currency::unreserve(target, pay_fee);
 
 				} else {
 					for application in app_list.iter_mut() {
-						if matches!(application, Some(app)  if app.supervisor.1.fields == kyc_fields && app.supervisor.0 == kyc_index && app.supervisor.1.account == who.clone() && app.progress == Progress::IasDone)
+						if matches!(application, Some(app)  if app.sword_holder.1.fields == kyc_fields && app.sword_holder.0 == kyc_index && app.sword_holder.1.account == who.clone() && app.progress == Progress::IasDone)
 						{
 							let mut registration = <KYCOf<T>>::get(target).ok_or(Error::<T>::InvalidTarget)?;
 							for element in registration.judgements.iter_mut() {
@@ -1001,18 +1001,16 @@ pub mod pallet {
 										);
 										let _ = T::Currency::repatriate_reserved(
 											&target,
-											&supervisor.1.account,
-											supervisor.1.fee,
+											&sword_holder.1.account,
+											sword_holder.1.fee,
 											BalanceStatus::Free,
 										);
+										Self::increment_area_count(&registration.info.area)?;
 									}
 									element.3 = *authentication;
 								}
 							}
 
-							if kyc_fields == KYCFields::Area {
-								Self::increment_area_count(&registration.info.area)?;
-							}
 							<KYCOf<T>>::insert(&target, registration);
 
 							application.as_mut().map(|i| {
@@ -1025,7 +1023,7 @@ pub mod pallet {
 
 					<ApplicationFormList<T>>::insert(target, app_list);
 					Self::update_record_list(&ias.1.account, target, &kyc_fields, Progress::Success);
-					Self::update_record_list(&supervisor.1.account, target, &kyc_fields, Progress::Success);
+					Self::update_record_list(&sword_holder.1.account, target, &kyc_fields, Progress::Success);
 				}
 			}
 			Ok(())
@@ -1071,8 +1069,8 @@ pub mod pallet {
 			who: &T::AccountId,
 			ias_account: T::AccountId,
 			ias_index: KYCIndex,
-			supervisor_account: T::AccountId,
-			supervisor_index: KYCIndex,
+			sword_holder_account: T::AccountId,
+			sword_holder_index: KYCIndex,
 			kyc_fields: KYCFields,
 			progress: Progress,
 		) -> sp_std::result::Result<(), DispatchError> {
@@ -1081,8 +1079,8 @@ pub mod pallet {
 				<ApplicationFormList<T>>::get(who);
 			for app in app_list.iter_mut() {
 				if matches!(app, Some(a) if a.ias.0 == ias_index && a.ias.1.account == ias_account
-				&& a.ias.1.fields == kyc_fields && a.supervisor.0 == supervisor_index
-				&& a.supervisor.1.account == supervisor_account && a.progress != Progress::Failure)
+				&& a.ias.1.fields == kyc_fields && a.sword_holder.0 == sword_holder_index
+				&& a.sword_holder.1.account == sword_holder_account && a.progress != Progress::Failure)
 				{
 					app.as_mut().map(|i| {
 						i.set_progress(progress);

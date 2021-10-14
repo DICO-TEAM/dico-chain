@@ -4,7 +4,7 @@
   "MultiAddress": "GenericAddress",
   "KYCIndex": "u32",
   "Data": "Vec<u8>",
-  "ExchangeKey": "[u8; 32]",
+  "CurvePubicKey": "[u8; 32]",
   "Message": "[u8; 128]",
   "AccountInfo": {
     "nonce": "Index",
@@ -23,7 +23,7 @@
     "_enum": [
       "Name",
       "Area",
-      "ExchangeKey",
+      "CurvePubicKey",
       "Email"
     ]
   },
@@ -32,14 +32,14 @@
       "Pending",
       "IasDoing",
       "IasDone",
-      "SupervisorDone",
+      "SwordHolderDone",
       "Success",
       "Failure"
     ]
   },
   "ApplicationForm": {
     "ias": "(KYCIndex, IASInfo<Balance, AccountId>)",
-    "supervisor": "(KYCIndex, IASInfo<Balance, AccountId>)",
+    "sword_holder": "(KYCIndex, IASInfo<Balance, AccountId>)",
     "progress": "Progress"
   },
   "BlackInfo": {
@@ -336,13 +336,13 @@
   "KYCInfo": {
     "name": "Vec<u8>",
     "area": "AreaCode",
-    "exchange_key": "Vec<u8>",
+    "curve_public_key": "Vec<u8>",
     "email": "Vec<u8>"
   },
   "IASInfo": {
     "account": "AccountId",
     "fee": "Balance",
-    "exchange_key": "ExchangeKey",
+    "curve_public_key": "CurvePubicKey",
     "fields": "KYCFields"
   },
   "CurrencyId": "u32",
@@ -550,8 +550,8 @@
   },
   "LbpId": "u32",
   "DepositBalanceInfo": {
-      "amount": "Balance",
-      "expiration": "BlockNumber"
+    "amount": "Balance",
+    "expiration": "BlockNumber"
   },
   "InviteInfo": {
     "inviter": "AccountId",
