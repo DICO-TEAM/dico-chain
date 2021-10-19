@@ -645,8 +645,6 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
 			Self::verify_permissions(&sender, &kyc_fields, true)?;
-			let mut unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
-			ensure!(!unique_id_list.contains(&id), Error::<T>::NotUniqueID);
 
 			Self::ias_do_provide_judgement(&sender, kyc_fields.clone(), kyc_index, &target, judgement, id, message)?;
 
@@ -941,7 +939,12 @@ pub mod pallet {
 				}
 				<RecordsOf<T>>::insert(who, record_list);
 
-				Self::add_unique_id_list(&kyc_fields, id);
+				if judgement == Judgement::PASS {
+					let mut unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
+					ensure!(!unique_id_list.contains(&id), Error::<T>::NotUniqueID);
+					Self::add_unique_id_list(&kyc_fields, id);
+				}
+
 				Self::update_application_form(target, ias.1.account.clone(), ias.0,
 											  sword_holder.1.account.clone(), sword_holder.0,
 											  ias.1.fields, Progress::IasDone)?;
@@ -960,8 +963,11 @@ pub mod pallet {
 			authentication: &Authentication,
 			id: &Data,
 		) -> sp_std::result::Result<(), DispatchError> {
-			let mut unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
-			ensure!(unique_id_list.contains(&id), Error::<T>::NotContainsUniqueID);
+
+			if authentication.clone() == Authentication::Success {
+				let mut unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
+				ensure!(!unique_id_list.contains(&id), Error::<T>::NotContainsUniqueID);
+			}
 
 			let mut app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
 				<ApplicationFormList<T>>::get(target);

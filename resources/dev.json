@@ -66,13 +66,12 @@
   },
   "Judgement": {
     "_enum": {
-      "Unknown": "Null",
+      "PASS": "Null",
       "FeePaid": "Balance",
-      "Reasonable": "Null",
-      "KnownGood": "Null",
       "OutOfDate": "Null",
       "LowQuality": "Null",
-      "Erroneous": "Null"
+      "Erroneous": "Null",
+      "Repeat": "Null"
     }
   },
   "AreaCode": {

@@ -13,17 +13,11 @@ pub type Data = Vec<u8>;
 /// IAS Judgement
 #[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
 pub enum Judgement<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> {
-    /// The default value; no opinion is held.
-    Unknown,
+    /// The default value; it has passed.
+    PASS,
     /// No judgement is yet in place, but a deposit is reserved as payment for providing one.
     FeePaid(Balance),
-    /// The data appears to be reasonably acceptable in terms of its accuracy,
-    /// however no in depth checks (such as in-person meetings or formal KYC)
-    /// have been conducted.
-    Reasonable,
-    /// The target is known directly by the registrar and the registrar can
-    /// fully attest to the the data's accuracy.
-    KnownGood,
+
     /// The data was once good but is currently out of date. There is no
     /// malicious intent in the inaccuracy. This judgement can be removed
     /// through updating the data.
