@@ -1011,7 +1011,7 @@ pub mod pallet {
                 .filter(|item| matches!(item, Some(item) if item.ias.1.fields == kyc_fields && item.ias.1.account == who.clone() && item.ias.0 == kyc_index && item.progress == Progress::IasDoing))
                 .next()
                 .ok_or(Error::<T>::NoApplication)? {
-                let mut registration = <KYCOf<T>>::get(target).ok_or(Error::<T>::NoKYC)?;
+                let mut registration = <KYCOf<T>>::get(&target).ok_or(Error::<T>::NoKYC)?;
 
 
                 for element in registration.judgements.iter_mut() {
@@ -1025,6 +1025,8 @@ pub mod pallet {
                         )
                     }
                 }
+
+				<KYCOf<T>>::insert(&target, registration);
 
                 let mut record_list: Vec<Record<T::AccountId>> = <RecordsOf<T>>::get(who);
 
