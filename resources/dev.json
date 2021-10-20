@@ -626,6 +626,7 @@
     "owner": "AccountId",
     "start_block": "BlockNumber",
     "end_block": "BlockNumber",
+    "reward_per_block": "Balance",
     "last_reward_block": "BlockNumber",
     "acc_reward_per_share": "Balance",
     "stake_currency_id": "AssetId",
