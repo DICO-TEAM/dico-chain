@@ -1062,7 +1062,7 @@ pub mod pallet {
 			authentication: &Authentication,
 			id: &Data,
 		) -> sp_std::result::Result<(), DispatchError> {
-			if authentication.clone() == Authentication::Success {
+			if authentication == &Authentication::Success {
 				let mut unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
 				ensure!(!unique_id_list.contains(&id), Error::<T>::NotContainsUniqueID);
 			}

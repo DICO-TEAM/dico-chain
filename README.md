@@ -12,6 +12,7 @@
 ## Credits
 
 [ORML](https://github.com/open-web3-stack/open-runtime-module-library)
+[paritytech/substrate](https://github.com/paritytech/substrate)
 
 
 ## License
