@@ -1401,7 +1401,7 @@ impl pallet_dico_treasury::Config for Runtime {
 parameter_types! {
 	pub const MaxClassMetadata: u32 = 1024;
     pub const MaxTokenMetadata: u32 = 1024;
-	pub const  MaxTokenAttribute: u32 = 1024;
+	pub const MaxTokenAttribute: u32 = 1024;
 
 }
 
@@ -1410,9 +1410,9 @@ impl pallet_nft::Config for Runtime {
 	type ClassId = u32;
 	type TokenId = u32;
 	type Currency = Balances;
-	type MaxClassMetadata = ();
-	type MaxTokenMetadata = ();
-	type MaxTokenAttribute = ();
+	type MaxClassMetadata = MaxClassMetadata;
+	type MaxTokenMetadata = MaxTokenMetadata;
+	type MaxTokenAttribute = MaxTokenAttribute;
 	type PowerHandler = Ico;
 }
 

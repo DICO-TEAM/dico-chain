@@ -711,7 +711,7 @@ decl_module! {
 		fn set_asset_power_multiple(origin, currency_id: AssetId, multiple: PowerMultiple) {
 			ensure_root(origin)?;
 			let old_multiple = PowerMultipleOf::get(currency_id);
-			ensure!(multiple.down != 0, Error::<T>::DownIsZero);
+			ensure!(multiple.down != 0 && multiple.up != 0, Error::<T>::DownIsZero);
 			ensure!(old_multiple != multiple, Error::<T>::MultipleNotChange);
 			PowerMultipleOf::insert(currency_id, &multiple);
 			Self::deposit_event(RawEvent::SetAssetPowerMultiple(currency_id, multiple));
@@ -986,6 +986,9 @@ impl<T: Config> Module<T> {
     }
 
     pub fn get_token_price(currency_id: AssetId) -> MultiBalanceOf<T> {
+		if currency_id == T::UsdtCurrencyId::get() {
+			return MultiBalanceOf::<T>::from(1_000_000u32);
+		}
 		match T::PriceData::get_price(currency_id, T::UsdtCurrencyId::get()) {
 			Some(x) => {
 				runtime_print!(" ---------------the token {:?}, price is {:?} ------------------", currency_id, x);
@@ -1720,7 +1723,12 @@ impl<T: Config> Module<T> {
 		if min_join_amount > max_join_amount {
 			return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32))
 		}
-		(min_join_amount, max_join_amount)
+
+		let mul = PowerMultipleOf::get(currency_id);
+		let a = MultiBalanceOf::<T>::from(mul.up);
+		let b = MultiBalanceOf::<T>::from(mul.down);
+
+		(min_join_amount.saturating_mul(b) / a, max_join_amount.saturating_mul(b) / a)
 	}
 
 
