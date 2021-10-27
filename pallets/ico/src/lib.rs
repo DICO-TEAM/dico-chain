@@ -1724,7 +1724,7 @@ impl<T: Config> Module<T> {
 			return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32))
 		}
 
-		let mul = PowerMultipleOf::get(currency_id);
+		let mul = PowerMultipleOf::get(exchange_token_id);
 		let a = MultiBalanceOf::<T>::from(mul.up);
 		let b = MultiBalanceOf::<T>::from(mul.down);
 
