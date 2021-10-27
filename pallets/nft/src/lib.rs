@@ -65,7 +65,7 @@ pub struct ClassData<NftLevel, Balance, TokenId> {
 #[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, Default)]
 pub struct TokenData<Hash, AccountId, Attribute, Balance, NftStatus, ClassId> {
 	class_id: ClassId,
-	hash: Hash,  
+	hash: Hash,
 	power_threshold: Balance,
 	claim_payment: Balance,
 	attribute: Attribute,
@@ -532,6 +532,7 @@ impl<T: Config> Pallet<T> {
 				is_active_image: false,
 			};
 			Self::update_no_owner_tokens_vec(class_id, token_id, true);
+			Self::get_token_ownership(owner, class_id, token_id);
 			*token_info = Some(t);
 			Ok(())
 		})
@@ -642,8 +643,12 @@ impl<T: Config> Pallet<T> {
 				}
 			},
 		}
-
-		NoOwnerTokensOf::<T>::insert(class_id, tokens);
+		if tokens.is_empty() {
+			NoOwnerTokensOf::<T>::remove(class_id);
+		}
+		else {
+			NoOwnerTokensOf::<T>::insert(class_id, tokens);
+		}
 	}
 
 	pub fn is_owner(account: &T::AccountId, token: (T::ClassId, T::TokenId)) -> bool {
@@ -721,7 +726,12 @@ impl<T: Config> Pallet<T> {
 		if let Some(pos) = tokens.iter().position(|h| h.token_id == token_id) {
 			tokens.swap_remove(pos);
 		}
-		InSaleTokens::<T>::insert(class_id, tokens);
+		if tokens.is_empty() {
+			InSaleTokens::<T>::remove(class_id);
+		}
+		else {
+			InSaleTokens::<T>::insert(class_id, tokens);
+		}
 	}
 
 	fn get_in_sale_token(class_id: T::ClassId, token_id: T::TokenId) -> Option<SaleInfoOf<T>> {
