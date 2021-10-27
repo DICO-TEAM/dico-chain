@@ -219,6 +219,7 @@ pub mod module {
 		ActiveNft,
 		MaxAttributeExceeded,
 		NoPermissionNFTLevel,
+		PowerTooLow,
 	}
 
 	/// Next available class ID.
@@ -529,7 +530,7 @@ impl<T: Config> Pallet<T> {
 			ensure!(t.owner == None, Error::<T>::OwnerIsExists);
 			let class_info = Classes::<T>::get(class_id).ok_or(Error::<T>::ClassNotFound)?;
 			T::Currency::withdraw(&owner, class_info.data.claim_payment, WithdrawReasons::TRANSFER, ExistenceRequirement::KeepAlive)?;
-			T::PowerHandler::sub_user_power(&owner, class_info.data.power_threshold)?;
+			T::PowerHandler::sub_user_power(&owner, class_info.data.power_threshold).map_err(|_| Error::<T>::PowerTooLow)?;
 			t.owner = Some(owner.clone());
 			t.data.power_threshold = class_info.data.power_threshold;
 			t.data.claim_payment = class_info.data.claim_payment;
