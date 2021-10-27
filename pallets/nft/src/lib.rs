@@ -477,6 +477,7 @@ impl<T: Config> Pallet<T> {
 			let mut data = TokenDataOf::<T>::default();
 			let hash = Self::get_hash(class_id, token_id);
 			data.hash = hash;
+			data.class_id = class_id;
 			data.power_threshold = BalanceOf::<T>::from(0u32);
 			data.claim_payment = BalanceOf::<T>::from(0u32);
 			data.attribute = attribute;
