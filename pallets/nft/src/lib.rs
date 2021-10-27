@@ -218,6 +218,7 @@ pub mod module {
 		Inactive,
 		ActiveNft,
 		MaxAttributeExceeded,
+		NoPermissionNFTLevel,
 	}
 
 	/// Next available class ID.
@@ -407,6 +408,11 @@ impl<T: Config> Pallet<T> {
 	) -> Result<T::ClassId, DispatchError> {
 
 		ensure!(IssuerOf::<T>::get(&data.level).is_none(), Error::<T>::LevelInUse);
+		match data.level {
+			NftLevel::Other(_) => { return Err(Error::<T>::NoPermissionNFTLevel)?; },
+			_ => {},
+		}
+
 		let bounded_metadata: BoundedVec<u8, T::MaxClassMetadata> =
 			metadata.try_into().map_err(|_| Error::<T>::MaxMetadataExceeded)?;
 
