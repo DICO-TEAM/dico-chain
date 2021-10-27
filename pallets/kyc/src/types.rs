@@ -10,6 +10,7 @@ pub type Message = [u8; 128];
 pub type Data = Vec<u8>;
 
 
+
 /// IAS Judgement
 #[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
 pub enum Judgement<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> {
