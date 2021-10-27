@@ -65,7 +65,7 @@ pub mod traits;
 pub mod types;
 pub mod weights;
 
-use crate::types::{AreaCode, KYCInfo};
+use crate::types::{AreaCode, Authentication, KYCInfo};
 use frame_system::Account;
 use traits::KycHandler;
 
@@ -268,8 +268,10 @@ pub mod pallet {
 		TooManyAccount,
 		/// Account isn't found.
 		NotFound,
+        /// InProgress
+        InProgress,
 		/// NO IAS
-		NoIAS,
+        NoIAS,
 		/// this fee not found ias or sword holder
 		ThisFeeNotFoundIASOrSwordHolder,
 		/// Fee is not enough.
@@ -537,6 +539,16 @@ pub mod pallet {
         ))]
 		pub fn clear_kyc(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
+
+			let mut app_list = <ApplicationFormList<T>>::get(&sender);
+
+			ensure!(
+				app_list.iter().all(
+					|app| matches!(app, Some(app) if app.progress == Progress::Success || app.progress == Progress::Failure)
+				),
+				Error::<T>::InProgress
+			);
+
 			let reg = <KYCOf<T>>::take(&sender).ok_or(Error::<T>::NotFound)?;
 			let deposit = reg.total_deposit();
 
@@ -924,12 +936,9 @@ pub mod pallet {
 				fields: kyc_fields,
 			};
 
-
-
 			if let Some(ias) = ias_list.get_mut(kyc_index as usize) {
-
 				ias.as_mut().map(|s| {
-                    T::Currency::unreserve(&s.account, service_deposit);
+					T::Currency::unreserve(&s.account, service_deposit);
 					*s = ias_info;
 					s
 				});
@@ -1026,7 +1035,7 @@ pub mod pallet {
                     }
                 }
 
-				<KYCOf<T>>::insert(&target, registration);
+                <KYCOf<T>>::insert(&target, registration);
 
                 let mut record_list: Vec<Record<T::AccountId>> = <RecordsOf<T>>::get(who);
 
@@ -1306,7 +1315,11 @@ impl<T: Config> KycHandler<T::AccountId, AreaCode> for Pallet<T> {
 	fn get_user_area(user: &T::AccountId) -> Option<AreaCode> {
 		match <KYCOf<T>>::get(user) {
 			Some(info) => {
-				return Some(info.info.area);
+				let jg = info.judgements;
+				if &jg.len() == &1usize && &jg[0].3 == &Authentication::Success {
+					return Some(info.info.area);
+				}
+				return None;
 			}
 			None => None,
 		}
