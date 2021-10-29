@@ -1613,7 +1613,7 @@ impl<T: Config> Module<T> {
 
 		    if ico.tag == None {
 				let mut new_usdt = TotalUsdt::<T>::get();
-				new_usdt.saturating_add(ico.total_usdt);
+				new_usdt = new_usdt.saturating_add(ico.total_usdt);
 				ico.tag = Some(new_usdt);
 				Ico::<T>::insert(currency_id, index, ico);
 				TotalUsdt::<T>::put(new_usdt);
