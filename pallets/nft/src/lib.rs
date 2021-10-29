@@ -614,6 +614,7 @@ impl<T: Config> Pallet<T> {
 			t.data.status.is_in_sale = false;
 			t.owner = Some(buyer.clone());
 			*token_info = Some(t);
+			Self::get_token_ownership(buyer, token.0, token.1);
 			Self::deposit_event(Event::BuyToken(buyer.clone(),token.0, token.1, sale_info.price));
 			Ok(())
 		})
