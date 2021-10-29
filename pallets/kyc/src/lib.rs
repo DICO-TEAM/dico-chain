@@ -268,10 +268,10 @@ pub mod pallet {
 		TooManyAccount,
 		/// Account isn't found.
 		NotFound,
-        /// InProgress
-        InProgress,
+		/// InProgress
+		InProgress,
 		/// NO IAS
-        NoIAS,
+		NoIAS,
 		/// this fee not found ias or sword holder
 		ThisFeeNotFoundIASOrSwordHolder,
 		/// Fee is not enough.
@@ -1104,7 +1104,7 @@ pub mod pallet {
                             for element in registration.judgements.iter_mut() {
                                 let (field, index, judgement, auth) = &element;
                                 if field == &kyc_fields && index == &kyc_index && auth.is_pending() {
-                                    if let Judgement::FeePaid(fee) = judgement {
+                                    if judgement == &Judgement::PASS {
                                         let _ = T::Currency::repatriate_reserved(
                                             target,
                                             &ias.1.account,
