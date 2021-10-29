@@ -135,8 +135,6 @@ pub struct IcoParameters<BlockNumber, Balance, CurrencyId, AreaCode> {
     desc: Vec<u8>,
     /// The asset ID of the project's token
     currency_id: CurrencyId,
-    /// The project's logo url
-    logo_url: Vec<u8>,
     /// The project's official website
     official_website: Vec<u8>,
     is_must_kyc: bool,
@@ -228,8 +226,6 @@ pub struct IcoInfo<BlockNumber, Balance, CurrencyId, AreaCode, AccountId> {
     already_released_proportion: Percent,
     /// The asset ID of the project's token
     currency_id: CurrencyId,
-    /// The project's logo url
-    logo_url: Vec<u8>,
     /// The project's official website
     official_website: Vec<u8>,
     /// Maximum number of times a user can participate in an ICO
@@ -363,7 +359,6 @@ decl_module! {
 						index: Some(total_num),
 						already_released_proportion: Percent::from_percent(0u8),
 						currency_id: info.currency_id,
-						logo_url: info.logo_url.clone(),
 						official_website: info.official_website.clone(),
 						is_must_kyc: info.is_must_kyc,
 						user_ico_max_times: info.user_ico_max_times,
