@@ -29,7 +29,7 @@ use sp_runtime::{
 	Hash},
 	ArithmeticError, DispatchError, DispatchResult, RuntimeDebug,
 };
-use sp_std::{convert::TryInto, vec::Vec, collections::btree_map::BTreeMap};
+use sp_std::{convert::TryInto, vec::Vec, collections::{btree_map::BTreeMap, btree_set::BTreeSet}};
 use sp_std::vec;
 use sp_runtime::offchain::storage_lock::BlockNumberProvider;
 mod mock;
@@ -220,6 +220,7 @@ pub mod module {
 		MaxAttributeExceeded,
 		NoPermissionNFTLevel,
 		PowerTooLow,
+		TokenAlreadyExists,
 	}
 
 	/// Next available class ID.
@@ -266,6 +267,11 @@ pub mod module {
 	#[pallet::storage]
 	#[pallet::getter(fn no_owner_tokens_of)]
 	pub type NoOwnerTokensOf<T: Config> = StorageMap<_, Twox64Concat, T::ClassId, Vec<T::TokenId>, ValueQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn all_tokens_hash)]
+	pub type AllTokensHash<T: Config> = StorageValue<_, BTreeSet<Vec<u8>>, ValueQuery>;
+	//BTreeSet<Vec<u8>>;
 
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
@@ -464,6 +470,8 @@ impl<T: Config> Pallet<T> {
 	) -> Result<T::TokenId, DispatchError> {
 		NextTokenId::<T>::try_mutate(class_id, |id| -> Result<T::TokenId, DispatchError> {
 
+			ensure!(!AllTokensHash::<T>::get().contains(&image_hash), Error::<T>::TokenAlreadyExists);
+
 			let bounded_metadata: BoundedVec<u8, T::MaxTokenMetadata> =
 				metadata.try_into().map_err(|_| Error::<T>::MaxMetadataExceeded)?;
 
@@ -482,7 +490,7 @@ impl<T: Config> Pallet<T> {
 			data.power_threshold = BalanceOf::<T>::from(0u32);
 			data.claim_payment = BalanceOf::<T>::from(0u32);
 			data.attribute = attribute;
-			data.image_hash = image_hash;
+			data.image_hash = image_hash.clone();
 			data.sell_records = vec![];
 			data.status = NftStatus::default();
 
@@ -497,6 +505,8 @@ impl<T: Config> Pallet<T> {
 				info.total_issuance = new_total_issuance;
 				Ok(())
 			})?;
+
+			AllTokensHash::<T>::mutate(|h| h.insert(image_hash));
 
 			let token_info = TokenInfo {
 				metadata: bounded_metadata,
