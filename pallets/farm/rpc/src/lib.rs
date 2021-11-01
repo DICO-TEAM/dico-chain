@@ -3,24 +3,23 @@
 use codec::Codec;
 use jsonrpc_core::{Error as RpcError, ErrorCode, Result as RpcResult};
 use jsonrpc_derive::rpc;
+use sc_rpc_api::DenyUnsafe;
 use serde::{Deserialize, Serialize};
 use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;
-use sc_rpc_api::DenyUnsafe;
+use sp_rpc::number::NumberOrHex;
 use sp_runtime::{
 	generic::BlockId,
 	traits::{Block as BlockT, MaybeDisplay},
 };
-use std::sync::Arc;
 use std::convert::TryInto;
-use sp_rpc::number::NumberOrHex;
+use std::sync::Arc;
 
 pub use pallet_farm_rpc_runtime_api::FarmApi as FarmRuntimeApi;
 
-
 #[rpc]
 pub trait FarmApi<AccountId, PoolId, Balance> {
-	#[rpc(name="farm_getParticipantReward")]
+	#[rpc(name = "farm_getParticipantReward")]
 	fn get_participant_reward(&self, account: AccountId, pid: PoolId) -> RpcResult<NumberOrHex>;
 }
 
@@ -40,7 +39,6 @@ impl<C, B> Farm<C, B> {
 			_marker: Default::default(),
 		}
 	}
-
 }
 
 pub enum Error {
@@ -48,7 +46,6 @@ pub enum Error {
 	RuntimeError,
 	/// The transaction was not decodable.
 	DecodeError,
-
 }
 
 impl From<Error> for i64 {
@@ -60,22 +57,16 @@ impl From<Error> for i64 {
 	}
 }
 
-
-impl<C, Block, AccountId, PoolId, Balance>
-FarmApi<AccountId, PoolId, Balance> for Farm<C, Block>
-	where
-		Block: BlockT,
-		C: Send + Sync + 'static + ProvideRuntimeApi<Block> + HeaderBackend<Block>,
-		C::Api: FarmRuntimeApi<Block, AccountId, PoolId, Balance>,
-		AccountId: Codec,
-		PoolId: Codec,
-		Balance: Codec + MaybeDisplay + Copy + TryInto<NumberOrHex> +  std::marker::Send + 'static,
+impl<C, Block, AccountId, PoolId, Balance> FarmApi<AccountId, PoolId, Balance> for Farm<C, Block>
+where
+	Block: BlockT,
+	C: Send + Sync + 'static + ProvideRuntimeApi<Block> + HeaderBackend<Block>,
+	C::Api: FarmRuntimeApi<Block, AccountId, PoolId, Balance>,
+	AccountId: Codec,
+	PoolId: Codec,
+	Balance: Codec + MaybeDisplay + Copy + TryInto<NumberOrHex> + std::marker::Send + 'static,
 {
-	fn get_participant_reward(
-		&self,
-		account: AccountId,
-		pid: PoolId,
-	) -> RpcResult<NumberOrHex> {
+	fn get_participant_reward(&self, account: AccountId, pid: PoolId) -> RpcResult<NumberOrHex> {
 		let api = self.client.runtime_api();
 		// let at = BlockId::hash(at.unwrap_or_else(||
 		// 	// If the block hash is not supplied assume the best block.
@@ -83,7 +74,6 @@ FarmApi<AccountId, PoolId, Balance> for Farm<C, Block>
 		// );
 		let best = self.client.info().best_hash;
 		let at = BlockId::hash(best);
-
 
 		let reward = api.get_participant_reward(&at, account, pid).map_err(|e| RpcError {
 			code: ErrorCode::ServerError(Error::RuntimeError.into()),
@@ -98,8 +88,3 @@ FarmApi<AccountId, PoolId, Balance> for Farm<C, Block>
 		})
 	}
 }
-
-
-
-
-

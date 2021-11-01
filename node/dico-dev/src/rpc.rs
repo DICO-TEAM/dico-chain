@@ -1,4 +1,4 @@
-use dico_primitives::{AccountId, Balance, Block, BlockNumber, Hash, Index, AssetId, PoolId};
+use dico_primitives::{AccountId, AssetId, Balance, Block, BlockNumber, Hash, Index, PoolId};
 use grandpa::{FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState};
 use sc_client_api::AuxStore;
 use sc_consensus_babe::{Config, Epoch};
@@ -19,7 +19,6 @@ use std::sync::Arc;
 // local
 use pallet_ico_rpc::{FullIco, IcoApi};
 use pallet_ico_rpc_runtime_api::IcoAmountApi;
-
 
 /// Light client extra dependencies.
 pub struct LightDeps<C, F, P> {
@@ -136,10 +135,7 @@ where
 		deny_unsafe,
 	)));
 
-	io.extend_with(IcoApi::to_delegate(FullIco::new(
-		client.clone(),
-		deny_unsafe,
-	)));
+	io.extend_with(IcoApi::to_delegate(FullIco::new(client.clone(), deny_unsafe)));
 	// Making synchronous calls in light client freezes the browser currently,
 	// more context: https://github.com/paritytech/substrate/pull/3480
 	// These RPCs should use an asynchronous caller instead.
@@ -156,12 +152,10 @@ where
 		select_chain,
 		deny_unsafe,
 	)));
-	io.extend_with(pallet_farm_rpc::FarmApi::to_delegate(
-		pallet_farm_rpc::Farm::new(
-			client.clone(),
-			deny_unsafe,
-		),
-	));
+	io.extend_with(pallet_farm_rpc::FarmApi::to_delegate(pallet_farm_rpc::Farm::new(
+		client.clone(),
+		deny_unsafe,
+	)));
 	io.extend_with(sc_finality_grandpa_rpc::GrandpaApi::to_delegate(
 		GrandpaRpcHandler::new(
 			shared_authority_set.clone(),

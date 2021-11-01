@@ -112,4 +112,3 @@ benchmarks! {
 		assert_eq!(T::Currency::free_balance(asset_b, &caller), 1_000_000_000_000_000 + 10_000_000_000_000);
 	}
 }
-

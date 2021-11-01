@@ -83,24 +83,25 @@ pub mod module {
 	use super::*;
 
 	pub(crate) type BalanceOf<T> =
-	<<T as Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::Balance;
+		<<T as Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::Balance;
 	// pub(crate) type AssetId =
-	// <<T as Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::CurrencyId;
+	// <<T as Config>::MultiCurrency as MultiCurrency<<T as
+	// frame_system::Config>::AccountId>>::CurrencyId;
 	pub(crate) type AmountOf<T> =
-	<<T as Config>::MultiCurrency as MultiCurrencyExtended<<T as frame_system::Config>::AccountId>>::Amount;
+		<<T as Config>::MultiCurrency as MultiCurrencyExtended<<T as frame_system::Config>::AccountId>>::Amount;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
 		type MultiCurrency: MultiCurrency<Self::AccountId, CurrencyId = AssetId>
-		+ MultiCurrencyExtended<Self::AccountId>
-		+ MultiLockableCurrency<Self::AccountId>
-		+ MultiReservableCurrency<Self::AccountId>;
+			+ MultiCurrencyExtended<Self::AccountId>
+			+ MultiLockableCurrency<Self::AccountId>
+			+ MultiReservableCurrency<Self::AccountId>;
 
 		type NativeCurrency: BasicCurrencyExtended<Self::AccountId, Balance = BalanceOf<Self>, Amount = AmountOf<Self>>
-		+ BasicLockableCurrency<Self::AccountId, Balance = BalanceOf<Self>>
-		+ BasicReservableCurrency<Self::AccountId, Balance = BalanceOf<Self>>;
+			+ BasicLockableCurrency<Self::AccountId, Balance = BalanceOf<Self>>
+			+ BasicReservableCurrency<Self::AccountId, Balance = BalanceOf<Self>>;
 
 		#[pallet::constant]
 		type GetNativeCurrencyId: Get<AssetId>;
@@ -153,7 +154,7 @@ pub mod module {
 	#[pallet::getter(fn asset_info)]
 	/// Metadata of an asset.
 	pub type DicoAssetsInfo<T: Config> =
-	StorageMap<_, Blake2_128Concat, AssetId, DicoAssetInfo<T::AccountId, DicoAssetMetadata>>;
+		StorageMap<_, Blake2_128Concat, AssetId, DicoAssetInfo<T::AccountId, DicoAssetMetadata>>;
 
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
@@ -205,8 +206,8 @@ pub mod module {
 				Some(x) => {
 					ensure!(x != &metadata, Error::<T>::MetadataNotChange);
 					ensure!(x.decimals == metadata.decimals, Error::<T>::ShouldNotChangeDecimals);
-				},
-				None => {},
+				}
+				None => {}
 			}
 
 			asset_info.metadata = Some(metadata.clone());
@@ -218,11 +219,7 @@ pub mod module {
 
 		/// Users destroy their own assets.
 		#[pallet::weight(10000)]
-		pub fn burn(
-			origin: OriginFor<T>,
-			currency_id: AssetId,
-			amount: BalanceOf<T>,
-		) -> DispatchResultWithPostInfo {
+		pub fn burn(origin: OriginFor<T>, currency_id: AssetId, amount: BalanceOf<T>) -> DispatchResultWithPostInfo {
 			let user = ensure_signed(origin)?;
 
 			ensure!(Self::is_exists_metadata(currency_id), Error::<T>::MetadataNotExists);
@@ -290,8 +287,9 @@ pub mod module {
 	}
 }
 
-impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::AccountId, BalanceOf<T>, DispatchResult> for Pallet<T> {
-
+impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::AccountId, BalanceOf<T>, DispatchResult>
+	for Pallet<T>
+{
 	fn get_metadata(currency_id: AssetId) -> result::Result<DicoAssetMetadata, DispatchError> {
 		if currency_id == T::GetNativeCurrencyId::get() {
 			return Ok(DicoAssetMetadata {
@@ -307,17 +305,28 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 		}
 	}
 
-	fn do_create(user: T::AccountId, currency_id: AssetId, metadata: Option<DicoAssetMetadata>, amount: BalanceOf<T>, is_swap_deposit: bool) -> DispatchResult {
+	fn do_create(
+		user: T::AccountId,
+		currency_id: AssetId,
+		metadata: Option<DicoAssetMetadata>,
+		amount: BalanceOf<T>,
+		is_swap_deposit: bool,
+	) -> DispatchResult {
 		ensure!(
 			!Self::is_exists_metadata(currency_id)
 				&& T::MultiCurrency::total_issuance(currency_id) == BalanceOf::<T>::from(0u32),
 			Error::<T>::AssetAlreadyExists
 		);
 		if is_swap_deposit {
-			ensure!(Self::is_currency_id_too_large(currency_id), Error::<T>::CurrencyIdTooLow);
-		}
-		else {
-			ensure!(!Self::is_currency_id_too_large(currency_id), Error::<T>::CurrencyIdTooLarge);
+			ensure!(
+				Self::is_currency_id_too_large(currency_id),
+				Error::<T>::CurrencyIdTooLow
+			);
+		} else {
+			ensure!(
+				!Self::is_currency_id_too_large(currency_id),
+				Error::<T>::CurrencyIdTooLarge
+			);
 			Self::withdraw(T::GetNativeCurrencyId::get(), &user, T::CreateConsume::get())?;
 		}
 
@@ -344,8 +353,8 @@ impl<T: Config> Pallet<T> {
 				if x.metadata.is_some() {
 					return true;
 				}
-			},
-			None => {},
+			}
+			None => {}
 		}
 		false
 	}
@@ -356,7 +365,6 @@ impl<T: Config> Pallet<T> {
 		}
 		false
 	}
-
 }
 
 impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
@@ -575,9 +583,9 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
 pub struct Currency<T, GetCurrencyId>(marker::PhantomData<T>, marker::PhantomData<GetCurrencyId>);
 
 impl<T, GetCurrencyId> BasicCurrency<T::AccountId> for Currency<T, GetCurrencyId>
-	where
-		T: Config,
-		GetCurrencyId: Get<AssetId>,
+where
+	T: Config,
+	GetCurrencyId: Get<AssetId>,
 {
 	type Balance = BalanceOf<T>;
 
@@ -623,9 +631,9 @@ impl<T, GetCurrencyId> BasicCurrency<T::AccountId> for Currency<T, GetCurrencyId
 }
 
 impl<T, GetCurrencyId> BasicCurrencyExtended<T::AccountId> for Currency<T, GetCurrencyId>
-	where
-		T: Config,
-		GetCurrencyId: Get<AssetId>,
+where
+	T: Config,
+	GetCurrencyId: Get<AssetId>,
 {
 	type Amount = AmountOf<T>;
 
@@ -635,9 +643,9 @@ impl<T, GetCurrencyId> BasicCurrencyExtended<T::AccountId> for Currency<T, GetCu
 }
 
 impl<T, GetCurrencyId> BasicLockableCurrency<T::AccountId> for Currency<T, GetCurrencyId>
-	where
-		T: Config,
-		GetCurrencyId: Get<AssetId>,
+where
+	T: Config,
+	GetCurrencyId: Get<AssetId>,
 {
 	type Moment = T::BlockNumber;
 
@@ -655,9 +663,9 @@ impl<T, GetCurrencyId> BasicLockableCurrency<T::AccountId> for Currency<T, GetCu
 }
 
 impl<T, GetCurrencyId> BasicReservableCurrency<T::AccountId> for Currency<T, GetCurrencyId>
-	where
-		T: Config,
-		GetCurrencyId: Get<AssetId>,
+where
+	T: Config,
+	GetCurrencyId: Get<AssetId>,
 {
 	fn can_reserve(who: &T::AccountId, value: Self::Balance) -> bool {
 		<Pallet<T> as MultiReservableCurrency<T::AccountId>>::can_reserve(GetCurrencyId::get(), who, value)
@@ -704,10 +712,10 @@ type PalletBalanceOf<A, Currency> = <Currency as PalletCurrency<A>>::Balance;
 
 // Adapt `frame_support::traits::Currency`
 impl<T, AccountId, Currency, Amount, Moment> BasicCurrency<AccountId>
-for BasicCurrencyAdapter<T, Currency, Amount, Moment>
-	where
-		Currency: PalletCurrency<AccountId>,
-		T: Config,
+	for BasicCurrencyAdapter<T, Currency, Amount, Moment>
+where
+	Currency: PalletCurrency<AccountId>,
+	T: Config,
 {
 	type Balance = PalletBalanceOf<AccountId, Currency>;
 
@@ -760,9 +768,9 @@ for BasicCurrencyAdapter<T, Currency, Amount, Moment>
 
 // Adapt `frame_support::traits::Currency`
 impl<T, AccountId, Currency, Amount, Moment> BasicCurrencyExtended<AccountId>
-for BasicCurrencyAdapter<T, Currency, Amount, Moment>
-	where
-		Amount: Signed
+	for BasicCurrencyAdapter<T, Currency, Amount, Moment>
+where
+	Amount: Signed
 		+ TryInto<PalletBalanceOf<AccountId, Currency>>
 		+ TryFrom<PalletBalanceOf<AccountId, Currency>>
 		+ SimpleArithmetic
@@ -771,8 +779,8 @@ for BasicCurrencyAdapter<T, Currency, Amount, Moment>
 		+ MaybeSerializeDeserialize
 		+ Debug
 		+ Default,
-		Currency: PalletCurrency<AccountId>,
-		T: Config,
+	Currency: PalletCurrency<AccountId>,
+	T: Config,
 {
 	type Amount = Amount;
 
@@ -791,10 +799,10 @@ for BasicCurrencyAdapter<T, Currency, Amount, Moment>
 
 // Adapt `frame_support::traits::LockableCurrency`
 impl<T, AccountId, Currency, Amount, Moment> BasicLockableCurrency<AccountId>
-for BasicCurrencyAdapter<T, Currency, Amount, Moment>
-	where
-		Currency: PalletLockableCurrency<AccountId>,
-		T: Config,
+	for BasicCurrencyAdapter<T, Currency, Amount, Moment>
+where
+	Currency: PalletLockableCurrency<AccountId>,
+	T: Config,
 {
 	type Moment = Moment;
 
@@ -816,10 +824,10 @@ for BasicCurrencyAdapter<T, Currency, Amount, Moment>
 
 // Adapt `frame_support::traits::ReservableCurrency`
 impl<T, AccountId, Currency, Amount, Moment> BasicReservableCurrency<AccountId>
-for BasicCurrencyAdapter<T, Currency, Amount, Moment>
-	where
-		Currency: PalletReservableCurrency<AccountId>,
-		T: Config,
+	for BasicCurrencyAdapter<T, Currency, Amount, Moment>
+where
+	Currency: PalletReservableCurrency<AccountId>,
+	T: Config,
 {
 	fn can_reserve(who: &AccountId, value: Self::Balance) -> bool {
 		Currency::can_reserve(who, value)

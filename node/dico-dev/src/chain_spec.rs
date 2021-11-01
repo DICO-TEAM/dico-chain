@@ -366,8 +366,6 @@ fn get_properties() -> Map<String, Value> {
 	properties
 }
 
-
-
 fn local_testnet_genesis() -> GenesisConfig {
 	testnet_genesis(
 		vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],

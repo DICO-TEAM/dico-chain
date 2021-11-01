@@ -20,18 +20,21 @@ use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
-	traits::{Get, MaxEncodedLen, Currency, ExistenceRequirement, WithdrawReasons},
+	traits::{Currency, ExistenceRequirement, Get, MaxEncodedLen, WithdrawReasons},
 	BoundedVec, Parameter,
 };
 use pallet_ico::traits::PowerHandler;
+use sp_runtime::offchain::storage_lock::BlockNumberProvider;
 use sp_runtime::{
-	traits::{AtLeast32BitUnsigned, CheckedAdd, CheckedSub, MaybeSerializeDeserialize, Member, One, Zero,
-	Hash},
+	traits::{AtLeast32BitUnsigned, CheckedAdd, CheckedSub, Hash, MaybeSerializeDeserialize, Member, One, Zero},
 	ArithmeticError, DispatchError, DispatchResult, RuntimeDebug,
 };
-use sp_std::{convert::TryInto, vec::Vec, collections::{btree_map::BTreeMap, btree_set::BTreeSet}};
 use sp_std::vec;
-use sp_runtime::offchain::storage_lock::BlockNumberProvider;
+use sp_std::{
+	collections::{btree_map::BTreeMap, btree_set::BTreeSet},
+	convert::TryInto,
+	vec::Vec,
+};
 mod mock;
 mod tests;
 
@@ -50,7 +53,6 @@ pub struct ClassInfo<TokenId, AccountId, Data, ClassMetadataOf> {
 	pub data: Data,
 }
 
-
 /// class data
 #[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug)]
 pub struct ClassData<NftLevel, Balance, TokenId> {
@@ -60,7 +62,6 @@ pub struct ClassData<NftLevel, Balance, TokenId> {
 	images_hash: Option<Vec<u8>>,
 	maximum_quantity: TokenId,
 }
-
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, Default)]
 pub struct TokenData<Hash, AccountId, Attribute, Balance, NftStatus, ClassId> {
@@ -73,7 +74,6 @@ pub struct TokenData<Hash, AccountId, Attribute, Balance, NftStatus, ClassId> {
 	sell_records: Vec<(AccountId, Balance)>,
 	status: NftStatus,
 }
-
 
 /// nft level
 #[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug)]
@@ -88,7 +88,7 @@ pub enum NftLevel {
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug)]
-pub struct  SaleInfo<TokenId, Balance, BlockNumber, AccountId> {
+pub struct SaleInfo<TokenId, Balance, BlockNumber, AccountId> {
 	seller: AccountId,
 	token_id: TokenId,
 	price: Balance,
@@ -96,7 +96,7 @@ pub struct  SaleInfo<TokenId, Balance, BlockNumber, AccountId> {
 }
 
 #[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug)]
-pub struct  NftStatus {
+pub struct NftStatus {
 	is_in_sale: bool,
 	is_active_image: bool,
 	is_claimed: bool,
@@ -111,7 +111,6 @@ impl Default for NftStatus {
 		}
 	}
 }
-
 
 impl Default for NftLevel {
 	fn default() -> Self {
@@ -136,12 +135,11 @@ use sp_runtime::RuntimeString::Owned;
 #[frame_support::pallet]
 pub mod module {
 	use super::*;
-	use pallet_ico::system::pallet_prelude::OriginFor;
 	use pallet_ico::ensure_signed;
+	use pallet_ico::system::pallet_prelude::OriginFor;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
-
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 		/// The class ID type
 		type ClassId: Parameter + Member + AtLeast32BitUnsigned + Default + Copy;
@@ -155,23 +153,29 @@ pub mod module {
 		/// The maximum size of a token's attribute.
 		type MaxTokenAttribute: Get<u32>;
 		type PowerHandler: pallet_ico::traits::PowerHandler<Self::AccountId, DispatchResult, BalanceOf<Self>>;
-
 	}
 	pub type AttributeOf<T> = BoundedVec<u8, <T as Config>::MaxTokenAttribute>;
 	pub type ClassMetadataOf<T> = BoundedVec<u8, <T as Config>::MaxClassMetadata>;
-	pub type SaleInfoOf<T> = SaleInfo<<T as Config>::TokenId, <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance, <T as frame_system::Config>::BlockNumber, <T as frame_system::Config>::AccountId>;
+	pub type SaleInfoOf<T> = SaleInfo<
+		<T as Config>::TokenId,
+		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance,
+		<T as frame_system::Config>::BlockNumber,
+		<T as frame_system::Config>::AccountId,
+	>;
 	pub type TokenMetadataOf<T> = BoundedVec<u8, <T as Config>::MaxTokenMetadata>;
 	pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-	pub type TokenDataOf<T> = TokenData<<T as frame_system::Config>::Hash, <T as frame_system::Config>::AccountId, AttributeOf<T>,  BalanceOf<T>, NftStatus, <T as Config>::ClassId>;
-	pub type ClassDataOf<T> = ClassData<NftLevel, BalanceOf<T>, <T as Config>::TokenId>;
-	pub type ClassInfoOf<T> = ClassInfo<
-		<T as Config>::TokenId,
+	pub type TokenDataOf<T> = TokenData<
+		<T as frame_system::Config>::Hash,
 		<T as frame_system::Config>::AccountId,
-		ClassDataOf<T>,
-		ClassMetadataOf<T>,
+		AttributeOf<T>,
+		BalanceOf<T>,
+		NftStatus,
+		<T as Config>::ClassId,
 	>;
-	pub type TokenInfoOf<T> =
-		TokenInfo<<T as frame_system::Config>::AccountId, TokenDataOf<T>, TokenMetadataOf<T>>;
+	pub type ClassDataOf<T> = ClassData<NftLevel, BalanceOf<T>, <T as Config>::TokenId>;
+	pub type ClassInfoOf<T> =
+		ClassInfo<<T as Config>::TokenId, <T as frame_system::Config>::AccountId, ClassDataOf<T>, ClassMetadataOf<T>>;
+	pub type TokenInfoOf<T> = TokenInfo<<T as frame_system::Config>::AccountId, TokenDataOf<T>, TokenMetadataOf<T>>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub (super) fn deposit_event)]
@@ -214,6 +218,7 @@ pub mod module {
 		NotIssuer,
 		OwnerIsExists,
 		NotOwner,
+		OwnerNotExists,
 		NotInSale,
 		Inactive,
 		ActiveNft,
@@ -252,17 +257,14 @@ pub mod module {
 	pub type Tokens<T: Config> =
 		StorageDoubleMap<_, Twox64Concat, T::ClassId, Twox64Concat, T::TokenId, TokenInfoOf<T>>;
 
-
 	#[pallet::storage]
 	#[pallet::getter(fn issuer_Of)]
 	pub type IssuerOf<T: Config> = StorageMap<_, Twox64Concat, NftLevel, (T::AccountId, T::ClassId)>;
-
 
 	/// the user's all tokens
 	#[pallet::storage]
 	#[pallet::getter(fn tokens_Of)]
 	pub type TokensOf<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, Vec<(T::ClassId, T::TokenId)>, ValueQuery>;
-
 
 	#[pallet::storage]
 	#[pallet::getter(fn no_owner_tokens_of)]
@@ -282,11 +284,7 @@ pub mod module {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight(10_000)]
-		pub fn create_class(
-			origin: OriginFor<T>,
-			metadata: Vec<u8>,
-			data: ClassDataOf<T>
-		) -> DispatchResult {
+		pub fn create_class(origin: OriginFor<T>, metadata: Vec<u8>, data: ClassDataOf<T>) -> DispatchResult {
 			let issuer = ensure_signed(origin)?;
 			let class_id = Self::do_create_class(&issuer, metadata, data)?;
 			Self::deposit_event(Event::<T>::CreateClass(issuer, class_id));
@@ -294,11 +292,7 @@ pub mod module {
 		}
 
 		#[pallet::weight(10_000)]
-		pub fn transfer(
-			origin: OriginFor<T>,
-			to: T::AccountId,
-			token: (T::ClassId, T::TokenId)
-		) -> DispatchResult {
+		pub fn transfer(origin: OriginFor<T>, to: T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::do_transfer(&who, &to, token)?;
 			Self::deposit_event(Event::<T>::Transfer(who, to, token));
@@ -311,19 +305,16 @@ pub mod module {
 			class_id: T::ClassId,
 			metadata: Vec<u8>,
 			attribute: Vec<u8>,
-			image_hash: Vec<u8>
+			image_hash: Vec<u8>,
 		) -> DispatchResult {
 			let issuer = ensure_signed(origin)?;
 			let token_id = Self::do_mint(&issuer, class_id, metadata, attribute, image_hash)?;
-			Self::deposit_event(Event::Mint(class_id,token_id));
+			Self::deposit_event(Event::Mint(class_id, token_id));
 			Ok(())
 		}
 
 		#[pallet::weight(10_000)]
-		pub fn claim(
-			origin: OriginFor<T>,
-			token: (T::ClassId, T::TokenId),
-		) -> DispatchResult {
+		pub fn claim(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::do_claim(&owner, token.0, token.1)?;
 			Self::deposit_event(Event::Claim(owner, token.0, token.1));
@@ -331,10 +322,7 @@ pub mod module {
 		}
 
 		#[pallet::weight(10_000)]
-		pub fn burn(
-			origin: OriginFor<T>,
-			token: (T::ClassId, T::TokenId)
-		) -> DispatchResult {
+		pub fn burn(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::do_burn(&owner, token)?;
 			Self::deposit_event(Event::<T>::Burn(owner, token.0, token.1));
@@ -345,7 +333,7 @@ pub mod module {
 		pub fn offer_token_for_sale(
 			origin: OriginFor<T>,
 			token: (T::ClassId, T::TokenId),
-			price: BalanceOf<T>
+			price: BalanceOf<T>,
 		) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::do_offer_token_for_sale(&owner, token, price)?;
@@ -354,10 +342,7 @@ pub mod module {
 		}
 
 		#[pallet::weight(10_000)]
-		pub fn withdraw_sale(
-			origin: OriginFor<T>,
-			token: (T::ClassId, T::TokenId)
-		) -> DispatchResult {
+		pub fn withdraw_sale(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::do_withdraw_sale(&owner, token)?;
 			Self::deposit_event(Event::<T>::WithdrawSale(token.0, token.1));
@@ -365,20 +350,14 @@ pub mod module {
 		}
 
 		#[pallet::weight(10_000)]
-		pub fn buy_token(
-			origin: OriginFor<T>,
-			token: (T::ClassId, T::TokenId)
-		) -> DispatchResult {
+		pub fn buy_token(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let buyer = ensure_signed(origin)?;
 			Self::do_buy_token(&buyer, token)?;
 			Ok(())
 		}
 
 		#[pallet::weight(10_000)]
-		pub fn active(
-			origin: OriginFor<T>,
-			token: (T::ClassId, T::TokenId)
-		) -> DispatchResult {
+		pub fn active(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			TokensOf::<T>::get(&owner).iter().for_each(|t| {
 				Self::do_active_or_not(&owner, *t, false);
@@ -391,33 +370,28 @@ pub mod module {
 		}
 
 		#[pallet::weight(10_000)]
-		pub fn inactive(
-			origin: OriginFor<T>,
-			token: (T::ClassId, T::TokenId)
-		) -> DispatchResult {
+		pub fn inactive(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::do_active_or_not(&owner, token, false)?;
 			Self::deposit_event(Event::<T>::Inactive(token));
 			Ok(())
 		}
-
-
 	}
 }
 
 impl<T: Config> Pallet<T> {
-
 	/// Create NFT(non fungible token) class
 	pub fn do_create_class(
 		issuer: &T::AccountId,
 		metadata: Vec<u8>,
 		data: ClassDataOf<T>,
 	) -> Result<T::ClassId, DispatchError> {
-
 		ensure!(IssuerOf::<T>::get(&data.level).is_none(), Error::<T>::LevelInUse);
 		match data.level {
-			NftLevel::Other(_) => { return Err(Error::<T>::NoPermissionNFTLevel)?; },
-			_ => {},
+			NftLevel::Other(_) => {
+				return Err(Error::<T>::NoPermissionNFTLevel)?;
+			}
+			_ => {}
 		}
 
 		let bounded_metadata: BoundedVec<u8, T::MaxClassMetadata> =
@@ -446,7 +420,10 @@ impl<T: Config> Pallet<T> {
 		Tokens::<T>::try_mutate(token.0, token.1, |token_info| -> DispatchResult {
 			let mut info = token_info.as_mut().ok_or(Error::<T>::TokenNotFound)?;
 
-			ensure!(!info.data.status.is_in_sale && info.data.status.is_claimed, Error::<T>::InSale);
+			ensure!(
+				!info.data.status.is_in_sale && info.data.status.is_claimed,
+				Error::<T>::InSale
+			);
 			ensure!(!info.data.status.is_active_image, Error::<T>::ActiveNft);
 			ensure!(info.owner == Some(from.clone()), Error::<T>::NoPermission);
 
@@ -469,8 +446,10 @@ impl<T: Config> Pallet<T> {
 		image_hash: Vec<u8>,
 	) -> Result<T::TokenId, DispatchError> {
 		NextTokenId::<T>::try_mutate(class_id, |id| -> Result<T::TokenId, DispatchError> {
-
-			ensure!(!AllTokensHash::<T>::get().contains(&image_hash), Error::<T>::TokenAlreadyExists);
+			ensure!(
+				!AllTokensHash::<T>::get().contains(&image_hash),
+				Error::<T>::TokenAlreadyExists
+			);
 
 			let bounded_metadata: BoundedVec<u8, T::MaxTokenMetadata> =
 				metadata.try_into().map_err(|_| Error::<T>::MaxMetadataExceeded)?;
@@ -481,7 +460,10 @@ impl<T: Config> Pallet<T> {
 			let token_id = *id;
 			*id = id.checked_add(&One::one()).ok_or(Error::<T>::NoAvailableTokenId)?;
 
-			ensure!(Classes::<T>::get(class_id).ok_or(Error::<T>::ClassNotFound)?.issuer == issuer.clone(), Error::<T>::NotIssuer);
+			ensure!(
+				Classes::<T>::get(class_id).ok_or(Error::<T>::ClassNotFound)?.issuer == issuer.clone(),
+				Error::<T>::NotIssuer
+			);
 
 			let mut data = TokenDataOf::<T>::default();
 			let hash = Self::get_hash(class_id, token_id);
@@ -501,7 +483,10 @@ impl<T: Config> Pallet<T> {
 					.checked_add(&One::one())
 					.ok_or(ArithmeticError::Overflow)?;
 
-				ensure!(info.data.maximum_quantity >= new_total_issuance, Error::<T>::NoAvailableTokenId);
+				ensure!(
+					info.data.maximum_quantity >= new_total_issuance,
+					Error::<T>::NoAvailableTokenId
+				);
 				info.total_issuance = new_total_issuance;
 				Ok(())
 			})?;
@@ -523,6 +508,7 @@ impl<T: Config> Pallet<T> {
 	fn do_active_or_not(owner: &T::AccountId, token: (T::ClassId, T::TokenId), is_active: bool) -> DispatchResult {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
+			ensure!(!Self::is_in_sale(token.0, token.1), Error::<T>::InSale);
 			ensure!(t.owner == Some(owner.clone()), Error::<T>::NotOwner);
 			match is_active {
 				true => t.data.status.is_active_image = true,
@@ -533,14 +519,20 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-
 	fn do_claim(owner: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) -> DispatchResult {
 		Tokens::<T>::try_mutate_exists(class_id, token_id, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
+			ensure!(!Self::is_in_sale(class_id, token_id), Error::<T>::InSale);
 			ensure!(t.owner == None, Error::<T>::OwnerIsExists);
 			let class_info = Classes::<T>::get(class_id).ok_or(Error::<T>::ClassNotFound)?;
-			T::Currency::withdraw(&owner, class_info.data.claim_payment, WithdrawReasons::TRANSFER, ExistenceRequirement::KeepAlive)?;
-			T::PowerHandler::sub_user_power(&owner, class_info.data.power_threshold).map_err(|_| Error::<T>::PowerTooLow)?;
+			T::Currency::withdraw(
+				&owner,
+				class_info.data.claim_payment,
+				WithdrawReasons::TRANSFER,
+				ExistenceRequirement::KeepAlive,
+			)?;
+			T::PowerHandler::sub_user_power(&owner, class_info.data.power_threshold)
+				.map_err(|_| Error::<T>::PowerTooLow)?;
 			t.owner = Some(owner.clone());
 			t.data.power_threshold = class_info.data.power_threshold;
 			t.data.claim_payment = class_info.data.claim_payment;
@@ -561,6 +553,7 @@ impl<T: Config> Pallet<T> {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
 			ensure!(t.owner == Some(owner.clone()), Error::<T>::NoPermission);
+			ensure!(!Self::is_in_sale(token.0, token.1), Error::<T>::InSale);
 			ensure!(!t.data.status.is_active_image, Error::<T>::ActiveNft);
 			Classes::<T>::try_mutate(token.0, |class_info| -> DispatchResult {
 				let info = class_info.as_mut().ok_or(Error::<T>::ClassNotFound)?;
@@ -586,8 +579,11 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-
-	fn do_offer_token_for_sale(user: &T::AccountId, token:(T::ClassId, T::TokenId), price: BalanceOf<T>) -> DispatchResult {
+	fn do_offer_token_for_sale(
+		user: &T::AccountId,
+		token: (T::ClassId, T::TokenId),
+		price: BalanceOf<T>,
+	) -> DispatchResult {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
 			ensure!(t.owner == Some(user.clone()), Error::<T>::NotOwner);
@@ -595,7 +591,7 @@ impl<T: Config> Pallet<T> {
 			ensure!(!Self::is_in_sale(token.0, token.1), Error::<T>::InSale);
 			t.data.status.is_in_sale = true;
 			// t.data.status.is_active_image = false;
-			Self::insert_token_to_sale_vec(&user,token.0, token.1, price);
+			Self::insert_token_to_sale_vec(&user, token.0, token.1, price);
 			*token_info = Some(t);
 			Ok(())
 		})
@@ -616,20 +612,30 @@ impl<T: Config> Pallet<T> {
 	fn do_buy_token(buyer: &T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
-			// ensure!(Self::is_in_sale(token.0, token.1), Error::<T>::NotInSale);
+			ensure!(Self::is_in_sale(token.0, token.1), Error::<T>::NotInSale);
+			let old_owner = match t.owner {
+				Some(x) => x,
+				_ => {
+					return Err(Error::<T>::OwnerNotExists)?;
+				}
+			};
 			let sale_info = Self::get_in_sale_token(token.0, token.1).ok_or(Error::<T>::NotInSale)?;
-			T::Currency::transfer(&buyer, &sale_info.seller, sale_info.price, ExistenceRequirement::KeepAlive)?;
+			T::Currency::transfer(
+				&buyer,
+				&sale_info.seller,
+				sale_info.price,
+				ExistenceRequirement::KeepAlive,
+			)?;
 			Self::remove_token_from_sale_vec(token.0, token.1);
 			t.data.sell_records.push((sale_info.seller, sale_info.price));
 			t.data.status.is_in_sale = false;
 			t.owner = Some(buyer.clone());
 			*token_info = Some(t);
-			Self::get_token_ownership(buyer, token.0, token.1);
-			Self::deposit_event(Event::BuyToken(buyer.clone(),token.0, token.1, sale_info.price));
+			Self::transfer_ownership(&old_owner, &buyer, token.0, token.1);
+			Self::deposit_event(Event::BuyToken(buyer.clone(), token.0, token.1, sale_info.price));
 			Ok(())
 		})
 	}
-
 
 	/// Destroy NFT(non fungible token) class
 	pub fn destroy_class(issuer: &T::AccountId, class_id: T::ClassId) -> DispatchResult {
@@ -646,26 +652,24 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-
 	/// Update initializing tokens
 	fn update_no_owner_tokens_vec(class_id: T::ClassId, token_id: T::TokenId, is_remove: bool) {
 		let mut tokens = NoOwnerTokensOf::<T>::get(class_id);
 		match is_remove {
 			true => {
-				if let Some(pos) = tokens.iter().position(|h| h == &token_id ) {
+				if let Some(pos) = tokens.iter().position(|h| h == &token_id) {
 					tokens.swap_remove(pos);
 				}
-			},
+			}
 			false => {
-				if let None = tokens.iter().position(|h| h == &token_id ) {
+				if let None = tokens.iter().position(|h| h == &token_id) {
 					tokens.push(token_id);
 				}
-			},
+			}
 		}
 		if tokens.is_empty() {
 			NoOwnerTokensOf::<T>::remove(class_id);
-		}
-		else {
+		} else {
 			NoOwnerTokensOf::<T>::insert(class_id, tokens);
 		}
 	}
@@ -673,7 +677,7 @@ impl<T: Config> Pallet<T> {
 	pub fn is_owner(account: &T::AccountId, token: (T::ClassId, T::TokenId)) -> bool {
 		if let Some(info) = Tokens::<T>::get(token.0, token.1) {
 			if info.owner == Some(account.clone()) {
-				return true
+				return true;
 			}
 		}
 		false
@@ -688,12 +692,10 @@ impl<T: Config> Pallet<T> {
 		false
 	}
 
-
 	fn transfer_ownership(who: &T::AccountId, des: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) {
 		Self::remove_token_ownership(&who, class_id, token_id);
 		Self::get_token_ownership(&des, class_id, token_id);
 	}
-
 
 	fn get_token_ownership(who: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) {
 		let mut tokens = TokensOf::<T>::get(who);
@@ -716,7 +718,10 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn is_in_sale(class_id: T::ClassId, token_id: T::TokenId) -> bool {
-		if let Some(pos) = InSaleTokens::<T>::get(class_id).iter().position(|h| h.token_id == token_id) {
+		if let Some(pos) = InSaleTokens::<T>::get(class_id)
+			.iter()
+			.position(|h| h.token_id == token_id)
+		{
 			return true;
 		}
 		false
@@ -747,8 +752,7 @@ impl<T: Config> Pallet<T> {
 		}
 		if tokens.is_empty() {
 			InSaleTokens::<T>::remove(class_id);
-		}
-		else {
+		} else {
 			InSaleTokens::<T>::insert(class_id, tokens);
 		}
 	}
@@ -760,5 +764,4 @@ impl<T: Config> Pallet<T> {
 		}
 		None
 	}
-
 }

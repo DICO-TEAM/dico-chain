@@ -2,7 +2,6 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-
 sp_api::decl_runtime_apis! {
 	pub trait FarmApi<AccountId, PoolId, Balance> where
 		AccountId: codec::Codec,
@@ -12,4 +11,3 @@ sp_api::decl_runtime_apis! {
 		fn get_participant_reward(account: AccountId, pid: PoolId) -> Balance;
 	}
 }
-

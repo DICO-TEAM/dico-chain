@@ -29,9 +29,8 @@ use frame_support::traits::{
 	Currency, ExistenceRequirement::KeepAlive, Get, Imbalance, OnUnbalanced, ReservableCurrency, WithdrawReasons,
 };
 use frame_support::weights::{DispatchClass, Weight};
-use frame_support::{PalletId, decl_error, decl_event, decl_module, decl_storage, ensure, print, StorageDoubleMap};
+use frame_support::{decl_error, decl_event, decl_module, decl_storage, ensure, print, PalletId, StorageDoubleMap};
 use frame_system::ensure_signed;
-use traits::DicoTreasuryHandler;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_runtime::SaturatedConversion;
@@ -40,6 +39,7 @@ use sp_runtime::{
 	Permill, RuntimeDebug,
 };
 use sp_std::prelude::*;
+use traits::DicoTreasuryHandler;
 pub use weights::WeightInfo;
 
 use orml_traits::{

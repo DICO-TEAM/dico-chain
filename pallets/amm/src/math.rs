@@ -2,9 +2,9 @@
 #![allow(clippy::unused_unit)]
 #![allow(clippy::upper_case_acronyms)]
 
+use frame_support::ensure;
 use sp_core::U256;
 use sp_runtime::ArithmeticError;
-use frame_support::ensure;
 
 #[cfg(test)]
 pub const TEST_DECIMAL: u128 = 10_000_000_000u128;
@@ -22,19 +22,16 @@ pub const LIQUIDITY_DECIMALS: u8 = 10;
 ///  rB = reserve_b                     rA                                                    //
 ///  aB = amount_b                                                                            //
 /// ******************************************************************************************//
-pub fn quote(
-	amount_a: U256,
-	reserve_a: U256,
-	reserve_b: U256,
-) -> sp_std::result::Result<U256, ArithmeticError> {
+pub fn quote(amount_a: U256, reserve_a: U256, reserve_b: U256) -> sp_std::result::Result<U256, ArithmeticError> {
 	ensure!(!reserve_a.is_zero(), ArithmeticError::DivisionByZero);
 
 	let amount_b = amount_a
-		.checked_mul(reserve_b).ok_or(ArithmeticError::Overflow)?
-		.checked_div(reserve_a).ok_or(ArithmeticError::Overflow)?;
+		.checked_mul(reserve_b)
+		.ok_or(ArithmeticError::Overflow)?
+		.checked_div(reserve_a)
+		.ok_or(ArithmeticError::Overflow)?;
 	Ok(amount_b)
 }
-
 
 /// Given the input amount of the asset and the transaction pair reserve,
 /// return the maximum output amount of the other assets.
@@ -52,21 +49,23 @@ pub fn get_amount_out(
 	reserve_out: U256,
 ) -> sp_std::result::Result<U256, ArithmeticError> {
 	let amount_in_with_fee = amount_in
-		.checked_mul(U256::from(997)).ok_or(ArithmeticError::Overflow)?;
+		.checked_mul(U256::from(997))
+		.ok_or(ArithmeticError::Overflow)?;
 	let numerator = amount_in_with_fee
-		.checked_mul(reserve_out).ok_or(ArithmeticError::Overflow)?;
+		.checked_mul(reserve_out)
+		.ok_or(ArithmeticError::Overflow)?;
 	let denominator = reserve_in
-		.checked_mul(U256::from(1000)).ok_or(ArithmeticError::Overflow)?
-		.checked_add(amount_in_with_fee).ok_or(ArithmeticError::Overflow)?;
+		.checked_mul(U256::from(1000))
+		.ok_or(ArithmeticError::Overflow)?
+		.checked_add(amount_in_with_fee)
+		.ok_or(ArithmeticError::Overflow)?;
 
 	ensure!(!denominator.is_zero(), ArithmeticError::DivisionByZero);
 
-	let amount_out = numerator
-		.checked_div(denominator).ok_or(ArithmeticError::Overflow)?;
+	let amount_out = numerator.checked_div(denominator).ok_or(ArithmeticError::Overflow)?;
 
 	Ok(amount_out)
 }
-
 
 /// Given the output amount of the asset and the transaction pair reserve,
 /// return the required input amount for the other assets.
@@ -84,21 +83,26 @@ pub fn get_amount_in(
 	reserve_out: U256,
 ) -> sp_std::result::Result<U256, ArithmeticError> {
 	let numerator = reserve_in
-		.checked_mul(amount_out).ok_or(ArithmeticError::Overflow)?
-		.checked_mul(U256::from(1000)).ok_or(ArithmeticError::Overflow)?;
+		.checked_mul(amount_out)
+		.ok_or(ArithmeticError::Overflow)?
+		.checked_mul(U256::from(1000))
+		.ok_or(ArithmeticError::Overflow)?;
 	let denominator = reserve_out
-		.checked_sub(amount_out).ok_or(ArithmeticError::Overflow)?
-		.checked_mul(U256::from(997)).ok_or(ArithmeticError::Overflow)?;
+		.checked_sub(amount_out)
+		.ok_or(ArithmeticError::Overflow)?
+		.checked_mul(U256::from(997))
+		.ok_or(ArithmeticError::Overflow)?;
 
 	ensure!(!denominator.is_zero(), ArithmeticError::DivisionByZero);
 
 	let amount_in = numerator
-		.checked_div(denominator).ok_or(ArithmeticError::Overflow)?
-		.checked_add(U256::one()).ok_or(ArithmeticError::Overflow)?;
+		.checked_div(denominator)
+		.ok_or(ArithmeticError::Overflow)?
+		.checked_add(U256::one())
+		.ok_or(ArithmeticError::Overflow)?;
 
 	Ok(amount_in)
 }
-
 
 /// Calculate the amount of trading pairs of assets that can be obtained when remove liquidity.
 /// Calculation formula:
@@ -113,16 +117,19 @@ pub fn calc_amount_out(
 	ensure!(!total_liquidity.is_zero(), ArithmeticError::DivisionByZero);
 
 	let remove_amount_a = remove_liquidity
-		.checked_mul(reserve_a).ok_or(ArithmeticError::Overflow)?
-		.checked_div(total_liquidity).ok_or(ArithmeticError::Overflow)?;
+		.checked_mul(reserve_a)
+		.ok_or(ArithmeticError::Overflow)?
+		.checked_div(total_liquidity)
+		.ok_or(ArithmeticError::Overflow)?;
 
 	let remove_amount_b = remove_liquidity
-		.checked_mul(reserve_b).ok_or(ArithmeticError::Overflow)?
-		.checked_div(total_liquidity).ok_or(ArithmeticError::Overflow)?;
+		.checked_mul(reserve_b)
+		.ok_or(ArithmeticError::Overflow)?
+		.checked_div(total_liquidity)
+		.ok_or(ArithmeticError::Overflow)?;
 
 	Ok((remove_amount_a, remove_amount_b))
 }
-
 
 /// Calculate the amount of pairs of assets needed to add liquidity.
 pub fn calc_amount_in(
@@ -156,11 +163,9 @@ pub fn calc_amount_in(
 
 /// Calculate the amount of liquidity that can be obtained when adding a trading pair of assets.
 /// Calculation formula:
-/// - total_liquidity == 0 (first add)
-///   add_liquidity = sqrt(amount_a * amount_b) - 1000
-/// - total_liquidity != 0
-///   add_liquidity = min(amount_a * total_liquidity / reserve_a,
-///                       amount_b * total_liquidity / reserve_b)
+/// - total_liquidity == 0 (first add) add_liquidity = sqrt(amount_a * amount_b) - 1000
+/// - total_liquidity != 0 add_liquidity = min(amount_a * total_liquidity / reserve_a, amount_b *
+///   total_liquidity / reserve_b)
 pub fn calc_liquidity_add(
 	reserve_a: U256,
 	reserve_b: U256,
@@ -171,9 +176,11 @@ pub fn calc_liquidity_add(
 ) -> sp_std::result::Result<U256, ArithmeticError> {
 	if total_liquidity.is_zero() {
 		let add_liquidity = amount_a
-			.checked_mul(amount_b).ok_or(ArithmeticError::Overflow)?
+			.checked_mul(amount_b)
+			.ok_or(ArithmeticError::Overflow)?
 			.integer_sqrt()
-			.checked_sub(minimum_liquidity_limit).ok_or(ArithmeticError::Overflow)?;
+			.checked_sub(minimum_liquidity_limit)
+			.ok_or(ArithmeticError::Overflow)?;
 		return Ok(add_liquidity);
 	}
 
@@ -181,14 +188,22 @@ pub fn calc_liquidity_add(
 	ensure!(!reserve_b.is_zero(), ArithmeticError::DivisionByZero);
 
 	let add_liquidity_a = amount_a
-		.checked_mul(total_liquidity).ok_or(ArithmeticError::Overflow)?
-		.checked_div(reserve_a).ok_or(ArithmeticError::Overflow)?;
+		.checked_mul(total_liquidity)
+		.ok_or(ArithmeticError::Overflow)?
+		.checked_div(reserve_a)
+		.ok_or(ArithmeticError::Overflow)?;
 
 	let add_liquidity_b = amount_b
-		.checked_mul(total_liquidity).ok_or(ArithmeticError::Overflow)?
-		.checked_div(reserve_b).ok_or(ArithmeticError::Overflow)?;
+		.checked_mul(total_liquidity)
+		.ok_or(ArithmeticError::Overflow)?
+		.checked_div(reserve_b)
+		.ok_or(ArithmeticError::Overflow)?;
 
-	let add_liquidity = if add_liquidity_a < add_liquidity_b { add_liquidity_a } else { add_liquidity_b };
+	let add_liquidity = if add_liquidity_a < add_liquidity_b {
+		add_liquidity_a
+	} else {
+		add_liquidity_b
+	};
 
 	Ok(add_liquidity)
 }
@@ -216,7 +231,11 @@ mod tests {
 			Ok(U256::from(66))
 		);
 		assert_eq!(
-			get_amount_out(U256::from(50 * TEST_DECIMAL), U256::from(100 * TEST_DECIMAL), U256::from(200 * TEST_DECIMAL)),
+			get_amount_out(
+				U256::from(50 * TEST_DECIMAL),
+				U256::from(100 * TEST_DECIMAL),
+				U256::from(200 * TEST_DECIMAL)
+			),
 			Ok(U256::from(665331998665u128))
 		);
 	}
@@ -228,7 +247,11 @@ mod tests {
 			Ok(U256::from(50))
 		);
 		assert_eq!(
-			get_amount_in(U256::from(66 * TEST_DECIMAL), U256::from(100 * TEST_DECIMAL), U256::from(200 * TEST_DECIMAL)),
+			get_amount_in(
+				U256::from(66 * TEST_DECIMAL),
+				U256::from(100 * TEST_DECIMAL),
+				U256::from(200 * TEST_DECIMAL)
+			),
 			Ok(U256::from(494019371548u128))
 		);
 	}
@@ -244,7 +267,12 @@ mod tests {
 			Err(ArithmeticError::DivisionByZero)
 		);
 		assert_eq!(
-			calc_amount_out(U256::from(U256::MAX/2), U256::from(U256::MAX), U256::from(U256::MAX/2), U256::from(U256::MAX)),
+			calc_amount_out(
+				U256::from(U256::MAX / 2),
+				U256::from(U256::MAX),
+				U256::from(U256::MAX / 2),
+				U256::from(U256::MAX)
+			),
 			Err(ArithmeticError::Overflow)
 		);
 	}
@@ -252,23 +280,58 @@ mod tests {
 	#[test]
 	fn test_calc_amount_in() {
 		assert_eq!(
-			calc_amount_in(U256::from(0), U256::from(0), U256::from(100), U256::from(200), U256::zero(), U256::zero()),
+			calc_amount_in(
+				U256::from(0),
+				U256::from(0),
+				U256::from(100),
+				U256::from(200),
+				U256::zero(),
+				U256::zero()
+			),
 			Ok(Some((U256::from(100), U256::from(200))))
 		);
 		assert_eq!(
-			calc_amount_in(U256::from(1000), U256::from(2000), U256::from(100), U256::from(500), U256::zero(), U256::zero()),
+			calc_amount_in(
+				U256::from(1000),
+				U256::from(2000),
+				U256::from(100),
+				U256::from(500),
+				U256::zero(),
+				U256::zero()
+			),
 			Ok(Some((U256::from(100), U256::from(200))))
 		);
 		assert_eq!(
-			calc_amount_in(U256::from(1000), U256::from(2000), U256::from(100), U256::from(500), U256::from(50), U256::from(250)),
+			calc_amount_in(
+				U256::from(1000),
+				U256::from(2000),
+				U256::from(100),
+				U256::from(500),
+				U256::from(50),
+				U256::from(250)
+			),
 			Ok(None)
 		);
 		assert_eq!(
-			calc_amount_in(U256::from(1000), U256::from(2000), U256::from(100), U256::from(50), U256::from(0), U256::from(0)),
+			calc_amount_in(
+				U256::from(1000),
+				U256::from(2000),
+				U256::from(100),
+				U256::from(50),
+				U256::from(0),
+				U256::from(0)
+			),
 			Ok(Some((U256::from(25), U256::from(50))))
 		);
 		assert_eq!(
-			calc_amount_in(U256::from(1000), U256::from(2000), U256::from(100), U256::from(50), U256::from(50), U256::from(0)),
+			calc_amount_in(
+				U256::from(1000),
+				U256::from(2000),
+				U256::from(100),
+				U256::from(50),
+				U256::from(50),
+				U256::from(0)
+			),
 			Ok(None)
 		);
 	}
@@ -276,19 +339,47 @@ mod tests {
 	#[test]
 	fn test_calc_liquidity_add() {
 		assert_eq!(
-			calc_liquidity_add(U256::from(0), U256::from(0), U256::from(10000), U256::from(40000), U256::from(0), U256::from(1000)),
+			calc_liquidity_add(
+				U256::from(0),
+				U256::from(0),
+				U256::from(10000),
+				U256::from(40000),
+				U256::from(0),
+				U256::from(1000)
+			),
 			Ok(U256::from(19000))
 		);
 		assert_eq!(
-			calc_liquidity_add(U256::from(10000), U256::from(40000), U256::from(10000), U256::from(40000), U256::from(19000), U256::from(1000)),
+			calc_liquidity_add(
+				U256::from(10000),
+				U256::from(40000),
+				U256::from(10000),
+				U256::from(40000),
+				U256::from(19000),
+				U256::from(1000)
+			),
 			Ok(U256::from(19000))
 		);
 		assert_eq!(
-			calc_liquidity_add(U256::from(0), U256::from(0), U256::from(10000), U256::from(40000), U256::from(0), U256::from(0)),
+			calc_liquidity_add(
+				U256::from(0),
+				U256::from(0),
+				U256::from(10000),
+				U256::from(40000),
+				U256::from(0),
+				U256::from(0)
+			),
 			Ok(U256::from(20000))
 		);
 		assert_eq!(
-			calc_liquidity_add(U256::from(10000), U256::from(40000), U256::from(10000), U256::from(40000), U256::from(20000), U256::from(0)),
+			calc_liquidity_add(
+				U256::from(10000),
+				U256::from(40000),
+				U256::from(10000),
+				U256::from(40000),
+				U256::from(20000),
+				U256::from(0)
+			),
 			Ok(U256::from(20000))
 		);
 	}

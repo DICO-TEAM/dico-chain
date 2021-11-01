@@ -9,18 +9,23 @@
 #![allow(clippy::upper_case_acronyms)]
 
 use codec::{Decode, Encode};
-use core::convert::{TryFrom};
+use core::convert::TryFrom;
+use dico_primitives::{to_balance, to_u256, Amount, AssetId, Balance, BlockNumber};
 use frame_support::{
-	traits::{Get, EnsureOrigin},
-	pallet_prelude::*, ensure, transactional, PalletId,
-	sp_runtime::traits::{Zero, One, AtLeast32Bit, CheckedAdd},
 	dispatch::DispatchErrorWithPostInfo,
+	ensure,
+	pallet_prelude::*,
+	sp_runtime::traits::{AtLeast32Bit, CheckedAdd, One, Zero},
+	traits::{EnsureOrigin, Get},
+	transactional, PalletId,
 };
 use frame_system::pallet_prelude::*;
-use dico_primitives::{AssetId, Balance, Amount, BlockNumber, to_u256, to_balance};
-use sp_runtime::{ArithmeticError, traits::{AccountIdConversion, SaturatedConversion}};
-use sp_core::U256;
 use orml_traits::{MultiCurrency, MultiCurrencyExtended};
+use sp_core::U256;
+use sp_runtime::{
+	traits::{AccountIdConversion, SaturatedConversion},
+	ArithmeticError,
+};
 
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
@@ -34,7 +39,6 @@ mod mock;
 
 #[cfg(test)]
 mod tests;
-
 
 #[derive(Encode, Decode, Default, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
@@ -90,7 +94,6 @@ impl<AccountId> PoolExtendInfo<AccountId> {
 	}
 }
 
-
 // Re-export pallet items so that they can be accessed from the crate namespace.
 pub use pallet::*;
 
@@ -109,21 +112,10 @@ pub mod pallet {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
 		/// The mining pool id
-		type PoolExtendId: Parameter
-			+ Member
-			+ Into<u32>
-			+ AtLeast32Bit
-			+ Default
-			+ Copy
-			+ MaybeSerializeDeserialize;
+		type PoolExtendId: Parameter + Member + Into<u32> + AtLeast32Bit + Default + Copy + MaybeSerializeDeserialize;
 
 		/// Multi currency for transfer of currencies
-		type Currency: MultiCurrencyExtended<
-			Self::AccountId,
-			CurrencyId=AssetId,
-			Balance=Balance,
-			Amount=Amount
-		>;
+		type Currency: MultiCurrencyExtended<Self::AccountId, CurrencyId = AssetId, Balance = Balance, Amount = Amount>;
 
 		/// The mining pool's module id, keep all assets in pool.
 		#[pallet::constant]
@@ -168,24 +160,13 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn get_pool_extend)]
-	pub type PoolExtends<T: Config> = StorageMap<
-		_,
-		Twox64Concat,
-		T::PoolExtendId,
-		PoolExtendInfo<T::AccountId>,
-		OptionQuery
-	>;
+	pub type PoolExtends<T: Config> =
+		StorageMap<_, Twox64Concat, T::PoolExtendId, PoolExtendInfo<T::AccountId>, OptionQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn get_participant)]
-	pub type ParticipantExtends<T: Config> = StorageDoubleMap<
-		_, Twox64Concat,
-		T::PoolExtendId,
-		Twox64Concat,
-		T::AccountId,
-		ParticipantExtend,
-		OptionQuery
-	>;
+	pub type ParticipantExtends<T: Config> =
+		StorageDoubleMap<_, Twox64Concat, T::PoolExtendId, Twox64Concat, T::AccountId, ParticipantExtend, OptionQuery>;
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
@@ -197,7 +178,7 @@ pub mod pallet {
 			start_block: T::BlockNumber,
 			end_block: T::BlockNumber,
 			reward_per_block: Balance,
-			stake_currency_id: AssetId
+			stake_currency_id: AssetId,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 
@@ -210,11 +191,10 @@ pub mod pallet {
 			let end_block: BlockNumber = end_block.saturated_into();
 			ensure!(block_number <= start_block, Error::<T>::StartBlockOutDate);
 
-			let block_delta = end_block
-				.checked_sub(start_block).ok_or(ArithmeticError::Overflow)?;
-			let currency_amount = to_balance!(
-				to_u256!(block_delta).checked_mul(to_u256!(reward_per_block)).ok_or(ArithmeticError::Overflow)?
-			)?;
+			let block_delta = end_block.checked_sub(start_block).ok_or(ArithmeticError::Overflow)?;
+			let currency_amount = to_balance!(to_u256!(block_delta)
+				.checked_mul(to_u256!(reward_per_block))
+				.ok_or(ArithmeticError::Overflow)?)?;
 
 			let module_account_id = Self::account_id();
 			T::Currency::transfer(currency_id, &who, &module_account_id, currency_amount)?;
@@ -238,7 +218,7 @@ pub mod pallet {
 				pool_extend_id,
 				currency_id,
 				currency_amount,
-				stake_currency_id
+				stake_currency_id,
 			));
 
 			Ok(().into())
@@ -259,12 +239,13 @@ pub mod pallet {
 
 			let module_account_id = Self::account_id();
 			if participant_extend.amount > Balance::zero() {
-				let pending_reward = to_balance!(
-					to_u256!(participant_extend.amount)
-					.checked_mul(to_u256!(pool_extend.acc_reward_per_share)).ok_or(ArithmeticError::Overflow)?
-					.checked_div(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?
-					.checked_sub(to_u256!(participant_extend.reward_debt)).ok_or(ArithmeticError::Overflow)?
-				)?;
+				let pending_reward = to_balance!(to_u256!(participant_extend.amount)
+					.checked_mul(to_u256!(pool_extend.acc_reward_per_share))
+					.ok_or(ArithmeticError::Overflow)?
+					.checked_div(to_u256!(1e12 as u64))
+					.ok_or(ArithmeticError::Overflow)?
+					.checked_sub(to_u256!(participant_extend.reward_debt))
+					.ok_or(ArithmeticError::Overflow)?)?;
 
 				if pending_reward > Balance::zero() {
 					T::Currency::transfer(pool_extend.currency_id, &module_account_id, &who, pending_reward)?;
@@ -273,17 +254,21 @@ pub mod pallet {
 
 			if amount > Balance::zero() {
 				T::Currency::transfer(pool_extend.stake_currency_id, &who, &module_account_id, amount)?;
-				participant_extend.amount = participant_extend.amount
-					.checked_add(amount).ok_or(ArithmeticError::Overflow)?;
-				pool_extend.total_stake_amount = pool_extend.total_stake_amount
-					.checked_add(amount).ok_or(ArithmeticError::Overflow)?;
+				participant_extend.amount = participant_extend
+					.amount
+					.checked_add(amount)
+					.ok_or(ArithmeticError::Overflow)?;
+				pool_extend.total_stake_amount = pool_extend
+					.total_stake_amount
+					.checked_add(amount)
+					.ok_or(ArithmeticError::Overflow)?;
 			}
 
-			participant_extend.reward_debt = to_balance!(
-				to_u256!(participant_extend.amount)
-				.checked_mul(to_u256!(pool_extend.acc_reward_per_share)).ok_or(ArithmeticError::Overflow)?
-				.checked_div(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?
-			)?;
+			participant_extend.reward_debt = to_balance!(to_u256!(participant_extend.amount)
+				.checked_mul(to_u256!(pool_extend.acc_reward_per_share))
+				.ok_or(ArithmeticError::Overflow)?
+				.checked_div(to_u256!(1e12 as u64))
+				.ok_or(ArithmeticError::Overflow)?)?;
 
 			PoolExtends::<T>::insert(pool_extend_id, pool_extend);
 			ParticipantExtends::<T>::insert(pool_extend_id, &who, participant_extend);
@@ -301,17 +286,24 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 
-			let mut participant_extend = ParticipantExtends::<T>::get(pool_extend_id, &who).ok_or(Error::<T>::UserNotFindInPoolExtend)?;
-			ensure!(participant_extend.amount >= amount, Error::<T>::InsufficientWithdrawAmount);
+			let mut participant_extend =
+				ParticipantExtends::<T>::get(pool_extend_id, &who).ok_or(Error::<T>::UserNotFindInPoolExtend)?;
+			ensure!(
+				participant_extend.amount >= amount,
+				Error::<T>::InsufficientWithdrawAmount
+			);
 
 			Self::update_pool_extend(&pool_extend_id)?;
 
 			let mut pool_extend = PoolExtends::<T>::get(pool_extend_id).ok_or(Error::<T>::PoolExtendNotFind)?;
 
 			let pending_reward = to_balance!(to_u256!(participant_extend.amount)
-				.checked_mul(to_u256!(pool_extend.acc_reward_per_share)).ok_or(ArithmeticError::Overflow)?
-				.checked_div(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?
-				.checked_sub(to_u256!(participant_extend.reward_debt)).ok_or(ArithmeticError::Overflow)?)?;
+				.checked_mul(to_u256!(pool_extend.acc_reward_per_share))
+				.ok_or(ArithmeticError::Overflow)?
+				.checked_div(to_u256!(1e12 as u64))
+				.ok_or(ArithmeticError::Overflow)?
+				.checked_sub(to_u256!(participant_extend.reward_debt))
+				.ok_or(ArithmeticError::Overflow)?)?;
 
 			let module_account_id = Self::account_id();
 
@@ -321,15 +313,19 @@ pub mod pallet {
 
 			if amount > Balance::zero() {
 				participant_extend.amount = to_balance!(to_u256!(participant_extend.amount)
-					.checked_sub(to_u256!(amount)).ok_or(ArithmeticError::Overflow)?)?;
+					.checked_sub(to_u256!(amount))
+					.ok_or(ArithmeticError::Overflow)?)?;
 				pool_extend.total_stake_amount = to_balance!(to_u256!(pool_extend.total_stake_amount)
-					.checked_sub(to_u256!(amount)).ok_or(ArithmeticError::Overflow)?)?;
+					.checked_sub(to_u256!(amount))
+					.ok_or(ArithmeticError::Overflow)?)?;
 				T::Currency::transfer(pool_extend.stake_currency_id, &module_account_id, &who, amount)?;
 			}
 
 			participant_extend.reward_debt = to_balance!(to_u256!(participant_extend.amount)
-				.checked_mul(to_u256!(pool_extend.acc_reward_per_share)).ok_or(ArithmeticError::Overflow)?
-				.checked_div(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?)?;
+				.checked_mul(to_u256!(pool_extend.acc_reward_per_share))
+				.ok_or(ArithmeticError::Overflow)?
+				.checked_div(to_u256!(1e12 as u64))
+				.ok_or(ArithmeticError::Overflow)?)?;
 
 			PoolExtends::<T>::insert(pool_extend_id, pool_extend);
 			ParticipantExtends::<T>::insert(pool_extend_id, &who, participant_extend);
@@ -347,44 +343,53 @@ impl<T: Config> Pallet<T> {
 
 	fn get_next_pool_extend_id() -> sp_std::result::Result<T::PoolExtendId, DispatchErrorWithPostInfo> {
 		let next_pool_extend_id = Self::next_pool_extend_id();
-		let new_pool_extend_id = next_pool_extend_id.checked_add(&One::one()).ok_or(Error::<T>::NoPoolExtendIdAvailable)?;
+		let new_pool_extend_id = next_pool_extend_id
+			.checked_add(&One::one())
+			.ok_or(Error::<T>::NoPoolExtendIdAvailable)?;
 		NextPoolExtendId::<T>::put(new_pool_extend_id);
 
 		Ok(next_pool_extend_id)
 	}
 
-	fn update_pool_extend(
-		pid: &T::PoolExtendId
-	) -> sp_std::result::Result<(), DispatchErrorWithPostInfo> {
-		PoolExtends::<T>::try_mutate(pid, |maybe_pool_extend| -> sp_std::result::Result<(), DispatchErrorWithPostInfo> {
-			let pool_extend = maybe_pool_extend.as_mut().ok_or(Error::<T>::PoolExtendNotFind)?;
-			let block_number: BlockNumber = frame_system::pallet::Pallet::<T>::block_number().saturated_into();
-			if block_number <= pool_extend.last_reward_block {
-				return Ok(());
-			}
+	fn update_pool_extend(pid: &T::PoolExtendId) -> sp_std::result::Result<(), DispatchErrorWithPostInfo> {
+		PoolExtends::<T>::try_mutate(
+			pid,
+			|maybe_pool_extend| -> sp_std::result::Result<(), DispatchErrorWithPostInfo> {
+				let pool_extend = maybe_pool_extend.as_mut().ok_or(Error::<T>::PoolExtendNotFind)?;
+				let block_number: BlockNumber = frame_system::pallet::Pallet::<T>::block_number().saturated_into();
+				if block_number <= pool_extend.last_reward_block {
+					return Ok(());
+				}
 
-			let reward_block = if block_number < pool_extend.end_block {block_number} else {pool_extend.end_block};
-			let block_delta = reward_block
-				.checked_sub(pool_extend.last_reward_block).ok_or(ArithmeticError::Overflow)?;
-			if block_delta == BlockNumber::zero() {
-				return Ok(());
-			}
+				let reward_block = if block_number < pool_extend.end_block {
+					block_number
+				} else {
+					pool_extend.end_block
+				};
+				let block_delta = reward_block
+					.checked_sub(pool_extend.last_reward_block)
+					.ok_or(ArithmeticError::Overflow)?;
+				if block_delta == BlockNumber::zero() {
+					return Ok(());
+				}
 
-			let block_rewards = to_balance!(
-				to_u256!(block_delta).checked_mul(to_u256!(pool_extend.reward_per_block)).ok_or(ArithmeticError::Overflow)?
-			)?;
+				let block_rewards = to_balance!(to_u256!(block_delta)
+					.checked_mul(to_u256!(pool_extend.reward_per_block))
+					.ok_or(ArithmeticError::Overflow)?)?;
 
-			pool_extend.acc_reward_per_share = to_balance!(
-				to_u256!(pool_extend.acc_reward_per_share).checked_add(
-					to_u256!(block_rewards)
-					.checked_mul(to_u256!(1e12 as u64)).ok_or(ArithmeticError::Overflow)?
-					.checked_div(to_u256!(pool_extend.total_stake_amount)).ok_or(ArithmeticError::Overflow)?
-				).ok_or(ArithmeticError::Overflow)?
-			)?;
-			pool_extend.last_reward_block = reward_block;
+				pool_extend.acc_reward_per_share = to_balance!(to_u256!(pool_extend.acc_reward_per_share)
+					.checked_add(
+						to_u256!(block_rewards)
+							.checked_mul(to_u256!(1e12 as u64))
+							.ok_or(ArithmeticError::Overflow)?
+							.checked_div(to_u256!(pool_extend.total_stake_amount))
+							.ok_or(ArithmeticError::Overflow)?
+					)
+					.ok_or(ArithmeticError::Overflow)?)?;
+				pool_extend.last_reward_block = reward_block;
 
-			Ok(())
-		})
+				Ok(())
+			},
+		)
 	}
 }
-
