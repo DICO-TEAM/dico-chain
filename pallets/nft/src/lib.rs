@@ -214,6 +214,7 @@ pub mod module {
 		NotIssuer,
 		OwnerIsExists,
 		NotOwner,
+		OwnerNotExists,
 		NotInSale,
 		Inactive,
 		ActiveNft,
@@ -523,6 +524,7 @@ impl<T: Config> Pallet<T> {
 	fn do_active_or_not(owner: &T::AccountId, token: (T::ClassId, T::TokenId), is_active: bool) -> DispatchResult {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
+			ensure!(!Self::is_in_sale(token.0, token.1), Error::<T>::InSale);
 			ensure!(t.owner == Some(owner.clone()), Error::<T>::NotOwner);
 			match is_active {
 				true => t.data.status.is_active_image = true,
@@ -537,6 +539,7 @@ impl<T: Config> Pallet<T> {
 	fn do_claim(owner: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) -> DispatchResult {
 		Tokens::<T>::try_mutate_exists(class_id, token_id, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
+			ensure!(!Self::is_in_sale(class_id, token_id), Error::<T>::InSale);
 			ensure!(t.owner == None, Error::<T>::OwnerIsExists);
 			let class_info = Classes::<T>::get(class_id).ok_or(Error::<T>::ClassNotFound)?;
 			T::Currency::withdraw(&owner, class_info.data.claim_payment, WithdrawReasons::TRANSFER, ExistenceRequirement::KeepAlive)?;
@@ -561,6 +564,7 @@ impl<T: Config> Pallet<T> {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
 			ensure!(t.owner == Some(owner.clone()), Error::<T>::NoPermission);
+			ensure!(!Self::is_in_sale(token.0, token.1), Error::<T>::InSale);
 			ensure!(!t.data.status.is_active_image, Error::<T>::ActiveNft);
 			Classes::<T>::try_mutate(token.0, |class_info| -> DispatchResult {
 				let info = class_info.as_mut().ok_or(Error::<T>::ClassNotFound)?;
@@ -616,7 +620,11 @@ impl<T: Config> Pallet<T> {
 	fn do_buy_token(buyer: &T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
-			// ensure!(Self::is_in_sale(token.0, token.1), Error::<T>::NotInSale);
+			ensure!(Self::is_in_sale(token.0, token.1), Error::<T>::NotInSale);
+			let old_owner = match t.owner {
+				Some(x) => x,
+				_ => {return Err(Error::<T>::OwnerNotExists)?;},
+			};
 			let sale_info = Self::get_in_sale_token(token.0, token.1).ok_or(Error::<T>::NotInSale)?;
 			T::Currency::transfer(&buyer, &sale_info.seller, sale_info.price, ExistenceRequirement::KeepAlive)?;
 			Self::remove_token_from_sale_vec(token.0, token.1);
@@ -624,7 +632,7 @@ impl<T: Config> Pallet<T> {
 			t.data.status.is_in_sale = false;
 			t.owner = Some(buyer.clone());
 			*token_info = Some(t);
-			Self::get_token_ownership(buyer, token.0, token.1);
+			Self::transfer_ownership(&old_owner, &buyer, token.0, token.1);
 			Self::deposit_event(Event::BuyToken(buyer.clone(),token.0, token.1, sale_info.price));
 			Ok(())
 		})
