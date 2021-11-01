@@ -2,19 +2,21 @@
 #![allow(clippy::unused_unit)]
 #![allow(clippy::upper_case_acronyms)]
 
+use dico_primitives::{
+	constants::time::{DAYS, MINUTES},
+	BlockNumber,
+};
 use sp_core::U256;
 use sp_runtime::ArithmeticError;
-use dico_primitives::{BlockNumber, constants::time::{DAYS, MINUTES}};
-
 
 pub const BONE: u128 = 1_000_000_000_000_000_000u128;
 pub const MIN_BPOW_BASE: u128 = 1u128;
 pub const MAX_BPOW_BASE: u128 = 2u128 * BONE - 1u128;
 pub const BPOW_PRECISION: u128 = BONE / 10_000_000_000u128;
-pub const MAX_DURATION_BLOCK: BlockNumber = 3 * DAYS;		// 43200 blocks if secs_per_block = 6
-pub const MIN_DURATION_BLOCK: BlockNumber = 30 * MINUTES;	// 300 blocks if secs_per_block = 6
-pub const MAX_STEPS: u32 = MAX_DURATION_BLOCK / 100;		// 432
-pub const MIN_STEPS: u32 = MIN_DURATION_BLOCK / 100;		// 3
+pub const MAX_DURATION_BLOCK: BlockNumber = 3 * DAYS; // 43200 blocks if secs_per_block = 6
+pub const MIN_DURATION_BLOCK: BlockNumber = 30 * MINUTES; // 300 blocks if secs_per_block = 6
+pub const MAX_STEPS: u32 = MAX_DURATION_BLOCK / 100; // 432
+pub const MIN_STEPS: u32 = MIN_DURATION_BLOCK / 100; // 3
 pub const WEIGHT_ONE: u128 = 10_000_000_000u128;
 pub const MAX_WEIGHT: u128 = 100 * WEIGHT_ONE;
 pub const MIN_WEIGHT: u128 = WEIGHT_ONE;
@@ -56,7 +58,11 @@ fn bpowi(a: U256, n: U256) -> Option<U256> {
 	let zero = U256::zero();
 	let two = U256::from(2);
 
-	let mut z = if n.checked_rem(two)? != zero { a } else { U256::from(BONE) };
+	let mut z = if n.checked_rem(two)? != zero {
+		a
+	} else {
+		U256::from(BONE)
+	};
 
 	let mut a1 = a;
 	let mut n1 = n.checked_div(two)?;
@@ -77,8 +83,12 @@ fn bpowi(a: U256, n: U256) -> Option<U256> {
 // Use `bpowi` for `b^e` and `bpowK` for k iterations
 // of approximation of b^0.w
 fn bpow(base: U256, exp: U256) -> Option<U256> {
-	if base < U256::from(MIN_BPOW_BASE) { return None; }
-	if base > U256::from(MAX_BPOW_BASE) { return None; }
+	if base < U256::from(MIN_BPOW_BASE) {
+		return None;
+	}
+	if base > U256::from(MAX_BPOW_BASE) {
+		return None;
+	}
 
 	let whole = bfloor(exp)?;
 	let remain = bsub(exp, whole)?;
@@ -122,10 +132,16 @@ fn bpow_approx(base: U256, exp: U256, precision: U256) -> Option<U256> {
 		let (c, cneg) = bsub_sign(a, bsub(big_k, bone)?);
 		term = bmul(term, bmul(c, x)?)?;
 		term = bdiv(term, big_k)?;
-		if term == zero { break; }
+		if term == zero {
+			break;
+		}
 
-		if xneg { negative = !negative }
-		if cneg { negative = !negative }
+		if xneg {
+			negative = !negative
+		}
+		if cneg {
+			negative = !negative
+		}
 
 		sum = if negative { bsub(sum, term)? } else { badd(sum, term)? };
 
@@ -134,7 +150,6 @@ fn bpow_approx(base: U256, exp: U256, precision: U256) -> Option<U256> {
 
 	Some(sum)
 }
-
 
 // *******************************************************************************************//
 //  calc_spot_price                                                                           //
@@ -157,15 +172,11 @@ pub fn calc_spot_price(
 	let numerator = bdiv(asset_balance_in, asset_weight_in).ok_or(ArithmeticError::Overflow)?;
 	let denominator = bdiv(asset_balance_out, asset_weight_out).ok_or(ArithmeticError::Overflow)?;
 	let ratio = bdiv(numerator, denominator).ok_or(ArithmeticError::Overflow)?;
-	let scale = bdiv(
-		bone,
-		bsub(bone, swap_fee).ok_or(ArithmeticError::Overflow)?,
-	).ok_or(ArithmeticError::Overflow)?;
+	let scale = bdiv(bone, bsub(bone, swap_fee).ok_or(ArithmeticError::Overflow)?).ok_or(ArithmeticError::Overflow)?;
 
 	let spot_price = bmul(ratio, scale).ok_or(ArithmeticError::Overflow)?;
 	Ok(spot_price)
 }
-
 
 //********************************************************************************************//
 // calc_out_given_in                                                                          //
@@ -199,7 +210,6 @@ pub fn calc_out_given_in(
 	Ok(asset_amount_out)
 }
 
-
 //********************************************************************************************//
 // calc_in_given_out                                                                          //
 // aI = asset_amount_in                                                                       //
@@ -228,11 +238,12 @@ pub fn calc_in_given_out(
 	let mut asset_amount_in = bsub(bone, swap_fee).ok_or(ArithmeticError::Overflow)?;
 	asset_amount_in = bdiv(
 		bmul(asset_balance_in, foo).ok_or(ArithmeticError::Overflow)?,
-		asset_amount_in).ok_or(ArithmeticError::Overflow)?;
+		asset_amount_in,
+	)
+	.ok_or(ArithmeticError::Overflow)?;
 
 	Ok(asset_amount_in)
 }
-
 
 //********************************************************************************************//
 // calc_adjust_block                                                                          //
@@ -243,14 +254,15 @@ pub fn calc_in_given_out(
 // aB = adjust_block                                                                          //
 //********************************************************************************************//
 pub fn calc_adjust_block(start_block: U256, end_block: U256, steps: U256, step: U256) -> Option<U256> {
-	if steps == U256::zero() { return None; }
+	if steps == U256::zero() {
+		return None;
+	}
 
 	bsub(end_block, start_block)
 		.and_then(|x| bdiv(x, steps))
 		.and_then(|x| bmul(x, step))
 		.and_then(|x| badd(x, start_block))
 }
-
 
 //************************************************************************************************//
 // calc_adjust_weight                                                                             //
@@ -261,7 +273,9 @@ pub fn calc_adjust_block(start_block: U256, end_block: U256, steps: U256, step: 
 // aW = adjust_weight                                                                             //
 //************************************************************************************************//
 pub fn calc_adjust_weight(start_weight: U256, end_weight: U256, steps: U256, step: U256) -> Option<U256> {
-	if steps == U256::zero() { return None; }
+	if steps == U256::zero() {
+		return None;
+	}
 
 	if start_weight > end_weight {
 		let acc_weight = bsub(start_weight, end_weight)
@@ -279,13 +293,11 @@ pub fn calc_adjust_weight(start_weight: U256, end_weight: U256, steps: U256, ste
 }
 
 pub fn calc_crowdfunding_amount(supply_amount: U256, crowdfunding_fee: U256) -> Option<U256> {
-	bsub(U256::from(BONE), U256::from(crowdfunding_fee))
-		.and_then(|x| bmul(U256::from(supply_amount), x))
+	bsub(U256::from(BONE), U256::from(crowdfunding_fee)).and_then(|x| bmul(U256::from(supply_amount), x))
 }
 
 pub fn calc_supply_amount_with_fee(supply_amount: U256, crowdfunding_fee: U256) -> Option<U256> {
-	bsub(U256::from(BONE), U256::from(crowdfunding_fee))
-		.and_then(|x| bdiv(U256::from(supply_amount), x))
+	bsub(U256::from(BONE), U256::from(crowdfunding_fee)).and_then(|x| bdiv(U256::from(supply_amount), x))
 }
 
 #[cfg(test)]
@@ -327,47 +339,102 @@ mod tests {
 	#[test]
 	fn test_calc_adjust_weight() {
 		assert_eq!(
-			calc_adjust_weight(U256::from(36000000000000u128), U256::from(12000000000000u128), U256::from(72), U256::from(0)),
+			calc_adjust_weight(
+				U256::from(36000000000000u128),
+				U256::from(12000000000000u128),
+				U256::from(72),
+				U256::from(0)
+			),
 			Some(U256::from(36000000000000u128)),
 		);
 		assert_eq!(
-			calc_adjust_weight(U256::from(36000000000000u128), U256::from(12000000000000u128), U256::from(72), U256::from(1)),
+			calc_adjust_weight(
+				U256::from(36000000000000u128),
+				U256::from(12000000000000u128),
+				U256::from(72),
+				U256::from(1)
+			),
 			Some(U256::from(35666666666667u128)),
 		);
 		assert_eq!(
-			calc_adjust_weight(U256::from(36000000000000u128), U256::from(12000000000000u128), U256::from(72), U256::from(4)),
+			calc_adjust_weight(
+				U256::from(36000000000000u128),
+				U256::from(12000000000000u128),
+				U256::from(72),
+				U256::from(4)
+			),
 			Some(U256::from(34666666666667u128)),
 		);
 		assert_eq!(
-			calc_adjust_weight(U256::from(36000000000000u128), U256::from(12000000000000u128), U256::from(72), U256::from(14)),
+			calc_adjust_weight(
+				U256::from(36000000000000u128),
+				U256::from(12000000000000u128),
+				U256::from(72),
+				U256::from(14)
+			),
 			Some(U256::from(31333333333333u128)),
 		);
 		assert_eq!(
-			calc_adjust_weight(U256::from(36000000000000u128), U256::from(12000000000000u128), U256::from(72), U256::from(34)),
+			calc_adjust_weight(
+				U256::from(36000000000000u128),
+				U256::from(12000000000000u128),
+				U256::from(72),
+				U256::from(34)
+			),
 			Some(U256::from(24666666666667u128)),
 		);
 		assert_eq!(
-			calc_adjust_weight(U256::from(36000000000000u128), U256::from(12000000000000u128), U256::from(72), U256::from(64)),
+			calc_adjust_weight(
+				U256::from(36000000000000u128),
+				U256::from(12000000000000u128),
+				U256::from(72),
+				U256::from(64)
+			),
 			Some(U256::from(14666666666667u128)),
 		);
 		assert_eq!(
-			calc_adjust_weight(U256::from(36000000000000u128), U256::from(12000000000000u128), U256::from(72), U256::from(72)),
+			calc_adjust_weight(
+				U256::from(36000000000000u128),
+				U256::from(12000000000000u128),
+				U256::from(72),
+				U256::from(72)
+			),
 			Some(U256::from(12000000000000u128)),
 		);
 		assert_eq!(
-			calc_adjust_weight(U256::from(4000000000000u128), U256::from(28000000000000u128), U256::from(72), U256::from(4)),
+			calc_adjust_weight(
+				U256::from(4000000000000u128),
+				U256::from(28000000000000u128),
+				U256::from(72),
+				U256::from(4)
+			),
 			Some(U256::from(5333333333333u128)),
 		);
 		assert_eq!(
-			calc_adjust_weight(U256::from(4000000000000u128), U256::from(28000000000000u128), U256::from(72), U256::from(14)),
+			calc_adjust_weight(
+				U256::from(4000000000000u128),
+				U256::from(28000000000000u128),
+				U256::from(72),
+				U256::from(14)
+			),
 			Some(U256::from(8666666666667u128)),
 		);
 		assert_eq!(
-			calc_adjust_weight(U256::from(4000000000000u128), U256::from(28000000000000u128), U256::from(72), U256::from(34)),
+			calc_adjust_weight(
+				U256::from(4000000000000u128),
+				U256::from(28000000000000u128),
+				U256::from(72),
+				U256::from(34)
+			),
 			Some(U256::from(15333333333333u128)),
 		);
 		assert_eq!(
-			calc_adjust_weight(U256::from(4000000000000u128), U256::from(28000000000000u128), U256::from(72), U256::from(64)),
+			calc_adjust_weight(
+				U256::from(4000000000000u128),
+				U256::from(28000000000000u128),
+				U256::from(72),
+				U256::from(64)
+			),
 			Some(U256::from(25333333333333u128)),
 		);
 	}
@@ -427,7 +494,10 @@ mod tests {
 		);
 		assert_eq!(
 			bfloor(U256::MAX),
-			Some(U256::from_dec_str("115792089237316195423570985008687907853269984665640564039457000000000000000000").unwrap())
+			Some(
+				U256::from_dec_str("115792089237316195423570985008687907853269984665640564039457000000000000000000")
+					.unwrap()
+			)
 		);
 	}
 
@@ -451,7 +521,10 @@ mod tests {
 		);
 		assert_eq!(
 			bsub(U256::MAX, U256::from(100000000000000000000u128)),
-			Some(U256::from_dec_str("115792089237316195423570985008687907853269984665640564039357584007913129639935").unwrap())
+			Some(
+				U256::from_dec_str("115792089237316195423570985008687907853269984665640564039357584007913129639935")
+					.unwrap()
+			)
 		);
 	}
 
@@ -472,7 +545,10 @@ mod tests {
 	#[test]
 	fn test_bdiv() {
 		assert_eq!(bdiv(U256::zero(), U256::one()), Some(U256::zero()));
-		assert_eq!(bdiv(U256::one(), U256::one()), Some(U256::from(1000000000000000000u128)));
+		assert_eq!(
+			bdiv(U256::one(), U256::one()),
+			Some(U256::from(1000000000000000000u128))
+		);
 		assert_eq!(
 			bdiv(U256::from(100000000000000000000u128), U256::from(30000000u128)),
 			Some(U256::from(3333333333333333333333333333333u128))
@@ -507,10 +583,7 @@ mod tests {
 	#[test]
 	fn test_bpow() {
 		assert_eq!(bpow(U256::zero(), U256::zero()), None);
-		assert_eq!(
-			bpow(U256::one(), U256::one()),
-			Some(U256::from(999999999999999999u128))
-		);
+		assert_eq!(bpow(U256::one(), U256::one()), Some(U256::from(999999999999999999u128)));
 		assert_eq!(
 			bpow(U256::from(10000000u128), U256::from(30000000u128)),
 			Some(U256::from(999999999970000000u128))
@@ -527,109 +600,142 @@ mod tests {
 
 	#[test]
 	fn test_calc_spot_price() {
-		assert_eq!(calc_spot_price(
-			U256::from(10000000000000u128),
-			U256::from(4),
-			U256::from(75000000000000000u128),
-			U256::from(36),
-			U256::zero(),
-		), Ok(U256::from(1200000000000000u128)));
-		assert_eq!(calc_spot_price(
-			U256::zero(),
-			U256::from(4),
-			U256::from(75000000000000000u128),
-			U256::from(36),
-			U256::zero(),
-		), Ok(U256::zero()));
-		assert_eq!(calc_spot_price(
-			U256::from(10000000000000u128),
-			U256::from(4),
-			U256::from(75000000000000000u128),
-			U256::from(36),
-			U256::from(TEST_SWAP_FEE),
-		), Ok(U256::from(1200000001800000u128)));
+		assert_eq!(
+			calc_spot_price(
+				U256::from(10000000000000u128),
+				U256::from(4),
+				U256::from(75000000000000000u128),
+				U256::from(36),
+				U256::zero(),
+			),
+			Ok(U256::from(1200000000000000u128))
+		);
+		assert_eq!(
+			calc_spot_price(
+				U256::zero(),
+				U256::from(4),
+				U256::from(75000000000000000u128),
+				U256::from(36),
+				U256::zero(),
+			),
+			Ok(U256::zero())
+		);
+		assert_eq!(
+			calc_spot_price(
+				U256::from(10000000000000u128),
+				U256::from(4),
+				U256::from(75000000000000000u128),
+				U256::from(36),
+				U256::from(TEST_SWAP_FEE),
+			),
+			Ok(U256::from(1200000001800000u128))
+		);
 
-		assert_eq!(calc_spot_price(
-			U256::from(u128::MAX),
-			U256::from(35),
-			U256::from(u128::MAX),
-			U256::from(5),
-			U256::from(TEST_SWAP_FEE),
-		), Ok(U256::from(142857143071428572u128)));
+		assert_eq!(
+			calc_spot_price(
+				U256::from(u128::MAX),
+				U256::from(35),
+				U256::from(u128::MAX),
+				U256::from(5),
+				U256::from(TEST_SWAP_FEE),
+			),
+			Ok(U256::from(142857143071428572u128))
+		);
 
-		assert_eq!(calc_spot_price(
-			U256::from(1333333000000000000000000u128),
-			U256::from(4),
-			U256::from(7500000000000000000000000u128),
-			U256::from(36),
-			U256::from(1500000000000000u128),
-		), Ok(U256::from(1602403204807210816u128)));
+		assert_eq!(
+			calc_spot_price(
+				U256::from(1333333000000000000000000u128),
+				U256::from(4),
+				U256::from(7500000000000000000000000u128),
+				U256::from(36),
+				U256::from(1500000000000000u128),
+			),
+			Ok(U256::from(1602403204807210816u128))
+		);
 	}
 
 	#[test]
 	fn test_calc_out_given_in() {
-		assert_eq!(calc_out_given_in(
-			U256::from(u128::MAX),
-			U256::from(35),
-			U256::from(u128::MAX),
-			U256::from(5),
-			U256::from(10000000000000u128),
-			U256::from(TEST_SWAP_FEE),
-		), Ok(U256::zero()));
-		assert_eq!(calc_out_given_in(
-			U256::from(10000000000000u128),
-			U256::from(4),
-			U256::from(75000000000000000u128),
-			U256::from(36),
-			U256::from(1000000000000u128),
-			U256::from(TEST_SWAP_FEE),
-		), Ok(U256::from(790060733782324u128)));
-		assert_eq!(calc_out_given_in(
-			U256::from(10000000000000u128),
-			U256::from(36),
-			U256::from(75000000000000000u128),
-			U256::from(4),
-			U256::from(1000000000000u128),
-			U256::from(TEST_SWAP_FEE),
-		), Ok(U256::from(43192678583027373u128)));
-		assert_eq!(calc_out_given_in(
-			U256::from(1333333000000u128),
-			U256::from(4),
-			U256::from(7500000000000000000u128),
-			U256::from(36),
-			U256::from(86034000000u128),
-			U256::from(TEST_SWAP_FEE),
-		), Ok(U256::from(51927050546147730u128)));
+		assert_eq!(
+			calc_out_given_in(
+				U256::from(u128::MAX),
+				U256::from(35),
+				U256::from(u128::MAX),
+				U256::from(5),
+				U256::from(10000000000000u128),
+				U256::from(TEST_SWAP_FEE),
+			),
+			Ok(U256::zero())
+		);
+		assert_eq!(
+			calc_out_given_in(
+				U256::from(10000000000000u128),
+				U256::from(4),
+				U256::from(75000000000000000u128),
+				U256::from(36),
+				U256::from(1000000000000u128),
+				U256::from(TEST_SWAP_FEE),
+			),
+			Ok(U256::from(790060733782324u128))
+		);
+		assert_eq!(
+			calc_out_given_in(
+				U256::from(10000000000000u128),
+				U256::from(36),
+				U256::from(75000000000000000u128),
+				U256::from(4),
+				U256::from(1000000000000u128),
+				U256::from(TEST_SWAP_FEE),
+			),
+			Ok(U256::from(43192678583027373u128))
+		);
+		assert_eq!(
+			calc_out_given_in(
+				U256::from(1333333000000u128),
+				U256::from(4),
+				U256::from(7500000000000000000u128),
+				U256::from(36),
+				U256::from(86034000000u128),
+				U256::from(TEST_SWAP_FEE),
+			),
+			Ok(U256::from(51927050546147730u128))
+		);
 	}
 
 	#[test]
 	fn test_calc_in_given_out() {
-		assert_eq!(calc_in_given_out(
-			U256::from(u128::MAX),
-			U256::from(35),
-			U256::from(u128::MAX),
-			U256::from(5),
-			U256::from(10000000000000u128),
-			U256::from(TEST_SWAP_FEE),
-		), Ok(U256::zero()));
-		assert_eq!(calc_in_given_out(
-			U256::from(10000000000000u128),
-			U256::from(4),
-			U256::from(75000000000000000u128),
-			U256::from(36),
-			U256::from(1000000000000u128),
-			U256::from(TEST_SWAP_FEE),
-		), Ok(U256::from(1200080006u128)));
-		assert_eq!(calc_in_given_out(
-			U256::from(10000000000000u128),
-			U256::from(36),
-			U256::from(75000000000000000u128),
-			U256::from(4),
-			U256::from(1000000000000u128),
-			U256::from(TEST_SWAP_FEE),
-		), Ok(U256::from(14814925u128)));
+		assert_eq!(
+			calc_in_given_out(
+				U256::from(u128::MAX),
+				U256::from(35),
+				U256::from(u128::MAX),
+				U256::from(5),
+				U256::from(10000000000000u128),
+				U256::from(TEST_SWAP_FEE),
+			),
+			Ok(U256::zero())
+		);
+		assert_eq!(
+			calc_in_given_out(
+				U256::from(10000000000000u128),
+				U256::from(4),
+				U256::from(75000000000000000u128),
+				U256::from(36),
+				U256::from(1000000000000u128),
+				U256::from(TEST_SWAP_FEE),
+			),
+			Ok(U256::from(1200080006u128))
+		);
+		assert_eq!(
+			calc_in_given_out(
+				U256::from(10000000000000u128),
+				U256::from(36),
+				U256::from(75000000000000000u128),
+				U256::from(4),
+				U256::from(1000000000000u128),
+				U256::from(TEST_SWAP_FEE),
+			),
+			Ok(U256::from(14814925u128))
+		);
 	}
 }
-
-
-

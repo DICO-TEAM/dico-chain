@@ -4,11 +4,10 @@
 
 use super::*;
 pub use crate::mock::{
-	Currency, Event as TestEvent, ExtBuilder, Origin,
-	System, Test, DOT, ALICE, BOB, USDT, DICO, Lbp,
-	DEFAULT_ASSET_AMOUNT, WEIGHT_ONE
+	Currency, Event as TestEvent, ExtBuilder, Lbp, Origin, System, Test, ALICE, BOB, DEFAULT_ASSET_AMOUNT, DICO, DOT,
+	USDT, WEIGHT_ONE,
 };
-use frame_support::{assert_ok, assert_err};
+use frame_support::{assert_err, assert_ok};
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut ext = ExtBuilder::default().build();
@@ -30,21 +29,32 @@ fn expect_events(e: Vec<TestEvent>) {
 	assert_eq!(last_events(e.len()), e);
 }
 
-
 #[test]
 fn fundraising_update_should_work() {
 	new_test_ext().execute_with(|| {
 		Lbp::add_fundraising(1000, 100000);
 		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(1000, 100000)]));
 		assert_eq!(Lbp::ensure_fundraising(1000, 100000), Ok(()));
-		assert_err!(Lbp::ensure_fundraising(1000, 100), Error::<Test>::InvalidFundraisingAmount);
-		assert_err!(Lbp::ensure_fundraising(10000, 10000), Error::<Test>::InvalidFundraisingAsset);
+		assert_err!(
+			Lbp::ensure_fundraising(1000, 100),
+			Error::<Test>::InvalidFundraisingAmount
+		);
+		assert_err!(
+			Lbp::ensure_fundraising(10000, 10000),
+			Error::<Test>::InvalidFundraisingAsset
+		);
 		Lbp::add_fundraising(1000, 1000);
 		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(1000, 1000)]));
 		Lbp::add_fundraising(100, 1000);
-		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(1000, 1000), (100, 1000)]));
+		assert_eq!(
+			SupportFundraisingAssets::<Test>::get(),
+			Some(vec![(1000, 1000), (100, 1000)])
+		);
 		Lbp::add_fundraising(100, 100);
-		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(1000, 1000), (100, 100)]));
+		assert_eq!(
+			SupportFundraisingAssets::<Test>::get(),
+			Some(vec![(1000, 1000), (100, 100)])
+		);
 		Lbp::remove_fundraising(100);
 		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(1000, 1000)]));
 		Lbp::remove_fundraising(1000);
@@ -64,17 +74,23 @@ fn fundraising_asset_update_should_work() {
 			USDT,
 			100_000_000_000_000_000u128
 		));
-		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(USDT, 100_000_000_000_000_000u128)]));
-		expect_events(
-			vec![Event::FundraisingAssetAdded(USDT, 100_000_000_000_000_000u128).into()]
+		assert_eq!(
+			SupportFundraisingAssets::<Test>::get(),
+			Some(vec![(USDT, 100_000_000_000_000_000u128)])
 		);
+		expect_events(vec![
+			Event::FundraisingAssetAdded(USDT, 100_000_000_000_000_000u128).into()
+		]);
 
 		assert_ok!(Lbp::add_fundraising_asset(
 			Origin::signed(ALICE),
 			USDT,
 			1000_000_000_000_000_000u128
 		));
-		assert_eq!(SupportFundraisingAssets::<Test>::get(), Some(vec![(USDT, 1000_000_000_000_000_000u128)]));
+		assert_eq!(
+			SupportFundraisingAssets::<Test>::get(),
+			Some(vec![(USDT, 1000_000_000_000_000_000u128)])
+		);
 
 		assert_ok!(Lbp::add_fundraising_asset(
 			Origin::signed(ALICE),
@@ -83,69 +99,67 @@ fn fundraising_asset_update_should_work() {
 		));
 		assert_eq!(
 			SupportFundraisingAssets::<Test>::get(),
-			Some(vec![(USDT, 1000_000_000_000_000_000u128), (DICO, 1000_000_000_000_000_000_000u128)])
+			Some(vec![
+				(USDT, 1000_000_000_000_000_000u128),
+				(DICO, 1000_000_000_000_000_000_000u128)
+			])
 		);
 
-		assert_ok!(Lbp::remove_fundraising_asset(
-			Origin::signed(ALICE),
-			USDT
-		));
+		assert_ok!(Lbp::remove_fundraising_asset(Origin::signed(ALICE), USDT));
 		assert_eq!(
 			SupportFundraisingAssets::<Test>::get(),
 			Some(vec![(DICO, 1000_000_000_000_000_000_000u128)])
 		);
-		expect_events(
-			vec![Event::FundraisingAssetRemoved(USDT).into()]
-		);
+		expect_events(vec![Event::FundraisingAssetRemoved(USDT).into()]);
 
-		assert_ok!(Lbp::remove_fundraising_asset(
-			Origin::signed(ALICE),
-			DICO
-		));
-		assert_eq!(
-			SupportFundraisingAssets::<Test>::get(),
-			None
-		);
+		assert_ok!(Lbp::remove_fundraising_asset(Origin::signed(ALICE), DICO));
+		assert_eq!(SupportFundraisingAssets::<Test>::get(), None);
 	});
 }
 
 #[test]
 fn create_lbp_should_work() {
 	new_test_ext().execute_with(|| {
-		assert_err!(Lbp::create_lbp(
-			Origin::signed(ALICE),
-			USDT,
-			DICO,
-			10_000_000_000_000u128,
-			100_000_000_000_000u128,
-			10 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			10 * WEIGHT_ONE,
-			100,
-			1000,
-			100,
-		), Error::<Test>::InvalidFundraisingAsset);
+		assert_err!(
+			Lbp::create_lbp(
+				Origin::signed(ALICE),
+				USDT,
+				DICO,
+				10_000_000_000_000u128,
+				100_000_000_000_000u128,
+				10 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				10 * WEIGHT_ONE,
+				100,
+				1000,
+				100,
+			),
+			Error::<Test>::InvalidFundraisingAsset
+		);
 
 		assert_ok!(Lbp::add_fundraising_asset(
 			Origin::signed(ALICE),
 			DICO,
 			100_000_000_000_000_000u128
 		));
-		assert_err!(Lbp::create_lbp(
-			Origin::signed(ALICE),
-			USDT,
-			DICO,
-			10_000_000_000_000u128,
-			100_000_000_000_000u128,
-			10 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			10 * WEIGHT_ONE,
-			100,
-			1000,
-			100,
-		), Error::<Test>::InvalidFundraisingAmount);
+		assert_err!(
+			Lbp::create_lbp(
+				Origin::signed(ALICE),
+				USDT,
+				DICO,
+				10_000_000_000_000u128,
+				100_000_000_000_000u128,
+				10 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				10 * WEIGHT_ONE,
+				100,
+				1000,
+				100,
+			),
+			Error::<Test>::InvalidFundraisingAmount
+		);
 
 		assert_ok!(Lbp::add_fundraising_asset(
 			Origin::signed(ALICE),
@@ -173,97 +187,136 @@ fn create_lbp_should_work() {
 		let lbp_pair = LbpPair::new(USDT, DICO);
 		assert_eq!(OngoingLbps::<Test>::get(lbp_pair), Some((ALICE, 0)));
 
-		let lbp_info = LbpInfo::new(100, 1000, 100,ALICE,
-									USDT, DICO, 10_000_000_000_000u128,
-									100_000_000_000_000u128, 10 * WEIGHT_ONE, 90 * WEIGHT_ONE,
-									90 * WEIGHT_ONE, 10 * WEIGHT_ONE);
+		let lbp_info = LbpInfo::new(
+			100,
+			1000,
+			100,
+			ALICE,
+			USDT,
+			DICO,
+			10_000_000_000_000u128,
+			100_000_000_000_000u128,
+			10 * WEIGHT_ONE,
+			90 * WEIGHT_ONE,
+			90 * WEIGHT_ONE,
+			10 * WEIGHT_ONE,
+		);
 		assert_eq!(Lbps::<Test>::get(0), Some(lbp_info));
 
 		let module_id_account = Lbp::account_id();
-		assert_eq!(Currency::free_balance(DICO, &module_id_account), 100_000_000_000_000u128);
+		assert_eq!(
+			Currency::free_balance(DICO, &module_id_account),
+			100_000_000_000_000u128
+		);
 		assert_eq!(Currency::free_balance(USDT, &module_id_account), 10_000_000_000_000u128);
-		assert_eq!(Currency::free_balance(DICO, &ALICE), DEFAULT_ASSET_AMOUNT - 100_000_000_000_000u128);
-		assert_eq!(Currency::free_balance(USDT, &ALICE), DEFAULT_ASSET_AMOUNT - 10_000_000_000_000u128);
-
-		expect_events(
-			vec![Event::LbpCreated(ALICE, 0, USDT, DICO,
-								   10_000_000_000_000, 100_000_000_000_000).into()]
+		assert_eq!(
+			Currency::free_balance(DICO, &ALICE),
+			DEFAULT_ASSET_AMOUNT - 100_000_000_000_000u128
+		);
+		assert_eq!(
+			Currency::free_balance(USDT, &ALICE),
+			DEFAULT_ASSET_AMOUNT - 10_000_000_000_000u128
 		);
 
-		assert_err!(Lbp::create_lbp(
-			Origin::signed(ALICE),
-			USDT,
-			DICO,
-			10_000_000_000_000u128,
-			100_000_000_000_000u128,
-			10 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			10 * WEIGHT_ONE,
-			100,
-			1000,
-			100,
-		), Error::<Test>::LbpPairOngoing);
-
-		assert_err!(Lbp::create_lbp(
-			Origin::signed(ALICE),
-			USDT,
-			DICO,
-			10_000_000_000_000u128,
-			100_000_000_000_000u128,
-			10 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			10 * WEIGHT_ONE,
-			100,
-			1000,
+		expect_events(vec![Event::LbpCreated(
+			ALICE,
 			0,
-		), Error::<Test>::ErrMinSteps);
-
-		assert_err!(Lbp::create_lbp(
-			Origin::signed(ALICE),
 			USDT,
 			DICO,
-			10_000_000_000_000u128,
-			100_000_000_000_000u128,
-			10 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			10 * WEIGHT_ONE,
-			100,
-			1000,
-			433,
-		), Error::<Test>::ErrMaxSteps);
+			10_000_000_000_000,
+			100_000_000_000_000,
+		)
+		.into()]);
 
-		assert_err!(Lbp::create_lbp(
-			Origin::signed(ALICE),
-			USDT,
-			DICO,
-			10_000_000_000_000u128,
-			100_000_000_000_000u128,
-			10 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			10 * WEIGHT_ONE,
-			100,
-			120,
-			100,
-		), Error::<Test>::ErrMinDurationBlock);
+		assert_err!(
+			Lbp::create_lbp(
+				Origin::signed(ALICE),
+				USDT,
+				DICO,
+				10_000_000_000_000u128,
+				100_000_000_000_000u128,
+				10 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				10 * WEIGHT_ONE,
+				100,
+				1000,
+				100,
+			),
+			Error::<Test>::LbpPairOngoing
+		);
 
-		assert_err!(Lbp::create_lbp(
-			Origin::signed(ALICE),
-			USDT,
-			DICO,
-			10_000_000_000_000u128,
-			100_000_000_000_000u128,
-			10 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			90 * WEIGHT_ONE,
-			10 * WEIGHT_ONE,
-			100,
-			100000,
-			100,
-		), Error::<Test>::ErrMaxDurationBlock);
+		assert_err!(
+			Lbp::create_lbp(
+				Origin::signed(ALICE),
+				USDT,
+				DICO,
+				10_000_000_000_000u128,
+				100_000_000_000_000u128,
+				10 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				10 * WEIGHT_ONE,
+				100,
+				1000,
+				0,
+			),
+			Error::<Test>::ErrMinSteps
+		);
+
+		assert_err!(
+			Lbp::create_lbp(
+				Origin::signed(ALICE),
+				USDT,
+				DICO,
+				10_000_000_000_000u128,
+				100_000_000_000_000u128,
+				10 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				10 * WEIGHT_ONE,
+				100,
+				1000,
+				433,
+			),
+			Error::<Test>::ErrMaxSteps
+		);
+
+		assert_err!(
+			Lbp::create_lbp(
+				Origin::signed(ALICE),
+				USDT,
+				DICO,
+				10_000_000_000_000u128,
+				100_000_000_000_000u128,
+				10 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				10 * WEIGHT_ONE,
+				100,
+				120,
+				100,
+			),
+			Error::<Test>::ErrMinDurationBlock
+		);
+
+		assert_err!(
+			Lbp::create_lbp(
+				Origin::signed(ALICE),
+				USDT,
+				DICO,
+				10_000_000_000_000u128,
+				100_000_000_000_000u128,
+				10 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				90 * WEIGHT_ONE,
+				10 * WEIGHT_ONE,
+				100,
+				100000,
+				100,
+			),
+			Error::<Test>::ErrMaxDurationBlock
+		);
 	});
 }
 
@@ -291,22 +344,37 @@ fn exit_lbp_should_work() {
 			100,
 		));
 
-		let mut lbp_info = LbpInfo::new(100, 1000, 100, ALICE,
-										DICO, USDT, 100_000_000_000_000u128,
-										10_000_000_000_000u128, 90 * WEIGHT_ONE, 10 * WEIGHT_ONE,
-										10 * WEIGHT_ONE, 90 * WEIGHT_ONE);
-
+		let mut lbp_info = LbpInfo::new(
+			100,
+			1000,
+			100,
+			ALICE,
+			DICO,
+			USDT,
+			100_000_000_000_000u128,
+			10_000_000_000_000u128,
+			90 * WEIGHT_ONE,
+			10 * WEIGHT_ONE,
+			10 * WEIGHT_ONE,
+			90 * WEIGHT_ONE,
+		);
 
 		assert_err!(Lbp::exit_lbp(Origin::signed(ALICE), 1), Error::<Test>::LbpNotFind);
 		assert_err!(Lbp::exit_lbp(Origin::signed(BOB), 0), Error::<Test>::MustBeOwner);
 
 		lbp_info.status = LbpStatus::Cancelled;
 		Lbps::<Test>::insert(0, lbp_info);
-		assert_err!(Lbp::exit_lbp(Origin::signed(ALICE), 0), Error::<Test>::MustBeNonTradingStatus);
+		assert_err!(
+			Lbp::exit_lbp(Origin::signed(ALICE), 0),
+			Error::<Test>::MustBeNonTradingStatus
+		);
 
 		lbp_info.status = LbpStatus::InProgress;
 		Lbps::<Test>::insert(0, lbp_info);
-		assert_err!(Lbp::exit_lbp(Origin::signed(ALICE), 0), Error::<Test>::MustBeNonTradingStatus);
+		assert_err!(
+			Lbp::exit_lbp(Origin::signed(ALICE), 0),
+			Error::<Test>::MustBeNonTradingStatus
+		);
 
 		lbp_info.status = LbpStatus::Pending;
 		Lbps::<Test>::insert(0, lbp_info);
@@ -327,9 +395,7 @@ fn exit_lbp_should_work() {
 		let lbp_pair = LbpPair::new(DICO, USDT);
 		assert_eq!(OngoingLbps::<Test>::get(lbp_pair), None);
 
-		expect_events(
-			vec![Event::LbpExited(ALICE, 0).into()]
-		);
+		expect_events(vec![Event::LbpExited(ALICE, 0).into()]);
 	});
 }
 
@@ -362,23 +428,50 @@ fn swap_exact_amount_supply_should_work() {
 		let lbp_pair = LbpPair::new(USDT, DICO);
 		assert_eq!(OngoingLbps::<Test>::get(lbp_pair), Some((ALICE, 0)));
 
-		let mut lbp_info = LbpInfo::new(1, 1001, 100, ALICE,
-										USDT, DICO, 1333333000000000000000000u128,
-										7500000000000000000000000u128, 4 * WEIGHT_ONE, 36 * WEIGHT_ONE,
-										36 * WEIGHT_ONE, 4 * WEIGHT_ONE);
+		let mut lbp_info = LbpInfo::new(
+			1,
+			1001,
+			100,
+			ALICE,
+			USDT,
+			DICO,
+			1333333000000000000000000u128,
+			7500000000000000000000000u128,
+			4 * WEIGHT_ONE,
+			36 * WEIGHT_ONE,
+			36 * WEIGHT_ONE,
+			4 * WEIGHT_ONE,
+		);
 		lbp_info.status = LbpStatus::InProgress;
 		assert_eq!(Lbps::<Test>::get(0), Some(lbp_info));
 
 		let module_id_account = Lbp::account_id();
-		assert_eq!(Currency::free_balance(DICO, &module_id_account), 7500000000000000000000000u128);
-		assert_eq!(Currency::free_balance(USDT, &module_id_account), 1333333000000000000000000u128);
-		assert_eq!(Currency::free_balance(DICO, &ALICE), DEFAULT_ASSET_AMOUNT - 7500000000000000000000000u128);
-		assert_eq!(Currency::free_balance(USDT, &ALICE), DEFAULT_ASSET_AMOUNT - 1333333000000000000000000u128);
-
-		expect_events(
-			vec![Event::LbpCreated(ALICE, 0, USDT, DICO,
-								   1333333000000000000000000u128, 7500000000000000000000000u128).into()]
+		assert_eq!(
+			Currency::free_balance(DICO, &module_id_account),
+			7500000000000000000000000u128
 		);
+		assert_eq!(
+			Currency::free_balance(USDT, &module_id_account),
+			1333333000000000000000000u128
+		);
+		assert_eq!(
+			Currency::free_balance(DICO, &ALICE),
+			DEFAULT_ASSET_AMOUNT - 7500000000000000000000000u128
+		);
+		assert_eq!(
+			Currency::free_balance(USDT, &ALICE),
+			DEFAULT_ASSET_AMOUNT - 1333333000000000000000000u128
+		);
+
+		expect_events(vec![Event::LbpCreated(
+			ALICE,
+			0,
+			USDT,
+			DICO,
+			1333333000000000000000000u128,
+			7500000000000000000000000u128,
+		)
+		.into()]);
 
 		assert_ok!(Lbp::swap_exact_amount_supply(
 			Origin::signed(BOB),
@@ -392,22 +485,34 @@ fn swap_exact_amount_supply_should_work() {
 		lbp_info.fundraising_balance -= 51676197239710905000000u128;
 		assert_eq!(Lbps::<Test>::get(0), Some(lbp_info));
 
-		assert_eq!(Currency::free_balance(DICO, &module_id_account),
-				   7500000000000000000000000u128 - 51676197239710905000000u128);
-		assert_eq!(Currency::free_balance(USDT, &module_id_account),
-				   1333333000000000000000000u128 + 85603830000000000000000u128);
-		assert_eq!(Currency::free_balance(DICO, &BOB),
-				   DEFAULT_ASSET_AMOUNT + 51676197239710905000000u128);
-		assert_eq!(Currency::free_balance(USDT, &BOB),
-				   DEFAULT_ASSET_AMOUNT - 86034000000000000000000u128);
-
-		expect_events(
-			vec![Event::Swapped(BOB, 0, USDT, DICO,
-								86034000000000000000000u128, 51676197239710905000000u128).into()]
+		assert_eq!(
+			Currency::free_balance(DICO, &module_id_account),
+			7500000000000000000000000u128 - 51676197239710905000000u128
 		);
+		assert_eq!(
+			Currency::free_balance(USDT, &module_id_account),
+			1333333000000000000000000u128 + 85603830000000000000000u128
+		);
+		assert_eq!(
+			Currency::free_balance(DICO, &BOB),
+			DEFAULT_ASSET_AMOUNT + 51676197239710905000000u128
+		);
+		assert_eq!(
+			Currency::free_balance(USDT, &BOB),
+			DEFAULT_ASSET_AMOUNT - 86034000000000000000000u128
+		);
+
+		expect_events(vec![Event::Swapped(
+			BOB,
+			0,
+			USDT,
+			DICO,
+			86034000000000000000000u128,
+			51676197239710905000000u128,
+		)
+		.into()]);
 	});
 }
-
 
 #[test]
 fn swap_exact_amount_target_should_work() {
@@ -438,23 +543,50 @@ fn swap_exact_amount_target_should_work() {
 		let lbp_pair = LbpPair::new(USDT, DICO);
 		assert_eq!(OngoingLbps::<Test>::get(lbp_pair), Some((ALICE, 0)));
 
-		let mut lbp_info = LbpInfo::new(1, 1001, 100, ALICE,
-										USDT, DICO, 1333333000000000000000000u128,
-										7500000000000000000000000u128, 4 * WEIGHT_ONE, 36 * WEIGHT_ONE,
-										36 * WEIGHT_ONE, 4 * WEIGHT_ONE);
+		let mut lbp_info = LbpInfo::new(
+			1,
+			1001,
+			100,
+			ALICE,
+			USDT,
+			DICO,
+			1333333000000000000000000u128,
+			7500000000000000000000000u128,
+			4 * WEIGHT_ONE,
+			36 * WEIGHT_ONE,
+			36 * WEIGHT_ONE,
+			4 * WEIGHT_ONE,
+		);
 		lbp_info.status = LbpStatus::InProgress;
 		assert_eq!(Lbps::<Test>::get(0), Some(lbp_info));
 
 		let module_id_account = Lbp::account_id();
-		assert_eq!(Currency::free_balance(DICO, &module_id_account), 7500000000000000000000000u128);
-		assert_eq!(Currency::free_balance(USDT, &module_id_account), 1333333000000000000000000u128);
-		assert_eq!(Currency::free_balance(DICO, &ALICE), DEFAULT_ASSET_AMOUNT - 7500000000000000000000000u128);
-		assert_eq!(Currency::free_balance(USDT, &ALICE), DEFAULT_ASSET_AMOUNT - 1333333000000000000000000u128);
-
-		expect_events(
-			vec![Event::LbpCreated(ALICE, 0, USDT, DICO,
-								   1333333000000000000000000u128, 7500000000000000000000000u128).into()]
+		assert_eq!(
+			Currency::free_balance(DICO, &module_id_account),
+			7500000000000000000000000u128
 		);
+		assert_eq!(
+			Currency::free_balance(USDT, &module_id_account),
+			1333333000000000000000000u128
+		);
+		assert_eq!(
+			Currency::free_balance(DICO, &ALICE),
+			DEFAULT_ASSET_AMOUNT - 7500000000000000000000000u128
+		);
+		assert_eq!(
+			Currency::free_balance(USDT, &ALICE),
+			DEFAULT_ASSET_AMOUNT - 1333333000000000000000000u128
+		);
+
+		expect_events(vec![Event::LbpCreated(
+			ALICE,
+			0,
+			USDT,
+			DICO,
+			1333333000000000000000000u128,
+			7500000000000000000000000u128,
+		)
+		.into()]);
 
 		assert_ok!(Lbp::swap_exact_amount_target(
 			Origin::signed(BOB),
@@ -468,19 +600,32 @@ fn swap_exact_amount_target_should_work() {
 		lbp_info.fundraising_balance -= 51927050621361330000000u128;
 		assert_eq!(Lbps::<Test>::get(0), Some(lbp_info));
 
-		assert_eq!(Currency::free_balance(DICO, &module_id_account),
-				   7500000000000000000000000u128 - 51927050621361330000000u128);
-		assert_eq!(Currency::free_balance(USDT, &module_id_account),
-				   1333333000000000000000000u128 + 86033999974477294587667u128);
-		assert_eq!(Currency::free_balance(DICO, &BOB),
-				   DEFAULT_ASSET_AMOUNT + 51927050621361330000000u128);
-		assert_eq!(Currency::free_balance(USDT, &BOB),
-				   DEFAULT_ASSET_AMOUNT - 86466331632640497073032u128);
-
-		expect_events(
-			vec![Event::Swapped(BOB, 0, USDT, DICO,
-								86466331632640497073032u128, 51927050621361330000000u128).into()]
+		assert_eq!(
+			Currency::free_balance(DICO, &module_id_account),
+			7500000000000000000000000u128 - 51927050621361330000000u128
 		);
+		assert_eq!(
+			Currency::free_balance(USDT, &module_id_account),
+			1333333000000000000000000u128 + 86033999974477294587667u128
+		);
+		assert_eq!(
+			Currency::free_balance(DICO, &BOB),
+			DEFAULT_ASSET_AMOUNT + 51927050621361330000000u128
+		);
+		assert_eq!(
+			Currency::free_balance(USDT, &BOB),
+			DEFAULT_ASSET_AMOUNT - 86466331632640497073032u128
+		);
+
+		expect_events(vec![Event::Swapped(
+			BOB,
+			0,
+			USDT,
+			DICO,
+			86466331632640497073032u128,
+			51927050621361330000000u128,
+		)
+		.into()]);
 	});
 }
 
@@ -512,23 +657,50 @@ fn swap_exact_amount_target_should_work2() {
 		let lbp_pair = LbpPair::new(USDT, DICO);
 		assert_eq!(OngoingLbps::<Test>::get(lbp_pair), Some((ALICE, 0)));
 
-		let mut lbp_info = LbpInfo::new(1, 1001, 100, ALICE,
-										DICO, USDT, 1333333000000000000000000u128,
-										7500000000000000000000000u128, 36 * WEIGHT_ONE, 12 * WEIGHT_ONE,
-										4 * WEIGHT_ONE, 28 * WEIGHT_ONE);
+		let mut lbp_info = LbpInfo::new(
+			1,
+			1001,
+			100,
+			ALICE,
+			DICO,
+			USDT,
+			1333333000000000000000000u128,
+			7500000000000000000000000u128,
+			36 * WEIGHT_ONE,
+			12 * WEIGHT_ONE,
+			4 * WEIGHT_ONE,
+			28 * WEIGHT_ONE,
+		);
 		lbp_info.status = LbpStatus::InProgress;
 		assert_eq!(Lbps::<Test>::get(0), Some(lbp_info));
 
 		let module_id_account = Lbp::account_id();
-		assert_eq!(Currency::free_balance(USDT, &module_id_account), 7500000000000000000000000u128);
-		assert_eq!(Currency::free_balance(DICO, &module_id_account), 1333333000000000000000000u128);
-		assert_eq!(Currency::free_balance(USDT, &ALICE), DEFAULT_ASSET_AMOUNT - 7500000000000000000000000u128);
-		assert_eq!(Currency::free_balance(DICO, &ALICE), DEFAULT_ASSET_AMOUNT - 1333333000000000000000000u128);
-
-		expect_events(
-			vec![Event::LbpCreated(ALICE, 0, DICO, USDT,
-								   1333333000000000000000000u128, 7500000000000000000000000u128).into()]
+		assert_eq!(
+			Currency::free_balance(USDT, &module_id_account),
+			7500000000000000000000000u128
 		);
+		assert_eq!(
+			Currency::free_balance(DICO, &module_id_account),
+			1333333000000000000000000u128
+		);
+		assert_eq!(
+			Currency::free_balance(USDT, &ALICE),
+			DEFAULT_ASSET_AMOUNT - 7500000000000000000000000u128
+		);
+		assert_eq!(
+			Currency::free_balance(DICO, &ALICE),
+			DEFAULT_ASSET_AMOUNT - 1333333000000000000000000u128
+		);
+
+		expect_events(vec![Event::LbpCreated(
+			ALICE,
+			0,
+			DICO,
+			USDT,
+			1333333000000000000000000u128,
+			7500000000000000000000000u128,
+		)
+		.into()]);
 
 		assert_ok!(Lbp::swap_exact_amount_target(
 			Origin::signed(BOB),
@@ -542,19 +714,31 @@ fn swap_exact_amount_target_should_work2() {
 		lbp_info.fundraising_balance += 3223295933112765945000000u128;
 		assert_eq!(Lbps::<Test>::get(0), Some(lbp_info));
 
-		assert_eq!(Currency::free_balance(DICO, &module_id_account),
-				   1333333000000000000000000u128 - 51927050621361330000000u128);
-		assert_eq!(Currency::free_balance(USDT, &module_id_account),
-				   7500000000000000000000000u128 + 3223295933112765945000000u128);
-		assert_eq!(Currency::free_balance(DICO, &BOB),
-				   DEFAULT_ASSET_AMOUNT + 51927050621361330000000u128);
-		assert_eq!(Currency::free_balance(USDT, &BOB),
-				   DEFAULT_ASSET_AMOUNT - 3239493400113332608040201u128);
-
-		expect_events(
-			vec![Event::Swapped(BOB, 0, USDT, DICO,
-								3239493400113332608040201u128, 51927050621361330000000u128).into()]
+		assert_eq!(
+			Currency::free_balance(DICO, &module_id_account),
+			1333333000000000000000000u128 - 51927050621361330000000u128
 		);
+		assert_eq!(
+			Currency::free_balance(USDT, &module_id_account),
+			7500000000000000000000000u128 + 3223295933112765945000000u128
+		);
+		assert_eq!(
+			Currency::free_balance(DICO, &BOB),
+			DEFAULT_ASSET_AMOUNT + 51927050621361330000000u128
+		);
+		assert_eq!(
+			Currency::free_balance(USDT, &BOB),
+			DEFAULT_ASSET_AMOUNT - 3239493400113332608040201u128
+		);
+
+		expect_events(vec![Event::Swapped(
+			BOB,
+			0,
+			USDT,
+			DICO,
+			3239493400113332608040201u128,
+			51927050621361330000000u128,
+		)
+		.into()]);
 	});
 }
-

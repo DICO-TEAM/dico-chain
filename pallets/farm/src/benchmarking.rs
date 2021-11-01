@@ -3,10 +3,10 @@
 use super::*;
 
 use frame_benchmarking::{account, benchmarks};
-use sp_std::prelude::*;
 use frame_support::traits::UnfilteredDispatchable;
-use sp_core::{U256};
 use frame_system::{Pallet as System, RawOrigin};
+use sp_core::U256;
+use sp_std::prelude::*;
 
 use crate::Pallet as Farm;
 
@@ -136,4 +136,3 @@ benchmarks! {
 		assert_eq!(Users::<T>::get(pool_id, caller).unwrap(), participant);
 	}
 }
-

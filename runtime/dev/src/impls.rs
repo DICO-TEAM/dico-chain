@@ -18,8 +18,8 @@
 //! Some configurable implementations as associated type for the substrate runtime.
 
 use crate::{Authorship, Balances, NegativeImbalance};
+use dico_primitives::{Moment, Price};
 use frame_support::traits::{Currency, OnUnbalanced};
-use dico_primitives::{Price,Moment};
 
 pub struct Author;
 impl OnUnbalanced<NegativeImbalance> for Author {

@@ -5,13 +5,12 @@
 use codec::{Decode, Encode};
 use dico_primitives::{
 	constants::{currency::*, time::*},
-	AccountIndex, Balance, BlockNumber, Hash, Index, Moment, AssetId, Amount,CurrencyId, Price,
-	PoolId,
+	AccountIndex, Amount, AssetId, Balance, BlockNumber, CurrencyId, Hash, Index, Moment, PoolId, Price,
 };
-use pallet_currencies::{BasicCurrencyAdapter};
 pub use dico_primitives::{AccountId, Signature};
+use frame_support::traits::InstanceFilter;
 use frame_support::{
-	construct_runtime, parameter_types,PalletId,
+	construct_runtime, parameter_types,
 	traits::{
 		Currency, Imbalance, KeyOwnerProofSystem, LockIdentifier, MaxEncodedLen, OnUnbalanced, U128CurrencyToVote,
 	},
@@ -19,14 +18,15 @@ use frame_support::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
 		DispatchClass, IdentityFee, Weight,
 	},
-	RuntimeDebug,
+	PalletId, RuntimeDebug,
 };
-use frame_support::{traits::InstanceFilter};
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
 	EnsureOneOf, EnsureRoot,
 };
+use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended};
 use pallet_contracts::weights::WeightInfo;
+use pallet_currencies::BasicCurrencyAdapter;
 use pallet_election_provider_multi_phase::FallbackStrategy;
 use pallet_grandpa::fg_primitives;
 use pallet_grandpa::{AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
@@ -44,14 +44,13 @@ use sp_core::{
 use sp_inherents::{CheckInherentsResult, InherentData};
 use sp_runtime::curve::PiecewiseLinear;
 use sp_runtime::traits::{
-	self, Zero, BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys, SaturatedConversion, StaticLookup,
+	self, BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys, SaturatedConversion, StaticLookup, Zero,
 };
 use sp_runtime::transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity};
 use sp_runtime::{
-	create_runtime_str, generic, impl_opaque_keys, ApplyExtrinsicResult, FixedPointNumber, Perbill, Percent, Permill,
-	Perquintill,DispatchResult,
+	create_runtime_str, generic, impl_opaque_keys, ApplyExtrinsicResult, DispatchResult, FixedPointNumber, Perbill,
+	Percent, Permill, Perquintill,
 };
-use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended};
 use sp_std::prelude::*;
 #[cfg(any(feature = "std", test))]
 use sp_version::NativeVersion;
@@ -77,12 +76,12 @@ use sp_runtime::generic::Era;
 /// Import dico-chain pallets.
 pub use pallet_template;
 
-pub use pallet_kyc;
 pub use pallet_amm;
 pub use pallet_farm;
+pub use pallet_farm_extend;
+pub use pallet_kyc;
 pub use pallet_lbp;
 pub use pallet_pricedao;
-pub use pallet_farm_extend;
 
 use pallet_farm_rpc_runtime_api as farm_rpc;
 
@@ -1138,7 +1137,6 @@ parameter_type_with_key! {
 	};
 }
 
-
 impl orml_tokens::Config for Runtime {
 	type Event = Event;
 	type Balance = Balance;
@@ -1191,8 +1189,7 @@ impl pallet_farm::Config for Runtime {
 	type Event = Event;
 	type PoolId = u32;
 	type Currency = Currencies;
-	type FounderSetOrigin =
-		pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+	type FounderSetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
 	type NativeAssetId = DICOAssetId;
 	type PalletId = FarmPalletId;
 	type WeightInfo = pallet_farm::weights::DicoWeight<Runtime>;
@@ -1213,16 +1210,13 @@ impl pallet_lbp::Config for Runtime {
 	type LbpId = u32;
 	type WeightInfo = pallet_lbp::weights::DicoWeight<Runtime>;
 	type TreasuryHandler = DicoTreasury;
-	type FounderSetOrigin =
-		pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+	type FounderSetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
 }
 
 /// Configure the pallet template in pallets/template.
 impl pallet_template::Config for Runtime {
 	type Event = Event;
 }
-
-
 
 parameter_types! {
 	pub const KYCPalletId: PalletId = PalletId(*b"dico/kyc");
@@ -1271,9 +1265,8 @@ impl pallet_oracle::Config<DicoDataProvider> for Runtime {
 	type OracleValue = Price;
 	type MaxOracleSize = MaxOracleSize;
 	type RootOperatorAccountId = ZeroAccountId;
-	type WeightInfo = ();  //todo
+	type WeightInfo = (); //todo
 }
-
 
 create_median_value_data_provider!(
 	AggregatedDataProvider,
@@ -1311,7 +1304,6 @@ impl pallet_pricedao::Config for Runtime {
 	type WithdrawExpirationPeriod = withdrawExpirationPeriod;
 	type WeightInfo = pallet_pricedao::weights::PriceWeight<Runtime>;
 }
-
 
 parameter_types! {
 	pub const InitiatorPledge: Balance = 100 * DOLLARS;
@@ -1400,7 +1392,7 @@ impl pallet_dico_treasury::Config for Runtime {
 
 parameter_types! {
 	pub const MaxClassMetadata: u32 = 1024;
-    pub const MaxTokenMetadata: u32 = 1024;
+	pub const MaxTokenMetadata: u32 = 1024;
 	pub const MaxTokenAttribute: u32 = 1024;
 
 }
@@ -1415,10 +1407,6 @@ impl pallet_nft::Config for Runtime {
 	type MaxTokenAttribute = MaxTokenAttribute;
 	type PowerHandler = Ico;
 }
-
-
-
-
 
 construct_runtime!(
 	pub enum Runtime where

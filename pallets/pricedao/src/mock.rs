@@ -2,16 +2,19 @@
 
 use super::*;
 use crate as pallet_price;
-use std::cell::RefCell;
-use sp_core::H256;
 use frame_system::EnsureSignedBy;
+use sp_core::H256;
 use sp_runtime::{
-	traits::{BlakeTwo256, IdentityLookup}, testing::Header,FixedPointNumber,
+	testing::Header,
+	traits::{BlakeTwo256, IdentityLookup},
+	FixedPointNumber,
 };
+use std::cell::RefCell;
 
-use frame_support::{construct_runtime, ord_parameter_types, parameter_types, traits::{GenesisBuild},sp_runtime::ModuleId};
+use frame_support::{
+	construct_runtime, ord_parameter_types, parameter_types, sp_runtime::ModuleId, traits::GenesisBuild,
+};
 use frame_system as system;
-
 
 pub type AccountId = u128;
 pub type BlockNumber = u64;
@@ -72,7 +75,6 @@ impl Timestamp {
 	}
 }
 
-
 impl system::Config for Test {
 	type Origin = Origin;
 	type Call = Call;
@@ -110,7 +112,6 @@ impl pallet_oracle::Config for Test {
 	type WeightInfo = ();
 }
 
-
 impl Config for Test {
 	type Event = Event;
 	type Source = MockDataProvider;
@@ -143,7 +144,7 @@ impl DataFeeder<CurrencyId, Price, AccountId> for MockDataProvider {
 }
 
 pub struct ExtBuilder {
-	endowed_accounts: Vec<(AccountId,  Balance)>,
+	endowed_accounts: Vec<(AccountId, Balance)>,
 }
 
 pub const DEFAULT_BALANCE: Balance = 2000_000_000_000_000;
@@ -157,7 +158,7 @@ impl Default for ExtBuilder {
 				(BOB, DEFAULT_BALANCE),
 				(DAVE, DEFAULT_BALANCE),
 				(EVE, DEFAULT_BALANCE),
-			]
+			],
 		}
 	}
 }
@@ -170,14 +171,12 @@ impl ExtBuilder {
 			members: vec![1, 2, 3].into(),
 			phantom: Default::default(),
 		}
-			.assimilate_storage(&mut t)
-			.unwrap();
+		.assimilate_storage(&mut t)
+		.unwrap();
 
 		t.into()
 	}
 }
-
-
 
 impl pallet_balances::Config for Test {
 	type MaxLocks = ();
@@ -199,7 +198,7 @@ pub fn new_test_ext1() -> sp_io::TestExternalities {
 		members: vec![1, 2, 3].into(),
 		phantom: Default::default(),
 	}
-		.assimilate_storage(&mut storage);
+	.assimilate_storage(&mut storage);
 
 	let mut t: sp_io::TestExternalities = storage.into();
 
@@ -217,7 +216,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 		members: vec![1, 2, 3].into(),
 		phantom: Default::default(),
 	}
-		.assimilate_storage(&mut storage);
+	.assimilate_storage(&mut storage);
 
 	let mut t: sp_io::TestExternalities = storage.into();
 
@@ -227,6 +226,3 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 
 	t
 }
-
-
-

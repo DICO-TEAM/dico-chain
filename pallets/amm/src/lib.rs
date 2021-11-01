@@ -8,29 +8,31 @@
 #![allow(clippy::unused_unit)]
 #![allow(clippy::upper_case_acronyms)]
 
+use codec::{Decode, Encode};
 use core::convert::TryFrom;
+use dico_primitives::{to_balance, to_u256, Amount, AssetId, Balance};
 use frame_support::{
-	ensure, traits::Get, transactional, PalletId,
-	sp_runtime::traits::{Zero, One},
-	pallet_prelude::*,
-	pallet_prelude::DispatchResultWithPostInfo,
 	dispatch::DispatchErrorWithPostInfo,
+	ensure,
+	pallet_prelude::DispatchResultWithPostInfo,
+	pallet_prelude::*,
+	sp_runtime::traits::{One, Zero},
+	traits::Get,
+	transactional, PalletId,
 };
 use frame_system::{ensure_signed, pallet_prelude::*};
-use dico_primitives::{AssetId, Balance, Amount, to_u256, to_balance};
-use sp_std::{vec::Vec};
-use sp_runtime::{ArithmeticError, traits::{AccountIdConversion}, RuntimeDebug};
 use sp_core::U256;
-use codec::{Decode, Encode};
+use sp_runtime::{traits::AccountIdConversion, ArithmeticError, RuntimeDebug};
+use sp_std::vec::Vec;
 
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 
+use dico_currencies::DicoAssetMetadata;
 use orml_traits::{MultiCurrency, MultiCurrencyExtended};
-use dico_currencies::{DicoAssetMetadata};
 
-pub mod math;
 mod benchmarking;
+pub mod math;
 pub mod weights;
 
 use weights::WeightInfo;
@@ -47,7 +49,11 @@ pub struct Pair(pub AssetId, pub AssetId);
 
 impl Pair {
 	pub fn new(asset_a: AssetId, asset_b: AssetId) -> Self {
-		if asset_a < asset_b { Self(asset_a, asset_b) } else { Self(asset_b, asset_a) }
+		if asset_a < asset_b {
+			Self(asset_a, asset_b)
+		} else {
+			Self(asset_b, asset_a)
+		}
 	}
 }
 
@@ -56,9 +62,9 @@ impl Pair {
 pub struct LiquidityInfo(pub Balance, pub Balance, pub AssetId);
 
 // Re-export pallet items so that they can be accessed from the crate namespace.
-pub use pallet::*;
-use dico_currencies::currencies_trait::CurrenciesHandler;
 use crate::math::LIQUIDITY_DECIMALS;
+use dico_currencies::currencies_trait::CurrenciesHandler;
+pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -75,9 +81,7 @@ pub mod pallet {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
 		/// Multi currency for transfer of currencies
-		type Currency: MultiCurrencyExtended<
-			Self::AccountId, CurrencyId=AssetId, Balance=Balance, Amount=Amount
-		>;
+		type Currency: MultiCurrencyExtended<Self::AccountId, CurrencyId = AssetId, Balance = Balance, Amount = Amount>;
 
 		#[pallet::constant]
 		type LiquidityAssetIdBase: Get<AssetId>;
@@ -127,7 +131,8 @@ pub mod pallet {
 	#[pallet::event]
 	#[pallet::generate_deposit(pub (crate) fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// New liquidity was provided to the pool. [who, liquidity_id, asset a, asset b, amount a, amount b]
+		/// New liquidity was provided to the pool. [who, liquidity_id, asset a, asset b, amount a,
+		/// amount b]
 		LiquidityAdded(T::AccountId, AssetId, AssetId, AssetId, Balance, Balance),
 
 		/// Liquidity was removed from the pool. [who, liquidity_id, asset a, asset b, liquidity]
@@ -167,7 +172,10 @@ pub mod pallet {
 			let who = ensure_signed(origin)?;
 
 			ensure!(asset_a != asset_b, Error::<T>::MustBeDifferentAsset);
-			ensure!(amount_a_desired != 0 && amount_b_desired != 0, Error::<T>::MustAddNonZeroAmount);
+			ensure!(
+				amount_a_desired != 0 && amount_b_desired != 0,
+				Error::<T>::MustAddNonZeroAmount
+			);
 			ensure!(
 				asset_a <= T::LiquidityAssetIdBase::get() && asset_b <= T::LiquidityAssetIdBase::get(),
 				Error::<T>::MustBeNonLiquidAsset
@@ -231,26 +239,25 @@ pub mod pallet {
 			};
 
 			*asset_0_amount = asset_0_amount
-				.checked_add(add_amount_0).ok_or(ArithmeticError::Overflow)?;
+				.checked_add(add_amount_0)
+				.ok_or(ArithmeticError::Overflow)?;
 			*asset_1_amount = asset_1_amount
-				.checked_add(add_amount_1).ok_or(ArithmeticError::Overflow)?;
+				.checked_add(add_amount_1)
+				.ok_or(ArithmeticError::Overflow)?;
 
 			Liquidity::<T>::insert(pair, liquidity_info);
 
-			Self::deposit_event(
-				Event::LiquidityAdded(
-					who,
-					new_liquidity_id,
-					asset_a,
-					asset_b,
-					amount_a,
-					amount_b,
-				)
-			);
+			Self::deposit_event(Event::LiquidityAdded(
+				who,
+				new_liquidity_id,
+				asset_a,
+				asset_b,
+				amount_a,
+				amount_b,
+			));
 
 			Ok(().into())
 		}
-
 
 		/// Remove liquidity from specific liquidity pool in the form of burning shares.
 		///
@@ -309,25 +316,27 @@ pub mod pallet {
 					(remove_amount_b, remove_amount_a)
 				};
 
-				*asset_0_amount = asset_0_amount.checked_sub(remove_amount_0).ok_or(ArithmeticError::Overflow)?;
-				*asset_1_amount = asset_1_amount.checked_sub(remove_amount_1).ok_or(ArithmeticError::Overflow)?;
+				*asset_0_amount = asset_0_amount
+					.checked_sub(remove_amount_0)
+					.ok_or(ArithmeticError::Overflow)?;
+				*asset_1_amount = asset_1_amount
+					.checked_sub(remove_amount_1)
+					.ok_or(ArithmeticError::Overflow)?;
 
-				Self::deposit_event(
-					Event::LiquidityRemoved(
-						who,
-						*liquidity_id,
-						asset_a,
-						asset_b,
-						remove_liquidity,
-					)
-				);
+				Self::deposit_event(Event::LiquidityRemoved(
+					who,
+					*liquidity_id,
+					asset_a,
+					asset_b,
+					remove_liquidity,
+				));
 
 				Ok(().into())
 			})
 		}
 
-
-		/// Use a fixed amount of supply assets to exchange for target assets not less than `amount_out_min`.
+		/// Use a fixed amount of supply assets to exchange for target assets not less than
+		/// `amount_out_min`.
 		///
 		/// Emits 'Swapped' when successful.
 		#[pallet::weight(< T as Config >::WeightInfo::swap_exact_assets_for_assets())]
@@ -350,20 +359,13 @@ pub mod pallet {
 			Self::swap(&amounts, &path)?;
 			T::Currency::transfer(path[path.len() - 1], &module_account_id, &who, amount_out)?;
 
-			Self::deposit_event(
-				Event::Swapped(
-					who,
-					path,
-					amount_in,
-					amount_out,
-				)
-			);
+			Self::deposit_event(Event::Swapped(who, path, amount_in, amount_out));
 
 			Ok(().into())
 		}
 
-
-		/// Use no more than `amount_in_max` supply assets to exchange for a fixed amount of target assets.
+		/// Use no more than `amount_in_max` supply assets to exchange for a fixed amount of target
+		/// assets.
 		///
 		/// Emits 'Swapped' when successful.
 		#[pallet::weight(< T as Config >::WeightInfo::swap_assets_for_exact_assets())]
@@ -385,20 +387,12 @@ pub mod pallet {
 			Self::swap(&amounts, &path)?;
 			T::Currency::transfer(path[path.len() - 1], &module_account_id, &who, amount_out)?;
 
-			Self::deposit_event(
-				Event::Swapped(
-					who,
-					path,
-					amount_in,
-					amount_out,
-				)
-			);
+			Self::deposit_event(Event::Swapped(who, path, amount_in, amount_out));
 
 			Ok(().into())
 		}
 	}
 }
-
 
 impl<T: Config> Pallet<T> {
 	fn account_id() -> T::AccountId {
@@ -414,9 +408,9 @@ impl<T: Config> Pallet<T> {
 
 		ensure!(
 			!asset_a_metadata.name.is_empty()
-			&& !asset_a_metadata.symbol.is_empty()
-			&& !asset_b_metadata.name.is_empty()
-			&& !asset_b_metadata.symbol.is_empty(),
+				&& !asset_a_metadata.symbol.is_empty()
+				&& !asset_b_metadata.name.is_empty()
+				&& !asset_b_metadata.symbol.is_empty(),
 			Error::<T>::AssetMetadataInvalid
 		);
 
@@ -429,9 +423,9 @@ impl<T: Config> Pallet<T> {
 
 		let module_account_id = Self::account_id();
 		let new_liquidity_id = Self::get_next_liquidity_id()?;
-		let amount =
-			<<T as dico_currencies::Config>::MultiCurrency as
-			orml_traits::MultiCurrency<<T as frame_system::Config>::AccountId>>::Balance::from(0u32);
+		let amount = <<T as dico_currencies::Config>::MultiCurrency as orml_traits::MultiCurrency<
+			<T as frame_system::Config>::AccountId,
+		>>::Balance::from(0u32);
 
 		let liquidity_metadata = DicoAssetMetadata {
 			name: liquidity_name,
@@ -457,7 +451,8 @@ impl<T: Config> Pallet<T> {
 		}
 
 		let new_liquidity_id = next_liquidity_id
-			.checked_add(One::one()).ok_or(Error::<T>::NoLiquidityIdAvailable)?;
+			.checked_add(One::one())
+			.ok_or(Error::<T>::NoLiquidityIdAvailable)?;
 		NextLiquidityId::<T>::put(new_liquidity_id);
 
 		Ok(next_liquidity_id)
@@ -468,7 +463,11 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn sort_asset(asset_a: AssetId, asset_b: AssetId) -> (AssetId, AssetId) {
-		if asset_a < asset_b { (asset_a, asset_b) } else { (asset_b, asset_a) }
+		if asset_a < asset_b {
+			(asset_a, asset_b)
+		} else {
+			(asset_b, asset_a)
+		}
 	}
 
 	fn get_reserves(
@@ -478,8 +477,7 @@ impl<T: Config> Pallet<T> {
 		let (asset_0, _) = Self::sort_asset(asset_a, asset_b);
 		let pair = Self::pair_for(asset_a, asset_b);
 
-		let liquidity_info = Liquidity::<T>::try_get(pair)
-			.map_err(|_| Error::<T>::LiquidityNotFind)?;
+		let liquidity_info = Liquidity::<T>::try_get(pair).map_err(|_| Error::<T>::LiquidityNotFind)?;
 
 		if asset_a == asset_0 {
 			Ok((liquidity_info.0, liquidity_info.1))
@@ -488,7 +486,8 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
-	/// Performs a chained `get_amount_out` calculation for pairs of transactions of any path length.
+	/// Performs a chained `get_amount_out` calculation for pairs of transactions of any path
+	/// length.
 	fn get_amounts_out(
 		amount_in: Balance,
 		path: &Vec<AssetId>,
@@ -501,11 +500,7 @@ impl<T: Config> Pallet<T> {
 
 		for i in 0..path_len - 1 {
 			let (reserve_in, reserve_out) = Self::get_reserves(path[i], path[i + 1])?;
-			let amount = math::get_amount_out(
-				to_u256!(amounts[i]),
-				to_u256!(reserve_in),
-				to_u256!(reserve_out),
-			)?;
+			let amount = math::get_amount_out(to_u256!(amounts[i]), to_u256!(reserve_in), to_u256!(reserve_out))?;
 
 			amounts[i + 1] = to_balance!(amount)?;
 		}
@@ -527,11 +522,7 @@ impl<T: Config> Pallet<T> {
 		let mut i = path_len - 1;
 		while i > 0 {
 			let (reserve_in, reserve_out) = Self::get_reserves(path[i - 1], path[i])?;
-			let amount = math::get_amount_in(
-				to_u256!(amounts[i]),
-				to_u256!(reserve_in),
-				to_u256!(reserve_out),
-			)?;
+			let amount = math::get_amount_in(to_u256!(amounts[i]), to_u256!(reserve_in), to_u256!(reserve_out))?;
 
 			amounts[i - 1] = to_balance!(amount)?;
 			i -= 1;
@@ -541,10 +532,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// cross path swap, format: path = `[0, 1, 2]`, amounts = `[1000, 1, 1000]`
-	fn swap(
-		amounts: &Vec<Balance>,
-		path: &Vec<AssetId>,
-	) -> DispatchResultWithPostInfo {
+	fn swap(amounts: &Vec<Balance>, path: &Vec<AssetId>) -> DispatchResultWithPostInfo {
 		let path_len = path.len();
 
 		for i in 0..path_len - 1 {
@@ -553,30 +541,29 @@ impl<T: Config> Pallet<T> {
 			let pair = Self::pair_for(asset_in, asset_out);
 
 			Liquidity::<T>::try_mutate(pair, |maybe_liquidity_info| -> DispatchResultWithPostInfo {
-				let liquidity_info = maybe_liquidity_info
-					.as_mut().ok_or(Error::<T>::LiquidityNotFind)?;
+				let liquidity_info = maybe_liquidity_info.as_mut().ok_or(Error::<T>::LiquidityNotFind)?;
 
 				let (asset_0_amount, asset_1_amount, _liquidity_id) =
 					(&mut liquidity_info.0, &mut liquidity_info.1, &mut liquidity_info.2);
 
-				let invariant_before_swap: U256 = U256::from(*asset_0_amount)
-					.saturating_mul(U256::from(*asset_1_amount));
+				let invariant_before_swap: U256 =
+					U256::from(*asset_0_amount).saturating_mul(U256::from(*asset_1_amount));
 
 				if pair.0 == asset_in {
-					*asset_0_amount = asset_0_amount
-						.checked_add(amount_in).ok_or(ArithmeticError::Overflow)?;
+					*asset_0_amount = asset_0_amount.checked_add(amount_in).ok_or(ArithmeticError::Overflow)?;
 					*asset_1_amount = asset_1_amount
-						.checked_sub(amount_out).ok_or(ArithmeticError::Overflow)?;
+						.checked_sub(amount_out)
+						.ok_or(ArithmeticError::Overflow)?;
 				} else {
 					*asset_0_amount = asset_0_amount
-						.checked_sub(amount_out).ok_or(ArithmeticError::Overflow)?;
-					*asset_1_amount = asset_1_amount
-						.checked_add(amount_in).ok_or(ArithmeticError::Overflow)?;
+						.checked_sub(amount_out)
+						.ok_or(ArithmeticError::Overflow)?;
+					*asset_1_amount = asset_1_amount.checked_add(amount_in).ok_or(ArithmeticError::Overflow)?;
 				}
 
 				// invariant check to ensure the constant product formulas (k = x * y)
-				let invariant_after_swap: U256 = U256::from(*asset_0_amount)
-					.saturating_mul(U256::from(*asset_1_amount));
+				let invariant_after_swap: U256 =
+					U256::from(*asset_0_amount).saturating_mul(U256::from(*asset_1_amount));
 				ensure!(
 					invariant_after_swap >= invariant_before_swap,
 					Error::<T>::InvariantCheckFailed,

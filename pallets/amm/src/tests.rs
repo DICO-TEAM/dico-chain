@@ -4,12 +4,11 @@
 
 use super::*;
 pub use crate::mock::{
-	Currency, Event as TestEvent, ExtBuilder, Origin,
-	System, Test, DOT, ALICE, BOB, USDT, DICO, AMM,
-	DEFAULT_ASSET_AMOUNT,
+	Currency, Event as TestEvent, ExtBuilder, Origin, System, Test, ALICE, AMM, BOB, DEFAULT_ASSET_AMOUNT, DICO, DOT,
+	USDT,
 };
-use frame_support::{assert_ok};
 use dico_currencies::DicoAssetMetadata;
+use frame_support::assert_ok;
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut ext = ExtBuilder::default().build();
@@ -32,28 +31,36 @@ fn expect_events(e: Vec<TestEvent>) {
 }
 
 fn preset_conditions() {
-	assert_ok!(
-		Currency::create_asset(Origin::signed(ALICE), DOT, DEFAULT_ASSET_AMOUNT, Some(
-			DicoAssetMetadata{
+	assert_ok!(Currency::create_asset(
+		Origin::signed(ALICE),
+		DOT,
+		DEFAULT_ASSET_AMOUNT,
+		Some(DicoAssetMetadata {
 			name: "Polkadot".into(),
 			symbol: "DOT".into(),
 			decimals: 10
-		}))
-	);
-	assert_ok!(
-		Currency::create_asset(Origin::signed(ALICE), USDT, DEFAULT_ASSET_AMOUNT, Some(DicoAssetMetadata {
+		})
+	));
+	assert_ok!(Currency::create_asset(
+		Origin::signed(ALICE),
+		USDT,
+		DEFAULT_ASSET_AMOUNT,
+		Some(DicoAssetMetadata {
 			name: "Tether USDT".into(),
 			symbol: "USDT".into(),
 			decimals: 10
-		}))
-	);
-	assert_ok!(
-		Currency::create_asset(Origin::signed(ALICE), DICO, DEFAULT_ASSET_AMOUNT, Some(DicoAssetMetadata {
+		})
+	));
+	assert_ok!(Currency::create_asset(
+		Origin::signed(ALICE),
+		DICO,
+		DEFAULT_ASSET_AMOUNT,
+		Some(DicoAssetMetadata {
 			name: "Distributed ICO".into(),
 			symbol: "DICO".into(),
 			decimals: 10
-		}))
-	);
+		})
+	));
 
 	assert_ok!(Currency::deposit(DOT, &BOB, DEFAULT_ASSET_AMOUNT));
 	assert_ok!(Currency::deposit(USDT, &BOB, DEFAULT_ASSET_AMOUNT));
@@ -84,8 +91,14 @@ fn add_liquidity_should_work() {
 
 		assert_eq!(Currency::free_balance(asset_a, &module_id_account), 100_000_000_000_000);
 		assert_eq!(Currency::free_balance(asset_b, &module_id_account), 100_000_000_000_000);
-		assert_eq!(Currency::free_balance(asset_a, &ALICE), DEFAULT_ASSET_AMOUNT - 100_000_000_000_000);
-		assert_eq!(Currency::free_balance(asset_b, &ALICE), DEFAULT_ASSET_AMOUNT - 100_000_000_000_000);
+		assert_eq!(
+			Currency::free_balance(asset_a, &ALICE),
+			DEFAULT_ASSET_AMOUNT - 100_000_000_000_000
+		);
+		assert_eq!(
+			Currency::free_balance(asset_b, &ALICE),
+			DEFAULT_ASSET_AMOUNT - 100_000_000_000_000
+		);
 		assert_eq!(Currency::free_balance(liquidity_id, &ALICE), 100_000_000_000_000);
 		assert_eq!(Currency::total_issuance(liquidity_id), 100_000_000_000_000);
 		assert_eq!(
@@ -93,10 +106,15 @@ fn add_liquidity_should_work() {
 			LiquidityInfo(100_000_000_000_000, 100_000_000_000_000, 20000000)
 		);
 
-		expect_events(vec![Event::LiquidityAdded(ALICE, liquidity_id,
-												 asset_a, asset_b,
-												 100_000_000_000_000,
-												 100_000_000_000_000).into()]);
+		expect_events(vec![Event::LiquidityAdded(
+			ALICE,
+			liquidity_id,
+			asset_a,
+			asset_b,
+			100_000_000_000_000,
+			100_000_000_000_000,
+		)
+		.into()]);
 
 		assert_ok!(AMM::add_liquidity(
 			Origin::signed(BOB),
@@ -110,8 +128,14 @@ fn add_liquidity_should_work() {
 
 		assert_eq!(Currency::free_balance(asset_a, &module_id_account), 200_000_000_000_000);
 		assert_eq!(Currency::free_balance(asset_b, &module_id_account), 200_000_000_000_000);
-		assert_eq!(Currency::free_balance(asset_a, &BOB), DEFAULT_ASSET_AMOUNT - 100_000_000_000_000);
-		assert_eq!(Currency::free_balance(asset_b, &BOB), DEFAULT_ASSET_AMOUNT - 100_000_000_000_000);
+		assert_eq!(
+			Currency::free_balance(asset_a, &BOB),
+			DEFAULT_ASSET_AMOUNT - 100_000_000_000_000
+		);
+		assert_eq!(
+			Currency::free_balance(asset_b, &BOB),
+			DEFAULT_ASSET_AMOUNT - 100_000_000_000_000
+		);
 		assert_eq!(Currency::free_balance(liquidity_id, &BOB), 100_000_000_000_000);
 		assert_eq!(Currency::total_issuance(liquidity_id), 200_000_000_000_000);
 		assert_eq!(
@@ -119,10 +143,15 @@ fn add_liquidity_should_work() {
 			LiquidityInfo(200_000_000_000_000, 200_000_000_000_000, 20000000)
 		);
 
-		expect_events(vec![Event::LiquidityAdded(BOB, liquidity_id,
-												 asset_a, asset_b,
-												 100_000_000_000_000,
-												 100_000_000_000_000).into()]);
+		expect_events(vec![Event::LiquidityAdded(
+			BOB,
+			liquidity_id,
+			asset_a,
+			asset_b,
+			100_000_000_000_000,
+			100_000_000_000_000,
+		)
+		.into()]);
 	});
 }
 
@@ -167,12 +196,16 @@ fn remove_liquidity_should_work() {
 		let pair = AMM::pair_for(asset_a, asset_b);
 		assert_eq!(Liquidity::<Test>::get(pair).unwrap(), LiquidityInfo(0, 0, 20000000));
 
-		expect_events(vec![Event::LiquidityRemoved(ALICE, liquidity_id,
-												   asset_a, asset_b,
-												   100_000_000_000_000).into()]);
+		expect_events(vec![Event::LiquidityRemoved(
+			ALICE,
+			liquidity_id,
+			asset_a,
+			asset_b,
+			100_000_000_000_000,
+		)
+		.into()]);
 	});
 }
-
 
 #[test]
 fn swap_exact_assets_for_assets_should_work() {
@@ -204,9 +237,18 @@ fn swap_exact_assets_for_assets_should_work() {
 		let module_id_account = AMM::account_id();
 
 		assert_eq!(Currency::free_balance(asset_a, &module_id_account), 110_000_000_000_000);
-		assert_eq!(Currency::free_balance(asset_b, &module_id_account), 100_000_000_000_000 - 9066108938801);
-		assert_eq!(Currency::free_balance(asset_a, &BOB), DEFAULT_ASSET_AMOUNT - 10_000_000_000_000);
-		assert_eq!(Currency::free_balance(asset_b, &BOB), DEFAULT_ASSET_AMOUNT + 9066108938801);
+		assert_eq!(
+			Currency::free_balance(asset_b, &module_id_account),
+			100_000_000_000_000 - 9066108938801
+		);
+		assert_eq!(
+			Currency::free_balance(asset_a, &BOB),
+			DEFAULT_ASSET_AMOUNT - 10_000_000_000_000
+		);
+		assert_eq!(
+			Currency::free_balance(asset_b, &BOB),
+			DEFAULT_ASSET_AMOUNT + 9066108938801
+		);
 
 		let pair = AMM::pair_for(asset_a, asset_b);
 		assert_eq!(
@@ -214,8 +256,13 @@ fn swap_exact_assets_for_assets_should_work() {
 			LiquidityInfo(110_000_000_000_000, 100_000_000_000_000 - 9066108938801, 20000000)
 		);
 
-		expect_events(vec![Event::Swapped(BOB, vec![DICO, USDT],
-										  10_000_000_000_000, 9066108938801).into()]);
+		expect_events(vec![Event::Swapped(
+			BOB,
+			vec![DICO, USDT],
+			10_000_000_000_000,
+			9066108938801,
+		)
+		.into()]);
 	});
 }
 
@@ -258,8 +305,14 @@ fn swap_exact_assets_for_assets_2_should_work() {
 
 		assert_eq!(Currency::free_balance(DICO, &module_id_account), 110_000_000_000_000);
 		assert_eq!(Currency::free_balance(USDT, &module_id_account), 600_000_000_000_000);
-		assert_eq!(Currency::free_balance(DOT, &module_id_account), 100_000_000_000_000 - 1775681666676);
-		assert_eq!(Currency::free_balance(DICO, &BOB), DEFAULT_ASSET_AMOUNT - 10_000_000_000_000);
+		assert_eq!(
+			Currency::free_balance(DOT, &module_id_account),
+			100_000_000_000_000 - 1775681666676
+		);
+		assert_eq!(
+			Currency::free_balance(DICO, &BOB),
+			DEFAULT_ASSET_AMOUNT - 10_000_000_000_000
+		);
 		assert_eq!(Currency::free_balance(DOT, &BOB), DEFAULT_ASSET_AMOUNT + 1775681666676);
 
 		let pair = AMM::pair_for(DICO, USDT);
@@ -271,12 +324,20 @@ fn swap_exact_assets_for_assets_2_should_work() {
 		let pair = AMM::pair_for(DOT, USDT);
 		assert_eq!(
 			Liquidity::<Test>::get(pair).unwrap(),
-			LiquidityInfo(100_000_000_000_000 - 1775681666676, 500_000_000_000_000 + 9066108938801, 20000001)
+			LiquidityInfo(
+				100_000_000_000_000 - 1775681666676,
+				500_000_000_000_000 + 9066108938801,
+				20000001
+			)
 		);
 
-
-		expect_events(vec![Event::Swapped(BOB, vec![DICO, USDT, DOT],
-										  10_000_000_000_000, 1775681666676).into()]);
+		expect_events(vec![Event::Swapped(
+			BOB,
+			vec![DICO, USDT, DOT],
+			10_000_000_000_000,
+			1775681666676,
+		)
+		.into()]);
 	});
 }
 
@@ -309,19 +370,40 @@ fn swap_assets_for_exact_assets_should_work() {
 
 		let module_id_account = AMM::account_id();
 
-		assert_eq!(Currency::free_balance(asset_a, &module_id_account), 100_000_000_000_000 + 11144544745348);
-		assert_eq!(Currency::free_balance(asset_b, &module_id_account), 100_000_000_000_000 - 10_000_000_000_000);
-		assert_eq!(Currency::free_balance(asset_a, &BOB), DEFAULT_ASSET_AMOUNT - 11144544745348);
-		assert_eq!(Currency::free_balance(asset_b, &BOB), DEFAULT_ASSET_AMOUNT + 10_000_000_000_000);
+		assert_eq!(
+			Currency::free_balance(asset_a, &module_id_account),
+			100_000_000_000_000 + 11144544745348
+		);
+		assert_eq!(
+			Currency::free_balance(asset_b, &module_id_account),
+			100_000_000_000_000 - 10_000_000_000_000
+		);
+		assert_eq!(
+			Currency::free_balance(asset_a, &BOB),
+			DEFAULT_ASSET_AMOUNT - 11144544745348
+		);
+		assert_eq!(
+			Currency::free_balance(asset_b, &BOB),
+			DEFAULT_ASSET_AMOUNT + 10_000_000_000_000
+		);
 
 		let pair = AMM::pair_for(asset_a, asset_b);
 		assert_eq!(
 			Liquidity::<Test>::get(pair).unwrap(),
-			LiquidityInfo(100_000_000_000_000 + 11144544745348, 100_000_000_000_000 - 10_000_000_000_000, 20000000)
+			LiquidityInfo(
+				100_000_000_000_000 + 11144544745348,
+				100_000_000_000_000 - 10_000_000_000_000,
+				20000000
+			)
 		);
 
-		expect_events(vec![Event::Swapped(BOB, vec![DICO, USDT],
-										  11144544745348, 10_000_000_000_000).into()]);
+		expect_events(vec![Event::Swapped(
+			BOB,
+			vec![DICO, USDT],
+			11144544745348,
+			10_000_000_000_000,
+		)
+		.into()]);
 	});
 }
 
@@ -364,8 +446,14 @@ fn swap_assets_for_exact_assets2_should_work() {
 
 		assert_eq!(Currency::free_balance(DICO, &module_id_account), 110_000_000_000_000);
 		assert_eq!(Currency::free_balance(USDT, &module_id_account), 600_000_000_000_000);
-		assert_eq!(Currency::free_balance(DOT, &module_id_account), 100_000_000_000_000 - 1775681666676);
-		assert_eq!(Currency::free_balance(DICO, &BOB), DEFAULT_ASSET_AMOUNT - 10_000_000_000_000);
+		assert_eq!(
+			Currency::free_balance(DOT, &module_id_account),
+			100_000_000_000_000 - 1775681666676
+		);
+		assert_eq!(
+			Currency::free_balance(DICO, &BOB),
+			DEFAULT_ASSET_AMOUNT - 10_000_000_000_000
+		);
 		assert_eq!(Currency::free_balance(DOT, &BOB), DEFAULT_ASSET_AMOUNT + 1775681666676);
 
 		let pair = AMM::pair_for(DICO, USDT);
@@ -377,11 +465,19 @@ fn swap_assets_for_exact_assets2_should_work() {
 		let pair = AMM::pair_for(DOT, USDT);
 		assert_eq!(
 			Liquidity::<Test>::get(pair).unwrap(),
-			LiquidityInfo(100_000_000_000_000 - 1775681666676, 500_000_000_000_000 + 9066108938801, 20000001)
+			LiquidityInfo(
+				100_000_000_000_000 - 1775681666676,
+				500_000_000_000_000 + 9066108938801,
+				20000001
+			)
 		);
 
-		expect_events(vec![Event::Swapped(BOB, vec![DICO, USDT, DOT],
-										  10_000_000_000_000, 1775681666676).into()]);
+		expect_events(vec![Event::Swapped(
+			BOB,
+			vec![DICO, USDT, DOT],
+			10_000_000_000_000,
+			1775681666676,
+		)
+		.into()]);
 	});
 }
-

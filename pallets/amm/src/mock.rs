@@ -4,14 +4,17 @@
 
 use crate as amm;
 use crate::Config;
+use dico_currencies::BasicCurrencyAdapter;
+use dico_primitives::{AssetId, Balance, BlockNumber};
+use frame_support::traits::GenesisBuild;
 use frame_support::{parameter_types, PalletId};
 use frame_system as system;
 use orml_traits::parameter_type_with_key;
-use sp_core::{H256};
-use sp_runtime::{testing::Header, traits::{BlakeTwo256, IdentityLookup, Zero}};
-use frame_support::traits::GenesisBuild;
-use dico_primitives::{AssetId, Balance, BlockNumber};
-use dico_currencies::BasicCurrencyAdapter;
+use sp_core::H256;
+use sp_runtime::{
+	testing::Header,
+	traits::{BlakeTwo256, IdentityLookup, Zero},
+};
 
 pub type Amount = i128;
 pub type AccountId = u64;
@@ -92,7 +95,6 @@ parameter_type_with_key! {
 	};
 }
 
-
 impl orml_tokens::Config for Test {
 	type Event = Event;
 	type Balance = Balance;
@@ -119,7 +121,6 @@ impl dico_currencies::Config for Test {
 	type CreateConsume = CreateConsume;
 	type MaxCreatableCurrencyId = AmmLiquidityAssetIdBase;
 }
-
 
 impl Config for Test {
 	type Event = Event;
@@ -150,10 +151,10 @@ impl ExtBuilder {
 
 		orml_tokens::GenesisConfig::<Test> {
 			balances: self.endowed_accounts,
-		}.assimilate_storage(&mut t).unwrap();
+		}
+		.assimilate_storage(&mut t)
+		.unwrap();
 
 		t.into()
 	}
 }
-
-

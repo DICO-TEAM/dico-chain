@@ -27,9 +27,9 @@ use codec::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 
 use frame_support::{
-	ensure,log,
+	ensure, log,
 	pallet_prelude::*,
-	traits::{ Get, InitializeMembers, Time},
+	traits::{Get, InitializeMembers, Time},
 	weights::{Pays, Weight},
 	Parameter,
 };
@@ -37,7 +37,7 @@ use frame_system::{ensure_root, ensure_signed, pallet_prelude::*};
 pub use orml_traits::{CombineData, DataFeeder, DataProvider, DataProviderExtended, OnNewData};
 use orml_utilities::OrderedSet;
 use sp_runtime::{traits::Member, DispatchResult, RuntimeDebug};
-use sp_std::{fmt::Debug, prelude::*, vec,convert::TryInto};
+use sp_std::{convert::TryInto, fmt::Debug, prelude::*, vec};
 
 pub use crate::default_combine_data::DefaultCombineData;
 
@@ -110,10 +110,10 @@ pub mod module {
 	#[pallet::generate_deposit(pub(crate) fn deposit_event)]
 	pub enum Event<T: Config<I>, I: 'static = ()> {
 		/// New feed data is submitted. [sender, values,Time]
-		NewFeedData(T::AccountId, Vec<(T::OracleKey, T::OracleValue)>,MomentOf<T,I>),
+		NewFeedData(T::AccountId, Vec<(T::OracleKey, T::OracleValue)>, MomentOf<T, I>),
 
 		/// New price is locked
-		NewLockedPrice(T::OracleKey,  T::OracleValue),
+		NewLockedPrice(T::OracleKey, T::OracleValue),
 	}
 
 	/// Raw values for each oracle operators
@@ -137,13 +137,14 @@ pub mod module {
 	/// If an oracle operator has feed a value in this block
 	#[pallet::storage]
 	pub(crate) type HasDispatched<T: Config<I>, I: 'static = ()> =
-		StorageValue<_, OrderedSet<T::AccountId,T::MaxOracleSize>, ValueQuery>;
+		StorageValue<_, OrderedSet<T::AccountId, T::MaxOracleSize>, ValueQuery>;
 
 	/// The current members of the collective. This is stored sorted (just by
 	/// value).
 	#[pallet::storage]
 	#[pallet::getter(fn members)]
-	pub type Members<T: Config<I>, I: 'static = ()> = StorageValue<_, OrderedSet<T::AccountId,T::MaxOracleSize>, ValueQuery>;
+	pub type Members<T: Config<I>, I: 'static = ()> =
+		StorageValue<_, OrderedSet<T::AccountId, T::MaxOracleSize>, ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn nonces)]
@@ -201,9 +202,9 @@ pub mod module {
 				if v {
 					match Self::get(&k) {
 						Some(timestamped_values) => {
-								<LockedPrice<T, I>>::insert(&k, timestamped_values.value.clone());
-								Self::deposit_event(Event::NewLockedPrice(k, timestamped_values.value));
-						},
+							<LockedPrice<T, I>>::insert(&k, timestamped_values.value.clone());
+							Self::deposit_event(Event::NewLockedPrice(k, timestamped_values.value));
+						}
 						_ => (),
 					}
 				}
@@ -324,12 +325,12 @@ impl<T: Config<I>, I: 'static> Pallet<T, I> {
 
 			T::OnNewData::on_new_data(&who, &key, &value);
 		}
-		Self::deposit_event(Event::NewFeedData(who, values,T::Time::now()));
+		Self::deposit_event(Event::NewFeedData(who, values, T::Time::now()));
 		Ok(())
 	}
 }
 
-impl<T: Config<I>, I: 'static> UpdateOraclesStorgage<T::AccountId,T::OracleKey> for Pallet<T, I> {
+impl<T: Config<I>, I: 'static> UpdateOraclesStorgage<T::AccountId, T::OracleKey> for Pallet<T, I> {
 	fn initialize_members(members: Vec<T::AccountId>) {
 		if !members.is_empty() {
 			assert!(Members::<T, I>::get().0.is_empty(), "Members are already initialized!");
@@ -345,7 +346,7 @@ impl<T: Config<I>, I: 'static> UpdateOraclesStorgage<T::AccountId,T::OracleKey> 
 		// }
 
 		Members::<T, I>::mutate(|keys| {
-			memmbers.iter().for_each(|m|{
+			memmbers.iter().for_each(|m| {
 				keys.insert(m.clone());
 			})
 		});
@@ -354,18 +355,16 @@ impl<T: Config<I>, I: 'static> UpdateOraclesStorgage<T::AccountId,T::OracleKey> 
 	fn del_members(memmbers: &[T::AccountId]) {
 		// Members::<T, I>::mutate(|keys| keys.remove(memmber));
 		Members::<T, I>::mutate(|keys| {
-			memmbers.iter().for_each(|m|{
+			memmbers.iter().for_each(|m| {
 				keys.remove(m);
 			})
 		});
 	}
 
-	fn unlock_price(currency_id: T::OracleKey){
+	fn unlock_price(currency_id: T::OracleKey) {
 		LockedPrice::<T, I>::remove(currency_id);
 	}
-
 }
-
 
 impl<T: Config<I>, I: 'static> DataProvider<T::OracleKey, T::OracleValue> for Pallet<T, I> {
 	fn get(key: &T::OracleKey) -> Option<T::OracleValue> {

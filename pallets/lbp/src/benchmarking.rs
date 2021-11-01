@@ -3,12 +3,12 @@
 use super::*;
 
 use frame_benchmarking::{account, benchmarks};
+use frame_system::RawOrigin;
 use sp_std::prelude::*;
-use frame_system::{RawOrigin};
 
 use crate::Pallet as Lbp;
 
-use dico_primitives::{AssetId};
+use dico_primitives::AssetId;
 
 const SEED: u32 = 1;
 
@@ -126,4 +126,3 @@ benchmarks! {
 		assert_eq!(T::Currency::free_balance(DOT, &buyer), 10_000_000_000_000_000_000_000_000_000 + 51927050621361330000000);
 	}
 }
-

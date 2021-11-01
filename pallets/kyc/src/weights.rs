@@ -132,7 +132,6 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(1 as Weight))
 	}
 
-
 	fn request_judgement(r: u32, x: u32) -> Weight {
 		(75_299_000 as Weight)
 			.saturating_add((493_000 as Weight).saturating_mul(r as Weight))
@@ -140,7 +139,6 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(2 as Weight))
 			.saturating_add(T::DbWeight::get().writes(1 as Weight))
 	}
-
 }
 
 // For backwards compatibility and tests
@@ -196,7 +194,6 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
 	}
 
-
 	fn apply_certification(r: u32, x: u32) -> Weight {
 		(71_923_000 as Weight)
 			.saturating_add((529_000 as Weight).saturating_mul(r as Weight))
@@ -226,7 +223,6 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
 			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
 	}
-
 
 	fn ias_provide_judgement(r: u32, x: u32) -> Weight {
 		(71_923_000 as Weight)

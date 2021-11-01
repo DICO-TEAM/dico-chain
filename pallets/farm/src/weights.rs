@@ -44,16 +44,13 @@ pub struct DicoWeight<T>(PhantomData<T>);
 
 impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	fn set_halving_period() -> Weight {
-		(12_293_000 as Weight)
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		(12_293_000 as Weight).saturating_add(T::DbWeight::get().writes(1 as Weight))
 	}
 	fn set_dico_per_block() -> Weight {
-		(12_704_000 as Weight)
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		(12_704_000 as Weight).saturating_add(T::DbWeight::get().writes(1 as Weight))
 	}
 	fn set_start_block() -> Weight {
-		(12_354_000 as Weight)
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		(12_354_000 as Weight).saturating_add(T::DbWeight::get().writes(1 as Weight))
 	}
 	fn create_pool() -> Weight {
 		(35_337_000 as Weight)
@@ -80,16 +77,13 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 // For backwards compatibility and tests
 impl WeightInfo for () {
 	fn set_halving_period() -> Weight {
-		(12_293_000 as Weight)
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		(12_293_000 as Weight).saturating_add(RocksDbWeight::get().writes(1 as Weight))
 	}
 	fn set_dico_per_block() -> Weight {
-		(12_704_000 as Weight)
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		(12_704_000 as Weight).saturating_add(RocksDbWeight::get().writes(1 as Weight))
 	}
 	fn set_start_block() -> Weight {
-		(12_354_000 as Weight)
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		(12_354_000 as Weight).saturating_add(RocksDbWeight::get().writes(1 as Weight))
 	}
 	fn create_pool() -> Weight {
 		(35_337_000 as Weight)

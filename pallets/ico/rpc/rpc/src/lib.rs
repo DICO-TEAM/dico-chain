@@ -13,231 +13,258 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // #![cfg_attr(not(feature = "std"), no_std)]
-use jsonrpc_derive::rpc;
-use jsonrpc_core::{Error as RpcError, {futures::future::{self as rpc_future, result}}, ErrorCode};
-use sp_runtime::{
-    generic::BlockId,
-    traits,
-};
-use sp_blockchain::{
-    HeaderBackend,
-    Error as ClientError
-};
-use std::convert::TryInto;
 use codec::{self, Codec, Decode, Encode};
-use std::sync::Arc;
-use sc_rpc_api::DenyUnsafe;
+use jsonrpc_core::{
+	futures::future::{self as rpc_future, result},
+	Error as RpcError, ErrorCode,
+};
+use jsonrpc_derive::rpc;
 use pallet_ico_rpc_runtime_api::IcoAmountApi;
+use sc_rpc_api::DenyUnsafe;
+use sp_blockchain::{Error as ClientError, HeaderBackend};
 use sp_rpc::number::NumberOrHex;
+use sp_runtime::{generic::BlockId, traits};
+use std::convert::TryInto;
+use std::sync::Arc;
 type FutureResult<T> = Box<dyn rpc_future::Future<Item = T, Error = RpcError> + Send>;
 
 /// Ico RPC method
 #[rpc]
 pub trait IcoApi<AccountId, CurrencyId, Index, Balance> {
-    #[rpc(name = "ico_canReleaseAmount", alias("canReleaseAmount"))]
-    fn can_release_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
-    #[rpc(name = "ico_getRewardAmount", alias("getRewardAmount"))]
-    fn get_reward_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
-    #[rpc(name = "ico_canUnlockAmount", alias("canUnlockAmount"))]
-    fn can_unlock_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
-    #[rpc(name = "ico_canJoinAmount", alias("canJoinAmount"))]
-    fn can_join_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<(NumberOrHex, NumberOrHex)>;
-    #[rpc(name = "ico_getTokenPrice", alias("getTokenPrice"))]
-    fn get_token_price(&self, currency_id: CurrencyId) -> FutureResult<NumberOrHex>;
+	#[rpc(name = "ico_canReleaseAmount", alias("canReleaseAmount"))]
+	fn can_release_amount(
+		&self,
+		account: AccountId,
+		currency_id: CurrencyId,
+		index: Index,
+	) -> FutureResult<NumberOrHex>;
+	#[rpc(name = "ico_getRewardAmount", alias("getRewardAmount"))]
+	fn get_reward_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index)
+		-> FutureResult<NumberOrHex>;
+	#[rpc(name = "ico_canUnlockAmount", alias("canUnlockAmount"))]
+	fn can_unlock_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
+	#[rpc(name = "ico_canJoinAmount", alias("canJoinAmount"))]
+	fn can_join_amount(
+		&self,
+		user: AccountId,
+		currency_id: CurrencyId,
+		index: Index,
+	) -> FutureResult<(NumberOrHex, NumberOrHex)>;
+	#[rpc(name = "ico_getTokenPrice", alias("getTokenPrice"))]
+	fn get_token_price(&self, currency_id: CurrencyId) -> FutureResult<NumberOrHex>;
 }
 
 pub struct FullIco<C, B> {
-    client: Arc<C>,
-    deny_unsafe: DenyUnsafe,
-    _marker: std::marker::PhantomData<B>,
+	client: Arc<C>,
+	deny_unsafe: DenyUnsafe,
+	_marker: std::marker::PhantomData<B>,
 }
 
-impl <C, B> FullIco<C, B> {
-    pub fn new(client: Arc<C>, deny_unsafe: DenyUnsafe) -> Self {
-        FullIco {
-            client,
-            deny_unsafe,
-            _marker: Default::default(),
-        }
-    }
+impl<C, B> FullIco<C, B> {
+	pub fn new(client: Arc<C>, deny_unsafe: DenyUnsafe) -> Self {
+		FullIco {
+			client,
+			deny_unsafe,
+			_marker: Default::default(),
+		}
+	}
 }
 
 pub enum Error {
-    /// The transaction was not decodable.
-    DecodeError,
-    /// The call to runtime failed.
-    RuntimeError,
+	/// The transaction was not decodable.
+	DecodeError,
+	/// The call to runtime failed.
+	RuntimeError,
 }
 
 impl From<Error> for i64 {
-    fn from(e: Error) -> i64 {
-        match e {
-            Error::RuntimeError => 1,
-            Error::DecodeError => 2,
-        }
-    }
+	fn from(e: Error) -> i64 {
+		match e {
+			Error::RuntimeError => 1,
+			Error::DecodeError => 2,
+		}
+	}
 }
 
-
-impl<C, AccountId, CurrencyId, Index, Balance, Block> IcoApi<AccountId, CurrencyId, Index, Balance> for FullIco<C, Block>
+impl<C, AccountId, CurrencyId, Index, Balance, Block> IcoApi<AccountId, CurrencyId, Index, Balance>
+	for FullIco<C, Block>
 where
-    C: sp_api::ProvideRuntimeApi<Block>,
-    C: HeaderBackend<Block>,
-    C: Send + Sync + 'static,
-    C::Api: IcoAmountApi<Block, AccountId, CurrencyId, Index, Balance>,
-    Block: traits::Block,
-    AccountId: Clone + std::fmt::Display + Codec,
-    Index: Clone + std::fmt::Display + Codec + Send + traits::AtLeast32Bit + 'static,
-    CurrencyId: Clone + std::fmt::Display + Codec,
-    Balance: Codec + traits::MaybeDisplay + Copy + TryInto<NumberOrHex> +  std::marker::Send + 'static,
+	C: sp_api::ProvideRuntimeApi<Block>,
+	C: HeaderBackend<Block>,
+	C: Send + Sync + 'static,
+	C::Api: IcoAmountApi<Block, AccountId, CurrencyId, Index, Balance>,
+	Block: traits::Block,
+	AccountId: Clone + std::fmt::Display + Codec,
+	Index: Clone + std::fmt::Display + Codec + Send + traits::AtLeast32Bit + 'static,
+	CurrencyId: Clone + std::fmt::Display + Codec,
+	Balance: Codec + traits::MaybeDisplay + Copy + TryInto<NumberOrHex> + std::marker::Send + 'static,
 {
-    fn can_release_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex> {
-        let get_release_amount = || {
-            let api = self.client.runtime_api();
-            let best = self.client.info().best_hash;
-            let at = BlockId::hash(best);
+	fn can_release_amount(
+		&self,
+		account: AccountId,
+		currency_id: CurrencyId,
+		index: Index,
+	) -> FutureResult<NumberOrHex> {
+		let get_release_amount = || {
+			let api = self.client.runtime_api();
+			let best = self.client.info().best_hash;
+			let at = BlockId::hash(best);
 
-            let amount = api.can_release_amount(&at, account, currency_id, index).map_err(|e| RpcError {
-                code: ErrorCode::ServerError(Error::RuntimeError.into()),
-                message: "Unable to dry run extrinsic.".into(),
-                data: Some(format!("{:?}", e).into()),
-            })?;
-
-			let try_into_rpc_balance = |value: Balance| {
-			value.try_into().map_err(|_| RpcError {
-				code: ErrorCode::InvalidParams,
-				message: format!("{} doesn't fit in NumberOrHex representation", value),
-				data: None,
-			})
-			};
-			try_into_rpc_balance(amount)
-
-        };
-
-        Box::new(result(get_release_amount()))
-    }
-
-    fn get_token_price(&self, currency_id: CurrencyId) -> FutureResult<NumberOrHex> {
-        let get_token_price = || {
-            let api = self.client.runtime_api();
-            let best = self.client.info().best_hash;
-            let at = BlockId::hash(best);
-
-            let amount = api.get_token_price(&at, currency_id).map_err(|e| RpcError {
-                code: ErrorCode::ServerError(Error::RuntimeError.into()),
-                message: "Unable to dry run extrinsic.".into(),
-                data: Some(format!("{:?}", e).into()),
-            })?;
-
-            let try_into_rpc_balance = |value: Balance| {
-                value.try_into().map_err(|_| RpcError {
-                    code: ErrorCode::InvalidParams,
-                    message: format!("{} doesn't fit in NumberOrHex representation", value),
-                    data: None,
-                })
-            };
-            try_into_rpc_balance(amount)
-
-        };
-
-        Box::new(result(get_token_price()))
-    }
-
-    fn can_join_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<(NumberOrHex, NumberOrHex)> {
-        let can_join_amount = || {
-        let api = self.client.runtime_api();
-        let best = self.client.info().best_hash;
-        let at = BlockId::hash(best);
-
-        let amount = api.can_join_amount(&at, account, currency_id, index).map_err(|e| RpcError {
-            code: ErrorCode::ServerError(Error::RuntimeError.into()),
-            message: "Unable to dry run extrinsic.".into(),
-            data: Some(format!("{:?}", e).into()),
-        })?;
-
-        let try_into_rpc_balance = |value: Vec<Balance>| {
-            let mut new_value = vec![];
-            for i in value {
-                let j = i.try_into().ok();
-                match j {
-                    Some(x) => new_value.push(x),
-                    _ => {},
-                }
-            }
-            if new_value.len() == 2 {
-                let mut new_value_iter = new_value.iter();
-                let res = (new_value_iter.next().unwrap().clone(), new_value_iter.next().unwrap().clone());
-                Ok(res)
-            } else {
-                Err(RpcError {
-                    code: ErrorCode::InvalidParams,
-                    message: format!("doesn't fit in NumberOrHex representation"),
-                    data: None,
-                })
-            }
-        };
-        try_into_rpc_balance(vec![amount.0, amount.1])
-
-        };
-
-        Box::new(result(can_join_amount()))
-    }
-
-    fn get_reward_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex> {
-        let get_reward_amount = || {
-            let api = self.client.runtime_api();
-            let best = self.client.info().best_hash;
-            let at = BlockId::hash(best);
-
-            let amount = api.get_reward_amount(&at, account, currency_id, index).map_err(|e| RpcError {
-                code: ErrorCode::ServerError(Error::RuntimeError.into()),
-                message: "Unable to dry run extrinsic.".into(),
-                data: Some(format!("{:?}", e).into()),
-            })?;
+			let amount = api
+				.can_release_amount(&at, account, currency_id, index)
+				.map_err(|e| RpcError {
+					code: ErrorCode::ServerError(Error::RuntimeError.into()),
+					message: "Unable to dry run extrinsic.".into(),
+					data: Some(format!("{:?}", e).into()),
+				})?;
 
 			let try_into_rpc_balance = |value: Balance| {
-			value.try_into().map_err(|_| RpcError {
-				code: ErrorCode::InvalidParams,
-				message: format!("{} doesn't fit in NumberOrHex representation", value),
-				data: None,
-			})
+				value.try_into().map_err(|_| RpcError {
+					code: ErrorCode::InvalidParams,
+					message: format!("{} doesn't fit in NumberOrHex representation", value),
+					data: None,
+				})
 			};
 			try_into_rpc_balance(amount)
-
-        };
-
-        Box::new(result(get_reward_amount()))
-    }
-
-    fn can_unlock_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex
-    > {
-        let get_unlock_amount = || {
-        let api = self.client.runtime_api();
-        let best = self.client.info().best_hash;
-        let at = BlockId::hash(best);
-
-        let amount = api.can_unlock_amount(&at, account, currency_id, index).map_err(|e| RpcError {
-            code: ErrorCode::ServerError(Error::RuntimeError.into()),
-            message: "Unable to dry run extrinsic.".into(),
-            data: Some(format!("{:?}", e).into()),
-        })?;
-		let try_into_rpc_balance = |value: Balance| {
-		value.try_into().map_err(|_| RpcError {
-			code: ErrorCode::InvalidParams,
-			message: format!("{} doesn't fit in NumberOrHex representation", value),
-			data: None,
-		})
 		};
-		try_into_rpc_balance(amount)
 
-    };
+		Box::new(result(get_release_amount()))
+	}
 
-    Box::new(result(get_unlock_amount()))
-    }
+	fn get_token_price(&self, currency_id: CurrencyId) -> FutureResult<NumberOrHex> {
+		let get_token_price = || {
+			let api = self.client.runtime_api();
+			let best = self.client.info().best_hash;
+			let at = BlockId::hash(best);
+
+			let amount = api.get_token_price(&at, currency_id).map_err(|e| RpcError {
+				code: ErrorCode::ServerError(Error::RuntimeError.into()),
+				message: "Unable to dry run extrinsic.".into(),
+				data: Some(format!("{:?}", e).into()),
+			})?;
+
+			let try_into_rpc_balance = |value: Balance| {
+				value.try_into().map_err(|_| RpcError {
+					code: ErrorCode::InvalidParams,
+					message: format!("{} doesn't fit in NumberOrHex representation", value),
+					data: None,
+				})
+			};
+			try_into_rpc_balance(amount)
+		};
+
+		Box::new(result(get_token_price()))
+	}
+
+	fn can_join_amount(
+		&self,
+		account: AccountId,
+		currency_id: CurrencyId,
+		index: Index,
+	) -> FutureResult<(NumberOrHex, NumberOrHex)> {
+		let can_join_amount = || {
+			let api = self.client.runtime_api();
+			let best = self.client.info().best_hash;
+			let at = BlockId::hash(best);
+
+			let amount = api
+				.can_join_amount(&at, account, currency_id, index)
+				.map_err(|e| RpcError {
+					code: ErrorCode::ServerError(Error::RuntimeError.into()),
+					message: "Unable to dry run extrinsic.".into(),
+					data: Some(format!("{:?}", e).into()),
+				})?;
+
+			let try_into_rpc_balance = |value: Vec<Balance>| {
+				let mut new_value = vec![];
+				for i in value {
+					let j = i.try_into().ok();
+					match j {
+						Some(x) => new_value.push(x),
+						_ => {}
+					}
+				}
+				if new_value.len() == 2 {
+					let mut new_value_iter = new_value.iter();
+					let res = (
+						new_value_iter.next().unwrap().clone(),
+						new_value_iter.next().unwrap().clone(),
+					);
+					Ok(res)
+				} else {
+					Err(RpcError {
+						code: ErrorCode::InvalidParams,
+						message: format!("doesn't fit in NumberOrHex representation"),
+						data: None,
+					})
+				}
+			};
+			try_into_rpc_balance(vec![amount.0, amount.1])
+		};
+
+		Box::new(result(can_join_amount()))
+	}
+
+	fn get_reward_amount(
+		&self,
+		account: AccountId,
+		currency_id: CurrencyId,
+		index: Index,
+	) -> FutureResult<NumberOrHex> {
+		let get_reward_amount = || {
+			let api = self.client.runtime_api();
+			let best = self.client.info().best_hash;
+			let at = BlockId::hash(best);
+
+			let amount = api
+				.get_reward_amount(&at, account, currency_id, index)
+				.map_err(|e| RpcError {
+					code: ErrorCode::ServerError(Error::RuntimeError.into()),
+					message: "Unable to dry run extrinsic.".into(),
+					data: Some(format!("{:?}", e).into()),
+				})?;
+
+			let try_into_rpc_balance = |value: Balance| {
+				value.try_into().map_err(|_| RpcError {
+					code: ErrorCode::InvalidParams,
+					message: format!("{} doesn't fit in NumberOrHex representation", value),
+					data: None,
+				})
+			};
+			try_into_rpc_balance(amount)
+		};
+
+		Box::new(result(get_reward_amount()))
+	}
+
+	fn can_unlock_amount(
+		&self,
+		account: AccountId,
+		currency_id: CurrencyId,
+		index: Index,
+	) -> FutureResult<NumberOrHex> {
+		let get_unlock_amount = || {
+			let api = self.client.runtime_api();
+			let best = self.client.info().best_hash;
+			let at = BlockId::hash(best);
+
+			let amount = api
+				.can_unlock_amount(&at, account, currency_id, index)
+				.map_err(|e| RpcError {
+					code: ErrorCode::ServerError(Error::RuntimeError.into()),
+					message: "Unable to dry run extrinsic.".into(),
+					data: Some(format!("{:?}", e).into()),
+				})?;
+			let try_into_rpc_balance = |value: Balance| {
+				value.try_into().map_err(|_| RpcError {
+					code: ErrorCode::InvalidParams,
+					message: format!("{} doesn't fit in NumberOrHex representation", value),
+					data: None,
+				})
+			};
+			try_into_rpc_balance(amount)
+		};
+
+		Box::new(result(get_unlock_amount()))
+	}
 }
-
-
-
-
-
-
