@@ -52,7 +52,7 @@ use sp_std::vec::Vec;
 use sp_std::{collections::btree_map::BTreeMap, prelude::*, result};
 use traits::{IcoHandler, PowerHandler};
 
-pub mod mock;
+// pub mod mock;
 pub mod tests;
 pub mod traits;
 
@@ -1139,37 +1139,33 @@ impl<T: Config> Module<T> {
 	fn calculate_total_reward(
 		ico: &IcoInfo<T::BlockNumber, MultiBalanceOf<T>, AssetId, AreaCode, T::AccountId>,
 	) -> MultiBalanceOf<T> {
-		let actual_total_usdt = ico.total_usdt;
+		let mut this_time_total_usdt = ico.total_usdt;
 		let total_usdt = match ico.tag {
 			Some(tag_usdt) => tag_usdt,
-			None => TotalUsdt::<T>::get().saturating_add(actual_total_usdt),
+			None => TotalUsdt::<T>::get().saturating_add(this_time_total_usdt),
 		};
-		let num = total_usdt
-			/ (HalfDuration
-				.saturated_into::<MultiBalanceOf<T>>()
-				.saturating_add(MultiBalanceOf::<T>::from(1u32)));
-		let mut power_as_usdt = MultiBalanceOf::<T>::from(0u32);
-		if total_usdt.saturating_sub(actual_total_usdt) < num * HalfDuration.saturated_into::<MultiBalanceOf<T>>() {
-			let power1 = total_usdt.saturating_sub(num * HalfDuration.saturated_into::<MultiBalanceOf<T>>());
-			let power2 = actual_total_usdt.saturating_sub(power1);
-			power_as_usdt = power1
-				/ 2u32
-					.pow(num.saturated_into::<u32>())
-					.saturated_into::<MultiBalanceOf<T>>()
-				+ power2
-					/ 2u32
-						.pow(num.saturated_into::<u32>() - 1u32)
-						.saturated_into::<MultiBalanceOf<T>>();
-		} else {
-			power_as_usdt = actual_total_usdt
-				/ 2u32
-					.pow(num.saturated_into::<u32>())
-					.saturated_into::<MultiBalanceOf<T>>();
+
+		let mut num = total_usdt / HalfDuration.saturated_into::<MultiBalanceOf<T>>();
+		let mut remain = total_usdt % HalfDuration.saturated_into::<MultiBalanceOf<T>>();
+
+		let mut power = MultiBalanceOf::<T>::from(0u32);
+		loop {
+			if this_time_total_usdt.saturating_sub(remain) > MultiBalanceOf::<T>::from(0u32) {
+				power += (remain / (2u32.pow(num.saturated_into::<u32>())).saturated_into::<MultiBalanceOf<T>>());
+				this_time_total_usdt -= remain;
+				remain = HalfDuration.saturated_into::<MultiBalanceOf<T>>();
+				num = num.saturating_sub(1u32.saturated_into::<MultiBalanceOf<T>>())
+			}
+			else {
+				power += (this_time_total_usdt / (2u32.pow(num.saturated_into::<u32>())).saturated_into::<MultiBalanceOf<T>>());
+				break;
+			}
 		}
-		let first_total = T::IcoTotalReward::get() / 2u32.saturated_into::<MultiBalanceOf<T>>();
+
+		let first_total_reward = T::IcoTotalReward::get() / 2u32.saturated_into::<MultiBalanceOf<T>>();
 
 		Self::u256_convert_to_balance(
-			Self::balance_convert_to_u256(power_as_usdt) * Self::balance_convert_to_u256(first_total)
+			Self::balance_convert_to_u256(power) * Self::balance_convert_to_u256(first_total_reward)
 				/ Self::balance_convert_to_u256(HalfDuration.saturated_into::<MultiBalanceOf<T>>()),
 		)
 	}
