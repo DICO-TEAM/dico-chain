@@ -1152,9 +1152,9 @@ impl<T: Config> Module<T> {
 		loop {
 			if this_time_total_usdt.saturating_sub(remain) > MultiBalanceOf::<T>::from(0u32) {
 				power += (remain / (2u32.pow(num.saturated_into::<u32>())).saturated_into::<MultiBalanceOf<T>>());
-				this_time_total_usdt -= remain;
+				this_time_total_usdt = this_time_total_usdt.saturating_sub(remain);
 				remain = HalfDuration.saturated_into::<MultiBalanceOf<T>>();
-				num = num.saturating_sub(1u32.saturated_into::<MultiBalanceOf<T>>())
+				num = num.saturating_sub(1u32.saturated_into::<MultiBalanceOf<T>>());
 			}
 			else {
 				power += (this_time_total_usdt / (2u32.pow(num.saturated_into::<u32>())).saturated_into::<MultiBalanceOf<T>>());
