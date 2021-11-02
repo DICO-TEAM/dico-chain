@@ -80,8 +80,8 @@ use frame_support::{assert_noop, assert_ok, debug};
 // 			}],
 // 		);
 //
-// 		let initiator_info = IcoTest::get_unrelease_assets(ico.initiator, ico.currency_id, ico.index.unwrap());
-// 		// println!("initiator_info: {:?}", initiator_info);
+// 		let initiator_info = IcoTest::get_unrelease_assets(ico.initiator, ico.currency_id,
+// ico.index.unwrap()); 		// println!("initiator_info: {:?}", initiator_info);
 // 		assert_eq!(
 // 			initiator_info.is_some() && initiator_info.unwrap().total == 10_0000,
 // 			true
@@ -105,12 +105,10 @@ fn split(mut this_time_amount: u64, total_amount: u64, unit: u64) -> Vec<u64> {
 			result.push(remain);
 			this_time_amount -= remain;
 			remain = unit.clone();
-
 		} else {
 			result.push(this_time_amount);
 			break;
 		}
-
 	}
 	result
 }
@@ -119,6 +117,3 @@ fn main_test() {
 	let a = split(45u64, 45u64, 20);
 	println!("a ======== {:?}", a);
 }
-
-
-

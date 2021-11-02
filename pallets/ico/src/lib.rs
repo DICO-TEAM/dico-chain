@@ -1155,9 +1155,9 @@ impl<T: Config> Module<T> {
 				this_time_total_usdt = this_time_total_usdt.saturating_sub(remain);
 				remain = HalfDuration.saturated_into::<MultiBalanceOf<T>>();
 				num = num.saturating_sub(1u32.saturated_into::<MultiBalanceOf<T>>());
-			}
-			else {
-				power += (this_time_total_usdt / (2u32.pow(num.saturated_into::<u32>())).saturated_into::<MultiBalanceOf<T>>());
+			} else {
+				power += (this_time_total_usdt
+					/ (2u32.pow(num.saturated_into::<u32>())).saturated_into::<MultiBalanceOf<T>>());
 				break;
 			}
 		}
@@ -1709,7 +1709,11 @@ impl<T: Config> Module<T> {
 		};
 		runtime_print!("remain usdt amount is {:?}", user_remain_usdt);
 
-		let price = Self::get_token_price(exchange_token_id);
+		let mul = PowerMultipleOf::get(exchange_token_id);
+		let a = MultiBalanceOf::<T>::from(mul.up);
+		let b = MultiBalanceOf::<T>::from(mul.down);
+		let price = Self::get_token_price(exchange_token_id) * a / b;
+
 		if price == MultiBalanceOf::<T>::from(0u32) {
 			return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32));
 		}
@@ -1746,14 +1750,7 @@ impl<T: Config> Module<T> {
 			return (MultiBalanceOf::<T>::from(0u32), MultiBalanceOf::<T>::from(0u32));
 		}
 
-		let mul = PowerMultipleOf::get(exchange_token_id);
-		let a = MultiBalanceOf::<T>::from(mul.up);
-		let b = MultiBalanceOf::<T>::from(mul.down);
-
-		(
-			min_join_amount.saturating_mul(b) / a,
-			max_join_amount.saturating_mul(b) / a,
-		)
+		(min_join_amount, max_join_amount)
 	}
 
 	fn insert_invite_info(invitee: &T::AccountId, inviter: Option<T::AccountId>, currency_id: AssetId, index: u32) {
