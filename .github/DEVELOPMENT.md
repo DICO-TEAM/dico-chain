@@ -1,4 +1,4 @@
-# Development(Ubuntu)
+# Development
 
 ## setup
 
@@ -13,7 +13,7 @@ or
 make setup
 ```
 
-finished. install build supports package
+finished. install build supports package(Ubuntu, optional for polkadot build)
 
 ```
 sudo apt install build-essential git clang libclang-dev pkg-config libssl-dev
@@ -32,3 +32,4 @@ make build
 ```asm
 make dev
 ```
+
