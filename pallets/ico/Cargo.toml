@@ -21,6 +21,8 @@ codec           = { package = "parity-scale-codec", version = "2.0.0", default-f
 sp-core         = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
 sp-io           = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
 pallet-balances = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
+pallet-randomness-collective-flip          = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+
 
 # orml
 orml-traits     = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
@@ -32,6 +34,8 @@ pallet-kyc      = { path = "../kyc", default-features = false,  version = "1.0.0
 dico-primitives = { path = "../../primitives", default-features = false,  version = "1.0.0"}
 dico-treasury   = { package = "pallet-dico-treasury", path = "../treasury", default-features = false,  version = "1.0.0" }
 pallet-pricedao = { path = "../pricedao", default-features = false}
+pallet-amm = { path = "../amm", default-features = false }
+pallet-oracle = { path = "../oracle", default-features = false }
 
 [features]
 default = ['std']
@@ -51,4 +55,7 @@ std = [
     "dico-primitives/std",
     "dico-treasury/std",
     "pallet-pricedao/std",
+	"pallet-randomness-collective-flip/std",
+	"pallet-amm/std",
+	"pallet-oracle/std",
 ]

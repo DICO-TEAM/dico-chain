@@ -13,6 +13,7 @@ use std::cell::RefCell;
 
 use frame_support::{
 	construct_runtime, ord_parameter_types, parameter_types, sp_runtime::ModuleId, traits::GenesisBuild,
+	traits::Time
 };
 use frame_system as system;
 
@@ -31,7 +32,7 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Module, Call, Config, Storage, Event<T>},
-		DicoOracle: pallet_oracle::{Module, Storage, Call, Config<T>, Event<T>},
+		DicoOracle: pallet_oracle::{Module, Storage, Call, Event<T>},
 		Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 		PriceDao: pallet_price::{Module, Storage, Call, Config<T>, Event<T>},
 

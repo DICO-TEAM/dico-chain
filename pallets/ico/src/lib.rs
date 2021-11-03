@@ -52,7 +52,7 @@ use sp_std::vec::Vec;
 use sp_std::{collections::btree_map::BTreeMap, prelude::*, result};
 use traits::{IcoHandler, PowerHandler};
 
-// pub mod mock;
+pub mod mock;
 pub mod tests;
 pub mod traits;
 
