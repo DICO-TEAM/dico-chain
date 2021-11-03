@@ -9,13 +9,17 @@
 
 </div>
 
+
 ## Credits
 
 [ORML](https://github.com/open-web3-stack/open-runtime-module-library)
 
-
 [paritytech/substrate](https://github.com/paritytech/substrate)
 
+## Contributions
+
+Contributors are welcomed to join this project. Please check [CONTRIBUTING](./.github/CONTRIBUTING.md) about how to contribute
+to this project.
 
 ## License
 
