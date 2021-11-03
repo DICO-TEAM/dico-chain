@@ -16,6 +16,10 @@
 
 [paritytech/substrate](https://github.com/paritytech/substrate)
 
+## Development
+
+Click [here](./.github/DEVELOPMENT.md) to jump to development guide.
+
 ## Contributions
 
 Contributors are welcomed to join this project. Please check [CONTRIBUTING](./.github/CONTRIBUTING.md) about how to contribute
