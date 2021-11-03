@@ -3,23 +3,15 @@
 use super::*;
 // use crate::mock::*;
 use frame_support::{assert_noop, assert_ok, debug};
-
 // #[test]
 // fn test1() {
 // 	new_test_ext().execute_with(|| {
 // 		assert_eq!(IcoTest::now(), 1);
-// 		// debug(&IcoTest::now);
 // 		println!("{:}", IcoTest::now());
 // 		let a = IcoTest::classify_user_amount(100, vec![(55, 100), (37, 70)]);
-// 		// println!("{:?}", a);
-// 		// println!("{:?}", TotalNum::get());
-// 		// TotalNum::put(1000000);
-// 		// println!("{:?}", TotalNum::get());
 // 		assert_eq!(IcoTest::caculate_user_reward(a, 1000, 10000), 1200);
 //
 // 		assert_ok!(IcoTest::join(Origin::signed(1), 1u32, 1u32, 10000u64));
-//
-// 		// assert_ok!(())
 // 	});
 // }
 //
@@ -36,10 +28,12 @@ use frame_support::{assert_noop, assert_ok, debug};
 // fn calculate_total_power_test() {
 // 	new_test_ext().execute_with(|| {
 // 		let ico = IcoInfo {
+// 			desc: vec![],
 // 			start_time: None,
-// 			is_identity: false,
+// 			is_already_kyc: false,
 // 			initiator: 1,
 // 			total_usdt: 100_0000,
+// 			tag: None,
 // 			is_terminated: false,
 // 			project_name: vec![],
 // 			token_symbol: vec![],
@@ -47,9 +41,9 @@ use frame_support::{assert_noop, assert_ok, debug};
 // 			index: Some(1),
 // 			already_released_proportion: Default::default(),
 // 			currency_id: 1,
-// 			logo_url: vec![],
+// 			// logo_url: vec![],
 // 			official_website: vec![],
-// 			user_ico_max_count: 0,
+// 			user_ico_max_times: 0,
 // 			is_must_kyc: false,
 // 			total_issuance: 100_0000,
 // 			total_circulation: 100_0000,
@@ -58,8 +52,8 @@ use frame_support::{assert_noop, assert_ok, debug};
 // 			user_min_amount: 10000,
 // 			user_max_amount: 50000,
 // 			exchange_token: 2,
-// 			total_exchange_amount: 10_0000,
-// 			exclude_nation: vec![Countries::Chain],
+// 			exchange_token_total_amount: 10_0000,
+// 			exclude_area: vec![Countries::Chain],
 // 			lock_proportion: Default::default(),
 // 			unlock_duration: 0,
 // 			per_duration_unlock_amount: 0,
@@ -71,12 +65,15 @@ use frame_support::{assert_noop, assert_ok, debug};
 // 			ico.initiator,
 // 			vec![UnRelease {
 // 				currency_id: ico.currency_id,
+// 				inviter: None,
 // 				index: ico.index.unwrap(),
 // 				unreleased_currency_id: ico.exchange_token,
-// 				tags: vec![(5000, 100_000)],
+// 				total_usdt: 100000,
+// 				tags: vec![(5000, 100_000, 5000, 5000)],
 // 				total: 100000,
 // 				released: 8000,
-// 				is_already_get_reward: None,
+// 				refund: 8000,
+// 				reward: None
 // 			}],
 // 		);
 //
@@ -93,8 +90,8 @@ use frame_support::{assert_noop, assert_ok, debug};
 // 		println!("total_usdt: {:}", TotalUsdt::<Test>::get());
 // 	});
 // }
-//
-//
+
+
 fn split(mut this_time_amount: u64, total_amount: u64, unit: u64) -> Vec<u64> {
 	let mut remain = total_amount.clone() % unit.clone();
 	let mut num = total_amount / unit.clone();
