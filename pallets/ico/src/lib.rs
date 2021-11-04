@@ -42,7 +42,7 @@ use pallet_pricedao::traits::PriceData;
 pub use primitive_types::U256;
 use sp_runtime::app_crypto::sp_core::sandbox::ERR_EXECUTION;
 use sp_runtime::traits::{CheckedAdd, CheckedSub, StaticLookup};
-use sp_runtime::{
+pub use sp_runtime::{
 	traits::CheckedMul,
 	traits::{AccountIdConversion, CheckedDiv, Saturating, Zero},
 	DispatchError, DispatchResult, Percent, RuntimeDebug, SaturatedConversion,
@@ -58,7 +58,7 @@ pub mod traits;
 
 const ICO_ID: LockIdentifier = *b"ico     ";
 const HalfDuration: u128 = 200_000_000u128 * USDT;
-const USDT: u128 = 1000_000u128;
+pub const USDT: u128 = 1000_000u128;
 
 pub(crate) type MultiBalanceOf<T> =
 	<<T as Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::Balance;
