@@ -12,30 +12,37 @@ use sp_runtime::{
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
 };
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
-type Block = frame_system::mocking::MockBlock<Test>;
+use orml_tokens as tokens;
+pub type Block = sp_runtime::generic::Block<Header, UncheckedExtrinsic>;
+pub type UncheckedExtrinsic = sp_runtime::generic::UncheckedExtrinsic<u32, u64, Call, ()>;
 use std::cell::RefCell;
-use crate as ico;
+use crate as dao;
 use frame_system;
 use pallet_balances;
+pub use ico::{*};
 
 use currencies::{self as dico_currencies, BasicCurrencyAdapter};
-
+use dico_primitives::{constants::{currency::*, time::*}};
 type Key = u32;
 type Value = u128;
 pub type AccountId = u128;
 pub type Balance = u128;
 type Amount = i128;
 type BlockNumber = u32;
+type CurrencyId = u32;
 
-// pub const DOLLARS: u128 = 1000;
+pub const DOLLARS: u128 = 1000;
+
 pub const Alice: AccountId = 1;
 pub const Bob: AccountId = 2;
+pub const Herry: AccountId = 3;
+
 pub const DOT: CurrencyId = 10;
 pub const DICO: CurrencyId = 0;
 pub const KSM: CurrencyId = 20;
 pub const NewDAYS: u64 = 1000;
 pub const NEW_USDT: CurrencyId = 5;
+
 
 construct_runtime!(
 	pub enum Test where
@@ -54,6 +61,7 @@ construct_runtime!(
 		AMM: pallet_amm::{Pallet, Call, Storage, Event<T>},
 		DicoOracle: pallet_oracle::{Pallet, Storage, Call, Event<T>},
 		DicoTreasury: dico_treasury::{Pallet, Call, Storage, Event<T>},
+		Dao: dao::{Pallet, Origin<T>, Event<T>, Call, Storage},
 	}
 );
 
@@ -80,6 +88,20 @@ parameter_types! {
 	pub const DicoProposalBond: Balance = 100 * DOLLARS;
 	pub const DicoSpendPeriod: BlockNumber = 7 * DAYS;
 	pub const DicoTreasuryModuleId: PalletId = PalletId(*b"treasury");
+}
+
+parameter_types! {
+	pub const DicoMotionDuration: BlockNumber = 5 * DAYS;
+	pub const DicoMaxProposals: u32 = 100;
+}
+impl dao::Config for Test {
+	type Origin = Origin;
+	type Proposal = Call;
+	type Event = Event;
+	type MotionDuration = DicoMotionDuration;
+	type MaxProposals = DicoMaxProposals;
+	type WeightInfo = ();
+	type IcoHandler = ();
 }
 
 
@@ -221,7 +243,7 @@ parameter_types! {
 
 }
 
-impl Config for Test {
+impl ico::Config for Test {
 	type Event = Event;
 	type PermitIcoOrigin = frame_system::EnsureRoot<AccountId>;
 	type RejectIcoOrigin = frame_system::EnsureRoot<AccountId>;
@@ -302,7 +324,6 @@ impl dico_currencies::Config for Test {
 	type CreateConsume = CreateConsume;
 	type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
 }
-
 
 pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();

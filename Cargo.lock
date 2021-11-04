@@ -5224,13 +5224,23 @@ dependencies = [
 name = "pallet-dao"
 version = "1.0.0"
 dependencies = [
+ "dico-primitives",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
  "hex-literal",
  "log",
+ "orml-tokens",
  "orml-traits",
+ "pallet-amm",
+ "pallet-balances",
+ "pallet-currencies",
+ "pallet-dico-treasury",
  "pallet-ico",
+ "pallet-kyc",
+ "pallet-oracle",
+ "pallet-pricedao",
+ "pallet-randomness-collective-flip",
  "pallet-timestamp",
  "parity-scale-codec",
  "serde",

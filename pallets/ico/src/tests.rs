@@ -1,95 +1,144 @@
 #![cfg(test)]
 
 use super::*;
-// use crate::mock::*;
+use crate::mock::*;
 use frame_support::{assert_noop, assert_ok, debug};
-// #[test]
-// fn test1() {
-// 	new_test_ext().execute_with(|| {
-// 		assert_eq!(IcoTest::now(), 1);
-// 		println!("{:}", IcoTest::now());
-// 		let a = IcoTest::classify_user_amount(100, vec![(55, 100), (37, 70)]);
-// 		assert_eq!(IcoTest::caculate_user_reward(a, 1000, 10000), 1200);
-//
-// 		assert_ok!(IcoTest::join(Origin::signed(1), 1u32, 1u32, 10000u64));
-// 	});
-// }
-//
-// #[test]
-// fn unrelease_test() {
-// 	new_test_ext().execute_with(|| {
-// 		println!("first: {:#?}", RequestReleaseInfo::<Test>::get());
-// 		IcoTest::request_release(Origin::signed(1), 1, 2, Percent::from_percent(5u8));
-// 		println!("{:#?}", RequestReleaseInfo::<Test>::get());
-// 	});
-// }
-//
-// #[test]
-// fn calculate_total_power_test() {
-// 	new_test_ext().execute_with(|| {
-// 		let ico = IcoInfo {
-// 			desc: vec![],
-// 			start_time: None,
-// 			is_already_kyc: false,
-// 			initiator: 1,
-// 			total_usdt: 100_0000,
-// 			tag: None,
-// 			is_terminated: false,
-// 			project_name: vec![],
-// 			token_symbol: vec![],
-// 			decimals: 0,
-// 			index: Some(1),
-// 			already_released_proportion: Default::default(),
-// 			currency_id: 1,
-// 			// logo_url: vec![],
-// 			official_website: vec![],
-// 			user_ico_max_times: 0,
-// 			is_must_kyc: false,
-// 			total_issuance: 100_0000,
-// 			total_circulation: 100_0000,
-// 			ico_duration: 100,
-// 			total_ico_amount: 100_0000,
-// 			user_min_amount: 10000,
-// 			user_max_amount: 50000,
-// 			exchange_token: 2,
-// 			exchange_token_total_amount: 10_0000,
-// 			exclude_area: vec![Countries::Chain],
-// 			lock_proportion: Default::default(),
-// 			unlock_duration: 0,
-// 			per_duration_unlock_amount: 0,
-// 		};
-//
-// 		TotalUsdt::<Test>::put(250_0000);
-//
-// 		UnReleaseAssets::<Test>::insert(
-// 			ico.initiator,
-// 			vec![UnRelease {
-// 				currency_id: ico.currency_id,
-// 				inviter: None,
-// 				index: ico.index.unwrap(),
-// 				unreleased_currency_id: ico.exchange_token,
-// 				total_usdt: 100000,
-// 				tags: vec![(5000, 100_000, 5000, 5000)],
-// 				total: 100000,
-// 				released: 8000,
-// 				refund: 8000,
-// 				reward: None
-// 			}],
-// 		);
-//
-// 		let initiator_info = IcoTest::get_unrelease_assets(ico.initiator, ico.currency_id,
-// ico.index.unwrap()); 		// println!("initiator_info: {:?}", initiator_info);
-// 		assert_eq!(
-// 			initiator_info.is_some() && initiator_info.unwrap().total == 10_0000,
-// 			true
-// 		);
-//
-// 		let result = IcoTest::calculate_total_power(ico);
-//
-// 		println!("result: {:}", result);
-// 		println!("total_usdt: {:}", TotalUsdt::<Test>::get());
-// 	});
-// }
+
+fn initialize() {
+	Balances::set_balance(Origin::root(), Alice, 100_000 * DOLLARS, 100 * DOLLARS).unwrap();
+	Balances::set_balance(Origin::root(), Bob, 100_000 * DOLLARS, 100 * DOLLARS).unwrap();
+	Currencies::create_asset(Origin::signed(Alice), KSM, 100_000*DOLLARS, Some(DicoAssetMetadata {
+		name: b"KUSAMA".to_vec(),
+		symbol: b"KSM".to_vec(),
+		decimals: 12
+	})).unwrap();
+
+	Currencies::create_asset(Origin::signed(Bob), NEW_USDT, 100_000*DOLLARS, Some(DicoAssetMetadata {
+		name: b"NEW_USDT".to_vec(),
+		symbol: b"NEW_USDT".to_vec(),
+		decimals: 8
+	})).unwrap();
+
+	Currencies::create_asset(Origin::signed(Bob), DOT, 100_000*DOLLARS, Some(DicoAssetMetadata {
+		name: b"POLKADOT".to_vec(),
+		symbol: b"DOT".to_vec(),
+		decimals: 12
+	})).unwrap();
+	Currencies::transfer(Origin::signed(Bob), Alice, DOT, 5000 * DOLLARS).unwrap();
+
+	Ico::<Test>::insert(KSM, 1, IcoInfo {
+		desc: vec![],
+		start_time: Some(0u64),
+		is_already_kyc: false,
+		initiator: Alice,
+		total_usdt: 3500_0000 * USDT,
+		tag: None,
+		is_terminated: false,
+		project_name: b"KUSAMA".to_vec(),
+		token_symbol: b"KSM".to_vec(),
+		decimals: 12,
+		index: Some(1u32),
+		already_released_proportion: Default::default(),
+		currency_id: KSM,
+		official_website: vec![],
+		user_ico_max_times: 2,
+		is_must_kyc: false,
+		total_issuance: 10000 * DOLLARS,
+		total_circulation: 1000 * DOLLARS,
+		ico_duration: NewDAYS,
+		total_ico_amount: 1000 * DOLLARS,
+		user_min_amount: 100 * DOLLARS,
+		user_max_amount: 500 * DOLLARS,
+		exchange_token: NEW_USDT,
+		exchange_token_total_amount: 10000 * DOLLARS,
+		exclude_area: vec![],
+		lock_proportion: Default::default(),
+		unlock_duration: NewDAYS,
+		per_duration_unlock_amount: 0 * DOLLARS
+	});
+}
+
+#[test]
+fn initiate_ico_should_work() {
+	new_test_ext().execute_with(|| {
+		let info = IcoParameters {
+			desc: vec![],
+			currency_id: DOT,
+			official_website: vec![],
+			is_must_kyc: false,
+			user_ico_max_times: 2,
+			total_issuance: 10000 * DOLLARS,
+			total_circulation: 1000 * DOLLARS,
+			ico_duration: NewDAYS,
+			total_ico_amount: 1000 * DOLLARS,
+			user_min_amount: 100 * DOLLARS,
+			user_max_amount: 500 * DOLLARS,
+			exchange_token: KSM,
+			exchange_token_total_amount: 10000 * DOLLARS,
+			exclude_area: vec![],
+			lock_proportion: Default::default(),
+			unlock_duration: NewDAYS,
+			per_duration_unlock_amount: 0 * DOLLARS
+		};
+		initialize();
+		assert_ok!(IcoTest::initiate_ico(Origin::signed(Alice), info));
+
+	});
+}
+
+#[test]
+fn join_should_work() {
+	new_test_ext().execute_with(|| {
+		Ico::<Test>::insert(KSM, 1, IcoInfo {
+			desc: vec![],
+			start_time: Some(0u64),
+			is_already_kyc: false,
+			initiator: Alice,
+			total_usdt: 1000,
+			tag: None,
+			is_terminated: false,
+			project_name: b"KUSAMA".to_vec(),
+			token_symbol: b"KSM".to_vec(),
+			decimals: 12,
+			index: Some(1u32),
+			already_released_proportion: Default::default(),
+			currency_id: KSM,
+			official_website: vec![],
+			user_ico_max_times: 2,
+			is_must_kyc: false,
+			total_issuance: 10000 * DOLLARS,
+			total_circulation: 1000 * DOLLARS,
+			ico_duration: NewDAYS,
+			total_ico_amount: 1000 * DOLLARS,
+			user_min_amount: 100 * DOLLARS,
+			user_max_amount: 500 * DOLLARS,
+			exchange_token: NEW_USDT,
+			exchange_token_total_amount: 10000 * DOLLARS,
+			exclude_area: vec![],
+			lock_proportion: Default::default(),
+			unlock_duration: NewDAYS,
+			per_duration_unlock_amount: 0 * DOLLARS
+		});
+		initialize();
+		let result = IcoTest::join(Origin::signed(Bob), KSM, 1u32, 100 * DOLLARS, None);
+		println!("result: {:?}", result);
+	});
+}
+
+
+#[test]
+fn calculate_total_reward_should_work() {
+	new_test_ext().execute_with(|| {
+		initialize();
+		TotalUsdt::<Test>::put(1_8000_0000 * USDT);
+		let ico = Ico::<Test>::get(KSM, 1).unwrap();
+		print!("ico: {:#?}\n", ico);
+		let reward = IcoTest::calculate_total_reward(&ico);
+		println!("reward: {:?}", reward);
+		assert_eq!(reward, 13750000 * USDT + 1);
+	});
+
+}
 
 
 fn split(mut this_time_amount: u64, total_amount: u64, unit: u64) -> Vec<u64> {
@@ -109,8 +158,9 @@ fn split(mut this_time_amount: u64, total_amount: u64, unit: u64) -> Vec<u64> {
 	}
 	result
 }
+
 #[test]
 fn main_test() {
 	let a = split(45u64, 45u64, 20);
-	println!("a ======== {:?}", a);
+	println!("{:?}", a);
 }

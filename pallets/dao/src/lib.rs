@@ -39,14 +39,16 @@ use sp_std::{
 	prelude::*,
 	result,
 };
+use orml_traits::{BalanceStatus, MultiCurrency, MultiReservableCurrency};
+pub use weights::WeightInfo;
 
 // #[cfg(feature = "runtime-benchmarks")]
 // mod benchmarking;
 //
 pub mod weights;
+pub mod mock;
+pub mod tests;
 
-use orml_traits::{BalanceStatus, MultiCurrency, MultiReservableCurrency};
-pub use weights::WeightInfo;
 
 //
 /// Simple index type for proposal counting.
@@ -383,12 +385,6 @@ decl_module! {
 
 			// Allow (dis-)approving the proposal as soon as there are enough votes.
 			if approved {
-				// let (proposal, len) = Self::validate_and_get_proposal(
-				// 	currency_id,
-				// 	&proposal_hash,
-				// 	length_bound,
-				// 	proposal_weight_bound,
-				// )?;
 				let proposal = ProposalOf::<T>::get(currency_id, proposal_hash).ok_or(Error::<T>::ProposalMissing)?;
 				Self::deposit_event(RawEvent::Closed(proposal_hash, yes_votes, no_votes));
 				let (proposal_weight, proposal_count) =

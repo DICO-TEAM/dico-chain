@@ -27,9 +27,20 @@ pallet-timestamp   = { git = "https://github.com/paritytech/substrate.git", bran
 
 
 log = { version = "0.4.14", default-features = false }
-ico = { package = "pallet-ico", path = "../ico", default-features = false, version = "1.0.0"}
 
-orml-traits = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
+ico                               = { package = "pallet-ico", path = "../ico", default-features = false, version = "1.0.0"}
+dico-primitives                   = { path = "../../primitives", default-features = false,  version = "1.0.0"}
+pallet-balances                   = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
+orml-tokens                       = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
+currencies                        = { package = "pallet-currencies", path = '../currencies', default-features = false, version = '1.0.0'}
+pallet-kyc                        = { path = "../kyc", default-features = false,  version = "1.0.0"}
+dico-treasury                     = { package = "pallet-dico-treasury", path = "../treasury", default-features = false,  version = "1.0.0" }
+pallet-pricedao                   = { path = "../pricedao", default-features = false}
+pallet-amm                        = { path = "../amm", default-features = false }
+pallet-oracle                     = { path = "../oracle", default-features = false }
+orml-traits                       = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
+pallet-randomness-collective-flip = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+
 
 [dev-dependencies]
 hex-literal = "0.3.1"
@@ -50,6 +61,16 @@ std = [
 	"frame-system/std",
 	"log/std",
 	"pallet-timestamp/std",
+	"dico-primitives/std",
+	"pallet-balances/std",
+	"orml-tokens/std",
+	"currencies/std",
+	"pallet-kyc/std",
+	"pallet-pricedao/std",
+	"pallet-amm/std",
+	"pallet-oracle/std",
+	"pallet-randomness-collective-flip/std",
+
 ]
 runtime-benchmarks = [
 	"frame-benchmarking",
