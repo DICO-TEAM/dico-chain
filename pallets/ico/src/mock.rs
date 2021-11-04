@@ -1,6 +1,6 @@
 #![cfg(test)]
 
-use super::*;
+pub use super::*;
 use pallet_pricedao;
 use pallet_oracle;
 use dico_treasury;
@@ -23,12 +23,19 @@ use currencies::{self as dico_currencies, BasicCurrencyAdapter};
 
 type Key = u32;
 type Value = u128;
-type AccountId = u128;
-type Balance = u128;
+pub type AccountId = u128;
+pub type Balance = u128;
 type Amount = i128;
-type CurrencyId = u32;
 type BlockNumber = u32;
-const DOLLARS: u128 = 1000;
+
+// pub const DOLLARS: u128 = 1000;
+pub const Alice: AccountId = 1;
+pub const Bob: AccountId = 2;
+pub const DOT: CurrencyId = 10;
+pub const DICO: CurrencyId = 0;
+pub const KSM: CurrencyId = 20;
+pub const NewDAYS: u64 = 1000;
+pub const NEW_USDT: CurrencyId = 5;
 
 construct_runtime!(
 	pub enum Test where
@@ -199,8 +206,8 @@ impl frame_system::Config for Test {
 
 parameter_types! {
 	pub const MinProportion: Percent = Percent::from_percent(20u8);
-	pub const GetNativeCurrencyId: CurrencyId = 0;
-	pub const IcoTotalReward: Balance = DOLLARS;
+	pub const GetNativeCurrencyId: CurrencyId = DICO;
+	pub const IcoTotalReward: Balance = 2_0000_0000 * USDT;
 	pub const InitiatorPledge: Balance = DOLLARS;
 	pub const RequestPledge: Balance = DOLLARS;
 	pub const RequestExpire: u64 = 100;
@@ -210,7 +217,7 @@ parameter_types! {
 	pub const ChillDuration: BlockNumber = 5 * DAYS;
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(10u8);
-	pub const UsdtCurrencyId: AssetId = 5;
+	pub const UsdtCurrencyId: AssetId = NEW_USDT;
 
 }
 
@@ -221,7 +228,7 @@ impl Config for Test {
 	type PermitReleaseOrigin = frame_system::EnsureRoot<AccountId>;
 	type TerminateIcoOrigin = frame_system::EnsureRoot<AccountId>;
 	type OnSlash = ();
-	type MultiCurrency = Tokens; //
+	type MultiCurrency = Currencies; //
 	type NativeCurrency = Balances; //
 	type GetNativeCurrencyId = GetNativeCurrencyId;
 	type InitiatorPledge = InitiatorPledge;

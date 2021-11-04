@@ -17,7 +17,7 @@
 
 use codec::{Decode, Encode};
 use currencies::{currencies_trait::CurrenciesHandler, DicoAssetInfo, DicoAssetMetadata};
-use dico_primitives::time::*;
+use dico_primitives::{time::*, currency::*};
 pub use dico_primitives::{AssetId, CurrencyId};
 use dico_primitives::{Balance, Price};
 use dico_treasury::traits::DicoTreasuryHandler;
