@@ -13,13 +13,13 @@ use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
 };
 use orml_tokens as tokens;
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
-type Block = frame_system::mocking::MockBlock<Test>;
+pub type Block = sp_runtime::generic::Block<Header, UncheckedExtrinsic>;
+pub type UncheckedExtrinsic = sp_runtime::generic::UncheckedExtrinsic<u32, u64, Call, ()>;
 use std::cell::RefCell;
 use crate as dao;
 use frame_system;
 use pallet_balances;
-use ico::*;
+pub use ico::{*};
 
 use currencies::{self as dico_currencies, BasicCurrencyAdapter};
 use dico_primitives::{constants::{currency::*, time::*}};
@@ -32,8 +32,11 @@ type BlockNumber = u32;
 type CurrencyId = u32;
 
 pub const DOLLARS: u128 = 1000;
+
 pub const Alice: AccountId = 1;
 pub const Bob: AccountId = 2;
+pub const Herry: AccountId = 3;
+
 pub const DOT: CurrencyId = 10;
 pub const DICO: CurrencyId = 0;
 pub const KSM: CurrencyId = 20;
@@ -98,7 +101,7 @@ impl dao::Config for Test {
 	type MotionDuration = DicoMotionDuration;
 	type MaxProposals = DicoMaxProposals;
 	type WeightInfo = ();
-	type IcoHandler = IcoTest;
+	type IcoHandler = ();
 }
 
 

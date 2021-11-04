@@ -303,20 +303,6 @@ impl dico_currencies::Config for Test {
 	type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
 }
 
-// pub fn new_test_ext1() -> sp_io::TestExternalities {
-// 	let mut storage = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
-//
-// 	let _ = pallet_oracle::GenesisConfig::default().build_storage::<Test>().unwrap()
-// 	.assimilate_storage(&mut storage);
-//
-// 	let mut t: sp_io::TestExternalities = storage.into();
-//
-// 	t.execute_with(|| {
-// 		Timestamp::set_timestamp(12345);
-// 	});
-//
-// 	t
-// }
 
 pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();

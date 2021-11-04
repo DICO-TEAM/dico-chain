@@ -47,6 +47,7 @@ pub use weights::WeightInfo;
 //
 pub mod weights;
 pub mod mock;
+pub mod tests;
 
 
 //
