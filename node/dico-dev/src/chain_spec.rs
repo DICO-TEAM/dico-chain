@@ -19,7 +19,7 @@ use sp_runtime::{
 	Perbill,
 };
 
-pub use dico_primitives::{constants::currency::*, AccountId, Balance, Signature};
+pub use dico_primitives::{constants::currency::*, AccountId, Balance, Signature, network::*};
 pub use dico_runtime::GenesisConfig;
 
 type AccountPublic = <Signature as Verify>::Signer;
@@ -135,7 +135,7 @@ fn staging_testnet_config_genesis() -> GenesisConfig {
 		// 5Ff3iXP75ruzroPWRP2FYBHWnmGGBSb63857BgnzCoXNxfPo
 		"9ee5e5bdc0ec239eb164f865ecc345ce4c88e76ee002e0f7e318097347471809"
 	]
-	.into();
+		.into();
 
 	let endowed_accounts: Vec<AccountId> = vec![root_key.clone()];
 
@@ -156,7 +156,7 @@ pub fn staging_testnet_config() -> ChainSpec {
 				.expect("Staging telemetry url is valid; qed"),
 		),
 		None,
-		Some(get_properties()),
+		Some(get_properties(NetworkType::DICO)),
 		Default::default(),
 	)
 }
@@ -170,8 +170,8 @@ pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Pu
 
 /// Helper function to generate an account ID from seed
 pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
-where
-	AccountPublic: From<<TPublic::Pair as Pair>::Public>,
+	where
+		AccountPublic: From<<TPublic::Pair as Pair>::Public>,
 {
 	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
@@ -354,17 +354,11 @@ pub fn development_config() -> ChainSpec {
 		vec![],
 		None,
 		None,
-		Some(get_properties()),
+		Some(get_properties(NetworkType::DICO)),
 		Default::default(),
 	)
 }
 
-fn get_properties() -> Map<String, Value> {
-	let mut properties = Map::new();
-	properties.insert("tokenSymbol".into(), "DICO".into());
-	properties.insert("tokenDecimals".into(), 14.into());
-	properties
-}
 
 fn local_testnet_genesis() -> GenesisConfig {
 	testnet_genesis(
@@ -385,7 +379,7 @@ pub fn local_testnet_config() -> ChainSpec {
 		vec![],
 		None,
 		None,
-		Some(get_properties()),
+		Some(get_properties(NetworkType::DICO)),
 		Default::default(),
 	)
 }

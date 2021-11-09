@@ -89,3 +89,64 @@ pub type Price = Balance;
 pub type ExchangeRate = FixedU128;
 pub type Ratio = FixedU128;
 pub type Rate = FixedU128;
+
+///Network
+#[cfg(feature = "std")]
+pub mod network {
+	#[cfg(feature = "std")]
+	use serde_json::{map::Map, value::Value};
+	// https://github.com/paritytech/ss58-registry/blob/main/ss58-registry.json
+	pub const KICO_PREFIX: u16 = 666;
+	pub const DICO_PREFIX: u16 = 888;
+
+	// 	pub const DICO_REGISTRY: Properties = json!({
+	// 		  "prefix": DICO_PREFIX,
+	// 		  "network": "DICO",
+	// 		  "displayName": "DICO",
+	// 		  "symbols": ["DICO"],
+	// 		  "decimals": [14],
+	// 		  "standardAccount": "*25519",
+	// 		  "website": "https://dico.io/"
+	// 		})
+	// 		.as_object()
+	// 		.expect("Network properties are valid; qed")
+	// 		.to_owned();
+	//
+	// 	pub const KICO_REGISTRY: Properties = json!({
+	// 		  "prefix": KICO_PREFIX,
+	// 		  "network": "KICO",
+	// 		  "displayName": "KICO",
+	// 		  "symbols": ["KICO"],
+	// 		  "decimals": [14],
+	// 		  "standardAccount": "*25519",
+	// 		  "website": "https://dico.io/"
+	// 		})
+	// 		.as_object()
+	// 		.expect("Network properties are valid; qed")
+	// 		.to_owned();
+	//
+
+	pub fn get_properties(network_type: NetworkType) -> Map<String, Value> {
+		let mut properties = Map::new();
+
+		match network_type {
+			NetworkType::KICO => {
+				properties.insert("ss58Format".into(), Value::from(KICO_PREFIX));
+				properties.insert("tokenSymbol".into(), "KICO".into());
+			}
+			NetworkType::DICO => {
+				properties.insert("ss58Format".into(), Value::from(DICO_PREFIX));
+				properties.insert("tokenSymbol".into(), "DICO".into());
+			}
+		}
+
+		properties.insert("tokenDecimals".into(), 14.into());
+		properties
+	}
+
+	#[derive(Clone, Copy)]
+	pub enum NetworkType {
+		KICO,
+		DICO,
+	}
+}
