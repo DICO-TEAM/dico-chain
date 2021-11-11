@@ -258,12 +258,12 @@ pub mod module {
 		StorageDoubleMap<_, Twox64Concat, T::ClassId, Twox64Concat, T::TokenId, TokenInfoOf<T>>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn issuer_Of)]
+	#[pallet::getter(fn issuer_of)]
 	pub type IssuerOf<T: Config> = StorageMap<_, Twox64Concat, NftLevel, (T::AccountId, T::ClassId)>;
 
 	/// the user's all tokens
 	#[pallet::storage]
-	#[pallet::getter(fn tokens_Of)]
+	#[pallet::getter(fn tokens_of)]
 	pub type TokensOf<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, Vec<(T::ClassId, T::TokenId)>, ValueQuery>;
 
 	#[pallet::storage]
