@@ -7,9 +7,14 @@ pub trait IcoHandler<CurrencyId, MulBalanceOf, AccountId, DispathErr, BlockNumbe
 	fn get_project_total_ico_amount(currency_id: CurrencyId, index: u32) -> result::Result<MulBalanceOf, DispathErr>;
 }
 
-
-impl<CurrencyId: Ord + Clone, MulBalanceOf: Ord + Clone + Default + From<u32>, AccountId: Ord + Clone, DispathErr: Clone, BlockNumber: Ord + Clone + Default>
-	IcoHandler<CurrencyId, MulBalanceOf, AccountId, DispathErr, BlockNumber> for () {
+impl<
+		CurrencyId: Ord + Clone,
+		MulBalanceOf: Ord + Clone + Default + From<u32>,
+		AccountId: Ord + Clone,
+		DispathErr: Clone,
+		BlockNumber: Ord + Clone + Default,
+	> IcoHandler<CurrencyId, MulBalanceOf, AccountId, DispathErr, BlockNumber> for ()
+{
 	fn is_project_ico_member(_: CurrencyId, _: u32, _: &AccountId) -> Result<bool, DispathErr> {
 		Ok(true)
 	}
