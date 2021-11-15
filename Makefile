@@ -1,3 +1,4 @@
+# -------------------------------------jenkins-------------------------------------
 .PHONY: kill
 kill:
 	bash scripts/kill.sh
@@ -7,6 +8,7 @@ purge:
 	bash scripts/purge.sh
 
 
+# -------------------------------------development-------------------------------------
 .PHONY: install
 install:
 	cargo install --force --path .
@@ -19,6 +21,10 @@ time:
 clear:
 	rm -rf target
 
+.PHONY: echo
+echo:
+	echo hello
+
 .PHONY: debug
 debug:
 	cargo build
@@ -26,6 +32,14 @@ debug:
 .PHONY: build
 build:
 	cargo build
+
+.PHONY: test
+test:
+	cargo test
+
+.PHONY: benchmarks
+benchmarks:
+	cargo build --bin dico-dev --features runtime-benchmarks
 
 .PHONY: build-dev
 build-dev:
