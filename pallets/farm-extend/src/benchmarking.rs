@@ -8,7 +8,7 @@ use sp_std::prelude::*;
 
 use crate::Pallet as FarmExtend;
 
-use primitives::AssetId;
+use dico_primitives::AssetId;
 
 const SEED: u32 = 1;
 const DICO: AssetId = 1000;
