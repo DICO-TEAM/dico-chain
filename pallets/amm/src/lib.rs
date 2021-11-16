@@ -140,9 +140,6 @@ pub mod pallet {
 
 		/// Swap asset cross path. [who, path, amount in, amount out]
 		Swapped(T::AccountId, Vec<AssetId>, Balance, Balance),
-
-		/// Deposit test asset.
-		AssetDeposited(T::AccountId, AssetId, Balance),
 	}
 
 	#[pallet::storage]
@@ -210,7 +207,7 @@ pub mod pallet {
 
 			let total_liquidity: Balance = T::Currency::total_issuance(*liquidity_id);
 
-			if total_liquidity.is_zero() {
+			if total_liquidity.is_zero() && math::MINIMUM_LIQUIDITY > 0u128 {
 				// permanently lock the first MINIMUM_LIQUIDITY assets
 				T::Currency::deposit(*liquidity_id, &module_account_id, math::MINIMUM_LIQUIDITY)?;
 			}

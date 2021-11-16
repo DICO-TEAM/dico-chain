@@ -8,7 +8,7 @@ use sp_std::prelude::*;
 
 use crate::Pallet as AMM;
 
-use primitives::{AssetId, Balance};
+use dico_primitives::{AssetId, Balance};
 
 const SEED: u32 = 1;
 

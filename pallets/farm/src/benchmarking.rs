@@ -54,7 +54,7 @@ benchmarks! {
 
 	create_pool {
 		let origin = T::FounderSetOrigin::successful_origin();
-		let alloc_point = U256::from(1000);
+		let alloc_point = 1000u128;
 		let call = Call::<T>::create_pool(LIQUIDITY_ID, alloc_point);
 
 	}: { call.dispatch_bypass_filter(origin)? }
@@ -67,8 +67,8 @@ benchmarks! {
 	update_pool_alloc_point {
 		let origin = T::FounderSetOrigin::successful_origin();
 
-		let initial_alloc_point = U256::from(1000);
-		let update_alloc_point = U256::from(10000);
+		let initial_alloc_point = 1000u128;
+		let update_alloc_point = 10000u128;
 		let pool_id = T::PoolId::zero();
 
 		let create_pool_call = Call::<T>::create_pool(LIQUIDITY_ID, initial_alloc_point);
@@ -84,7 +84,7 @@ benchmarks! {
 
 	deposit_lp {
 		let caller = funded_account::<T>("caller", 0);
-		let alloc_point = U256::from(1000);
+		let alloc_point = 1000u128;
 		let pool_id = T::PoolId::zero();
 		let amount: Balance = 100_000_000_000_000;
 
@@ -100,7 +100,7 @@ benchmarks! {
 		assert_eq!(Pools::<T>::get(pool_id).unwrap(), pool_info);
 
 		let participant = Participant::new(amount, 0);
-		assert_eq!(Users::<T>::get(pool_id, caller).unwrap(), participant);
+		assert_eq!(Participants::<T>::get(pool_id, caller).unwrap(), participant);
 	}
 
 	withdraw_lp {
@@ -114,7 +114,7 @@ benchmarks! {
 		DicoPerBlock::<T>::put(dico_per_block);
 
 		// create a pool
-		let alloc_point = U256::from(1000);
+		let alloc_point = 1000u128;
 		TotalAllocPoint::<T>::put(alloc_point);
 		let pool_info = PoolInfo::new(LIQUIDITY_ID, alloc_point, 1000);
 		Pools::<T>::insert(pool_id, pool_info);
@@ -128,11 +128,11 @@ benchmarks! {
 	verify {
 		let mut pool_info = PoolInfo::new(LIQUIDITY_ID, alloc_point, 1);
 		pool_info.total_amount = amount;
-		pool_info.acc_dico_per_share = U256::from(8750125000000000u64);
+		pool_info.acc_dico_per_share = 8750125000000000u128;
 		pool_info.last_reward_block = 16001;
 		assert_eq!(Pools::<T>::get(pool_id).unwrap(), pool_info);
 
 		let participant = Participant::new(amount, 875012500000000000);
-		assert_eq!(Users::<T>::get(pool_id, caller).unwrap(), participant);
+		assert_eq!(Participants::<T>::get(pool_id, caller).unwrap(), participant);
 	}
 }
