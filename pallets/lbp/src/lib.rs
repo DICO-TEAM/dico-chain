@@ -213,8 +213,6 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		FundraisingAssetAdded(AssetId, Balance),
 		FundraisingAssetRemoved(AssetId),
-		/// Deposit test asset.
-		AssetDeposited(T::AccountId, AssetId, Balance),
 		LbpCreated(T::AccountId, T::LbpId, AssetId, AssetId, Balance, Balance),
 		LbpExited(T::AccountId, T::LbpId),
 		Swapped(T::AccountId, T::LbpId, AssetId, AssetId, Balance, Balance),

@@ -140,9 +140,6 @@ pub mod pallet {
 
 		/// Swap asset cross path. [who, path, amount in, amount out]
 		Swapped(T::AccountId, Vec<AssetId>, Balance, Balance),
-
-		/// Deposit test asset.
-		AssetDeposited(T::AccountId, AssetId, Balance),
 	}
 
 	#[pallet::storage]
