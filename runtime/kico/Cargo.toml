@@ -27,6 +27,19 @@ dico-primitives = { package = 'dico-primitives', default-features = false, path 
 # Local Dependencies
 pallet-kyc                  = { package = 'pallet-kyc', default-features = false , path = '../../pallets/kyc'}
 pallet-template             = { package = 'pallet-template', default-features = false , path = '../../pallets/template'}
+pallet-oracle               = { package = 'pallet-oracle', default-features = false, path = '../../pallets/oracle'}
+pallet-pricedao             = { package = 'pallet-pricedao', default-features = false, path = '../../pallets/pricedao'}
+pallet-amm                  = { package = 'pallet-amm', default-features = false, path = '../../pallets/amm'}
+pallet-farm                 = { package = 'pallet-farm', default-features = false, path = '../../pallets/farm'}
+pallet-lbp                  = { package = 'pallet-lbp', default-features = false, path = '../../pallets/lbp'}
+pallet-currencies           = { package = "pallet-currencies", default-features = false, path = "../../pallets/currencies"}
+pallet-ico                  = { package = "pallet-ico", default-features = false, path = "../../pallets/ico"}
+pallet-dao                  = { package = "pallet-dao", default-features = false, path = "../../pallets/dao"}
+pallet-dico-treasury        = { package = "pallet-dico-treasury", default-features = false, path = "../../pallets/treasury"}
+pallet-ico-rpc-runtime-api  = { package = "pallet-ico-rpc-runtime-api", default-features = false, path = "../../pallets/ico/rpc/runtime-api"}
+pallet-farm-rpc-runtime-api = { package = 'pallet-farm-rpc-runtime-api', default-features = false, path = "../../pallets/farm/rpc/runtime-api" }
+pallet-nft                  = { package = "pallet-nft", default-features = false, path = "../../pallets/nft"}
+pallet-farm-extend          = { package = 'pallet-farm-extend', default-features = false, path = '../../pallets/farm-extend'}
 
 # Substrate Dependencies
 ## Substrate Primitive Dependencies
@@ -158,7 +171,6 @@ std = [
 	#	local pallet
 	'pallet-template/std',
 	'pallet-kyc/std',
-
 	'pallet-election-provider-multi-phase/std',
 	'pallet-democracy/std',
 	'pallet-membership/std',
@@ -169,4 +181,17 @@ std = [
 	'pallet-collective/std',
 	'pallet-elections-phragmen/std',
 	'sp-npos-elections/std',
+	"pallet-oracle/std",
+	"pallet-pricedao/std",
+	"pallet-amm/std",
+	"pallet-farm/std",
+	"pallet-lbp/std",
+	"pallet-currencies/std",
+	"pallet-ico/std",
+	"pallet-dao/std",
+	"pallet-dico-treasury/std",
+	"pallet-ico-rpc-runtime-api/std",
+	"pallet-farm-rpc-runtime-api/std",
+	"pallet-nft/std",
+	"pallet-farm-extend/std",
 ]
