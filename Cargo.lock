@@ -3632,6 +3632,7 @@ dependencies = [
  "jsonrpc-core",
  "kico-runtime",
  "log",
+ "pallet-farm-rpc",
  "pallet-transaction-payment-rpc",
  "parity-scale-codec",
  "polkadot-cli",
