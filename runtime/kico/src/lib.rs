@@ -16,7 +16,7 @@ use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, OpaqueKeys, Verify, Zero},
 	transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
-	ApplyExtrinsicResult, MultiSignature, Percent,
+	ApplyExtrinsicResult, MultiSignature, Percent,DispatchResult,
 };
 use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended};
 use pallet_currencies::BasicCurrencyAdapter;
@@ -71,6 +71,7 @@ pub use pallet_amm;
 pub use pallet_lbp;
 pub use pallet_farm;
 pub use pallet_farm_extend;
+pub use pallet_pricedao;
 
 use pallet_farm_rpc_runtime_api as farm_rpc;
 
@@ -938,6 +939,68 @@ impl pallet_currencies::Config for Runtime {
 	type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
 }
 
+// price data
+/// price
+parameter_types! {
+	pub const MaxOracleSize: u32 = 5;
+	pub const MinimumCount: u32 = 3;  // todo: The minimum number is 3
+	pub const ExpiresIn: Moment = 1000 * 60 * 60; // todo: 60 mins
+	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
+	pub const FeedPledgedBalance: Balance = 500 * DOLLARS;  // todo : pledge 500 dico?
+	pub const withdrawExpirationPeriod: BlockNumber = 10 * MINUTES;   // TODO: 5 * DAYS;
+}
+
+type DicoDataProvider = pallet_oracle::Instance1;
+impl pallet_oracle::Config<DicoDataProvider> for Runtime {
+	type Event = Event;
+	type OnNewData = ();
+	type CombineData = pallet_oracle::DefaultCombineData<Runtime, MinimumCount, ExpiresIn, DicoDataProvider>;
+	type Time = Timestamp;
+	type OracleKey = CurrencyId;
+	type OracleValue = Price;
+	type MaxOracleSize = MaxOracleSize;
+	type RootOperatorAccountId = ZeroAccountId;
+	type WeightInfo = pallet_oracle::weights::OracleWeight<Runtime>;
+}
+
+pub type TimeStampedPrice = pallet_oracle::TimestampedValue<Price, Moment>;
+create_median_value_data_provider!(
+	AggregatedDataProvider,
+	CurrencyId,
+	Price,
+	TimeStampedPrice,
+	[DicoOracle]
+);
+
+// Aggregated data provider cannot feed.
+impl DataFeeder<CurrencyId, Price, AccountId> for AggregatedDataProvider {
+	fn feed_value(_: AccountId, _: CurrencyId, _: Price) -> DispatchResult {
+		Err("Not supported".into())
+	}
+}
+
+parameter_types! {
+	pub const DicoTreasuryModuleId: PalletId = PalletId(*b"dico/trs");   // todo: modify name
+}
+
+type EnsureRootOrTwoThirdsGeneralCouncil = EnsureOneOf<
+	AccountId,
+	EnsureRoot<AccountId>,
+	pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>,
+>;
+
+impl pallet_pricedao::Config for Runtime {
+	type Event = Event;
+	type Source = AggregatedDataProvider;
+	type FeedOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
+	type UpdateOraclesStorgage = DicoOracle;
+	type DicoTreasuryModuleId = DicoTreasuryModuleId;
+	type BaseCurrency = Balances;
+	type PledgedBalance = FeedPledgedBalance;
+	type WithdrawExpirationPeriod = withdrawExpirationPeriod;
+	type WeightInfo = pallet_pricedao::weights::PriceWeight<Runtime>;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -989,9 +1052,11 @@ construct_runtime!(
 		// LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>},
 		Farm: pallet_farm::{Pallet, Call, Storage, Event<T>},
 		FarmExtend: pallet_farm_extend::{Pallet, Call, Storage, Event<T>},
+		PriceDao: pallet_pricedao::{Pallet, Call, Storage, Event<T>},
 		// ORML related modules
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
 		Currencies: pallet_currencies::{Pallet, Event<T>, Call, Storage},
+		DicoOracle: pallet_oracle::<Instance1>::{Pallet, Storage, Call, Event<T>},
 
 	}
 );
