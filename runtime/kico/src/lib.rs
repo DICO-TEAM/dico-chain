@@ -14,11 +14,12 @@ use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, OpaqueKeys, Verify},
+	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, OpaqueKeys, Verify, Zero},
 	transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature, Percent,
 };
-
+use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended};
+use pallet_currencies::BasicCurrencyAdapter;
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -854,6 +855,44 @@ impl pallet_kyc::Config for Runtime {
 	type WeightInfo = pallet_kyc::weights::SubstrateWeight<Runtime>;
 }
 
+parameter_type_with_key! {
+	pub ExistentialDeposits: |_currency_id: AssetId| -> Balance {
+		Zero::zero()
+	};
+}
+
+impl orml_tokens::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type Amount = Amount;
+	type CurrencyId = AssetId;
+	type WeightInfo = ();
+	type ExistentialDeposits = ExistentialDeposits;
+	type OnDust = ();
+	type MaxLocks = MaxLocks;
+	type DustRemovalWhitelist = ();
+}
+
+parameter_types! {
+	pub const CreateConsume: Balance = 100 * DOLLARS;
+	pub const DICOAssetId: AssetId = 0;
+	pub const MaxCreatableCurrencyId: AssetId = 4_000_000_000;
+}
+
+impl pallet_currencies::Config for Runtime {
+	type Event = Event;
+	type MultiCurrency = Tokens;
+
+	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+
+	type GetNativeCurrencyId = DICOAssetId;
+
+	type WeightInfo = ();
+
+	type CreateConsume = CreateConsume;
+	type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -901,6 +940,10 @@ construct_runtime!(
 		//local pallet
 		TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>},
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>},
+		// ORML related modules
+		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
+		Currencies: pallet_currencies::{Pallet, Event<T>, Call, Storage},
+
 	}
 );
 
