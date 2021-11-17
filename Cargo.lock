@@ -3633,6 +3633,8 @@ dependencies = [
  "kico-runtime",
  "log",
  "pallet-farm-rpc",
+ "pallet-ico-rpc",
+ "pallet-ico-rpc-runtime-api",
  "pallet-transaction-payment-rpc",
  "parity-scale-codec",
  "polkadot-cli",

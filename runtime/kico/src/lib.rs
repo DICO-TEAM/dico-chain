@@ -1001,6 +1001,111 @@ impl pallet_pricedao::Config for Runtime {
 	type WeightInfo = pallet_pricedao::weights::PriceWeight<Runtime>;
 }
 
+
+parameter_types! {
+	pub const DicoProposalBond: Balance = 100 * DOLLARS;
+	pub const DicoSpendPeriod: BlockNumber = 7 * DAYS;
+
+}
+
+impl pallet_dico_treasury::Config for Runtime {
+	type ApproveOrigin = EnsureOneOf<
+		AccountId,
+		EnsureRoot<AccountId>,
+		pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>,
+	>;
+	type PalletId = TreasuryPalletId;
+	type MultiCurrency = Currencies;
+	type RejectOrigin = EnsureOneOf<
+		AccountId,
+		EnsureRoot<AccountId>,
+		pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>,
+	>;
+
+	type Event = Event;
+	type GetNativeCurrencyId = DICOAssetId;
+	type ProposalBond = DicoProposalBond;
+	type SpendPeriod = DicoSpendPeriod;
+	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub const InitiatorPledge: Balance = 100 * DOLLARS;
+	pub const RequestPledge: Balance = 300 * DOLLARS;
+	pub const RequestExpire: BlockNumber = 5 * DAYS;
+	pub const MinProportion: Percent = Percent::from_percent(0u8);
+	pub const IcoTotalReward: Balance = 20_0000_0000 * DOLLARS;
+	pub const InitiatorBond: Percent = Percent::from_percent(1u8);
+	pub const TerminateProtectPeriod: Percent = Percent::from_percent(33);
+	pub const ReleaseProtectPeriod: Percent = Percent::from_percent(33);
+	pub const ChillDuration: BlockNumber = 10 * MINUTES;
+	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
+	pub const InviteeRewardProportion: Percent = Percent::from_percent(5u8);
+	pub const UsdtCurrencyId: AssetId = 5;
+
+}
+
+impl pallet_ico::Config for Runtime {
+	type Event = Event;
+	type PermitIcoOrigin = pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>;
+	type RejectIcoOrigin = pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>;
+	type PermitReleaseOrigin = pallet_dao::EnsureProportionAtLeast<Runtime, _1, _2, AccountId>;
+	type TerminateIcoOrigin = pallet_dao::EnsureProportionAtLeast<Runtime, _1, _2, AccountId>;
+	type OnSlash = ();
+	type MultiCurrency = Currencies;
+	type NativeCurrency = Balances;
+	type GetNativeCurrencyId = DICOAssetId;
+	type InitiatorPledge = InitiatorPledge;
+	type RequestPledge = RequestPledge;
+	type RequestExpire = RequestExpire;
+	type CurrenciesHandler = Currencies;
+	type IcoTotalReward = IcoTotalReward;
+	type DicoTreasuryHandler = DicoTreasury;
+	type InitiatorBond = InitiatorBond;
+	type TerminateProtectPeriod = TerminateProtectPeriod;
+	type ReleaseProtectPeriod = ReleaseProtectPeriod;
+	type ChillDuration = ChillDuration;
+	type InviterRewardProportion = InviterRewardProportion;
+	type InviteeRewardProportion = InviteeRewardProportion;
+	type PriceData = PriceDao;
+	type UsdtCurrencyId = UsdtCurrencyId;
+	type KycHandler = Kyc;
+}
+
+parameter_types! {
+	pub const DicoMotionDuration: BlockNumber = 5 * DAYS;
+	pub const DicoMaxProposals: u32 = 100;
+}
+
+impl pallet_dao::Config for Runtime {
+	type Origin = Origin;
+	type Proposal = Call;
+	type Event = Event;
+	type MotionDuration = DicoMotionDuration;
+	type MaxProposals = DicoMaxProposals;
+	type WeightInfo = ();
+	type IcoHandler = Ico;
+}
+
+parameter_types! {
+	pub const MaxClassMetadata: u32 = 1024;
+	pub const MaxTokenMetadata: u32 = 1024;
+	pub const MaxTokenAttribute: u32 = 1024;
+
+}
+
+impl pallet_nft::Config for Runtime {
+	type Event = Event;
+	type ClassId = u32;
+	type TokenId = u32;
+	type Currency = Balances;
+	type MaxClassMetadata = MaxClassMetadata;
+	type MaxTokenMetadata = MaxTokenMetadata;
+	type MaxTokenAttribute = MaxTokenAttribute;
+	type PowerHandler = Ico;
+}
+
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -1049,6 +1154,10 @@ construct_runtime!(
 		TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>},
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>},
 		AMM: pallet_amm::{Pallet, Call, Storage, Event<T>},
+		DicoTreasury: pallet_dico_treasury::{Pallet, Call, Storage, Event<T>},
+		Dao: pallet_dao::{Pallet, Origin<T>, Event<T>, Call, Storage},
+		Ico: pallet_ico::{Pallet, Event<T>, Call, Storage},
+		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>},
 		// LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>},
 		Farm: pallet_farm::{Pallet, Call, Storage, Event<T>},
 		FarmExtend: pallet_farm_extend::{Pallet, Call, Storage, Event<T>},
@@ -1059,6 +1168,7 @@ construct_runtime!(
 		DicoOracle: pallet_oracle::<Instance1>::{Pallet, Storage, Call, Event<T>},
 
 	}
+
 );
 
 impl_runtime_apis! {
@@ -1154,6 +1264,25 @@ impl_runtime_apis! {
 	impl cumulus_primitives_core::CollectCollationInfo<Block> for Runtime {
 		fn collect_collation_info() -> cumulus_primitives_core::CollationInfo {
 			ParachainSystem::collect_collation_info()
+		}
+	}
+
+	impl pallet_ico_rpc_runtime_api::IcoAmountApi<Block, AccountId, AssetId, Index, Balance> for Runtime {
+		fn can_release_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
+			Ico::can_release_amount(account, currency_id, index)
+		}
+		fn get_reward_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
+			Ico::get_reward_amount(account, currency_id, index)
+		}
+		fn can_unlock_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
+			Ico::can_unlock_amount(account, currency_id, index)
+		}
+		fn can_join_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> (Balance, Balance) {
+			Ico::can_join_amount(account, currency_id, index)
+		}
+
+		fn get_token_price(currency_id: CurrencyId) -> Balance {
+			Ico::get_token_price(currency_id)
 		}
 	}
 
