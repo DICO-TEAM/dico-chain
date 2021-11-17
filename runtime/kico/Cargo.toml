@@ -174,6 +174,9 @@ std = [
 	#	local pallet
 	'pallet-template/std',
 	'pallet-kyc/std',
+	"pallet-oracle/std",
+	"pallet-pricedao/std",
+
 	'pallet-election-provider-multi-phase/std',
 	'pallet-democracy/std',
 	'pallet-membership/std',
@@ -184,8 +187,6 @@ std = [
 	'pallet-collective/std',
 	'pallet-elections-phragmen/std',
 	'sp-npos-elections/std',
-	"pallet-oracle/std",
-	"pallet-pricedao/std",
 	"pallet-amm/std",
 	"pallet-farm/std",
 	"pallet-lbp/std",

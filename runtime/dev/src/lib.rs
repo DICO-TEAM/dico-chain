@@ -1265,7 +1265,7 @@ impl pallet_oracle::Config<DicoDataProvider> for Runtime {
 	type OracleValue = Price;
 	type MaxOracleSize = MaxOracleSize;
 	type RootOperatorAccountId = ZeroAccountId;
-	type WeightInfo = (); //todo
+	type WeightInfo = pallet_oracle::weights::OracleWeight<Runtime>;
 }
 
 create_median_value_data_provider!(
