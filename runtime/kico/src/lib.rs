@@ -67,6 +67,12 @@ use xcm_executor::{Config, XcmExecutor};
 /// Import the template pallet.
 pub use pallet_template;
 pub use pallet_kyc;
+pub use pallet_amm;
+pub use pallet_lbp;
+pub use pallet_farm;
+pub use pallet_farm_extend;
+
+use pallet_farm_rpc_runtime_api as farm_rpc;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
@@ -835,7 +841,10 @@ parameter_types! {
 	pub const MaxSwordHolder: u32 = 200;
 	pub const KYCBasicDeposit: Balance = 100 * DOLLARS;
 	pub const KYCServiceDeposit: Balance = 10000 * DOLLARS;
-
+	pub const AmmPalletId: PalletId = PalletId(*b"dico/amm");
+	pub const FarmPalletId: PalletId = PalletId(*b"dico/fam");
+	pub const LBPPalletId: PalletId = PalletId(*b"dico/lbp");
+	pub const FarmExtendPalletId: PalletId = PalletId(*b"dico/fme");
 }
 
 /// Configure the pallet template in pallets/template.
@@ -853,6 +862,42 @@ impl pallet_kyc::Config for Runtime {
 	type IASOrigin = EnsureRootOrHalfCouncil;
 	type SwordHolderOrigin = EnsureRootOrHalfCouncil;
 	type WeightInfo = pallet_kyc::weights::SubstrateWeight<Runtime>;
+}
+
+impl pallet_amm::Config for Runtime {
+	type Event = Event;
+	type Currency = Currencies;
+	type LiquidityAssetIdBase = MaxCreatableCurrencyId;
+	type PalletId = AmmPalletId;
+	type WeightInfo = pallet_amm::weights::DicoWeight<Runtime>;
+}
+
+// impl pallet_lbp::Config for Runtime {
+// 	type Event = Event;
+// 	type Currency = Currencies;
+// 	type PalletId = LBPPalletId;
+// 	type LbpId = u32;
+// 	type WeightInfo = pallet_lbp::weights::DicoWeight<Runtime>;
+// 	type TreasuryHandler = DicoTreasury;
+// 	type FounderSetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+// }
+
+impl pallet_farm::Config for Runtime {
+	type Event = Event;
+	type PoolId = u32;
+	type Currency = Currencies;
+	type FounderSetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+	type NativeAssetId = DICOAssetId;
+	type PalletId = FarmPalletId;
+	type WeightInfo = pallet_farm::weights::DicoWeight<Runtime>;
+}
+
+impl pallet_farm_extend::Config for Runtime {
+	type Event = Event;
+	type Currency = Currencies;
+	type PalletId = FarmExtendPalletId;
+	type PoolExtendId = u32;
+	type WeightInfo = pallet_farm_extend::weights::DicoWeight<Runtime>;
 }
 
 parameter_type_with_key! {
@@ -940,6 +985,10 @@ construct_runtime!(
 		//local pallet
 		TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>},
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>},
+		AMM: pallet_amm::{Pallet, Call, Storage, Event<T>},
+		// LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>},
+		Farm: pallet_farm::{Pallet, Call, Storage, Event<T>},
+		FarmExtend: pallet_farm_extend::{Pallet, Call, Storage, Event<T>},
 		// ORML related modules
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
 		Currencies: pallet_currencies::{Pallet, Event<T>, Call, Storage},
@@ -1004,6 +1053,14 @@ impl_runtime_apis! {
 	impl sp_offchain::OffchainWorkerApi<Block> for Runtime {
 		fn offchain_worker(header: &<Block as BlockT>::Header) {
 			Executive::offchain_worker(header)
+		}
+	}
+
+	impl farm_rpc::FarmApi<Block, AccountId, PoolId, Balance> for Runtime {
+		fn get_participant_reward(account: AccountId, pid: PoolId) -> Balance {
+			let reward = Farm::get_participant_reward(account, pid);
+
+			reward
 		}
 	}
 
@@ -1085,6 +1142,10 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
+			add_benchmark!(params, batches, amm, AMM);
+			add_benchmark!(params, batches, farm, Farm);
+			// add_benchmark!(params, batches, lbp, LBP);
+			add_benchmark!(params, batches, farm_extend, FarmExtend);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
