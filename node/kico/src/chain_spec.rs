@@ -178,6 +178,7 @@ fn testnet_genesis(
                 .collect(),
             phantom: Default::default(),
         },
+        tokens: Default::default(),
         technical_membership: Default::default(),
         treasury: Default::default(),
         council: CouncilConfig::default(),
