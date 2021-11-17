@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use dico_primitives::{AccountId, AssetId, Balance, Block, BlockNumber, Hash, Index as Nonce};
+use dico_primitives::{AccountId, AssetId, Balance, Block, BlockNumber, Hash, Index as Nonce, PoolId};
 
 use sc_client_api::AuxStore;
 pub use sc_rpc::{DenyUnsafe, SubscriptionTaskExecutor};
@@ -37,6 +37,7 @@ where
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
 	C::Api: BlockBuilder<Block>,
+	C::Api: pallet_farm_rpc::FarmRuntimeApi<Block, AccountId, PoolId, Balance>,
 	P: TransactionPool + Sync + Send + 'static,
 {
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
@@ -52,6 +53,10 @@ where
 	io.extend_with(SystemApi::to_delegate(FullSystem::new(
 		client.clone(),
 		pool,
+		deny_unsafe,
+	)));
+	io.extend_with(pallet_farm_rpc::FarmApi::to_delegate(pallet_farm_rpc::Farm::new(
+		client.clone(),
 		deny_unsafe,
 	)));
 	io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(client)));
