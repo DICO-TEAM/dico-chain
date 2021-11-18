@@ -873,15 +873,15 @@ impl pallet_amm::Config for Runtime {
 	type WeightInfo = pallet_amm::weights::DicoWeight<Runtime>;
 }
 
-// impl pallet_lbp::Config for Runtime {
-// 	type Event = Event;
-// 	type Currency = Currencies;
-// 	type PalletId = LBPPalletId;
-// 	type LbpId = u32;
-// 	type WeightInfo = pallet_lbp::weights::DicoWeight<Runtime>;
-// 	type TreasuryHandler = DicoTreasury;
-// 	type FounderSetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
-// }
+impl pallet_lbp::Config for Runtime {
+	type Event = Event;
+	type Currency = Currencies;
+	type PalletId = LBPPalletId;
+	type LbpId = u32;
+	type WeightInfo = pallet_lbp::weights::DicoWeight<Runtime>;
+	type TreasuryHandler = DicoTreasury;
+	type FounderSetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+}
 
 impl pallet_farm::Config for Runtime {
 	type Event = Event;
@@ -1158,7 +1158,7 @@ construct_runtime!(
 		Dao: pallet_dao::{Pallet, Origin<T>, Event<T>, Call, Storage},
 		Ico: pallet_ico::{Pallet, Event<T>, Call, Storage},
 		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>},
-		// LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>},
+		LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>},
 		Farm: pallet_farm::{Pallet, Call, Storage, Event<T>},
 		FarmExtend: pallet_farm_extend::{Pallet, Call, Storage, Event<T>},
 		PriceDao: pallet_pricedao::{Pallet, Call, Storage, Event<T>},
@@ -1338,7 +1338,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
 			add_benchmark!(params, batches, amm, AMM);
 			add_benchmark!(params, batches, farm, Farm);
-			// add_benchmark!(params, batches, lbp, LBP);
+			add_benchmark!(params, batches, lbp, LBP);
 			add_benchmark!(params, batches, farm_extend, FarmExtend);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
