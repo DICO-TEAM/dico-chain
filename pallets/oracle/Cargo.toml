@@ -13,11 +13,14 @@ serde           = { version = "1.0.111", optional = true }
 codec           = { package = 'parity-scale-codec', version = '2.0.0', features = ['derive'], default-features = false }
 frame-support   = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 frame-system    = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-orml-traits     = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
 sp-io           = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 sp-runtime      = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 sp-std          = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+
+
+# ORMML
 orml-utilities  = { default-features = false,git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
+orml-traits     = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
 
 
 
