@@ -42,7 +42,7 @@ use sp_std::{convert::TryInto, fmt::Debug, prelude::*, vec};
 pub use crate::default_combine_data::DefaultCombineData;
 
 mod default_combine_data;
-mod default_weight;
+pub mod weights;
 mod mock;
 mod tests;
 mod traits;
@@ -120,31 +120,31 @@ pub mod module {
 	#[pallet::storage]
 	#[pallet::getter(fn raw_values)]
 	pub type RawValues<T: Config<I>, I: 'static = ()> =
-		StorageDoubleMap<_, Twox64Concat, T::AccountId, Twox64Concat, T::OracleKey, TimestampedValueOf<T, I>>;
+	StorageDoubleMap<_, Twox64Concat, T::AccountId, Twox64Concat, T::OracleKey, TimestampedValueOf<T, I>>;
 
 	/// True if Self::values(key) is up to date, otherwise the value is stale
 	#[pallet::storage]
 	#[pallet::getter(fn is_updated)]
 	pub type IsUpdated<T: Config<I>, I: 'static = ()> =
-		StorageMap<_, Twox64Concat, <T as Config<I>>::OracleKey, bool, ValueQuery>;
+	StorageMap<_, Twox64Concat, <T as Config<I>>::OracleKey, bool, ValueQuery>;
 
 	/// Combined value, may not be up to date
 	#[pallet::storage]
 	#[pallet::getter(fn values)]
 	pub type Values<T: Config<I>, I: 'static = ()> =
-		StorageMap<_, Twox64Concat, <T as Config<I>>::OracleKey, TimestampedValueOf<T, I>>;
+	StorageMap<_, Twox64Concat, <T as Config<I>>::OracleKey, TimestampedValueOf<T, I>>;
 
 	/// If an oracle operator has feed a value in this block
 	#[pallet::storage]
 	pub(crate) type HasDispatched<T: Config<I>, I: 'static = ()> =
-		StorageValue<_, OrderedSet<T::AccountId, T::MaxOracleSize>, ValueQuery>;
+	StorageValue<_, OrderedSet<T::AccountId, T::MaxOracleSize>, ValueQuery>;
 
 	/// The current members of the collective. This is stored sorted (just by
 	/// value).
 	#[pallet::storage]
 	#[pallet::getter(fn members)]
 	pub type Members<T: Config<I>, I: 'static = ()> =
-		StorageValue<_, OrderedSet<T::AccountId, T::MaxOracleSize>, ValueQuery>;
+	StorageValue<_, OrderedSet<T::AccountId, T::MaxOracleSize>, ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn nonces)]

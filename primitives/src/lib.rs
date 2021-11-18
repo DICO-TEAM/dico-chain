@@ -52,6 +52,8 @@ pub type AssetId = u32;
 /// Index of a transaction in the chain.
 pub type Index = u32;
 
+pub type Nonce = u32;
+
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
 
