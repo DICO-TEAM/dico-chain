@@ -2,7 +2,7 @@ use cumulus_primitives_core::ParaId;
 pub use dico_primitives::{constants::currency::*, network::*, AccountId, Balance, BlockNumber, Signature};
 use kico_runtime::{
     AuraConfig, AuraId, BalancesConfig, CouncilConfig, SessionKeys, DemocracyConfig, ElectionsConfig, ParachainInfoConfig, Perbill,
-    SessionConfig, StakingConfig, SudoConfig, SystemConfig, TechnicalCommitteeConfig, WASM_BINARY,
+    SessionConfig,CollatorSelectionConfig, SudoConfig, SystemConfig, TechnicalCommitteeConfig, WASM_BINARY,
 };
 use hex_literal::hex;
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
@@ -10,7 +10,7 @@ use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
-use sp_runtime::traits::{IdentifyAccount, Verify};
+use sp_runtime::traits::{IdentifyAccount, Verify, Zero};
 use sc_telemetry::TelemetryEndpoints;
 
 
@@ -141,6 +141,11 @@ fn testnet_genesis(
         balances: BalancesConfig {
             balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
         },
+        collator_selection: CollatorSelectionConfig {
+            invulnerables: initial_authorities.iter().cloned().map(|(acc, _)| acc).collect(),
+            candidacy_bond: Zero::zero(),
+            ..Default::default()
+        },
         session: SessionConfig {
             keys: initial_authorities
                 .iter()
@@ -154,13 +159,7 @@ fn testnet_genesis(
                 })
                 .collect(),
         },
-        staking: StakingConfig {
-            validator_count: initial_authorities.len() as u32,
-            minimum_validator_count: initial_authorities.len() as u32,
-            invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
-            slash_reward_fraction: Perbill::from_percent(10),
-            ..Default::default()
-        },
+
         democracy: DemocracyConfig::default(),
         elections: ElectionsConfig {
             members: endowed_accounts

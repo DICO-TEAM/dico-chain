@@ -1,7 +1,7 @@
 [package]
 name        = 'kico-runtime'
 authors     = ["DICO-TEAM"]
-description = 'A new Cumulus FRAME-based Substrate Runtime, ready for hacking.'
+description = 'A decentralized and governable ICO platform.'
 license     = 'Apache 2.0'
 version     = '1.1.0'
 homepage    = 'https://github.com/DICO-TEAM/dico-chain'
@@ -70,25 +70,28 @@ frame-system-rpc-runtime-api = { git = 'https://github.com/paritytech/substrate'
 frame-election-provider-support            = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 
 ## Substrate Pallet Dependencies
-pallet-aura                                = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.8", default-features = false }
-pallet-balances                            = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-randomness-collective-flip          = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-sudo                                = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-timestamp                           = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-transaction-payment                 = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-transaction-payment-rpc-runtime-api = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-election-provider-multi-phase       = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-democracy      					   = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-membership      					   = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-staking                             = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-session                             = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-staking-reward-curve                = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-scheduler      					   = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-collective      					   = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-treasury      					   = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-bounties      					   = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-pallet-elections-phragmen      			   = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-sp-npos-elections      			           = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-aura                                 = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.8", default-features = false }
+pallet-balances                             = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-randomness-collective-flip           = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-sudo                                 = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-timestamp                            = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-utility                              = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-multisig                             = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-proxy                                = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-transaction-payment                  = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-transaction-payment-rpc-runtime-api  = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-democracy                            = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-membership                           = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-staking                              = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-session                              = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-staking-reward-curve                 = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-scheduler                            = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-collective                           = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-treasury                             = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-authorship                             = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-bounties                             = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-elections-phragmen                   = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+sp-npos-elections                           = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 
 
 # Cumulus Dependencies
@@ -100,6 +103,7 @@ cumulus-pallet-xcmp-queue       = { git = 'https://github.com/paritytech/cumulus
 cumulus-primitives-core         = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.8', default-features = false }
 cumulus-primitives-timestamp    = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.8', default-features = false }
 cumulus-primitives-utility      = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.8', default-features = false }
+pallet-collator-selection       = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.8', default-features = false }
 parachain-info                  = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.8', default-features = false }
 
 # Polkadot Dependencies
@@ -124,7 +128,6 @@ runtime-benchmarks = [
 	'pallet-template/runtime-benchmarks',
 	'pallet-kyc/runtime-benchmarks',
 
-	'pallet-election-provider-multi-phase/runtime-benchmarks',
 	'pallet-democracy/runtime-benchmarks',
 	'pallet-membership/runtime-benchmarks',
 	'pallet-staking/runtime-benchmarks',
@@ -153,11 +156,6 @@ std = [
 	"frame-support/std",
 	"frame-executive/std",
 	"frame-system/std",
-	"pallet-balances/std",
-	"pallet-randomness-collective-flip/std",
-	"pallet-timestamp/std",
-	"pallet-sudo/std",
-	"pallet-transaction-payment/std",
 	"parachain-info/std",
 	"cumulus-pallet-aura-ext/std",
 	"cumulus-pallet-parachain-system/std",
@@ -177,7 +175,14 @@ std = [
 	"pallet-oracle/std",
 	"pallet-pricedao/std",
 
-	'pallet-election-provider-multi-phase/std',
+	"pallet-balances/std",
+	"pallet-randomness-collective-flip/std",
+	"pallet-timestamp/std",
+	"pallet-sudo/std",
+	'pallet-multisig/std',
+	'pallet-utility/std',
+	'pallet-proxy/std',
+	"pallet-transaction-payment/std",
 	'pallet-democracy/std',
 	'pallet-membership/std',
 	'pallet-staking/std',
@@ -186,6 +191,9 @@ std = [
 	'pallet-scheduler/std',
 	'pallet-collective/std',
 	'pallet-elections-phragmen/std',
+	'pallet-session/std',
+	'pallet-authorship/std',
+	'pallet-collator-selection/std',
 	'sp-npos-elections/std',
 	"pallet-amm/std",
 	"pallet-farm/std",

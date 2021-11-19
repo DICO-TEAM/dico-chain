@@ -2,6 +2,7 @@
 name       = "dico-runtime"
 version    = "1.1.0"
 authors    = ["DICO-TEAM"]
+description = 'A decentralized and governable ICO platform.'
 edition    = "2018"
 build      = "build.rs"
 license    = "Apache-2.0"
