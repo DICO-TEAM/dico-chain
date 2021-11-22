@@ -19,7 +19,7 @@ relaychain:
     - name: charlie
 
 parachains:
-  - image: dicoteam/kico:v1.1.0
+  - image: dicoteam/kico
     chain:
       base: kico
       collators:
