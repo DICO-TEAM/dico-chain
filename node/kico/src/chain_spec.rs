@@ -14,6 +14,7 @@ use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Saturating, Verify, Zero};
 
+
 const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
@@ -52,6 +53,8 @@ pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
 {
     AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
+
+
 
 pub fn kico_config(id: ParaId) -> ChainSpec {
     ChainSpec::from_genesis(
@@ -106,17 +109,17 @@ pub fn kico_config(id: ParaId) -> ChainSpec {
                 .iter()
                 .flat_map(|x| {
                     if x == &"5E9ctshAdwE57dxVXohG8GwzedJqZ4qTwwLjPC67MQLZySkH" {
-                        vec![(x.clone().parse().unwrap(), 10_u128.pow(21).checked_mul(5).unwrap().into())]
+                        vec![(x.clone().parse().unwrap(), 10_u128.pow(22).checked_mul(5).unwrap().into())]
                     } else if x == &"5EKzRRVjvBvZfcRJPaHJCw2yecP9uQXcm6vqNcnMh6bCjpPe" {
-                        vec![(x.clone().parse().unwrap(), 10_u128.pow(21).checked_mul(5).unwrap().into())]
+                        vec![(x.clone().parse().unwrap(), 10_u128.pow(22).checked_mul(5).unwrap().into())]
                     } else if x == &"5DUw6RATvXy2fJrSjnZkNK7U5UVVkw861qP6kxLZZcsyxfYp" {
-                        vec![(x.clone().parse().unwrap(), 10_u128.pow(21).checked_mul(5).unwrap().into())]
+                        vec![(x.clone().parse().unwrap(), 10_u128.pow(22).checked_mul(1).unwrap().into())]
                     } else if x == &"5HgG3pVtHgLhiveRGTxShK7oVgPBgTiqRyGP44ASbK8JBwhL" {
-                        vec![(x.clone().parse().unwrap(), 10_u128.pow(21).checked_mul(4).unwrap().into())]
+                        vec![(x.clone().parse().unwrap(), 10_u128.pow(22).checked_mul(4).unwrap().into())]
                     } else if x == &"5FqPqiSxWc8J14KrCdAU3eGT4mTdLcCZyd6uNkHPjoqVrwwU" {
-                        vec![(x.clone().parse().unwrap(), 10_u128.pow(21).checked_mul(12).unwrap().into())]
+                        vec![(x.clone().parse().unwrap(), 10_u128.pow(22).checked_mul(4).unwrap().into())]
                     } else {
-                        vec![(x.clone().parse().unwrap(), 10_u128.pow(14).into())]
+                        vec![(x.clone().parse().unwrap(), 10_u128.pow(15).into())]
                     }
                 })
                 .collect();
