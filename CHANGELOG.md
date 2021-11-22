@@ -1,7 +1,21 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [1.1.1] - 2021-11-22
+
+### Bug Fixes
+
+- Fix command format
+
+### Features
+
+- Kico add vecting
+
+### Performance
+
+- Finish testnetwork (#14)
+
+## [1.1.0] - 2021-11-18
 
 ### Bug Fixes
 
@@ -35,10 +49,23 @@ All notable changes to this project will be documented in this file.
 - Add InProcess Error
 - Solving the halving problem
 - Solving the halving problem
+- Complete issue# 116
+- Clear KYC info when delete ias and SwordHolder (#117)
+- Build amm pallet benchmarking.(#122)
+- Add pallets for kico network.
+- Add farm pallet rpc.
+- Fix rpc build error
 
 ### Documentation
 
 - Add:How to Contribute
+- Add Development wiki
+- Add development wiki
+- Add PULL_REQUEST_TEMPLATE.md (#119)
+- Add README.md file.
+- Add README.md file.
+- Add README.md file.
+- Add README.md file.
 
 ### Feat
 
@@ -82,6 +109,9 @@ All notable changes to this project will be documented in this file.
 - Integrate the pallet-farm-extend into the runtime
 - Add benchmarking and weights
 - Add IAS/Sword holder logout  logic
+- Add the currencies module to the kico network
+- Update to kico
+- Add the ico module to the kico network
 
 ### Fix
 
@@ -103,10 +133,16 @@ All notable changes to this project will be documented in this file.
 
 - Change chain_spec.rs logic
 - Rm chglog
+- Add git-cliff-action
+- When the amount is equal to 0, there is no need to call the transfer interface.
+- Fix format
 
 ### Refactor
 
 - Use variables instead of constants.
+- Add network node type primitives
+- Update rust version (#114)
+- Add vecting (#123)
 
 ### Testing
 
@@ -119,6 +155,11 @@ All notable changes to this project will be documented in this file.
 - Update the README.md
 - Update the README.md of the ico module
 
+### Build
+
+- Build farm pallet benchmarking.(#122)
+- Remove useless code.
+
 ### Ci
 
 - Add DepositBalanceInfo json type
@@ -127,9 +168,21 @@ All notable changes to this project will be documented in this file.
 
 - Revert a previous commit
 
+### Runtime
+
+- Fix rpc builder
+
 ### Update
 
 - Update the README.md
+- Update the mock
+- Update the test
+- Update the mock
+- Update the test
+- Use substrate3.0 syntax
+- Use substrate3.0 syntax
+- Use substrate3.0 syntax
+- Update the cargo.toml
 
 ## [1.0.1] - 2021-09-14
 
