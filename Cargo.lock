@@ -3687,6 +3687,7 @@ dependencies = [
  "sc-tracing",
  "sc-transaction-pool",
  "serde",
+ "serde_json",
  "sp-api",
  "sp-authority-discovery",
  "sp-block-builder",
@@ -3731,6 +3732,7 @@ dependencies = [
  "log",
  "orml-tokens",
  "orml-traits",
+ "orml-vesting",
  "pallet-amm",
  "pallet-aura",
  "pallet-authorship",
@@ -5039,6 +5041,21 @@ version = "0.4.1-dev"
 source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git?rev=650ef607d023e4537d3f2932baa5e50bc3a349cb#650ef607d023e4537d3f2932baa5e50bc3a349cb"
 dependencies = [
  "frame-support",
+ "parity-scale-codec",
+ "serde",
+ "sp-io 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
+ "sp-runtime",
+ "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
+]
+
+[[package]]
+name = "orml-vesting"
+version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library.git?rev=650ef607d023e4537d3f2932baa5e50bc3a349cb#650ef607d023e4537d3f2932baa5e50bc3a349cb"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "max-encoded-len",
  "parity-scale-codec",
  "serde",
  "sp-io 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
@@ -11839,7 +11856,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f559b464de2e2bdabcac6a210d12e9b5a5973c251e102c44c585c71d51bd78e"
 dependencies = [
  "cfg-if 1.0.0",
- "rand 0.8.4",
+ "rand 0.3.23",
  "static_assertions",
 ]
 

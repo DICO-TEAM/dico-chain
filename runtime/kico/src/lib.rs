@@ -16,6 +16,7 @@ use pallet_currencies::BasicCurrencyAdapter;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
+	offchain::storage_lock::BlockNumberProvider,
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, Verify, Zero},
 	transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
@@ -895,6 +896,33 @@ impl orml_tokens::Config for Runtime {
 }
 
 parameter_types! {
+	pub MinVestedTransfer: Balance = 0;
+	pub const MaxVestingSchedules: u32 = 200;
+}
+
+pub struct RelaychainBlockNumberProvider<T>(sp_std::marker::PhantomData<T>);
+
+impl<T: cumulus_pallet_parachain_system::Config> BlockNumberProvider for RelaychainBlockNumberProvider<T> {
+	type BlockNumber = BlockNumber;
+
+	fn current_block_number() -> Self::BlockNumber {
+		cumulus_pallet_parachain_system::Pallet::<T>::validation_data()
+			.map(|d| d.relay_parent_number)
+			.unwrap_or_default()
+	}
+}
+
+impl orml_vesting::Config for Runtime {
+	type Event = Event;
+	type Currency = Balances;
+	type MinVestedTransfer = MinVestedTransfer;
+	type VestedTransferOrigin = frame_system::EnsureSigned<AccountId>;
+	type WeightInfo = ();
+	type MaxVestingSchedules = MaxVestingSchedules;
+	type BlockNumberProvider = RelaychainBlockNumberProvider<Runtime>;
+}
+
+parameter_types! {
 	pub const CreateConsume: Balance = 100 * DOLLARS;
 	pub const DICOAssetId: AssetId = 0;
 	pub const MaxCreatableCurrencyId: AssetId = 4_000_000_000;
@@ -1113,6 +1141,8 @@ construct_runtime!(
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 34,
 		//  3rd Party
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 40,
+		Vesting: orml_vesting::{Pallet, Storage, Event<T>, Config<T>} = 41,
+
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,
 		PolkadotXcm: pallet_xcm::{Pallet, Call, Event<T>, Origin} = 51,

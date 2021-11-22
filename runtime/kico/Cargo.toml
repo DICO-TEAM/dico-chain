@@ -41,8 +41,9 @@ pallet-farm-rpc-runtime-api = { package = 'pallet-farm-rpc-runtime-api', default
 pallet-nft                  = { package = "pallet-nft", default-features = false, path = "../../pallets/nft"}
 pallet-farm-extend          = { package = 'pallet-farm-extend', default-features = false, path = '../../pallets/farm-extend'}
 # orml
-orml-tokens = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
-orml-traits = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
+orml-tokens   = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
+orml-traits   = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
+orml-vesting  = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
 
 # Substrate Dependencies
 ## Substrate Primitive Dependencies
@@ -206,6 +207,8 @@ std = [
 	"pallet-farm-rpc-runtime-api/std",
 	"pallet-nft/std",
 	"pallet-farm-extend/std",
+
 	"orml-tokens/std",
 	"orml-traits/std",
+	"orml-vesting/std",
 ]
