@@ -8,6 +8,12 @@ pub mod currency {
 	pub const MILLICENTS: Balance = 1_000_000_000;
 	pub const CENTS: Balance = 1_000 * MILLICENTS; // assume this is worth about a cent.
 	pub const DOLLARS: Balance = 100 * CENTS;
+	// kilo
+	pub const KILODOLLARS: Balance = 1000 * DOLLARS;
+	// million
+	pub const MILLIONDOLLARS: Balance = 1000 * KILODOLLARS;
+	// billion
+	pub const BILLIONDOLLARS: Balance = 1000 * MILLIONDOLLARS;
 
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
 		items as Balance * 15 * CENTS + (bytes as Balance) * 6 * CENTS

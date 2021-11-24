@@ -552,7 +552,7 @@ pub mod pallet {
 
             let reg = <KYCOf<T>>::take(&sender).ok_or(Error::<T>::NotFound)?;
 
-            Self::increment_area_count(&reg.info.area)?;
+            Self::decrement_area_count(&reg.info.area)?;
             let deposit = reg.total_deposit();
 
             let _ = T::Currency::unreserve(&sender, deposit.clone());
