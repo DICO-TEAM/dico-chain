@@ -115,6 +115,7 @@ pub mod module {
 		type MaxCreatableCurrencyId: Get<AssetId>;
 	}
 
+
 	#[pallet::error]
 	pub enum Error<T> {
 		/// Unable to convert the Amount type into Balance.
@@ -175,7 +176,6 @@ pub mod module {
 			let user = ensure_signed(origin)?;
 			Self::do_create(user.clone(), currency_id, metadata, amount, false)?;
 
-			Self::deposit_event(Event::CreateAsset(user.clone(), currency_id, amount));
 			Ok(().into())
 		}
 
@@ -338,6 +338,7 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 				metadata: metadata,
 			},
 		);
+		Self::deposit_event(Event::CreateAsset(user.clone(), currency_id, amount));
 
 		Ok(())
 	}
