@@ -1732,7 +1732,7 @@ dependencies = [
 
 [[package]]
 name = "dico-dev"
-version = "1.1.0"
+version = "1.1.2"
 dependencies = [
  "assert_cmd",
  "async-std",
@@ -1831,7 +1831,7 @@ dependencies = [
 
 [[package]]
 name = "dico-runtime"
-version = "1.1.0"
+version = "1.1.2"
 dependencies = [
  "dico-primitives",
  "frame-benchmarking",
@@ -3644,7 +3644,7 @@ dependencies = [
 
 [[package]]
 name = "kico"
-version = "1.1.1"
+version = "1.1.2"
 dependencies = [
  "cumulus-client-cli",
  "cumulus-client-collator",
@@ -3711,7 +3711,7 @@ dependencies = [
 
 [[package]]
 name = "kico-runtime"
-version = "1.1.1"
+version = "1.1.2"
 dependencies = [
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",
