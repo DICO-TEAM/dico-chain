@@ -56,9 +56,9 @@ where
 pub fn kico_config(id: ParaId) -> ChainSpec {
 	ChainSpec::from_genesis(
 		// Name
-		"kico node",
+		"KICO",
 		// ID
-		"kico-node",
+		"KICO",
 		ChainType::Development,
 		move || {
 			let initial_authorities: Vec<(AccountId, AuraId)> = vec![

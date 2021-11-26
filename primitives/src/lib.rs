@@ -8,7 +8,7 @@ use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::Member,
 	traits::{BlakeTwo256, IdentifyAccount, Verify},
-	DispatchResult, FixedU128, MultiSignature, OpaqueExtrinsic, Perbill, Permill, RuntimeDebug,
+	DispatchResult, FixedU128, MultiAddress, MultiSignature, OpaqueExtrinsic, Perbill, Permill, RuntimeDebug,
 };
 use sp_version::RuntimeVersion;
 
@@ -32,6 +32,9 @@ pub type Signature = MultiSignature;
 /// Some way of identifying an account on the chain. We intentionally make it
 /// equivalent to the public key of our transaction signing scheme.
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
+
+/// The address format for describing accounts.
+pub type Address = MultiAddress<AccountId, ()>;
 
 /// The type for looking up accounts. We don't expect more than 4 billion of
 /// them.
