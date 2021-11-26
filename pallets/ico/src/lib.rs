@@ -327,7 +327,7 @@ pub mod pallet {
 	pub type PendingIco<T: Config> = StorageValue<
 		_,
 		Vec<
-			PendingInfo<IcoInfo<T::BlockNumber, MultiBalanceOf<T>, AssetId, AreaCode, T::AccountId>, MultiBalanceOf<T>>,
+			PendingInfo<IcoInfo<T::BlockNumber, MultiBalanceOf<T>, AssetId, AreaCode, T::AccountId>, MultiBalanceOf<T>>
 		>,
 		ValueQuery,
 	>;
