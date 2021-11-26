@@ -15,6 +15,7 @@ use cumulus_primitives_core::ParaId;
 
 // Substrate Imports
 use dico_primitives::{AccountId, AssetId, Balance, Block, Hash, Index, Nonce, PoolId};
+use pallet_ico_rpc_runtime_api::IcoAmountApi;
 use sc_client_api::ExecutorProvider;
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
@@ -26,7 +27,6 @@ use sp_consensus::SlotData;
 use sp_keystore::SyncCryptoStorePtr;
 use sp_runtime::traits::BlakeTwo256;
 use substrate_prometheus_endpoint::Registry;
-use pallet_ico_rpc_runtime_api::IcoAmountApi;
 
 // Native executor instance.
 native_executor_instance!(
@@ -147,12 +147,10 @@ where
 		+ sp_api::ApiExt<Block, StateBackend = sc_client_api::StateBackendFor<TFullBackend<Block>, Block>>
 		+ sp_offchain::OffchainWorkerApi<Block>
 		+ sp_block_builder::BlockBuilder<Block>
-
 		+ pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>
 		+ substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>
 		+ pallet_farm_rpc::FarmRuntimeApi<Block, AccountId, PoolId, Balance>
 		+ IcoAmountApi<Block, AccountId, AssetId, Index, Balance>
-
 		+ cumulus_primitives_core::CollectCollationInfo<Block>,
 	sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
 	Executor: sc_executor::NativeExecutionDispatch + 'static,

@@ -470,8 +470,10 @@
   },
   "PendingInfo": {
     "ico": "IcoInfo",
-    "pledge": "Balance"
+    "pledge": "Balance",
+  	"pledge_exchange_token": "Balance"
   },
+
   "MultiBalanceOf": "Balance",
   "Amount": "Balance",
   "IcoStatus": {
@@ -629,5 +631,14 @@
     "acc_reward_per_share": "Balance",
     "stake_currency_id": "AssetId",
     "total_stake_amount": "Balance"
-  }
+  },
+
+	"VestingScheduleOf":"VestingSchedule",
+	"VestingSchedule": {
+	"start": "BlockNumber",
+	"period": "BlockNumber",
+	"period_count": "u32",
+	"per_period": "Compact<Balance>"
+	}
+
 }
