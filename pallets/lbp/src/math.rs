@@ -15,8 +15,8 @@ pub const MAX_BPOW_BASE: u128 = 2u128 * BONE - 1u128;
 pub const BPOW_PRECISION: u128 = BONE / 10_000_000_000u128;
 pub const MAX_DURATION_BLOCK: BlockNumber = 3 * DAYS; // 43200 blocks if secs_per_block = 6
 pub const MIN_DURATION_BLOCK: BlockNumber = 30 * MINUTES; // 300 blocks if secs_per_block = 6
-pub const MAX_STEPS: u32 = MAX_DURATION_BLOCK / 100; // 432
-pub const MIN_STEPS: u32 = MIN_DURATION_BLOCK / 100; // 3
+pub const MAX_STEPS: u32 = MAX_DURATION_BLOCK / 25; // 432
+pub const MIN_STEPS: u32 = MIN_DURATION_BLOCK / 25; // 3
 pub const WEIGHT_ONE: u128 = 10_000_000_000u128;
 pub const MAX_WEIGHT: u128 = 100 * WEIGHT_ONE;
 pub const MIN_WEIGHT: u128 = WEIGHT_ONE;
