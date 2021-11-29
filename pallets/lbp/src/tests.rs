@@ -277,7 +277,7 @@ fn create_lbp_should_work() {
 				10 * WEIGHT_ONE,
 				100,
 				1000,
-				433,
+				865,
 			),
 			Error::<Test>::ErrMaxSteps
 		);
