@@ -211,7 +211,7 @@ pub fn testnet_genesis(
     root_key: AccountId,
     endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
-    let vesting_list_json = &include_bytes!("../../../resources/kico-vesting-KICO.json")[..];
+    let vesting_list_json = &include_bytes!("../../../resources/dev-kico-vesting-KICO.json")[..];
     // vesting_list: who, begin, length, liquid
     let vesting_list: Vec<(AccountId, BlockNumber, BlockNumber, Balance)> =
         serde_json::from_slice(vesting_list_json).unwrap();

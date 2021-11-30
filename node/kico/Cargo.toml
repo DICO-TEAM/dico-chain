@@ -1,9 +1,9 @@
 [package]
 name        = 'kico'
 authors     = ["DICO-TEAM"]
-description = 'A new Cumulus FRAME-based Substrate node, ready for hacking.'
+description = 'A decentralized and governable ICO platform.'
 license     = 'Apache 2.0'
-version     = '3.0.0'
+version     = '1.1.2'
 homepage    = 'https://github.com/DICO-TEAM/dico-chain'
 repository  = 'https://github.com/DICO-TEAM/dico-chain'
 edition     = '2018'
@@ -24,12 +24,14 @@ default = []
 runtime-benchmarks = ['kico-runtime/runtime-benchmarks']
 
 [dependencies]
-derive_more = { version = '0.99.2' }
-log         = { version = '0.4.14' }
-codec       = { package = 'parity-scale-codec', version = '2.0.0' }
-structopt   = { version = '0.3.8' }
-serde       = { version = '1.0.119', features = ['derive'] }
-hex-literal = { version = '0.3.1' }
+derive_more  = { version = '0.99.2' }
+log          = { version = '0.4.14' }
+codec        = { package = 'parity-scale-codec', version = '2.0.0' }
+structopt    = { version = '0.3.8' }
+serde        = { version = '1.0.119', features = ['derive'] }
+serde_json   = { version = '1.0' }
+hex-literal  = { version = '0.3.1' }
+
 
 
 
@@ -43,6 +45,8 @@ jsonrpc-core = { version = '15.1.0' }
 dico-primitives = { package = 'dico-primitives', default-features = false, path = "../../primitives" }
 kico-runtime = { package = "kico-runtime", path = '../../runtime/kico' }
 pallet-farm-rpc = { package = 'pallet-farm-rpc', path = "../../pallets/farm/rpc" }
+pallet-ico-rpc-runtime-api = { path = "../../pallets/ico/rpc/runtime-api"}
+pallet-ico-rpc             = { path = "../../pallets/ico/rpc/rpc" }
 
 
 # Substrate Dependencies
@@ -64,7 +68,7 @@ sc-network          = { git = 'https://github.com/paritytech/substrate', branch 
 sc-keystore         = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8' }
 sc-rpc              = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8' }
 sc-rpc-api          = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8' }
-sc-service          = { git = 'https://github.com/paritytech/substrate', branch = "polkadot-v0.9.8", version = '0.9.0', features = ['wasmtime'] }
+sc-service          = { git = 'https://github.com/paritytech/substrate', branch = "polkadot-v0.9.8", features = ['wasmtime'] }
 sc-telemetry        = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8' }
 sc-transaction-pool = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8' }
 sc-tracing          = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8' }

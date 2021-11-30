@@ -8,7 +8,7 @@ use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::Member,
 	traits::{BlakeTwo256, IdentifyAccount, Verify},
-	DispatchResult, FixedU128, MultiSignature, OpaqueExtrinsic, Perbill, Permill, RuntimeDebug,
+	DispatchResult, FixedU128, MultiAddress, MultiSignature, OpaqueExtrinsic, Perbill, Permill, RuntimeDebug,
 };
 use sp_version::RuntimeVersion;
 
@@ -33,6 +33,9 @@ pub type Signature = MultiSignature;
 /// equivalent to the public key of our transaction signing scheme.
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 
+/// The address format for describing accounts.
+pub type Address = MultiAddress<AccountId, ()>;
+
 /// The type for looking up accounts. We don't expect more than 4 billion of
 /// them.
 pub type AccountIndex = u32;
@@ -51,6 +54,8 @@ pub type AssetId = u32;
 
 /// Index of a transaction in the chain.
 pub type Index = u32;
+
+pub type Nonce = u32;
 
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
@@ -96,8 +101,8 @@ pub mod network {
 	#[cfg(feature = "std")]
 	use serde_json::{map::Map, value::Value};
 	// https://github.com/paritytech/ss58-registry/blob/main/ss58-registry.json
-	pub const KICO_PREFIX: u16 = 666;
-	pub const DICO_PREFIX: u16 = 888;
+	pub const KICO_PREFIX: u16 = 51;
+	pub const DICO_PREFIX: u16 = 52;
 
 	// 	pub const DICO_REGISTRY: Properties = json!({
 	// 		  "prefix": DICO_PREFIX,

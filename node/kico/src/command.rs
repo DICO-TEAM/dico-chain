@@ -20,14 +20,14 @@ use std::{io::Write, net::SocketAddr};
 
 fn load_spec(id: &str, para_id: ParaId) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 	Ok(match id {
-		"kico" => Box::new(chain_spec::kico_config(para_id)),
+		"" | "kico" => Box::new(chain_spec::kico_config(para_id)),
 		path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 	})
 }
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Parachain Collator Template".into()
+		"KICO Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -36,7 +36,7 @@ impl SubstrateCli for Cli {
 
 	fn description() -> String {
 		format!(
-			"Parachain Collator Template\n\nThe command-line arguments provided first will be \
+			"KICO Node\n\nThe command-line arguments provided first will be \
 		passed to the parachain node, while the arguments provided after -- will be passed \
 		to the relaychain node.\n\n\
 		{} [parachain-args] -- [relaychain-args]",
@@ -49,7 +49,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn support_url() -> String {
-		"https://github.com/substrate-developer-hub/substrate-parachain-template/issues/new".into()
+		"https://github.com/DICO-TEAM/dico-chain/issues/new".into()
 	}
 
 	fn copyright_start_year() -> i32 {
@@ -67,7 +67,7 @@ impl SubstrateCli for Cli {
 
 impl SubstrateCli for RelayChainCli {
 	fn impl_name() -> String {
-		"Parachain Collator Template".into()
+		"KICO Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -75,7 +75,7 @@ impl SubstrateCli for RelayChainCli {
 	}
 
 	fn description() -> String {
-		"Parachain Collator Template\n\nThe command-line arguments provided first will be \
+		"KICO Node\n\nThe command-line arguments provided first will be \
 		passed to the parachain node, while the arguments provided after -- will be passed \
 		to the relaychain node.\n\n\
 		parachain-collator [parachain-args] -- [relaychain-args]"
@@ -87,7 +87,7 @@ impl SubstrateCli for RelayChainCli {
 	}
 
 	fn support_url() -> String {
-		"https://github.com/substrate-developer-hub/substrate-parachain-template/issues/new".into()
+		"https://github.com/DICO-TEAM/dico-chain/issues/new".into()
 	}
 
 	fn copyright_start_year() -> i32 {
@@ -139,6 +139,10 @@ pub fn run() -> Result<()> {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
 		}
+		Some(Subcommand::Key(cmd)) => cmd.run(&cli),
+		Some(Subcommand::Sign(cmd)) => cmd.run(),
+		Some(Subcommand::Verify(cmd)) => cmd.run(),
+		Some(Subcommand::Vanity(cmd)) => cmd.run(),
 		Some(Subcommand::CheckBlock(cmd)) => {
 			construct_async_run!(|components, cli, cmd, config| {
 				Ok(cmd.run(components.client, components.import_queue))

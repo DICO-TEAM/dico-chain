@@ -2,14 +2,17 @@
 
 use std::sync::Arc;
 
-use dico_primitives::{AccountId, AssetId, Balance, Block, BlockNumber, Hash, Index as Nonce, PoolId};
+use dico_primitives::{AccountId, AssetId, Balance, Block,  Index, Nonce, PoolId};
 
 use sc_client_api::AuxStore;
 pub use sc_rpc::{DenyUnsafe, SubscriptionTaskExecutor};
-use sp_transaction_pool::TransactionPool;
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
+use sp_transaction_pool::TransactionPool;
+// local
+use pallet_ico_rpc::{FullIco, IcoApi};
+use pallet_ico_rpc_runtime_api::IcoAmountApi;
 
 /// A type representing all RPC extensions.
 pub type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
@@ -38,6 +41,7 @@ where
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
 	C::Api: BlockBuilder<Block>,
 	C::Api: pallet_farm_rpc::FarmRuntimeApi<Block, AccountId, PoolId, Balance>,
+	C::Api: IcoAmountApi<Block, AccountId, AssetId, Index, Balance>,
 	P: TransactionPool + Sync + Send + 'static,
 {
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
@@ -55,6 +59,7 @@ where
 		pool,
 		deny_unsafe,
 	)));
+	io.extend_with(IcoApi::to_delegate(FullIco::new(client.clone(), deny_unsafe)));
 	io.extend_with(pallet_farm_rpc::FarmApi::to_delegate(pallet_farm_rpc::Farm::new(
 		client.clone(),
 		deny_unsafe,

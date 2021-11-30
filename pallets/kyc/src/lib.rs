@@ -551,6 +551,8 @@ pub mod pallet {
 			);
 
             let reg = <KYCOf<T>>::take(&sender).ok_or(Error::<T>::NotFound)?;
+
+            Self::decrement_area_count(&reg.info.area)?;
             let deposit = reg.total_deposit();
 
             let _ = T::Currency::unreserve(&sender, deposit.clone());
@@ -808,6 +810,14 @@ pub mod pallet {
         fn increment_area_count(area: &AreaCode) -> DispatchResult {
             <AreaData<T>>::try_mutate(area, |count| {
                 let next = count.checked_add(1).ok_or(Error::<T>::CountOverflow)?;
+                *count = next;
+                Ok(().into())
+            })
+        }
+
+        fn decrement_area_count(area: &AreaCode) -> DispatchResult {
+            <AreaData<T>>::try_mutate(area, |count| {
+                let next = count.checked_sub(1).ok_or(Error::<T>::CountOverflow)?;
                 *count = next;
                 Ok(().into())
             })
