@@ -22,6 +22,7 @@ pallet-oracle      = { path = '../oracle', default-features = false}
 dico-currencies	   = { package = "pallet-currencies", path = "../currencies", default-features = false }
 primitives         = { package = "dico-primitives", path = "../../primitives", default-features = false }
 
+
 # substrate
 frame-benchmarking = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false, optional = true }
 frame-support      = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.8', default-features = false }
@@ -31,7 +32,7 @@ sp-runtime         = { git = 'https://github.com/paritytech/substrate.git', bran
 sp-core            = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 sp-io              = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 pallet-balances    = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-
+pallet-balances    = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 
 # ORML
 orml-tokens       = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
