@@ -1132,7 +1132,7 @@ construct_runtime!(
 		Farm: pallet_farm::{Pallet, Call, Storage, Event<T>} = 83,
 		FarmExtend: pallet_farm_extend::{Pallet, Call, Storage, Event<T>}= 84,
 		PriceDao: pallet_pricedao::{Pallet, Call, Storage, Event<T>} = 85,
-		Currencies: pallet_currencies::{Pallet, Event<T>, Call, Storage} = 86,
+		Currencies: pallet_currencies::{Pallet, Event<T>, Call, Storage, Config<T>} = 86,
 		DicoOracle: pallet_oracle::<Instance1>::{Pallet, Storage, Call, Event<T>}= 87,
 	}
 );
