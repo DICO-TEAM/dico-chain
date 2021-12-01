@@ -373,6 +373,10 @@ impl<T: Config> Pallet<T> {
 					return Ok(());
 				}
 
+				if pool_extend.total_stake_amount == Balance::zero() {
+					return Ok(());
+				}
+
 				let block_rewards = to_balance!(to_u256!(block_delta)
 					.checked_mul(to_u256!(pool_extend.reward_per_block))
 					.ok_or(ArithmeticError::Overflow)?)?;
@@ -383,7 +387,7 @@ impl<T: Config> Pallet<T> {
 							.checked_mul(to_u256!(1e12 as u64))
 							.ok_or(ArithmeticError::Overflow)?
 							.checked_div(to_u256!(pool_extend.total_stake_amount))
-							.ok_or(ArithmeticError::Overflow)?
+							.ok_or(ArithmeticError::DivisionByZero)?
 					)
 					.ok_or(ArithmeticError::Overflow)?)?;
 				pool_extend.last_reward_block = reward_block;
