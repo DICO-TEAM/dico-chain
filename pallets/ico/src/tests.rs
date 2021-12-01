@@ -7,6 +7,7 @@ use frame_support::{assert_noop, assert_ok, debug};
 fn initialize() {
 	Balances::set_balance(Origin::root(), Alice, 100_000 * DOLLARS, 100 * DOLLARS).unwrap();
 	Balances::set_balance(Origin::root(), Bob, 100_000 * DOLLARS, 100 * DOLLARS).unwrap();
+	IcoMaxUsdtAmount::<Test>::put(1000 * DOLLARS);
 	Currencies::create_asset(
 		Origin::signed(Alice),
 		KSM,
@@ -151,7 +152,7 @@ fn join_should_work() {
 }
 
 #[test]
-fn calculate_total_reward_should_work() {
+pub fn calculate_total_reward_should_work() {
 	new_test_ext().execute_with(|| {
 		initialize();
 		TotalUsdt::<Test>::put(1_8000_0000 * USDT);
@@ -180,7 +181,6 @@ fn split(mut this_time_amount: u64, total_amount: u64, unit: u64) -> Vec<u64> {
 	}
 	result
 }
-
 #[test]
 fn main_test() {
 	let a = split(45u64, 45u64, 20);

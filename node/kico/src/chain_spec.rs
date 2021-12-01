@@ -106,30 +106,15 @@ pub fn kico_config(id: ParaId) -> ChainSpec {
 			.iter()
 			.flat_map(|x| {
 				if x == &"5E9ctshAdwE57dxVXohG8GwzedJqZ4qTwwLjPC67MQLZySkH" {
-					vec![(
-						x.clone().parse().unwrap(),
-						500 * MILLIONDOLLARS,
-					)]
+					vec![(x.clone().parse().unwrap(), 500 * MILLIONDOLLARS)]
 				} else if x == &"5EKzRRVjvBvZfcRJPaHJCw2yecP9uQXcm6vqNcnMh6bCjpPe" {
-					vec![(
-						x.clone().parse().unwrap(),
-						500 * MILLIONDOLLARS,
-					)]
+					vec![(x.clone().parse().unwrap(), 500 * MILLIONDOLLARS)]
 				} else if x == &"5DUw6RATvXy2fJrSjnZkNK7U5UVVkw861qP6kxLZZcsyxfYp" {
-					vec![(
-						x.clone().parse().unwrap(),
-						100 * MILLIONDOLLARS,
-					)]
+					vec![(x.clone().parse().unwrap(), 100 * MILLIONDOLLARS)]
 				} else if x == &"5HgG3pVtHgLhiveRGTxShK7oVgPBgTiqRyGP44ASbK8JBwhL" {
-					vec![(
-						x.clone().parse().unwrap(),
-						400 * MILLIONDOLLARS,
-					)]
+					vec![(x.clone().parse().unwrap(), 400 * MILLIONDOLLARS)]
 				} else if x == &"5FqPqiSxWc8J14KrCdAU3eGT4mTdLcCZyd6uNkHPjoqVrwwU" {
-					vec![(
-						x.clone().parse().unwrap(),
-						400 * MILLIONDOLLARS,
-					)]
+					vec![(x.clone().parse().unwrap(), 400 * MILLIONDOLLARS)]
 				} else {
 					vec![(x.clone().parse().unwrap(), DOLLARS)]
 				}

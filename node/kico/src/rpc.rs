@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use dico_primitives::{AccountId, AssetId, Balance, Block,  Index, Nonce, PoolId};
+use dico_primitives::{AccountId, AssetId, Balance, Block, Index, Nonce, PoolId};
 
 use sc_client_api::AuxStore;
 pub use sc_rpc::{DenyUnsafe, SubscriptionTaskExecutor};

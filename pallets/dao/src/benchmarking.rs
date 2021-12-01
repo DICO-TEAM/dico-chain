@@ -19,20 +19,15 @@
 
 use super::*;
 
-use frame_system::RawOrigin as SystemOrigin;
+use frame_benchmarking::{account, benchmarks_instance, impl_benchmark_test_suite, whitelisted_caller};
 use frame_system::EventRecord;
-use frame_benchmarking::{
-	benchmarks_instance,
-	account,
-	whitelisted_caller,
-	impl_benchmark_test_suite,
-};
+use frame_system::RawOrigin as SystemOrigin;
 use sp_runtime::traits::Bounded;
 use sp_std::mem::size_of;
 
+use crate::Module as Collective;
 use frame_system::Call as SystemCall;
 use frame_system::Pallet as System;
-use crate::Module as Collective;
 
 const SEED: u32 = 0;
 
@@ -638,8 +633,4 @@ benchmarks_instance! {
 	}
 }
 
-impl_benchmark_test_suite!(
-	Collective,
-	crate::tests::new_test_ext(),
-	crate::tests::Test,
-);
+impl_benchmark_test_suite!(Collective, crate::tests::new_test_ext(), crate::tests::Test,);

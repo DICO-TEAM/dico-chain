@@ -35,8 +35,7 @@ use sp_std::{
 	convert::TryInto,
 	vec::Vec,
 };
-mod mock;
-mod tests;
+// mod mock;
 
 pub type Attributes = BTreeMap<Vec<u8>, Vec<u8>>;
 

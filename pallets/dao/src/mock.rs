@@ -1,28 +1,32 @@
 #![cfg(test)]
 
 pub use super::*;
-use pallet_pricedao;
-use pallet_oracle;
 use dico_treasury;
-use pallet_randomness_collective_flip;
-use frame_support::{construct_runtime, parameter_types, traits::{LockIdentifier, Time}, PalletId};
+use frame_support::{
+	construct_runtime, parameter_types,
+	traits::{LockIdentifier, Time},
+	PalletId,
+};
+use orml_tokens as tokens;
 use orml_traits::parameter_type_with_key;
+use pallet_oracle;
+use pallet_pricedao;
+use pallet_randomness_collective_flip;
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
 };
-use orml_tokens as tokens;
 pub type Block = sp_runtime::generic::Block<Header, UncheckedExtrinsic>;
 pub type UncheckedExtrinsic = sp_runtime::generic::UncheckedExtrinsic<u32, u64, Call, ()>;
-use std::cell::RefCell;
 use crate as dao;
 use frame_system;
+pub use ico::*;
 use pallet_balances;
-pub use ico::{*};
+use std::cell::RefCell;
 
 use currencies::{self as dico_currencies, BasicCurrencyAdapter};
-use dico_primitives::{constants::{currency::*, time::*}};
+use dico_primitives::constants::{currency::*, time::*};
 type Key = u32;
 type Value = u128;
 pub type AccountId = u128;
@@ -42,7 +46,6 @@ pub const DICO: CurrencyId = 0;
 pub const KSM: CurrencyId = 20;
 pub const NewDAYS: u64 = 1000;
 pub const NEW_USDT: CurrencyId = 5;
-
 
 construct_runtime!(
 	pub enum Test where
@@ -104,7 +107,6 @@ impl dao::Config for Test {
 	type IcoHandler = ();
 }
 
-
 impl dico_treasury::Config for Test {
 	type ApproveOrigin = frame_system::EnsureRoot<AccountId>;
 	type PalletId = DicoTreasuryModuleId;
@@ -136,7 +138,6 @@ impl pallet_oracle::Config for Test {
 	type WeightInfo = ();
 }
 
-
 parameter_types! {
 	pub const LiquidityAssetIdBase: AssetId = 50000;
 	pub const AMMPalletId: PalletId = PalletId(*b"dico/amm");
@@ -154,7 +155,6 @@ parameter_types! {
 	pub const PledgedBalance: Balance = DOLLARS;
 	pub const WithdrawExpirationPeriod: BlockNumber = 20;
 }
-
 
 impl pallet_pricedao::Config for Test {
 	type Event = Event;
@@ -269,7 +269,6 @@ impl ico::Config for Test {
 	type PriceData = PriceDao;
 	type UsdtCurrencyId = UsdtCurrencyId;
 	type KycHandler = Kyc;
-
 }
 
 parameter_types! {
@@ -329,7 +328,8 @@ pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 
 	let mut ext = sp_io::TestExternalities::new(t);
-	ext.execute_with(|| { System::set_block_number(1);
+	ext.execute_with(|| {
+		System::set_block_number(1);
 		Timestamp::set_timestamp(12345);
 	});
 	ext

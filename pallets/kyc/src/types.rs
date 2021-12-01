@@ -184,16 +184,16 @@ impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq + Zero + A
 	pub(crate) fn total_deposit(&self) -> Balance {
 		self.deposit
 			+ self
-			.judgements
-			.iter()
-			.map(|(_, _, ref j, _)| {
-				if let Judgement::FeePaid(fee) = j {
-					*fee
-				} else {
-					Zero::zero()
-				}
-			})
-			.fold(Zero::zero(), |a, i| a + i)
+				.judgements
+				.iter()
+				.map(|(_, _, ref j, _)| {
+					if let Judgement::FeePaid(fee) = j {
+						*fee
+					} else {
+						Zero::zero()
+					}
+				})
+				.fold(Zero::zero(), |a, i| a + i)
 	}
 }
 
@@ -231,9 +231,9 @@ pub struct IASInfo<
 }
 
 impl<
-	Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
-	AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
-> IASInfo<Balance, AccountId>
+		Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
+		AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
+	> IASInfo<Balance, AccountId>
 {
 	pub fn set_account(&mut self, account: AccountId) -> &mut Self {
 		self.account = account;
@@ -273,9 +273,9 @@ pub struct ApplicationForm<
 }
 
 impl<
-	Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
-	AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
-> ApplicationForm<Balance, AccountId>
+		Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
+		AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
+	> ApplicationForm<Balance, AccountId>
 {
 	pub fn set_ias(&mut self, index: KYCIndex, ias: IASInfo<Balance, AccountId>) -> &mut Self {
 		self.ias = (index, ias);

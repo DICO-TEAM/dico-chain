@@ -115,7 +115,6 @@ pub mod module {
 		type MaxCreatableCurrencyId: Get<AssetId>;
 	}
 
-
 	#[pallet::error]
 	pub enum Error<T> {
 		/// Unable to convert the Amount type into Balance.

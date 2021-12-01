@@ -19,6 +19,7 @@
 #![recursion_limit = "128"]
 
 // use codec::{Codec, Encode, Decode, MaxEncodedLen};
+pub use crate::pallet::*;
 use frame_support::{
 	codec::{Codec, Decode, Encode},
 	dispatch::{DispatchError, DispatchResult, DispatchResultWithPostInfo, Dispatchable, Parameter, PostDispatchInfo},
@@ -42,14 +43,13 @@ use sp_std::{
 	result,
 };
 pub use weights::WeightInfo;
-pub use crate::pallet::*;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 //
-pub mod weights;
 pub mod mock;
 pub mod tests;
+pub mod weights;
 
 /// Simple index type for proposal counting.
 pub type ProposalIndex = u32;
