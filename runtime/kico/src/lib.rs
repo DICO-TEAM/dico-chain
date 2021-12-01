@@ -1107,7 +1107,7 @@ construct_runtime!(
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 34,
 		//  3rd Party
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 40,
-		Vesting: orml_vesting::{Pallet, Storage, Event<T>, Config<T>} = 41,
+		Vesting: orml_vesting::{Pallet, Storage, Call, Event<T>, Config<T>} = 41,
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,

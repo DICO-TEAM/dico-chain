@@ -4,7 +4,7 @@ use hex_literal::hex;
 use kico_runtime::{
 	AuraConfig, AuraId, BalancesConfig, CollatorSelectionConfig, CouncilConfig, DemocracyConfig, ElectionsConfig,
 	GenesisConfig, ParachainInfoConfig, Perbill, SessionConfig, SessionKeys, SudoConfig, SystemConfig,
-	TechnicalCommitteeConfig, VestingConfig, WASM_BINARY,
+	TechnicalCommitteeConfig, TechnicalMembershipConfig, VestingConfig, WASM_BINARY,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -106,30 +106,15 @@ pub fn kico_config(id: ParaId) -> ChainSpec {
 			.iter()
 			.flat_map(|x| {
 				if x == &"5E9ctshAdwE57dxVXohG8GwzedJqZ4qTwwLjPC67MQLZySkH" {
-					vec![(
-						x.clone().parse().unwrap(),
-						500 * MILLIONDOLLARS,
-					)]
+					vec![(x.clone().parse().unwrap(), 500 * MILLIONDOLLARS)]
 				} else if x == &"5EKzRRVjvBvZfcRJPaHJCw2yecP9uQXcm6vqNcnMh6bCjpPe" {
-					vec![(
-						x.clone().parse().unwrap(),
-						500 * MILLIONDOLLARS,
-					)]
+					vec![(x.clone().parse().unwrap(), 500 * MILLIONDOLLARS)]
 				} else if x == &"5DUw6RATvXy2fJrSjnZkNK7U5UVVkw861qP6kxLZZcsyxfYp" {
-					vec![(
-						x.clone().parse().unwrap(),
-						100 * MILLIONDOLLARS,
-					)]
+					vec![(x.clone().parse().unwrap(), 100 * MILLIONDOLLARS)]
 				} else if x == &"5HgG3pVtHgLhiveRGTxShK7oVgPBgTiqRyGP44ASbK8JBwhL" {
-					vec![(
-						x.clone().parse().unwrap(),
-						400 * MILLIONDOLLARS,
-					)]
+					vec![(x.clone().parse().unwrap(), 400 * MILLIONDOLLARS)]
 				} else if x == &"5FqPqiSxWc8J14KrCdAU3eGT4mTdLcCZyd6uNkHPjoqVrwwU" {
-					vec![(
-						x.clone().parse().unwrap(),
-						400 * MILLIONDOLLARS,
-					)]
+					vec![(x.clone().parse().unwrap(), 400 * MILLIONDOLLARS)]
 				} else {
 					vec![(x.clone().parse().unwrap(), DOLLARS)]
 				}
@@ -153,11 +138,24 @@ pub fn kico_config(id: ParaId) -> ChainSpec {
 					}
 				});
 
+			let council = vec![
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				get_account_id_from_seed::<sr25519::Public>("Bob"),
+				get_account_id_from_seed::<sr25519::Public>("Charlie"),
+			];
+			let technical_committee = vec![
+				get_account_id_from_seed::<sr25519::Public>("Dave"),
+				get_account_id_from_seed::<sr25519::Public>("Eve"),
+				get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+			];
+
 			kico_genesis(
 				root_key,
 				initial_authorities,
 				endowed_accounts,
 				&mut distribution_accounts,
+				council,
+				technical_committee,
 				id,
 			)
 		},
@@ -177,6 +175,8 @@ fn kico_genesis(
 	initial_authorities: Vec<(AccountId, AuraId)>,
 	endowed_accounts: Vec<AccountId>,
 	distribution_accounts: &mut Vec<(AccountId, Balance)>,
+	council: Vec<AccountId>,
+	technical_committee: Vec<AccountId>,
 	id: ParaId,
 ) -> kico_runtime::GenesisConfig {
 	let num_endowed_accounts = endowed_accounts.len();
@@ -193,8 +193,6 @@ fn kico_genesis(
 		.collect::<Vec<(AccountId, Balance)>>();
 	// .append(distribution_accounts);
 	balances.append(distribution_accounts);
-
-	// let balances = distribution_accounts;
 
 	GenesisConfig {
 		system: SystemConfig {
@@ -232,17 +230,13 @@ fn kico_genesis(
 				.map(|member| (member, STASH))
 				.collect(),
 		},
-		technical_committee: TechnicalCommitteeConfig {
-			members: endowed_accounts
-				.iter()
-				.take((num_endowed_accounts + 1) / 2)
-				.cloned()
-				.collect(),
+		technical_committee: Default::default(),
+		technical_membership: TechnicalMembershipConfig {
+			members: technical_committee,
 			phantom: Default::default(),
 		},
 		tokens: Default::default(),
 		vesting: VestingConfig { vesting: vesting_list },
-		technical_membership: Default::default(),
 		treasury: Default::default(),
 		council: CouncilConfig::default(),
 		sudo: SudoConfig { key: root_key },
