@@ -10,6 +10,7 @@ use sp_runtime::{
 };
 
 use std::cell::RefCell;
+pub use primitives::{Price, CurrencyId};
 
 mod oracle {
 	pub use super::super::*;
@@ -45,6 +46,7 @@ impl frame_system::Config for Test {
 	type BaseCallFilter = ();
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
+	type OnSetCode = ();
 }
 
 thread_local! {
@@ -70,6 +72,7 @@ parameter_types! {
 	pub const MinimumCount: u32 = 3;
 	pub const ExpiresIn: u32 = 600;
 	pub const RootOperatorAccountId: AccountId = 4;
+	pub const MaxOracleSize: u32 = 5;
 }
 
 impl Config for Test {
@@ -80,20 +83,21 @@ impl Config for Test {
 	type OracleKey = Key;
 	type OracleValue = Value;
 	type RootOperatorAccountId = RootOperatorAccountId;
+	type MaxOracleSize =MaxOracleSize;
 	type WeightInfo = ();
 }
 
 pub type Block = sp_runtime::generic::Block<Header, UncheckedExtrinsic>;
 pub type UncheckedExtrinsic = sp_runtime::generic::UncheckedExtrinsic<u32, Call, u32, ()>;
 
-construct_runtime!(
+frame_support::construct_runtime!(
 	pub enum Test where
 		Block = Block,
 		NodeBlock = Block,
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
-		System: frame_system::{Module, Call, Storage, Config, Event<T>},
-		ModuleOracle: oracle::{Module, Storage, Call, Config<T>, Event<T>},
+		System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
+		ModuleOracle: oracle::{Pallet, Storage, Call, Event<T>},
 
 	}
 );
@@ -103,11 +107,11 @@ construct_runtime!(
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut storage = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 
-	let _ = oracle::GenesisConfig::<Test> {
-		members: vec![1, 2, 3].into(),
-		phantom: Default::default(),
-	}
-	.assimilate_storage(&mut storage);
+	// let _ = oracle::GenesisConfig::<Test> {
+	// 	members: vec![1, 2, 3].into(),
+	// 	phantom: Default::default(),
+	// }
+	// .assimilate_storage(&mut storage);
 
 	let mut t: sp_io::TestExternalities = storage.into();
 
