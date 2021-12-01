@@ -101,8 +101,8 @@ pub mod network {
 	#[cfg(feature = "std")]
 	use serde_json::{map::Map, value::Value};
 	// https://github.com/paritytech/ss58-registry/blob/main/ss58-registry.json
-	pub const KICO_PREFIX: u16 = 666;
-	pub const DICO_PREFIX: u16 = 888;
+	pub const KICO_PREFIX: u16 = 51;
+	pub const DICO_PREFIX: u16 = 52;
 
 	// 	pub const DICO_REGISTRY: Properties = json!({
 	// 		  "prefix": DICO_PREFIX,

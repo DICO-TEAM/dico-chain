@@ -5877,12 +5877,14 @@ dependencies = [
 name = "pallet-oracle"
 version = "1.0.0"
 dependencies = [
+ "dico-primitives",
  "frame-support",
  "frame-system",
  "orml-traits",
  "orml-utilities",
  "parity-scale-codec",
  "serde",
+ "sp-core 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
  "sp-io 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
  "sp-runtime",
  "sp-std 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.8)",
@@ -5896,6 +5898,7 @@ dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "orml-tokens",
  "orml-traits",
  "orml-utilities",
  "pallet-amm",

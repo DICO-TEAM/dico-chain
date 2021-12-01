@@ -16,12 +16,11 @@ targets = ['x86_64-unknown-linux-gnu']
 codec              = { package = 'parity-scale-codec', version = '2.0.0', features = ['derive'], default-features = false }
 serde              = { version = "1.0.102", optional = true }
 
-primitives         = { package = "dico-primitives", path = "../../primitives", default-features = false }
-
 # local
 pallet-amm         = { path = '../../pallets/amm', default-features = false}
 pallet-oracle      = { path = '../oracle', default-features = false}
 dico-currencies	   = { package = "pallet-currencies", path = "../currencies", default-features = false }
+primitives         = { package = "dico-primitives", path = "../../primitives", default-features = false }
 
 
 # substrate
@@ -32,17 +31,12 @@ sp-std             = { git = 'https://github.com/paritytech/substrate.git', bran
 sp-runtime         = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 sp-core            = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 sp-io              = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-
 pallet-balances    = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
 
-
-
-
 # ORML
-#orml-tokens       = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
+orml-tokens       = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
 orml-traits        = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
 orml-utilities     = { default-features = false,git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
-
 
 
 
@@ -59,7 +53,7 @@ std = [
 	'codec/std',
 	'frame-support/std',
 	'frame-system/std',
-#	"orml-tokens/std",
+	"orml-tokens/std",
 #	"orml-utilities/std",
 	"primitives/std",
 	"pallet-oracle/std",
