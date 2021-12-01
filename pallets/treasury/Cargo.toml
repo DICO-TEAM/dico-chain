@@ -27,9 +27,9 @@ frame-benchmarking = { git = "https://github.com/paritytech/substrate.git", bran
 orml-traits = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
 
 [dev-dependencies]
-sp-io ={ version = "3.0.0", default-features = false }
-sp-core                                                = { version = "3.0.0", default-features = false }
-sp-storage                                             = { version = "3.0.0", default-features = false }
+sp-io ={ version = "3.0.0"}
+sp-core                                                = { version = "3.0.0" }
+sp-storage                                             = { version = "3.0.0" }
 
 
 [features]
@@ -43,6 +43,13 @@ std = [
 	"frame-system/std",
 	"pallet-balances/std",
 	"orml-traits/std",
+	"frame-benchmarking/std",
+#	"sp-io/std",
+#	"sp-core/std",
+#	"sp-storage/std",
+
+
+
 ]
 
 #runtime-benchmarks = [

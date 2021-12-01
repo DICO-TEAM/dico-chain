@@ -17,8 +17,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 mod benchmarking;
-#[cfg(test)]
-mod tests;
 pub mod traits;
 pub mod weights;
 pub use crate::pallet::*;

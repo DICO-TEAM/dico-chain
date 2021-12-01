@@ -327,7 +327,7 @@ pub mod pallet {
 	pub type PendingIco<T: Config> = StorageValue<
 		_,
 		Vec<
-			PendingInfo<IcoInfo<T::BlockNumber, MultiBalanceOf<T>, AssetId, AreaCode, T::AccountId>, MultiBalanceOf<T>>
+			PendingInfo<IcoInfo<T::BlockNumber, MultiBalanceOf<T>, AssetId, AreaCode, T::AccountId>, MultiBalanceOf<T>>,
 		>,
 		ValueQuery,
 	>;
@@ -1183,7 +1183,7 @@ pub mod pallet {
 			result
 		}
 
-		fn calculate_total_reward(
+		pub fn calculate_total_reward(
 			ico: &IcoInfo<T::BlockNumber, MultiBalanceOf<T>, AssetId, AreaCode, T::AccountId>,
 		) -> MultiBalanceOf<T> {
 			let mut this_time_total_usdt = ico.total_usdt;
