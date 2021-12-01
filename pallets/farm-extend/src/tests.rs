@@ -162,6 +162,29 @@ fn deposit_asset_should_work() {
 }
 
 #[test]
+fn deposit_asset_should_work_2() {
+	new_test_ext().execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(FarmExtend::create_pool(
+			Origin::signed(ALICE),
+			DOT,
+			100,
+			1100,
+			1_000_000_000,
+			DICO
+		));
+
+		System::set_block_number(120);
+		assert_ok!(FarmExtend::deposit_asset(Origin::signed(ALICE), 0, 1000_000_000_000,));
+		let currency_amount: Balance = (1100 - 100) * 1_000_000_000;
+		let mut pool_extend_info =
+			PoolExtendInfo::new(DOT, currency_amount, ALICE, 100, 1100, 1_000_000_000, 100, DICO);
+		pool_extend_info.total_stake_amount = 1000_000_000_000;
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+	});
+}
+
+#[test]
 fn withdraw_asset_should_work() {
 	new_test_ext().execute_with(|| {
 		assert_ok!(FarmExtend::create_pool(
