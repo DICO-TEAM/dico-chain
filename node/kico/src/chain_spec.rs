@@ -93,27 +93,27 @@ pub fn kico_config(id: ParaId) -> ChainSpec {
 
 			let mut distribution_accounts: Vec<(AccountId, Balance)> = vec![
 				// R&D: 500 million, 10% of Balance, 90% is vesting, 12 months linear distribution
-				"5E9ctshAdwE57dxVXohG8GwzedJqZ4qTwwLjPC67MQLZySkH",
+				"5H9Kw8MJYNrXpRCNSxqQw8VwwtWvt5pP3wuLkv3mZnFUiWEU",
 				// Foundation: 500 million, 10% of Balance, 90% is vesting, 24 months linear distribution
-				"5EKzRRVjvBvZfcRJPaHJCw2yecP9uQXcm6vqNcnMh6bCjpPe",
+				"5EKpnRocPNmPgBtkML87eQyovEQYhF7ZFytCUavBgqDRY7H2",
 				// Airdrop: 100 million, 100% of Balance
-				"5DUw6RATvXy2fJrSjnZkNK7U5UVVkw861qP6kxLZZcsyxfYp",
-				// Market: 400 million, 10% of Balance, 90% is vesting, 14 months linear distribution
-				"5HgG3pVtHgLhiveRGTxShK7oVgPBgTiqRyGP44ASbK8JBwhL",
-				// Aution:  400 million, 30% of Balance, 70% is vesting, 14 months linear distribution
-				"5FqPqiSxWc8J14KrCdAU3eGT4mTdLcCZyd6uNkHPjoqVrwwU",
+				"5EemocaRg4Q1fWskskZsYv5W2eTG3DDxmocg7QMLqHNUBwtX",
+				// Market: 400 million, 10% of Balance, 90% is vesting, 12 months linear distribution
+				"5DcKbSQMBWL9rNpu4hEEgHsdhBpBjW9AroN67szRJecMDSyK",
+				// Aution:  400 million, 30% of Balance, 70% is vesting, 12 months linear distribution
+				"5HTzXU1pYHD7YG55S2TqSeQLbM9cWvEyv3Ayqjf3j33nM8pV",
 			]
 			.iter()
 			.flat_map(|x| {
-				if x == &"5E9ctshAdwE57dxVXohG8GwzedJqZ4qTwwLjPC67MQLZySkH" {
+				if x == &"5H9Kw8MJYNrXpRCNSxqQw8VwwtWvt5pP3wuLkv3mZnFUiWEU" {
 					vec![(x.clone().parse().unwrap(), 500 * MILLIONDOLLARS)]
-				} else if x == &"5EKzRRVjvBvZfcRJPaHJCw2yecP9uQXcm6vqNcnMh6bCjpPe" {
+				} else if x == &"5EKpnRocPNmPgBtkML87eQyovEQYhF7ZFytCUavBgqDRY7H2" {
 					vec![(x.clone().parse().unwrap(), 500 * MILLIONDOLLARS)]
-				} else if x == &"5DUw6RATvXy2fJrSjnZkNK7U5UVVkw861qP6kxLZZcsyxfYp" {
+				} else if x == &"5EemocaRg4Q1fWskskZsYv5W2eTG3DDxmocg7QMLqHNUBwtX" {
 					vec![(x.clone().parse().unwrap(), 100 * MILLIONDOLLARS)]
-				} else if x == &"5HgG3pVtHgLhiveRGTxShK7oVgPBgTiqRyGP44ASbK8JBwhL" {
+				} else if x == &"5DcKbSQMBWL9rNpu4hEEgHsdhBpBjW9AroN67szRJecMDSyK" {
 					vec![(x.clone().parse().unwrap(), 400 * MILLIONDOLLARS)]
-				} else if x == &"5FqPqiSxWc8J14KrCdAU3eGT4mTdLcCZyd6uNkHPjoqVrwwU" {
+				} else if x == &"5HTzXU1pYHD7YG55S2TqSeQLbM9cWvEyv3Ayqjf3j33nM8pV" {
 					vec![(x.clone().parse().unwrap(), 400 * MILLIONDOLLARS)]
 				} else {
 					vec![(x.clone().parse().unwrap(), DOLLARS)]
