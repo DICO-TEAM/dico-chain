@@ -1223,7 +1223,7 @@ parameter_types! {
 	pub const MaxIAS: u32 = 200;
 	pub const MaxSwordHolder: u32 = 200;
 	pub const KYCBasicDeposit: Balance = 100 * DOLLARS;
-	pub const KYCServiceDeposit: Balance = 10000 * DOLLARS;
+	pub const KYCServiceDeposit: Balance = 200000 * DOLLARS;
 
 }
 

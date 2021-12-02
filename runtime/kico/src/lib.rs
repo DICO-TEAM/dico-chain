@@ -783,7 +783,7 @@ parameter_types! {
 	pub const MaxIAS: u32 = 200;
 	pub const MaxSwordHolder: u32 = 200;
 	pub const KYCBasicDeposit: Balance = 100 * DOLLARS;
-	pub const KYCServiceDeposit: Balance = 10000 * DOLLARS;
+	pub const KYCServiceDeposit: Balance = 200000 * DOLLARS;
 	pub const AmmPalletId: PalletId = PalletId(*b"dico/amm");
 	pub const FarmPalletId: PalletId = PalletId(*b"dico/fam");
 	pub const LBPPalletId: PalletId = PalletId(*b"dico/lbp");
