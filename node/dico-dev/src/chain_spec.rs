@@ -1,8 +1,9 @@
 use dico_runtime::{
     wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, Block, CouncilConfig, DemocracyConfig,
     ElectionsConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig, SessionConfig, SessionKeys, SocietyConfig,
-    StakerStatus, StakingConfig, SudoConfig, SystemConfig, TechnicalCommitteeConfig, VestingConfig, MAX_NOMINATIONS,
+    StakerStatus, StakingConfig, CurrenciesConfig, SudoConfig, SystemConfig, TechnicalCommitteeConfig, VestingConfig, MAX_NOMINATIONS,
 };
+use pallet_currencies::{DicoAssetMetadata, DicoAssetInfo};
 use grandpa_primitives::AuthorityId as GrandpaId;
 use hex_literal::hex;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -18,7 +19,8 @@ use sp_runtime::{
     traits::{IdentifyAccount, Verify},
     Perbill,
 };
-
+use sp_runtime::AccountId32;
+use sp_core::crypto::Ss58Codec;
 pub use dico_primitives::{constants::currency::*, BlockNumber, AccountId, Balance, Signature, network::*};
 pub use dico_runtime::GenesisConfig;
 
@@ -335,7 +337,17 @@ pub fn testnet_genesis(
             max_members: 999,
         },
         vesting: VestingConfig { vesting: vesting_list },
-        gilt: Default::default(),
+        currencies: CurrenciesConfig {
+			assets: vec![(0, DicoAssetInfo {
+				owner: AccountId32::from_string("5EKzRRVjvBvZfcRJPaHJCw2yecP9uQXcm6vqNcnMh6bCjpPe").unwrap(),
+				metadata: Some(DicoAssetMetadata {
+					name: "dico".into(),
+					symbol: "DICO".into(),
+					decimals: 14u8,
+				})
+			})]
+		},
+		gilt: Default::default(),
         transaction_storage: Default::default(),
         tokens: Default::default(),
     }

@@ -1459,7 +1459,7 @@ construct_runtime!(
 		// ORML related modules
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>},
 		DicoOracle: pallet_oracle::<Instance1>::{Pallet, Storage, Call, Event<T>},
-		Currencies: pallet_currencies::{Pallet, Event<T>, Call, Storage},
+		Currencies: pallet_currencies::{Pallet, Event<T>, Call, Storage, Config<T>},
 
 		// dico-chain related modules
 		AMM: pallet_amm::{Pallet, Call, Storage, Event<T>},

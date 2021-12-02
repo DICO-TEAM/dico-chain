@@ -4,7 +4,7 @@ use hex_literal::hex;
 use kico_runtime::{
 	AuraConfig, AuraId, BalancesConfig, CollatorSelectionConfig, CouncilConfig, DemocracyConfig, ElectionsConfig,
 	GenesisConfig, ParachainInfoConfig, Perbill, SessionConfig, SessionKeys, SudoConfig, SystemConfig,
-	TechnicalCommitteeConfig, TechnicalMembershipConfig, VestingConfig, WASM_BINARY,
+	TechnicalCommitteeConfig, TechnicalMembershipConfig, VestingConfig, WASM_BINARY, CurrenciesConfig,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -12,7 +12,10 @@ use sc_telemetry::TelemetryEndpoints;
 use serde::{Deserialize, Serialize};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
+use sp_runtime::AccountId32;
 use sp_runtime::traits::{IdentifyAccount, Saturating, Verify, Zero};
+use pallet_currencies::{DicoAssetMetadata, DicoAssetInfo};
+use sp_core::crypto::Ss58Codec;
 
 const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
@@ -237,6 +240,16 @@ fn kico_genesis(
 		},
 		tokens: Default::default(),
 		vesting: VestingConfig { vesting: vesting_list },
+		currencies: CurrenciesConfig {
+			assets: vec![(0, DicoAssetInfo {
+				owner: AccountId32::from_string("5EKzRRVjvBvZfcRJPaHJCw2yecP9uQXcm6vqNcnMh6bCjpPe").unwrap(),
+				metadata: Some(DicoAssetMetadata {
+					name: "kico".into(),
+					symbol: "KICO".into(),
+					decimals: 14u8,
+				})
+			})]
+		},
 		treasury: Default::default(),
 		council: CouncilConfig::default(),
 		sudo: SudoConfig { key: root_key },

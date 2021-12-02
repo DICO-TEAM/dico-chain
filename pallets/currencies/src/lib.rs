@@ -15,7 +15,6 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
-
 use codec::Codec;
 use frame_support::{
 	ensure,
@@ -25,6 +24,8 @@ use frame_support::{
 		ReservableCurrency as PalletReservableCurrency, WithdrawReasons,
 	},
 };
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 use frame_system::{ensure_root, ensure_signed, pallet_prelude::*};
 use sp_std::vec::Vec;
 
@@ -62,6 +63,7 @@ pub mod currencies_trait;
 use currencies_trait::CurrenciesHandler;
 use dico_primitives::AssetId;
 
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 #[derive(Clone, Encode, Decode, Eq, PartialEq, Default, RuntimeDebug)]
 pub struct DicoAssetMetadata {
 	/// project name
@@ -72,6 +74,7 @@ pub struct DicoAssetMetadata {
 	pub decimals: u8,
 }
 
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 #[derive(Clone, Encode, Decode, Eq, PartialEq, Default, RuntimeDebug)]
 pub struct DicoAssetInfo<AccountId, DicoAssetMetadata> {
 	pub owner: AccountId,
@@ -114,7 +117,6 @@ pub mod module {
 		/// Maximum assets that can be created
 		type MaxCreatableCurrencyId: Get<AssetId>;
 	}
-
 
 	#[pallet::error]
 	pub enum Error<T> {
@@ -162,6 +164,26 @@ pub mod module {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<T::BlockNumber> for Pallet<T> {}
+
+	#[pallet::genesis_config]
+	pub struct GenesisConfig<T: Config> {
+		pub assets: Vec<(AssetId, DicoAssetInfo<T::AccountId, DicoAssetMetadata>)>,
+	}
+
+	#[cfg(feature = "std")]
+	impl<T: Config> Default for GenesisConfig<T> {
+		fn default() -> Self {
+			Self { assets: Default::default() }
+		}
+	}
+
+	#[pallet::genesis_build]
+	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+		fn build(&self) {
+			self.assets.iter().for_each(|asset_info| DicoAssetsInfo::<T>::insert(asset_info.0, asset_info.1.clone()))
+		}
+			}
+
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
@@ -285,19 +307,14 @@ pub mod module {
 			Ok(().into())
 		}
 	}
+
+
 }
 
 impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::AccountId, BalanceOf<T>, DispatchResult>
 	for Pallet<T>
 {
 	fn get_metadata(currency_id: AssetId) -> result::Result<DicoAssetMetadata, DispatchError> {
-		if currency_id == T::GetNativeCurrencyId::get() {
-			return Ok(DicoAssetMetadata {
-				name: "dico".into(),
-				symbol: "DICO".into(),
-				decimals: 14u8,
-			});
-		}
 		let asset_info = DicoAssetsInfo::<T>::get(currency_id).ok_or(Error::<T>::AssetNotExists)?;
 		match asset_info.metadata {
 			Some(x) => Ok(x),

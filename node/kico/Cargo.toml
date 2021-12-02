@@ -47,6 +47,7 @@ kico-runtime = { package = "kico-runtime", path = '../../runtime/kico' }
 pallet-farm-rpc = { package = 'pallet-farm-rpc', path = "../../pallets/farm/rpc" }
 pallet-ico-rpc-runtime-api = { path = "../../pallets/ico/rpc/runtime-api"}
 pallet-ico-rpc             = { path = "../../pallets/ico/rpc/rpc" }
+pallet-currencies = { path = "../../pallets/currencies"}
 
 
 # Substrate Dependencies
