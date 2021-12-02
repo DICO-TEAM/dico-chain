@@ -952,7 +952,7 @@ pub mod pallet {
 					// kyc user redo kyc
 					record_list
 						.iter()
-						.filter(|&record| record.progress == Progress::Success || record.progress == Progress::Failure)
+						.filter(|&record| record.progress != Progress::Success || record.progress != Progress::Failure)
 						.try_for_each(move |record| -> DispatchResult {
 							let reg = <KYCOf<T>>::take(&record.account).ok_or(Error::<T>::NotFound)?;
 							Self::decrement_area_count(&reg.info.area)?;
