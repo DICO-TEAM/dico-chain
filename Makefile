@@ -55,7 +55,7 @@ fix:
 
 .PHONY: dev
 dev:
-	./target/debug/dico-dev --dev --ws-external
+	RUST_LOG=runtime=debug ./target/debug/dico-dev --dev --ws-external
 
 # -------------------------------------cargo-------------------------------------
 
