@@ -66,14 +66,14 @@ pub fn kico_config(id: ParaId) -> ChainSpec {
 		move || {
 			let initial_authorities: Vec<(AccountId, AuraId)> = vec![
 				(
-					// 5E5BxCjexvzgH9LsYUzMjD6gJaWiKkmadvjsHFPZmrXrK7Rf//collator1
-					hex!["1a5dd54d1cef45e6140b54f3b83fdbbf41fec82645ad826d4f8cf106c88dd00e"].into(),
-					hex!["1a5dd54d1cef45e6140b54f3b83fdbbf41fec82645ad826d4f8cf106c88dd00e"].unchecked_into(),
+					// 5Gc9gNiPUZ4KaZfkZRQUNWPudHhkKDSUVUXC3FEZNjHhtQ6H //collator1
+					hex!["3ca222ba9c9cdae798cd40cf2d0523b248acd54b839465984f3c4854746575ef"].into(),
+					hex!["3ca222ba9c9cdae798cd40cf2d0523b248acd54b839465984f3c4854746575ef"].unchecked_into(),
 				),
 				(
-					// 5E5BxCjexvzgH9LsYUzMjD6gJaWiKkmadvjsHFPZmrXrK7Rf//collator2
-					hex!["c6b255117d87f959c4e564888dc4987e0c3c35a60872a7fac4c38d771b39b70c"].into(),
-					hex!["c6b255117d87f959c4e564888dc4987e0c3c35a60872a7fac4c38d771b39b70c"].unchecked_into(),
+					// 5CXPMQvx4ggp7ZueYSZB72zxqrRrvfkHFQuFnG5tjBNXs2st//collator2
+					hex!["90b8f45433cb1d85a9a8d7227aee0ad55a58fb25525ceec96449ab48d82e08d4"].into(),
+					hex!["90b8f45433cb1d85a9a8d7227aee0ad55a58fb25525ceec96449ab48d82e08d4"].unchecked_into(),
 				),
 			];
 
