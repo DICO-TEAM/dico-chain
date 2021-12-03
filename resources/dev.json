@@ -4,6 +4,7 @@
   "MultiAddress": "GenericAddress",
   "KYCIndex": "u32",
   "Data": "Vec<u8>",
+  "AssetId": "u32",
   "CurvePubicKey": "[u8; 32]",
   "Message": "[u8; 128]",
   "AccountInfo": {
