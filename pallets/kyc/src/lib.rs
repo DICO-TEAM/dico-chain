@@ -551,10 +551,21 @@ pub mod pallet {
 
 			let reg = <KYCOf<T>>::take(&sender).ok_or(Error::<T>::NotFound)?;
 
-			Self::decrement_area_count(&reg.info.area)?;
+			app_list.into_iter().try_for_each(|app|-> DispatchResult {
+				if let Some(app_form) = app {
+					if app_form.progress == Progress::Success {
+						Self::decrement_area_count(&reg.info.area)?;
+					}
+				}
+				Ok(())
+			})?;
+
 			let deposit = reg.total_deposit();
 
 			let _ = T::Currency::unreserve(&sender, deposit.clone());
+
+
+
 
 			let _ = <ApplicationFormList<T>>::take(&sender);
 
