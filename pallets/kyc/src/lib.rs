@@ -69,9 +69,9 @@ use crate::weights::WeightInfo;
 
 use codec::{Decode, Encode};
 use frame_support::{
-	runtime_print,
 	dispatch::DispatchResultWithPostInfo,
 	pallet_prelude::*,
+	runtime_print,
 	traits::{
 		BalanceStatus, Currency, EnsureOrigin, ExistenceRequirement, Get, OnUnbalanced, Randomness, ReservableCurrency,
 		WithdrawReasons,
@@ -544,7 +544,7 @@ pub mod pallet {
 
 			ensure!(
 				app_list.iter().all(
-					|app| matches!(app, Some(app) if app.progress == Progress::Success || app.progress == Progress::Failure)
+					|app| matches!(app, Some(app) if app.progress == Progress::Pending || app.progress == Progress::Success || app.progress == Progress::Failure)
 				),
 				Error::<T>::InProgress
 			);
@@ -954,9 +954,7 @@ pub mod pallet {
 				fields: kyc_fields,
 			};
 
-
 			if let Some(ias) = ias_list.get_mut(kyc_index as usize) {
-
 				if ias.is_some() {
 					let ias_clone = ias.clone();
 					let ias_account = &ias_clone.unwrap().account;
@@ -1038,7 +1036,8 @@ pub mod pallet {
 											  ias.1.fields, Progress::IasDoing)?;
 
 				// add record to ias records
-				Self::add_record_list(&ias.1.account, record)?;
+				Self::add_record_list(&ias.1.account, record.clone())?;
+				Self::add_record_list(&sword_holder.1.account, record)?;
 				Self::add_message_list(&who, &ias.1.account, message)?;
 			}
 			Ok(())
