@@ -178,9 +178,30 @@ fn deposit_asset_should_work_2() {
 		assert_ok!(FarmExtend::deposit_asset(Origin::signed(ALICE), 0, 1000_000_000_000,));
 		let currency_amount: Balance = (1100 - 100) * 1_000_000_000;
 		let mut pool_extend_info =
-			PoolExtendInfo::new(DOT, currency_amount, ALICE, 100, 1100, 1_000_000_000, 100, DICO);
+			PoolExtendInfo::new(DOT, currency_amount, ALICE, 100, 1100, 1_000_000_000, 120, DICO);
 		pool_extend_info.total_stake_amount = 1000_000_000_000;
 		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+		assert_ok!(FarmExtend::deposit_asset(Origin::signed(BOB), 0, 1000_000_000_000,));
+		pool_extend_info.total_stake_amount = 2000_000_000_000;
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+
+		System::set_block_number(150);
+		assert_ok!(FarmExtend::deposit_asset(Origin::signed(BOB), 0, 0,));
+		// acc_reward_per_share = (150 - 120) * 1000000000 * 1e12 / 2000000000000 = 15000000000
+		pool_extend_info.acc_reward_per_share = 15_000_000_000;
+		pool_extend_info.last_reward_block = 150;
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+		// reward_debt = 15000000000 * 1000_000_000_000 / 1e12 = 15000000000
+		assert_eq!(Currency::free_balance(DOT, &BOB), DEFAULT_ASSET_AMOUNT + 15000000000);
+		let participant_extend = ParticipantExtend::new(1000_000_000_000, 15000000000);
+		assert_eq!(ParticipantExtends::<Test>::get(0, BOB), Some(participant_extend));
+
+		assert_ok!(FarmExtend::deposit_asset(Origin::signed(ALICE), 0, 0,));
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+		// reward_debt = 15000000000 * 1000_000_000_000 / 1e12 = 15000000000
+		assert_eq!(Currency::free_balance(DOT, &ALICE), DEFAULT_ASSET_AMOUNT + 15000000000 - 1_000_000_000 * 1000);
+		let participant_extend = ParticipantExtend::new(1000_000_000_000, 15000000000);
+		assert_eq!(ParticipantExtends::<Test>::get(0, ALICE), Some(participant_extend));
 	});
 }
 
@@ -319,3 +340,49 @@ fn withdraw_asset_should_work() {
 		);
 	});
 }
+
+
+#[test]
+fn withdraw_asset_should_work_2() {
+	new_test_ext().execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(FarmExtend::create_pool(
+			Origin::signed(ALICE),
+			DOT,
+			100,
+			1100,
+			1_000_000_000,
+			DICO
+		));
+
+		System::set_block_number(120);
+		assert_ok!(FarmExtend::deposit_asset(Origin::signed(ALICE), 0, 1000_000_000_000,));
+		let currency_amount: Balance = (1100 - 100) * 1_000_000_000;
+		let mut pool_extend_info =
+			PoolExtendInfo::new(DOT, currency_amount, ALICE, 100, 1100, 1_000_000_000, 120, DICO);
+		pool_extend_info.total_stake_amount = 1000_000_000_000;
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+		assert_ok!(FarmExtend::deposit_asset(Origin::signed(BOB), 0, 1000_000_000_000,));
+		pool_extend_info.total_stake_amount = 2000_000_000_000;
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+
+		System::set_block_number(150);
+		assert_ok!(FarmExtend::withdraw_asset(Origin::signed(BOB), 0, 0,));
+		// acc_reward_per_share = (150 - 120) * 1000000000 * 1e12 / 2000000000000 = 15000000000
+		pool_extend_info.acc_reward_per_share = 15_000_000_000;
+		pool_extend_info.last_reward_block = 150;
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+		// reward_debt = 15000000000 * 1000_000_000_000 / 1e12 = 15000000000
+		assert_eq!(Currency::free_balance(DOT, &BOB), DEFAULT_ASSET_AMOUNT + 15000000000);
+		let participant_extend = ParticipantExtend::new(1000_000_000_000, 15000000000);
+		assert_eq!(ParticipantExtends::<Test>::get(0, BOB), Some(participant_extend));
+
+		assert_ok!(FarmExtend::withdraw_asset(Origin::signed(ALICE), 0, 0,));
+		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
+		// reward_debt = 15000000000 * 1000_000_000_000 / 1e12 = 15000000000
+		assert_eq!(Currency::free_balance(DOT, &ALICE), DEFAULT_ASSET_AMOUNT + 15000000000 - 1_000_000_000 * 1000);
+		let participant_extend = ParticipantExtend::new(1000_000_000_000, 15000000000);
+		assert_eq!(ParticipantExtends::<Test>::get(0, ALICE), Some(participant_extend));
+	});
+}
+

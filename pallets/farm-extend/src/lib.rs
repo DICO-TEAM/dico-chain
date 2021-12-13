@@ -374,6 +374,7 @@ impl<T: Config> Pallet<T> {
 				}
 
 				if pool_extend.total_stake_amount == Balance::zero() {
+					pool_extend.last_reward_block = reward_block;
 					return Ok(());
 				}
 
