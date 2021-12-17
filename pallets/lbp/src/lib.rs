@@ -10,6 +10,7 @@
 #![allow(clippy::upper_case_acronyms)]
 
 use core::convert::TryFrom;
+use scale_info::TypeInfo;
 use dico_primitives::{to_balance, to_u256};
 use dico_primitives::{Amount, AssetId, Balance, BlockNumber};
 use frame_support::{
@@ -53,7 +54,7 @@ mod tests;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
+#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum LbpStatus {
 	Pending,
@@ -62,7 +63,7 @@ pub enum LbpStatus {
 	Finished,
 }
 
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
+#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct LbpInfo<AccountId> {
 	pub start_block: BlockNumber,
@@ -128,7 +129,7 @@ impl<AccountId> LbpInfo<AccountId> {
 	}
 }
 
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
+#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct LbpPair(pub AssetId, pub AssetId);
 
