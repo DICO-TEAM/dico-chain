@@ -13,16 +13,12 @@ edition     = '2021'
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
+scale-info = { version = "1.0", default-features = false, features = ["derive"] }
 primitive-types = { default-features = false, version = '0.10.1' }
 codec                 = { package = 'parity-scale-codec', version = '2.3.1', default-features = false }
 serde                 = { version = '1', optional = true }
 log = { version = "0.4.14", default-features = false }
 
-
-
-
-
-dico-primitives                   = { path = "../../primitives", default-features = false}
 
 # local pallet
 ico                               = { package = "pallet-ico", path = "../ico", default-features = false }
@@ -32,10 +28,11 @@ dico-treasury                     = { package = "pallet-dico-treasury", path = "
 pallet-pricedao                   = { path = "../pricedao", default-features = false}
 pallet-amm                        = { path = "../amm", default-features = false }
 pallet-oracle                     = { path = "../oracle", default-features = false }
+dico-primitives                   = { path = "../../primitives", default-features = false}
 
 # orml
-orml-tokens   = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false }
-orml-traits   = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false }
+orml-tokens   = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "master" }
+orml-traits   = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "master" }
 # substrate
 sp-core            = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
 sp-std             = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}

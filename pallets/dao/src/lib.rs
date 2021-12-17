@@ -26,6 +26,7 @@ use frame_support::{
 	traits::{ChangeMembers, Currency, EnsureOrigin, Get, InitializeMembers, ReservableCurrency},
 	weights::{DispatchClass, GetDispatchInfo, Pays, Weight},
 };
+use scale_info::TypeInfo;
 use frame_system::{self as system, ensure_root, ensure_signed};
 use ico;
 use ico::traits::IcoHandler;
@@ -68,7 +69,7 @@ pub(crate) type CurrencyIdOf<T> =
 pub type MemberCount = u32;
 
 /// Origin for the collective module.
-#[derive(PartialEq, Eq, Clone, RuntimeDebug, Encode, Decode)]
+#[derive(PartialEq, Eq, Clone, RuntimeDebug, Encode, Decode, TypeInfo)]
 pub enum IcoRawOrigin<AccountId, MulBalance> {
 	/// It has been condoned by a given number of members of the collective from
 	/// a given total.
@@ -78,7 +79,7 @@ pub enum IcoRawOrigin<AccountId, MulBalance> {
 	_Phantom(sp_std::marker::PhantomData<(AccountId, MulBalance)>),
 }
 
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
 /// Info for keeping track of a motion being voted on.
 pub struct IcoCollectiveVotes<AccountId, BlockNumber, MulBalance> {
 	/// The proposal's unique index.
