@@ -9,6 +9,7 @@
 #![allow(clippy::upper_case_acronyms)]
 
 use codec::{Decode, Encode};
+use scale_info::TypeInfo;
 use core::convert::TryFrom;
 use dico_primitives::{to_balance, to_u256, Amount, AssetId, Balance, BlockNumber};
 use frame_support::{
@@ -42,7 +43,7 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
-#[derive(Encode, Decode, Default, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
+#[derive(Encode, Decode, Default, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Participant {
 	pub amount: Balance,
@@ -55,7 +56,7 @@ impl Participant {
 	}
 }
 
-#[derive(Encode, Decode, Default, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
+#[derive(Encode, Decode, Default, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct PoolInfo {
 	pub currency_id: AssetId,
