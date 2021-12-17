@@ -11,6 +11,7 @@ edition     = '2021'
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+scale-info = { version = "1.0", default-features = false, features = ["derive"] }
 primitive-types = { default-features = false, version = '0.10.1' }
 codec                 = { package = 'parity-scale-codec', version = '2.3.1', default-features = false }
 
@@ -26,8 +27,8 @@ pallet-randomness-collective-flip = { git = 'https://github.com/paritytech/subst
 
 
 # orml
-orml-tokens   = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false }
-orml-traits   = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false }
+orml-tokens   = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "master" }
+orml-traits   = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "master" }
 # local
 currencies      = { package = "pallet-currencies", path = '../currencies', default-features = false}
 pallet-kyc      = { path = "../kyc", default-features = false }

@@ -57,12 +57,12 @@ use traits::{IcoHandler, PowerHandler};
 pub mod mock;
 pub mod tests;
 pub mod traits;
-
+use scale_info::TypeInfo;
 const ICO_ID: LockIdentifier = *b"ico     ";
 const HalfDuration: u128 = 200_000_000u128 * USDT;
 pub const USDT: u128 = 1000_000u128;
 
-#[derive(PartialEq, Encode, Decode, RuntimeDebug, Clone)]
+#[derive(PartialEq, Encode, Decode, RuntimeDebug, Clone, TypeInfo)]
 pub enum IcoStatus {
 	Checking,
 	Failed,
@@ -75,7 +75,7 @@ impl Default for IcoStatus {
 	}
 }
 
-#[derive(PartialEq, Encode, Decode, RuntimeDebug, Clone)]
+#[derive(PartialEq, Encode, Decode, RuntimeDebug, Clone, TypeInfo)]
 pub struct InviteInfo<AccountId, Balance, AssetId> {
 	inviter: AccountId,
 	invitee: AccountId,
@@ -84,7 +84,7 @@ pub struct InviteInfo<AccountId, Balance, AssetId> {
 	reward: Option<Balance>,
 }
 
-#[derive(PartialEq, Encode, Decode, RuntimeDebug, Clone)]
+#[derive(PartialEq, Encode, Decode, RuntimeDebug, Clone, TypeInfo)]
 pub struct InitiatedIco<CurrencyId, Status, Balance> {
 	desc: Vec<u8>,
 	currency_id: CurrencyId,
@@ -95,7 +95,7 @@ pub struct InitiatedIco<CurrencyId, Status, Balance> {
 	amount: Balance,
 }
 
-#[derive(PartialEq, Eq, Encode, Decode, Default, RuntimeDebug, Clone)]
+#[derive(PartialEq, Eq, Encode, Decode, Default, RuntimeDebug, Clone, TypeInfo)]
 pub struct Release<AccountId, Block, CurrencyId, NativeBalance> {
 	/// who requests the token release
 	who: AccountId,
@@ -109,7 +109,7 @@ pub struct Release<AccountId, Block, CurrencyId, NativeBalance> {
 	pledge: NativeBalance,
 }
 
-#[derive(PartialEq, Encode, Decode, Default, RuntimeDebug, Clone)]
+#[derive(PartialEq, Encode, Decode, Default, RuntimeDebug, Clone, TypeInfo)]
 pub struct IcoLock<Balance, BlockNumber> {
 	/// When does the lockup start
 	start_block: BlockNumber,
@@ -123,7 +123,7 @@ pub struct IcoLock<Balance, BlockNumber> {
 	per_duration_unlock_amount: Balance,
 }
 
-#[derive(PartialEq, Encode, Decode, Default, RuntimeDebug, Clone)]
+#[derive(PartialEq, Encode, Decode, Default, RuntimeDebug, Clone, TypeInfo)]
 pub struct IcoParameters<BlockNumber, Balance, CurrencyId, AreaCode> {
 	desc: Vec<u8>,
 	/// The asset ID of the project's token
@@ -159,7 +159,7 @@ pub struct IcoParameters<BlockNumber, Balance, CurrencyId, AreaCode> {
 	per_duration_unlock_amount: Balance,
 }
 
-#[derive(PartialEq, Encode, Decode, Default, RuntimeDebug, Clone)]
+#[derive(PartialEq, Encode, Decode, Default, RuntimeDebug, Clone, TypeInfo)]
 pub struct UnRelease<MultiBalanceOf, CurrencyIdOf, AccountId> {
 	currency_id: CurrencyIdOf,
 	inviter: Option<AccountId>,
@@ -177,14 +177,14 @@ pub struct UnRelease<MultiBalanceOf, CurrencyIdOf, AccountId> {
 	reward: Option<MultiBalanceOf>,
 }
 
-#[derive(PartialEq, Encode, Decode, RuntimeDebug, Clone)]
+#[derive(PartialEq, Encode, Decode, RuntimeDebug, Clone, TypeInfo)]
 pub struct PendingInfo<IcoInfo, Balance> {
 	pub ico: IcoInfo,
 	pub pledge_dico: Balance,
 	pub pledge_exchange_token: Balance,
 }
 
-#[derive(PartialEq, Encode, Decode, Eq, RuntimeDebug, Clone)]
+#[derive(PartialEq, Encode, Decode, Eq, RuntimeDebug, Clone, TypeInfo)]
 pub struct PowerMultiple {
 	pub up: u32,
 	pub down: u32,
@@ -196,7 +196,7 @@ impl Default for PowerMultiple {
 	}
 }
 
-#[derive(PartialEq, Encode, Decode, Default, RuntimeDebug, Clone)]
+#[derive(PartialEq, Encode, Decode, Default, RuntimeDebug, Clone, TypeInfo)]
 pub struct IcoInfo<BlockNumber, Balance, CurrencyId, AreaCode, AccountId> {
 	desc: Vec<u8>,
 	/// The block numbers that start ico
