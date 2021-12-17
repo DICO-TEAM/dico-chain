@@ -71,8 +71,8 @@ pub type Amount = i128;
 /// Farm pool id.
 pub type PoolId = u32;
 
-/// Digest item type.
-pub type DigestItem = generic::DigestItem<Hash>;
+// // Digest item type.
+// pub type DigestItem = generic::DigestItem<Hash>;
 /// Header type.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 /// Block type.
