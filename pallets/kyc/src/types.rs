@@ -1,10 +1,11 @@
 #![feature(derive_default_enum)]
 
-use codec::{Decode, Encode};
+use codec::{Decode, Encode,MaxEncodedLen};
 use sp_runtime::traits::{AppendZerosInput, Saturating, StaticLookup, Zero};
 use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
 use sp_std::{fmt::Debug, iter::once, ops::Add};
+use scale_info::TypeInfo;
 
 pub type KYCIndex = u32;
 pub type CurvePubicKey = [u8; 32];
@@ -12,7 +13,7 @@ pub type Message = [u8; 128];
 pub type Data = Vec<u8>;
 
 /// IAS Judgement
-#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub enum Judgement<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> {
 	/// The default value; it has passed.
 	PASS,
@@ -64,7 +65,7 @@ impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> Judgement
 }
 
 /// kyc information authentication by the `SwordHolder`
-#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub enum Authentication {
 	/// pending status
 	Pending,
@@ -101,7 +102,7 @@ impl Authentication {
 }
 
 /// black info enum
-#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub enum Black<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> {
 	/// The default value; no opinion is held.
 	Unknown,
@@ -122,7 +123,7 @@ impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> Black<Bal
 }
 
 /// The blacklist of kyc
-#[derive(Clone, Encode, Eq, PartialEq, RuntimeDebug)]
+#[derive(Clone, Encode, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub struct BlackInfo<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> {
 	pub info: Vec<Black<Balance>>,
 }
@@ -135,7 +136,7 @@ impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> Decode fo
 }
 
 /// KYC field used by the user for authentication
-#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 pub enum KYCFields {
 	Name,
 	Area,
@@ -148,7 +149,7 @@ pub enum KYCFields {
 /// NOTE: This should be stored at the end of the storage item to facilitate the
 /// addition of extra fields in a backwards compatible way through a specialized
 /// `Decode` impl.
-#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub struct KYCInfo {
 	/// display name
 	/// Stored as UTF-8.
@@ -168,7 +169,7 @@ pub struct KYCInfo {
 }
 
 /// Information concerning the identity of the controller of an account.
-#[derive(Clone, Encode, Eq, PartialEq, RuntimeDebug)]
+#[derive(Clone, Encode, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub struct Registration<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> {
 	/// Judgements from the registrars on this identity. Stored ordered by
 	pub judgements: Vec<(KYCFields, KYCIndex, Judgement<Balance>, Authentication)>,
@@ -209,7 +210,7 @@ impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq> Decode fo
 }
 
 /// Information concerning a identity authentication service(IAS).
-#[derive(Clone, Encode, Decode, Eq, Copy, PartialEq, RuntimeDebug)]
+#[derive(Clone, Encode, Decode, Eq, Copy, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 pub struct IASInfo<
 	Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
 	AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
@@ -256,7 +257,7 @@ impl<
 }
 
 /// ApplicationForm
-#[derive(Clone, Encode, Decode, Eq, Copy, PartialEq, RuntimeDebug)]
+#[derive(Clone, Encode, Decode, Eq, Copy, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 pub struct ApplicationForm<
 	Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
 	AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
@@ -312,7 +313,7 @@ impl<
 }
 
 /// Certification progress record
-#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 pub enum Progress {
 	/// pending status
 	Pending,
@@ -331,7 +332,7 @@ pub enum Progress {
 }
 
 /// Record.
-#[derive(Clone, Encode, Decode, Eq, Copy, PartialEq, RuntimeDebug)]
+#[derive(Clone, Encode, Decode, Eq, Copy, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 pub struct Record<AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq> {
 	/// The account of the registrar.
 	pub account: AccountId,
@@ -344,7 +345,7 @@ pub struct Record<AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq> {
 }
 
 /// International Organization for Standardization (ISO)
-#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+#[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 pub enum AreaCode {
 	/// Afghanistan
 	AF,

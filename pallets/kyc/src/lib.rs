@@ -50,8 +50,6 @@
 //! * `remove_kyc` - Forcibly remove kyc from kyc list and add to black list.
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub use pallet::*;
-
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 #[cfg(test)]
@@ -63,11 +61,10 @@ pub mod traits;
 pub mod types;
 pub mod weights;
 
-use crate::traits::*;
+use crate::traits::KycHandler;
 use crate::types::*;
 use crate::weights::WeightInfo;
 
-use codec::{Decode, Encode};
 use frame_support::{
 	dispatch::DispatchResultWithPostInfo,
 	pallet_prelude::*,
@@ -78,13 +75,13 @@ use frame_support::{
 	},
 	PalletId,
 };
-use frame_system::pallet_prelude::*;
 use sp_runtime::traits::{
 	AccountIdConversion, AppendZerosInput, CheckedAdd, CheckedDiv, SaturatedConversion, Saturating, StaticLookup, Zero,
 };
 use sp_std::convert::TryFrom;
+use frame_system::pallet_prelude::*;
 use sp_std::prelude::*;
-use sp_std::{iter::once, ops::Add};
+pub use pallet::*;
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
@@ -94,8 +91,6 @@ type NegativeImbalanceOf<T> =
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::pallet_prelude::*;
-	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -205,10 +200,6 @@ pub mod pallet {
 		StorageMap<_, Twox64Concat, T::AccountId, Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
 
 	#[pallet::event]
-	#[pallet::metadata(
-    T::AccountId = "AccountId",
-    BalanceOf < T > = "Balance"
-    )]
 	#[pallet::generate_deposit(pub (super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// A identity authentication service(IAS)  provider was added.\[kyc_index\]
