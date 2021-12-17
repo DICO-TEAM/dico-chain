@@ -2,7 +2,7 @@
 name       = "dico-primitives"
 version    = "1.0.0"
 authors    = ["DICO-TEAM"]
-edition    = "2018"
+edition     = '2021'
 license    = "Apache-2.0"
 homepage   = "https://github.com/DICO-TEAM/dico-chain"
 repository = "https://github.com/DICO-TEAM/dico-chain"

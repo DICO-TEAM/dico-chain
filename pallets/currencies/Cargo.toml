@@ -6,7 +6,7 @@ license     = 'Apache 2.0'
 version     = '1.0.0'
 homepage    = 'https://github.com/DICO-TEAM/dico-chain'
 repository  = 'https://github.com/DICO-TEAM/dico-chain'
-edition     = '2018'
+edition     = '2021'
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 codec                 = { package = 'parity-scale-codec', version = '2.3.1', default-features = false }
