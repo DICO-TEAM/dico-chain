@@ -17,14 +17,14 @@
 #![allow(clippy::unused_unit)]
 
 use codec::{Decode, Encode};
+use scale_info::TypeInfo;
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
-	traits::{Currency, ExistenceRequirement, Get, MaxEncodedLen, WithdrawReasons},
+	traits::{Currency, ExistenceRequirement, Get,  WithdrawReasons},
 	BoundedVec, Parameter,
 };
 use pallet_ico::traits::PowerHandler;
-use sp_runtime::offchain::storage_lock::BlockNumberProvider;
 use sp_runtime::{
 	traits::{AtLeast32BitUnsigned, CheckedAdd, CheckedSub, Hash, MaybeSerializeDeserialize, Member, One, Zero},
 	ArithmeticError, DispatchError, DispatchResult, RuntimeDebug,
@@ -40,7 +40,7 @@ use sp_std::{
 pub type Attributes = BTreeMap<Vec<u8>, Vec<u8>>;
 
 /// Class info
-#[derive(Encode, Decode, Clone, Eq, PartialEq, MaxEncodedLen, RuntimeDebug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq,  RuntimeDebug, TypeInfo)]
 pub struct ClassInfo<TokenId, AccountId, Data, ClassMetadataOf> {
 	/// Class metadata
 	pub metadata: ClassMetadataOf,
@@ -53,7 +53,7 @@ pub struct ClassInfo<TokenId, AccountId, Data, ClassMetadataOf> {
 }
 
 /// class data
-#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub struct ClassData<NftLevel, Balance, TokenId> {
 	level: NftLevel,
 	power_threshold: Balance,
@@ -62,7 +62,7 @@ pub struct ClassData<NftLevel, Balance, TokenId> {
 	maximum_quantity: TokenId,
 }
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, Default)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, Default, TypeInfo)]
 pub struct TokenData<Hash, AccountId, Attribute, Balance, NftStatus, ClassId> {
 	class_id: ClassId,
 	hash: Hash,
@@ -75,7 +75,7 @@ pub struct TokenData<Hash, AccountId, Attribute, Balance, NftStatus, ClassId> {
 }
 
 /// nft level
-#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub enum NftLevel {
 	Rookie,
 	Angle,
@@ -86,7 +86,7 @@ pub enum NftLevel {
 	Other(Vec<u8>),
 }
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub struct SaleInfo<TokenId, Balance, BlockNumber, AccountId> {
 	seller: AccountId,
 	token_id: TokenId,
@@ -94,7 +94,7 @@ pub struct SaleInfo<TokenId, Balance, BlockNumber, AccountId> {
 	start_block: BlockNumber,
 }
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub struct NftStatus {
 	is_in_sale: bool,
 	is_active_image: bool,
@@ -118,7 +118,7 @@ impl Default for NftLevel {
 }
 
 /// Token info
-#[derive(Encode, Decode, Clone, Eq, PartialEq, MaxEncodedLen, RuntimeDebug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq,  RuntimeDebug, TypeInfo)]
 pub struct TokenInfo<AccountId, Data, TokenMetadataOf> {
 	/// Token metadata
 	pub metadata: TokenMetadataOf,
@@ -727,7 +727,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn block_num() -> T::BlockNumber {
-		frame_system::Pallet::<T>::current_block_number()
+		frame_system::Pallet::<T>::block_number()
 	}
 
 	fn insert_token_to_sale_vec(user: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId, price: BalanceOf<T>) {
