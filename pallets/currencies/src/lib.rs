@@ -16,6 +16,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
 use codec::Codec;
+use scale_info::TypeInfo;
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
@@ -64,7 +65,7 @@ use currencies_trait::CurrenciesHandler;
 use dico_primitives::AssetId;
 
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-#[derive(Clone, Encode, Decode, Eq, PartialEq, Default, RuntimeDebug)]
+#[derive(Clone, Encode, Decode, Eq, PartialEq, Default, RuntimeDebug, TypeInfo)]
 pub struct DicoAssetMetadata {
 	/// project name
 	pub name: Vec<u8>,
@@ -75,7 +76,7 @@ pub struct DicoAssetMetadata {
 }
 
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-#[derive(Clone, Encode, Decode, Eq, PartialEq, Default, RuntimeDebug)]
+#[derive(Clone, Encode, Decode, Eq, PartialEq, Default, RuntimeDebug, TypeInfo)]
 pub struct DicoAssetInfo<AccountId, DicoAssetMetadata> {
 	pub owner: AccountId,
 	pub metadata: Option<DicoAssetMetadata>,
