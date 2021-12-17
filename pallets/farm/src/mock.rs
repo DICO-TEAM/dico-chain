@@ -21,7 +21,7 @@ pub type AccountId = u64;
 
 pub const ALICE: AccountId = 1;
 pub const BOB: AccountId = 2;
-pub const DAVE: AccountId = 2;
+pub const DAVE: AccountId = 3;
 
 pub const DICO: AssetId = 1000;
 pub const DOT: AssetId = 2000;

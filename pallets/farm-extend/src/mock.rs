@@ -5,7 +5,7 @@
 use crate as farm_extend;
 use crate::Config;
 use dico_primitives::{AssetId, Balance};
-use frame_support::traits::GenesisBuild;
+use frame_support::traits::{GenesisBuild, Contains};
 use frame_support::{ord_parameter_types, parameter_types, PalletId};
 use frame_system as system;
 use frame_system::EnsureSignedBy;
@@ -21,6 +21,7 @@ pub type AccountId = u64;
 
 pub const ALICE: AccountId = 1;
 pub const BOB: AccountId = 2;
+pub const DAVE: AccountId = 3;
 
 pub const DICO: AssetId = 1000;
 pub const DOT: AssetId = 2000;
@@ -41,6 +42,13 @@ frame_support::construct_runtime!(
 	 }
 );
 
+pub struct MockDustRemovalWhitelist;
+impl Contains<AccountId> for MockDustRemovalWhitelist {
+	fn contains(a: &AccountId) -> bool {
+		*a == DAVE
+	}
+}
+
 parameter_types! {
 	pub const BlockHashCount: u64 = 250;
 	pub const SS58Prefix: u8 = 63;
@@ -48,7 +56,7 @@ parameter_types! {
 }
 
 impl system::Config for Test {
-	type BaseCallFilter = ();
+	type BaseCallFilter = frame_support::traits::Everything;
 	type BlockWeights = ();
 	type BlockLength = ();
 	type Origin = Origin;
@@ -88,7 +96,7 @@ impl orml_tokens::Config for Test {
 	type ExistentialDeposits = ExistentialDeposits;
 	type OnDust = ();
 	type MaxLocks = ();
-	type DustRemovalWhitelist = ();
+	type DustRemovalWhitelist = MockDustRemovalWhitelist;
 }
 
 impl Config for Test {
