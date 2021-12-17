@@ -30,4 +30,4 @@ to this project.
 
 ## License
 
-The project is made available under the Apache2.0/MIT license. See the `LICENSE` file for more information.
+The project is made available under the [Apache2.0](./LICENSE-APACHE)/[MIT](./LICENSE-MIT) license. 
