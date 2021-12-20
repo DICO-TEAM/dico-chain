@@ -19,17 +19,15 @@ substrate-build-script-utils = { git = 'https://github.com/paritytech/substrate'
 [[bin]]
 name = 'kico'
 
-[features]
-default = []
-runtime-benchmarks = ['kico-runtime/runtime-benchmarks']
+
 
 [dependencies]
 derive_more  = { version = '0.99.2' }
 log          = { version = '0.4.14' }
 codec        = { package = 'parity-scale-codec', version = '2.3.1' }
 structopt    = { version = '0.3.8' }
-serde        = { version = '1.0.119', features = ['derive'] }
-serde_json   = { version = '1.0' }
+serde        = { version = "1.0.124", features = ["derive"] }
+serde_json   = { version = '1.0.68' }
 hex-literal  = { version = '0.3.1' }
 
 
@@ -37,17 +35,18 @@ hex-literal  = { version = '0.3.1' }
 
 
 # RPC related Dependencies
-jsonrpc-core = { version = '15.1.0' }
+jsonrpc-core = { version = '18.0.0' }
 
 
 
 # Local Dependencies
-dico-primitives = { package = 'dico-primitives', default-features = false, path = "../../primitives" }
-kico-runtime = { package = "kico-runtime", path = '../../runtime/kico' }
-pallet-farm-rpc = { package = 'pallet-farm-rpc', path = "../../pallets/farm/rpc" }
+dico-primitives            = { package = 'dico-primitives', path = "../../primitives" }
+kico-runtime               = { package = "kico-runtime", path = '../../runtime/kico' }
+pallet-farm-rpc            = { package = 'pallet-farm-rpc', path = "../../pallets/farm/rpc" }
 pallet-ico-rpc-runtime-api = { path = "../../pallets/ico/rpc/runtime-api"}
 pallet-ico-rpc             = { path = "../../pallets/ico/rpc/rpc" }
-pallet-currencies = { path = "../../pallets/currencies"}
+pallet-currencies          = { path = "../../pallets/currencies"}
+
 
 
 # Substrate Dependencies
@@ -61,23 +60,25 @@ substrate-prometheus-endpoint  = { git = "https://github.com/paritytech/substrat
 ## Substrate Client Dependencies
 sc-basic-authorship = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 sc-chain-spec       = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
-sc-cli              = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
+sc-cli              = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', features = ['wasmtime']}
 sc-client-api       = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 sc-consensus        = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
-sc-executor         = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
+sc-executor         = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' , features = ['wasmtime']}
 sc-network          = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 sc-keystore         = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 sc-rpc              = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 sc-rpc-api          = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
-sc-service          = { git = 'https://github.com/paritytech/substrate', branch = "polkadot-v0.9.13", features = ['wasmtime'] }
+sc-service          = { git = 'https://github.com/paritytech/substrate', branch = "polkadot-v0.9.13" , features = ['wasmtime']}
 sc-telemetry        = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 sc-transaction-pool = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 sc-tracing          = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 
+frame-system-rpc-runtime-api = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13' }
+try-runtime-cli              = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', optional = true }
 
 
 ## Substrate Primitive Dependencies
-sp-std                   = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
+sp-std                   = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13', default-features = false }
 sp-api                   = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 sp-block-builder         = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 sp-blockchain            = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
@@ -112,3 +113,14 @@ polkadot-primitives   = { git = 'https://github.com/paritytech/polkadot', branch
 polkadot-service      = { git = 'https://github.com/paritytech/polkadot', branch = 'release-v0.9.13' }
 polkadot-test-service = { git = 'https://github.com/paritytech/polkadot', branch = 'release-v0.9.13' }
 
+
+[features]
+default            = ['std']
+runtime-benchmarks = [
+    'kico-runtime/runtime-benchmarks',
+    'polkadot-service/runtime-benchmarks',
+]
+std                = []
+try-runtime        = [
+    'try-runtime-cli',
+]

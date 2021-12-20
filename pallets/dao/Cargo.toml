@@ -13,11 +13,12 @@ edition     = '2021'
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-scale-info = { version = "1.0", default-features = false, features = ["derive"] }
+scale-info      = { version = "1.0", default-features = false, features = ["derive"] }
 primitive-types = { default-features = false, version = '0.10.1' }
-codec                 = { package = 'parity-scale-codec', version = '2.3.1', default-features = false }
-serde                 = { version = '1', optional = true }
-log = { version = "0.4.14", default-features = false }
+codec           = { package = 'parity-scale-codec', version = '2.3.1', default-features = false }
+serde           = { version = '1', optional = true }
+log             = { version = "0.4.14", default-features = false }
+
 
 
 # local pallet
@@ -48,12 +49,14 @@ pallet-balances                   = { git = "https://github.com/paritytech/subst
 
 [dev-dependencies]
 hex-literal = "0.3.1"
-frame-system = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13" }
+
 
 [features]
 default = ["std"]
 std = [
+	"orml-tokens/std",
 	"orml-traits/std",
+
 	"ico/std",
 	"codec/std",
 	"sp-core/std",
@@ -64,10 +67,10 @@ std = [
 	"sp-runtime/std",
 	"frame-system/std",
 	"log/std",
+	"scale-info/std",
 	"pallet-timestamp/std",
 	"dico-primitives/std",
 	"pallet-balances/std",
-	"orml-tokens/std",
 	"currencies/std",
 	"pallet-kyc/std",
 	"pallet-pricedao/std",
