@@ -9,7 +9,7 @@ repository  = 'https://github.com/DICO-TEAM/dico-chain'
 edition     = '2021'
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-scale-info = { version = "1.0", default-features = false, features = ["derive"] }
+scale-info    = { version = "1.0", default-features = false, features = ["derive"] }
 sp-io         = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
 serde         = { version = "1.0.102", optional = true }
 frame-support = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}

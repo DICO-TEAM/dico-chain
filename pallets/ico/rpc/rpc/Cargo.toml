@@ -13,10 +13,10 @@ edition     = '2021'
 
 [dependencies]
 codec               = { package = 'parity-scale-codec', version = '2.3.1', default-features = false }
-jsonrpc-derive      = { version = "15.1.0"}
-jsonrpc-core        = { version = "15.1.0"}
+jsonrpc-core        = { version = '18.0.0' }
+jsonrpc-core-client = { version = '18.0.0' }
+jsonrpc-derive      = { version = '18.0.0' }
 sc-rpc-api          = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }
-jsonrpc-core-client = { version = "15.1.0"}
 sp-api              = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }
 sp-rpc              = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }
 sp-runtime          = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }

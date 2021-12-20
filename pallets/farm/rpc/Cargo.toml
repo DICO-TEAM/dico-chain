@@ -22,12 +22,11 @@ path = 'runtime-api'
 
 
 [dependencies]
-primitive-types     = { default-features = false, version = '0.10.1' }
 codec                 = { package = 'parity-scale-codec', version = '2.3.1', default-features = false }
 serde                 = { version = '1', optional = true }
-jsonrpc-core        = { version = '15.1.0' }
-jsonrpc-core-client = { version = '15.1.0' }
-jsonrpc-derive      = { version = '15.1.0' }
+jsonrpc-core        = { version = '18.0.0' }
+jsonrpc-core-client = { version = '18.0.0' }
+jsonrpc-derive      = { version = '18.0.0' }
 
 
 sp-std        = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }
@@ -41,6 +40,9 @@ sp-rpc        = { git = 'https://github.com/paritytech/substrate.git', branch = 
 default = ['std']
 std = [
     'pallet-farm-rpc-runtime-api/std',
+    'sp-std/std',
+    'sp-api/std',
+    'sp-runtime/std',
     'serde',
     'codec/std',
 ]
