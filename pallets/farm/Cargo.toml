@@ -55,6 +55,7 @@ runtime-benchmarks = [
 std = [
     'serde',
     'codec/std',
+    'primitive-types/std',
     "scale-info/std",
     'frame-support/std',
     'frame-system/std',
@@ -64,4 +65,5 @@ std = [
     'orml-tokens/std',
     'orml-traits/std',
     'dico-primitives/std',
+    'primitive-types/std',
 ]

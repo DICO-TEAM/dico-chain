@@ -16,7 +16,7 @@ targets = ['x86_64-unknown-linux-gnu']
 substrate-wasm-builder = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
 
 [dependencies]
-primitive-types = { default-features = false, version = '0.10.1' }
+primitive-types       = { default-features = false, version = '0.10.1' }
 codec                 = { package = 'parity-scale-codec', version = '2.3.1', default-features = false }
 serde                 = { version = '1', optional = true }
 
@@ -34,4 +34,5 @@ std = [
     "sp-api/std",
     "sp-runtime/std",
     "sp-std/std",
+    "primitive-types/std",
 ]

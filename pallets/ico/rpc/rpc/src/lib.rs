@@ -15,8 +15,8 @@
 // #![cfg_attr(not(feature = "std"), no_std)]
 use codec::{self, Codec, Decode, Encode};
 use jsonrpc_core::{
-	futures::future::{self as rpc_future, result},
-	Error as RpcError, ErrorCode,
+	futures::future::{self as rpc_future},
+	Error as RpcError, ErrorCode, Result
 };
 use jsonrpc_derive::rpc;
 use pallet_ico_rpc_runtime_api::IcoAmountApi;
@@ -26,7 +26,7 @@ use sp_rpc::number::NumberOrHex;
 use sp_runtime::{generic::BlockId, traits};
 use std::convert::TryInto;
 use std::sync::Arc;
-type FutureResult<T> = Box<dyn rpc_future::Future<Item = T, Error = RpcError> + Send>;
+// type Result<T> = Box<dyn rpc_future::Future<Item = T, Error = RpcError> + Send>;
 
 /// Ico RPC method
 #[rpc]
@@ -37,21 +37,21 @@ pub trait IcoApi<AccountId, CurrencyId, Index, Balance> {
 		account: AccountId,
 		currency_id: CurrencyId,
 		index: Index,
-	) -> FutureResult<NumberOrHex>;
+	) -> Result<NumberOrHex>;
 	#[rpc(name = "ico_getRewardAmount", alias("getRewardAmount"))]
 	fn get_reward_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index)
-		-> FutureResult<NumberOrHex>;
+		-> Result<NumberOrHex>;
 	#[rpc(name = "ico_canUnlockAmount", alias("canUnlockAmount"))]
-	fn can_unlock_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> FutureResult<NumberOrHex>;
+	fn can_unlock_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> Result<NumberOrHex>;
 	#[rpc(name = "ico_canJoinAmount", alias("canJoinAmount"))]
 	fn can_join_amount(
 		&self,
 		user: AccountId,
 		currency_id: CurrencyId,
 		index: Index,
-	) -> FutureResult<(NumberOrHex, NumberOrHex)>;
+	) -> Result<(NumberOrHex, NumberOrHex)>;
 	#[rpc(name = "ico_getTokenPrice", alias("getTokenPrice"))]
-	fn get_token_price(&self, currency_id: CurrencyId) -> FutureResult<NumberOrHex>;
+	fn get_token_price(&self, currency_id: CurrencyId) -> Result<NumberOrHex>;
 }
 
 pub struct FullIco<C, B> {
@@ -104,7 +104,7 @@ where
 		account: AccountId,
 		currency_id: CurrencyId,
 		index: Index,
-	) -> FutureResult<NumberOrHex> {
+	) -> Result<NumberOrHex> {
 		let get_release_amount = || {
 			let api = self.client.runtime_api();
 			let best = self.client.info().best_hash;
@@ -128,10 +128,10 @@ where
 			try_into_rpc_balance(amount)
 		};
 
-		Box::new(result(get_release_amount()))
+		get_release_amount()
 	}
 
-	fn get_token_price(&self, currency_id: CurrencyId) -> FutureResult<NumberOrHex> {
+	fn get_token_price(&self, currency_id: CurrencyId) -> Result<NumberOrHex> {
 		let get_token_price = || {
 			let api = self.client.runtime_api();
 			let best = self.client.info().best_hash;
@@ -153,7 +153,7 @@ where
 			try_into_rpc_balance(amount)
 		};
 
-		Box::new(result(get_token_price()))
+		get_token_price()
 	}
 
 	fn can_join_amount(
@@ -161,7 +161,7 @@ where
 		account: AccountId,
 		currency_id: CurrencyId,
 		index: Index,
-	) -> FutureResult<(NumberOrHex, NumberOrHex)> {
+	) -> Result<(NumberOrHex, NumberOrHex)> {
 		let can_join_amount = || {
 			let api = self.client.runtime_api();
 			let best = self.client.info().best_hash;
@@ -202,7 +202,7 @@ where
 			try_into_rpc_balance(vec![amount.0, amount.1])
 		};
 
-		Box::new(result(can_join_amount()))
+		can_join_amount()
 	}
 
 	fn get_reward_amount(
@@ -210,7 +210,7 @@ where
 		account: AccountId,
 		currency_id: CurrencyId,
 		index: Index,
-	) -> FutureResult<NumberOrHex> {
+	) -> Result<NumberOrHex> {
 		let get_reward_amount = || {
 			let api = self.client.runtime_api();
 			let best = self.client.info().best_hash;
@@ -234,7 +234,7 @@ where
 			try_into_rpc_balance(amount)
 		};
 
-		Box::new(result(get_reward_amount()))
+		get_reward_amount()
 	}
 
 	fn can_unlock_amount(
@@ -242,7 +242,7 @@ where
 		account: AccountId,
 		currency_id: CurrencyId,
 		index: Index,
-	) -> FutureResult<NumberOrHex> {
+	) -> Result<NumberOrHex> {
 		let get_unlock_amount = || {
 			let api = self.client.runtime_api();
 			let best = self.client.info().best_hash;
@@ -265,6 +265,6 @@ where
 			try_into_rpc_balance(amount)
 		};
 
-		Box::new(result(get_unlock_amount()))
+		get_unlock_amount()
 	}
 }
