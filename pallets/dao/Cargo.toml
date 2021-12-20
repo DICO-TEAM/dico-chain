@@ -14,7 +14,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 scale-info      = { version = "1.0", default-features = false, features = ["derive"] }
-primitive-types = { default-features = false, version = '0.10.1' }
+primitive-types = { default-features = false, version = '0.10.1'}
 codec           = { package = 'parity-scale-codec', version = '2.3.1', default-features = false }
 serde           = { version = '1', optional = true }
 log             = { version = "0.4.14", default-features = false }
@@ -68,6 +68,7 @@ std = [
 	"frame-system/std",
 	"log/std",
 	"scale-info/std",
+	"primitive-types/std",
 	"pallet-timestamp/std",
 	"dico-primitives/std",
 	"pallet-balances/std",

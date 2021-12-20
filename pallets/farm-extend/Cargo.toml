@@ -65,4 +65,5 @@ std = [
     'orml-tokens/std',
     'orml-traits/std',
     'dico-primitives/std',
+    'primitive-types/std',
 ]
