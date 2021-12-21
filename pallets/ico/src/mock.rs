@@ -1,10 +1,12 @@
 #![cfg(test)]
 
 pub use super::*;
+use orml_traits::{DataFeeder, DataProvider};
+// use pallet_pricedao::
 use dico_treasury;
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{LockIdentifier, Time},
+	traits::{LockIdentifier, Time, Contains},
 	PalletId,
 };
 use orml_traits::parameter_type_with_key;
@@ -13,6 +15,7 @@ use pallet_pricedao;
 use pallet_randomness_collective_flip;
 use sp_core::H256;
 use sp_runtime::{
+	AccountId32,
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
 };
@@ -40,6 +43,7 @@ pub const DICO: CurrencyId = 0;
 pub const KSM: CurrencyId = 20;
 pub const NewDAYS: u64 = 1000;
 pub const NEW_USDT: CurrencyId = 5;
+pub const DAVE: AccountId = 3;
 
 construct_runtime!(
 	pub enum Test where
@@ -135,9 +139,28 @@ parameter_types! {
 	pub const WithdrawExpirationPeriod: BlockNumber = 20;
 }
 
+pub struct MockDataProvider;
+impl DataProvider<CurrencyId, Price> for MockDataProvider {
+	fn get(currency_id: &CurrencyId) -> Option<Price> {
+		match currency_id {
+			1 => Some(100),
+			2 => Some(50000),
+			3 => Some(100),
+			4 => Some(u128::zero()),
+			_ => None,
+		}
+	}
+}
+
+impl DataFeeder<CurrencyId, Price, AccountId> for MockDataProvider {
+	fn feed_value(_: AccountId, _: CurrencyId, _: Price) -> sp_runtime::DispatchResult {
+		Ok(())
+	}
+}
+
 impl pallet_pricedao::Config for Test {
 	type Event = Event;
-	type Source = DicoOracle;
+	type Source = MockDataProvider;
 	type FeedOrigin = frame_system::EnsureRoot<AccountId>;
 	type UpdateOraclesStorgage = DicoOracle;
 	type BaseCurrency = Balances;
@@ -180,7 +203,7 @@ parameter_types! {
 }
 
 impl frame_system::Config for Test {
-	type BaseCallFilter = ();
+	type BaseCallFilter = frame_support::traits::Everything;
 	type BlockWeights = ();
 	type BlockLength = ();
 	type Origin = Origin;
@@ -260,6 +283,13 @@ parameter_type_with_key! {
 	};
 }
 
+pub struct MockDustRemovalWhitelist;
+impl Contains<AccountId> for MockDustRemovalWhitelist {
+	fn contains(a: &AccountId) -> bool {
+		*a == DAVE
+	}
+}
+
 impl tokens::Config for Test {
 	type Event = Event;
 	type Balance = Balance;
@@ -269,7 +299,7 @@ impl tokens::Config for Test {
 	type ExistentialDeposits = ExistentialDeposits;
 	type OnDust = ();
 	type MaxLocks = MaxLocks;
-	type DustRemovalWhitelist = ();
+	type DustRemovalWhitelist = MockDustRemovalWhitelist;
 }
 
 parameter_types! {

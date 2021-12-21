@@ -8,7 +8,6 @@ pub use crate::mock::{
 	DOT, USDT,
 };
 use frame_support::assert_ok;
-use sp_core::crypto::Ss58AddressFormat::DockMainAccount;
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut ext = ExtBuilder::default().build();

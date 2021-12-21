@@ -16,6 +16,7 @@ use dico_currencies;
 // use frame_support::log;
 // use serde::{Deserialize, Serialize};
 
+use scale_info::TypeInfo;
 use orml_utilities::with_transaction_result;
 use sp_runtime::{DispatchError, DispatchResult, FixedU128};
 // use support::{DEXManager, ExchangeRateProvider, Price, PriceProvider};
@@ -47,7 +48,7 @@ pub mod module {
 	<<T as Config>::BaseCurrency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
 
 
-	#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug)]
+	#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug,TypeInfo)]
 	#[cfg_attr(test, derive(Default))]
 	pub struct DepositBalanceInfo<Balance,BlockNum>
 	{

@@ -5,13 +5,14 @@ use crate as pallet_price;
 use std::cell::RefCell;
 use sp_core::H256;
 use frame_system::EnsureSignedBy;
+
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup}, testing::Header,FixedPointNumber,
 };
 
 use orml_traits::parameter_type_with_key;
 use primitives::{AssetId};
-use frame_support::{construct_runtime, ord_parameter_types, parameter_types, traits::{GenesisBuild},PalletId,traits::Time};
+use frame_support::{construct_runtime, ord_parameter_types, parameter_types, traits::{GenesisBuild,Contains},PalletId,traits::Time};
 use frame_system as system;
 use dico_currencies::BasicCurrencyAdapter;
 
@@ -106,7 +107,7 @@ impl system::Config for Test {
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type DbWeight = ();
-	type BaseCallFilter = ();
+	type BaseCallFilter = frame_support::traits::Everything;
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
@@ -214,7 +215,14 @@ impl orml_tokens::Config for Test {
 	type ExistentialDeposits = ExistentialDeposits;
 	type OnDust = ();
 	type MaxLocks = ();
-	type DustRemovalWhitelist = ();
+	type DustRemovalWhitelist = MockDustRemovalWhitelist;
+}
+
+pub struct MockDustRemovalWhitelist;
+impl Contains<AccountId> for MockDustRemovalWhitelist {
+	fn contains(a: &AccountId) -> bool {
+		*a == DAVE
+	}
 }
 
 

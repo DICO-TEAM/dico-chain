@@ -9,6 +9,7 @@
 #![allow(clippy::upper_case_acronyms)]
 
 use codec::{Decode, Encode};
+use scale_info::TypeInfo;
 use core::convert::TryFrom;
 use dico_primitives::{to_balance, to_u256, Amount, AssetId, Balance};
 use frame_support::{
@@ -43,7 +44,7 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
+#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Pair(pub AssetId, pub AssetId);
 
@@ -57,7 +58,7 @@ impl Pair {
 	}
 }
 
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Default, Clone, RuntimeDebug, PartialOrd, Ord)]
+#[derive(Encode, Decode, Eq, PartialEq, Copy, Default, Clone, RuntimeDebug, PartialOrd, Ord, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct LiquidityInfo(pub Balance, pub Balance, pub AssetId);
 

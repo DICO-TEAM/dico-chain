@@ -1,46 +1,51 @@
 [package]
-name        = 'pallet-farm-rpc'
+name        = "pallet-farm-rpc"
 authors     = ["DICO-TEAM"]
-description = 'dico-chain farm Pallet rpc'
-license     = 'Apache 2.0'
-version     = '1.0.0'
-homepage    = 'https://github.com/DICO-TEAM/dico-chain'
-repository  = 'https://github.com/DICO-TEAM/dico-chain'
-edition     = '2018'
+description = "dico-chain farm Pallet rpc"
+license     = "Apache 2.0"
+version     = "1.0.0"
+homepage    = "https://github.com/DICO-TEAM/dico-chain"
+repository  = "https://github.com/DICO-TEAM/dico-chain"
+edition     = "2021"
 
 
 [package.metadata.docs.rs]
-targets = ['x86_64-unknown-linux-gnu']
+targets = ["x86_64-unknown-linux-gnu"]
 
 [build-dependencies]
-substrate-wasm-builder = { package = 'substrate-wasm-builder', version = '3.0.0' }
+substrate-wasm-builder = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
 
 [dependencies.pallet-farm-rpc-runtime-api]
 default-features = false
-package = 'pallet-farm-rpc-runtime-api'
-path = 'runtime-api'
+package = "pallet-farm-rpc-runtime-api"
+path = "runtime-api"
 
 
 [dependencies]
-primitive-types     = { default-features = false, version = '0.10.1' }
-serde               = { features = ['derive'], optional = true, version = '1.0.101' }
-codec               = { package = "parity-scale-codec", version = "2.2.0", default-features = false, features = ['derive'] }
-jsonrpc-core        = { version = '15.1.0' }
-jsonrpc-core-client = { version = '15.1.0' }
-jsonrpc-derive      = { version = '15.1.0' }
+codec               = { package = "parity-scale-codec", version = "2.3.1", default-features = false }
+serde               = { version = "1", optional = true }
+jsonrpc-core        = { version = "18.0.0" }
+jsonrpc-core-client = { version = "18.0.0" }
+jsonrpc-derive      = { version = "18.0.0" }
+futures             = { version = "0.3.15"}
 
 
-sp-std        = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-sp-api        = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-sp-runtime    = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-sp-blockchain = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-sc-rpc-api    = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
-sp-rpc        = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+
+sp-std        = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }
+sp-api        = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }
+sp-runtime    = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }
+sp-blockchain = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }
+sc-rpc-api    = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }
+sp-rpc        = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }
 
 [features]
 default = ['std']
 std = [
     'pallet-farm-rpc-runtime-api/std',
+
+    'sp-std/std',
+    'sp-api/std',
+    'sp-runtime/std',
     'serde',
     'codec/std',
 ]

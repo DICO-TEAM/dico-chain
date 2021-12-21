@@ -39,7 +39,7 @@ use sp_runtime::{
 use sp_std::prelude::*;
 use traits::DicoTreasuryHandler;
 pub use weights::WeightInfo;
-
+use scale_info::TypeInfo;
 use orml_traits::{
 	arithmetic::{Signed, SimpleArithmetic},
 	// currency::TransferAll,
@@ -64,7 +64,7 @@ pub(crate) type CurrencyIdOf<T> =
 
 /// A spending proposal.
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug)]
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo)]
 pub struct DicoTreasuryProposal<AccountId, Balance, BlockNumber, CurrencyId> {
 	currency_id: CurrencyId,
 	/// The account proposing it.

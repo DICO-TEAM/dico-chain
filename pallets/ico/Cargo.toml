@@ -5,29 +5,30 @@ version    = "1.0.0"
 license    = 'Apache 2.0'
 homepage   = 'https://github.com/DICO-TEAM/dico-chain'
 repository = 'https://github.com/DICO-TEAM/dico-chain'
-edition    = '2018'
+edition     = '2021'
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-primitive-types = { version = "0.9.1", default-features = false}
+scale-info = { version = "1.0", default-features = false, features = ["derive"] }
+primitive-types = { default-features = false, version = '0.10.1' }
+codec                 = { package = 'parity-scale-codec', version = '2.3.1', default-features = false }
 
-frame-support                     = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
-frame-system                      = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
-sp-runtime                        = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
-sp-std                            = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
-codec                             = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive"] }
-sp-core                           = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
-sp-io                             = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
-pallet-balances                   = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.8", default-features = false}
-pallet-randomness-collective-flip = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.8', default-features = false }
+
+frame-support                     = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
+frame-system                      = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
+sp-runtime                        = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
+sp-std                            = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
+sp-core                           = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
+sp-io                             = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
+pallet-balances                   = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
+pallet-randomness-collective-flip = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }
 
 
 # orml
-orml-traits     = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
-orml-tokens     = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", rev = "650ef607d023e4537d3f2932baa5e50bc3a349cb"}
-
+orml-tokens   = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "master" }
+orml-traits   = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "master" }
 # local
 currencies      = { package = "pallet-currencies", path = '../currencies', default-features = false}
 pallet-kyc      = { path = "../kyc", default-features = false }
@@ -41,22 +42,30 @@ pallet-oracle   = { path = "../oracle", default-features = false }
 [features]
 default = ['std']
 std = [
+    "codec/std",
+    "primitive-types/std",
+
     "frame-support/std",
     "frame-system/std",
+
     "sp-runtime/std",
     "sp-std/std",
-    "codec/std",
+    "sp-core/std",
+    "sp-io/std",
+
+
     "orml-traits/std",
     "orml-tokens/std",
+
+    "dico-primitives/std",
+
     "currencies/std",
     "pallet-kyc/std",
-    "sp-core/std",
-    "pallet-balances/std",
-    "primitive-types/std",
-    "dico-primitives/std",
-    "dico-treasury/std",
     "pallet-pricedao/std",
+    "pallet-amm/std",
+    "pallet-oracle/std",
+
+    "pallet-balances/std",
 	"pallet-randomness-collective-flip/std",
-	"pallet-amm/std",
-	"pallet-oracle/std",
+
 ]
