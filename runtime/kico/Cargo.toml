@@ -17,6 +17,7 @@ serde = { version = "1.0.124", optional = true, default-features = false }
 hex-literal = { version = "0.3.4", optional = true, default-features = false }
 scale-info = { version = "1.0", default-features = false, features = ["derive"] }
 smallvec = { version = "1.4.1"}
+static_assertions  = { version = "1.1.0" }
 
 
 # https://docs.rs/getrandom/0.2.3/getrandom/#indirect-dependencies
@@ -47,6 +48,7 @@ pallet-farm-extend = { package = "pallet-farm-extend", default-features = false,
 orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
 orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
 orml-vesting = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
+orml-xcm-support = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
 
 
 
@@ -79,6 +81,7 @@ pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/parityt
 pallet-treasury = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
 pallet-utility = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
 pallet-randomness-collective-flip = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
+pallet-elections-phragmen = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.13', default-features = false }
 
 
 ## Substrate Primitive Dependencies
@@ -107,6 +110,7 @@ cumulus-pallet-parachain-system = { git = "https://github.com/paritytech/cumulus
 cumulus-pallet-dmp-queue = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.13", default-features = false }
 cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.13", default-features = false }
 cumulus-pallet-xcm = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.13", default-features = false }
+pallet-collator-selection = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.13", default-features = false }
 parachain-info = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.13", default-features = false }
 
 # polkadot
@@ -211,6 +215,8 @@ std = [
     "orml-tokens/std",
     "orml-traits/std",
     "orml-vesting/std",
+    "orml-xcm-support/std",
+
     # polkadot
     "polkadot-parachain/std",
     "polkadot-runtime-common/std",

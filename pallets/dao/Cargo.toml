@@ -54,29 +54,37 @@ hex-literal = "0.3.1"
 [features]
 default = ["std"]
 std = [
-	"orml-tokens/std",
-	"orml-traits/std",
-
-	"ico/std",
-	"codec/std",
-	"sp-core/std",
-	"sp-std/std",
 	"serde",
-	"sp-io/std",
-	"frame-support/std",
-	"sp-runtime/std",
-	"frame-system/std",
+	"codec/std",
 	"log/std",
 	"scale-info/std",
 	"primitive-types/std",
-	"pallet-timestamp/std",
+
+	"orml-tokens/std",
+	"orml-traits/std",
+
+	"sp-core/std",
+	"sp-std/std",
+	"sp-io/std",
+	"sp-runtime/std",
+
+	"frame-benchmarking/std",
+	"frame-system/std",
+	"frame-system/std",
+
+
+
 	"dico-primitives/std",
-	"pallet-balances/std",
+	"dico-treasury/std",
 	"currencies/std",
+	"ico/std",
 	"pallet-kyc/std",
 	"pallet-pricedao/std",
 	"pallet-amm/std",
 	"pallet-oracle/std",
+
+	"pallet-timestamp/std",
+	"pallet-balances/std",
 	"pallet-randomness-collective-flip/std",
 
 ]

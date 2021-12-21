@@ -3472,16 +3472,19 @@ dependencies = [
  "orml-tokens",
  "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library?branch=master)",
  "orml-vesting",
+ "orml-xcm-support",
  "pallet-amm",
  "pallet-aura",
  "pallet-authorship",
  "pallet-balances",
  "pallet-bounties",
+ "pallet-collator-selection",
  "pallet-collective",
  "pallet-currencies",
  "pallet-dao",
  "pallet-democracy",
  "pallet-dico-treasury",
+ "pallet-elections-phragmen",
  "pallet-farm",
  "pallet-farm-extend",
  "pallet-farm-rpc-runtime-api",
@@ -3529,6 +3532,7 @@ dependencies = [
  "sp-std",
  "sp-transaction-pool",
  "sp-version",
+ "static_assertions",
  "substrate-wasm-builder",
  "xcm",
  "xcm-builder",
@@ -4997,6 +5001,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "orml-xcm-support"
+version = "0.4.1-dev"
+source = "git+https://github.com/open-web3-stack/open-runtime-module-library?branch=master#88f1b4b1ac6ea0621d188dfa7e64fd2915dd81d5"
+dependencies = [
+ "frame-support",
+ "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library?branch=master)",
+ "parity-scale-codec",
+ "sp-runtime",
+ "sp-std",
+ "xcm",
+ "xcm-executor",
+]
+
+[[package]]
 name = "output_vt100"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5261,6 +5279,25 @@ dependencies = [
  "serde",
  "sp-core",
  "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-collator-selection"
+version = "3.0.0"
+source = "git+https://github.com/paritytech/cumulus?branch=polkadot-v0.9.13#05cc5f0e2acacc18796f45ffa3c7b4626fd1046d"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "pallet-authorship",
+ "pallet-session",
+ "parity-scale-codec",
+ "rand 0.7.3",
+ "scale-info",
+ "serde",
+ "sp-runtime",
+ "sp-staking",
  "sp-std",
 ]
 
@@ -11087,7 +11124,7 @@ dependencies = [
  "chrono",
  "lazy_static",
  "matchers",
- "parking_lot 0.11.2",
+ "parking_lot 0.10.2",
  "regex",
  "serde",
  "serde_json",
@@ -11221,7 +11258,7 @@ version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f559b464de2e2bdabcac6a210d12e9b5a5973c251e102c44c585c71d51bd78e"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if 0.1.10",
  "rand 0.8.4",
  "static_assertions",
 ]

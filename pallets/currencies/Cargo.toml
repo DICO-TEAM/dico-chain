@@ -36,14 +36,18 @@ default = ["std"]
 std = [
     "serde",
     "codec/std",
+    "scale-info/std",
+
     "sp-runtime/std",
     "sp-std/std",
     "sp-io/std",
+    "sp-core/std",
+
     "frame-support/std",
     "frame-system/std",
+
     "orml-traits/std",
     "dico-primitives/std",
     "orml-tokens/std",
-    "orml-tokens/std",
-#    "sp-core/std",
+
 ]

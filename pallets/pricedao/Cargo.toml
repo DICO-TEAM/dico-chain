@@ -53,21 +53,30 @@ default = ['std']
 std = [
 	"serde",
 	'codec/std',
+	"primitive-types/std",
+	"scale-info/std",
+
+	'frame-benchmarking/std',
 	'frame-support/std',
 	'frame-system/std',
+
 	"orml-tokens/std",
-#	"orml-utilities/std",
+	"orml-utilities/std",
+	"orml-traits/std",
+
 	"primitives/std",
+	"pallet-amm/std",
 	"pallet-oracle/std",
+	"dico-currencies/std",
+
 	"sp-std/std",
-	"pallet-balances/std",
 	'sp-core/std',
 	"sp-io/std",
 	"sp-runtime/std",
-	"orml-traits/std",
-	"orml-utilities/std",
-	"dico-currencies/std",
-	"primitive-types/std",
+
+	"pallet-balances/std",
+
+
 ]
 runtime-benchmarks = [
 	"frame-benchmarking",

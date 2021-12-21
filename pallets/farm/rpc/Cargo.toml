@@ -42,6 +42,7 @@ sp-rpc        = { git = 'https://github.com/paritytech/substrate.git', branch = 
 default = ['std']
 std = [
     'pallet-farm-rpc-runtime-api/std',
+
     'sp-std/std',
     'sp-api/std',
     'sp-runtime/std',

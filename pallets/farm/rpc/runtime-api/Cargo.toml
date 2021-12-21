@@ -31,8 +31,9 @@ default = ["std"]
 std = [
     "serde",
     "codec/std",
+    "primitive-types/std",
+
     "sp-api/std",
     "sp-runtime/std",
     "sp-std/std",
-    "primitive-types/std",
 ]

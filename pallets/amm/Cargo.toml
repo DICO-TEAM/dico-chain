@@ -59,13 +59,20 @@ std = [
     'serde',
     'codec/std',
     "scale-info/std",
-    'frame-support/std',
+    'primitive-types/std',
+
+    'dico-primitives/std',
+    'dico-currencies/std',
+
+    'frame-benchmarking/std',
     'frame-system/std',
+    'frame-system/std',
+    'frame-system-benchmarking/std',
+
     'sp-runtime/std',
     'sp-core/std',
     'sp-std/std',
+
     'orml-tokens/std',
     'orml-traits/std',
-    'dico-primitives/std',
-    'primitive-types/std',
 ]
