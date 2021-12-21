@@ -68,14 +68,12 @@ std = [
 	"sp-io/std",
 	"sp-runtime/std",
 
-	"frame-benchmarking/std",
 	"frame-system/std",
-	"frame-system/std",
+	"frame-support/std",
 
 
 
 	"dico-primitives/std",
-	"dico-treasury/std",
 	"currencies/std",
 	"ico/std",
 	"pallet-kyc/std",

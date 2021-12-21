@@ -61,7 +61,6 @@ std = [
 
     "currencies/std",
     "pallet-kyc/std",
-    "dico-treasury/std",
     "pallet-pricedao/std",
     "pallet-amm/std",
     "pallet-oracle/std",

@@ -59,10 +59,8 @@ std = [
     "scale-info/std",
     'primitive-types/std',
 
-    'frame-benchmarking/std',
     'frame-support/std',
     'frame-system/std',
-    'frame-system-benchmarking/std',
 
     'sp-runtime/std',
     'sp-core/std',

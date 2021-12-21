@@ -16,12 +16,12 @@ codec = { package = "parity-scale-codec", version = "2.3.1", default-features = 
 serde = { version = "1.0.124", optional = true, default-features = false }
 hex-literal = { version = "0.3.4", optional = true, default-features = false }
 scale-info = { version = "1.0", default-features = false, features = ["derive"] }
-smallvec = { version = "1.4.1"}
+smallvec = { version = "1.6.1"}
 static_assertions  = { version = "1.1.0" }
 
 
 # https://docs.rs/getrandom/0.2.3/getrandom/#indirect-dependencies
-getrandom = { version = "0.2", features = ["js", "std"], default-features = false }
+#getrandom = { version = "0.2", features = ["js", "std"], default-features = false }
 
 
 # Local primitives
@@ -48,7 +48,6 @@ pallet-farm-extend = { package = "pallet-farm-extend", default-features = false,
 orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
 orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
 orml-vesting = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
-orml-xcm-support = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
 
 
 
@@ -128,8 +127,8 @@ substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", bran
 
 [features]
 default = ["std"]
-no_std = []
 runtime-benchmarks = [
+    "hex-literal",
     "frame-benchmarking/runtime-benchmarks",
     "frame-support/runtime-benchmarks",
     "frame-system/runtime-benchmarks",
@@ -145,6 +144,7 @@ std = [
     "codec/std",
     "serde",
     "scale-info/std",
+
     "cumulus-pallet-aura-ext/std",
     "cumulus-primitives-core/std",
     "cumulus-primitives-utility/std",
@@ -163,6 +163,7 @@ std = [
 
     "sp-io/std",
     "sp-core/std",
+    "sp-inherents/std",
     "sp-api/std",
     "sp-block-builder/std",
     "sp-consensus-aura/std",
@@ -194,8 +195,8 @@ std = [
     "pallet-treasury/std",
     "pallet-utility/std",
     "pallet-randomness-collective-flip/std",
+    "pallet-elections-phragmen/std",
 
-#    "sp-inherents/std",
     # localhost
     "dico-primitives/std",
     "pallet-template/std",
@@ -215,7 +216,6 @@ std = [
     "orml-tokens/std",
     "orml-traits/std",
     "orml-vesting/std",
-    "orml-xcm-support/std",
 
     # polkadot
     "polkadot-parachain/std",

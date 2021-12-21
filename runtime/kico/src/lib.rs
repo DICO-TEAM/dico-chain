@@ -12,7 +12,7 @@ use dico_primitives::{
     AccountId, AccountIndex, Address, Amount, AssetId, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment,
     PoolId, Price, Signature,
 };
-use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended};
+use orml_traits::{ create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended};
 use pallet_currencies::BasicCurrencyAdapter;
 
 use sp_api::impl_runtime_apis;
@@ -36,7 +36,7 @@ use static_assertions::const_assert;
 use frame_support::{
     construct_runtime, match_type, parameter_types,
     traits::{
-        Currency, EqualPrivilegeOnly, Everything, Imbalance, InstanceFilter, KeyOwnerProofSystem, LockIdentifier,
+        Contains, Currency, EqualPrivilegeOnly, Everything, Imbalance, InstanceFilter, KeyOwnerProofSystem, LockIdentifier,
         Nothing, OnUnbalanced, U128CurrencyToVote,
     },
     weights::{
@@ -839,12 +839,36 @@ parameter_types! {
 	pub TreasuryAccount: AccountId = TreasuryPalletId::get().into_account();
 }
 
+parameter_type_with_key! {
+	pub ExistentialDeposits: |_currency_id: AssetId| -> Balance {
+		Zero::zero()
+	};
+}
+
+pub struct DustRemovalWhitelist;
+impl Contains<AccountId> for DustRemovalWhitelist {
+    fn contains(a: &AccountId) -> bool {
+        get_all_module_accounts().contains(a)
+    }
+}
+
+pub fn get_all_module_accounts() -> Vec<AccountId> {
+    vec![
+        TreasuryPalletId::get().into_account(),
+        KYCPalletId::get().into_account(),
+        AmmPalletId::get().into_account(),
+        FarmPalletId::get().into_account(),
+        LBPPalletId::get().into_account(),
+        FarmExtendPalletId::get().into_account(),
+    ]
+}
+
 impl orml_tokens::Config for Runtime {
     type Event = Event;
     type Balance = Balance;
     type Amount = Amount;
     type CurrencyId = CurrencyId;
-    type WeightInfo = weights::orml_tokens::WeightInfo<Runtime>;
+    type WeightInfo = ();
     type ExistentialDeposits = ExistentialDeposits;
     type OnDust = orml_tokens::TransferDust<Runtime, TreasuryAccount>;
     type MaxLocks = MaxLocks;

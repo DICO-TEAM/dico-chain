@@ -56,7 +56,6 @@ std = [
 	"primitive-types/std",
 	"scale-info/std",
 
-	'frame-benchmarking/std',
 	'frame-support/std',
 	'frame-system/std',
 
@@ -67,7 +66,6 @@ std = [
 	"primitives/std",
 	"pallet-amm/std",
 	"pallet-oracle/std",
-	"dico-currencies/std",
 
 	"sp-std/std",
 	'sp-core/std',

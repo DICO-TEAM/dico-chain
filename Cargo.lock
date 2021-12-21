@@ -2637,10 +2637,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fcd999463524c52659517fe2cea98493cfe485d10565e7b0fb07dbba7ad2753"
 dependencies = [
  "cfg-if 1.0.0",
- "js-sys",
  "libc",
  "wasi 0.10.0+wasi-snapshot-preview1",
- "wasm-bindgen",
 ]
 
 [[package]]
@@ -3467,12 +3465,10 @@ dependencies = [
  "frame-system",
  "frame-system-rpc-runtime-api",
  "frame-try-runtime",
- "getrandom 0.2.3",
  "hex-literal",
  "orml-tokens",
  "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library?branch=master)",
  "orml-vesting",
- "orml-xcm-support",
  "pallet-amm",
  "pallet-aura",
  "pallet-authorship",
@@ -5001,20 +4997,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "orml-xcm-support"
-version = "0.4.1-dev"
-source = "git+https://github.com/open-web3-stack/open-runtime-module-library?branch=master#88f1b4b1ac6ea0621d188dfa7e64fd2915dd81d5"
-dependencies = [
- "frame-support",
- "orml-traits 0.4.1-dev (git+https://github.com/open-web3-stack/open-runtime-module-library?branch=master)",
- "parity-scale-codec",
- "sp-runtime",
- "sp-std",
- "xcm",
- "xcm-executor",
-]
-
-[[package]]
 name = "output_vt100"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5332,7 +5314,6 @@ dependencies = [
  "scale-info",
  "serde",
  "sp-core",
- "sp-io",
  "sp-runtime",
  "sp-std",
 ]
