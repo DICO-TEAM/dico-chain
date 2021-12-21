@@ -23,8 +23,8 @@ primitives     = { package = "dico-primitives", path= "../../primitives", defaul
 
 
 # ORML
-orml-traits    = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false }
-orml-utilities = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false }
+orml-traits    = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false , branch = "master" }
+orml-utilities = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false , branch = "master" }
 
 
 [features]
