@@ -8,13 +8,13 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use codec::{Decode, Encode};
 use dico_primitives::{
-    constants::{currency::*, time::*},
-    AccountId, AccountIndex, Address, Amount, AssetId, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment,
+    constants::{currency::*, time::*, parachains::*},
+    AccountId, AccountIndex, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment,
     PoolId, Price, Signature,
 };
-use orml_traits::{ create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended};
+pub use orml_xcm_support::{IsNativeConcrete, MultiCurrencyAdapter, MultiNativeAsset};
+use orml_traits::{ create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended, MultiCurrency};
 use pallet_currencies::BasicCurrencyAdapter;
-
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
@@ -66,6 +66,8 @@ use polkadot_runtime_common::{BlockHashCount, RocksDbWeight, SlowAdjustingFeeUpd
 // XCM Imports
 use xcm::latest::prelude::*;
 use xcm_builder::{
+	FixedRateOfFungible,
+	TakeRevenue,
 	AllowKnownQueryResponses,
 	AllowSubscriptionsFrom,
 	ParentAsSuperuser,
@@ -145,6 +147,102 @@ const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 /// We allow for 0.5 of a second of compute with a 12 second average block time.
 const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND / 2;
+
+pub fn ksm_per_second() -> u128 {
+	let base_weight = Balance::from(ExtrinsicBaseWeight::get());
+	let base_tx_fee = DOLLARS / 1000;
+	let base_tx_per_second = (WEIGHT_PER_SECOND as u128) / base_weight;
+	let fee_per_second = base_tx_per_second * base_tx_fee;
+	fee_per_second / 100
+}
+
+
+fn native_currency_location(id: CurrencyId) -> Option<MultiLocation> {
+	let token_symbol = match id {
+		native::KICO::AssetId => native::KICO::TokenSymbol,
+		native::LT::AssetId => native::LT::TokenSymbol,
+		_ => return None,
+	};
+	Some(MultiLocation::new(
+		1,
+		X2(Parachain(ParachainInfo::parachain_id().into()), GeneralKey(token_symbol.to_vec())),
+	))
+}
+
+pub struct CurrencyIdConvert;
+impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
+	fn convert(id: CurrencyId) -> Option<MultiLocation> {
+		match id {
+			kusama::KSM::AssetId => Some(MultiLocation::parent()),
+
+			native::KICO::AssetId | native::LT::AssetId => native_currency_location(id),
+
+			listen::LTP::AssetId => Some(MultiLocation::new(
+				1,
+				X2(
+					Parachain(listen::PARA_ID.into()),
+					GeneralKey(listen::LTP::TokenSymbol.to_vec()),
+				),
+			)),
+			_ => None,
+		}
+	}
+}
+
+impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
+	fn convert(location: MultiLocation) -> Option<CurrencyId> {
+		if location == MultiLocation::parent() {
+			return Some(kusama::KSM::AssetId.into())
+		}
+
+		match location {
+			MultiLocation {
+				parents: 1, interior: X2(Parachain(para_id), GeneralKey(key))
+			} => {
+				match (para_id, &key[..]) {
+					(listen::PARA_ID, listen::LTP::TokenSymbol) => Some(listen::LTP::AssetId.into()),
+					(id, key) if id == u32::from(ParachainInfo::parachain_id()) => match key {
+						native::LT::TokenSymbol => Some(native::LT::AssetId.into()),
+						native::KICO::TokenSymbol => Some(native::KICO::AssetId.into()),
+						_ => None,
+					}
+					_ => None,
+				}
+			}
+			_ => None,
+		}
+	}
+}
+
+impl Convert<MultiAsset, Option<CurrencyId>> for CurrencyIdConvert {
+	fn convert(asset: MultiAsset) -> Option<CurrencyId> {
+		if let MultiAsset { id: Concrete(location), .. } = asset {
+			Self::convert(location)
+		} else {
+			None
+		}
+	}
+}
+
+pub struct ToTreasury;
+impl TakeRevenue for ToTreasury {
+	fn take_revenue(revenue: MultiAsset) {
+		if let MultiAsset { id: Concrete(location), fun: Fungible(amount) } = revenue {
+			if let Some(currency_id) = CurrencyIdConvert::convert(location) {
+				// ensure KaruraTreasuryAccount have ed for all of the cross-chain asset.
+				// Ignore the result.
+				let _ = Currencies::deposit(currency_id, &TreasuryAccount::get(), amount);
+			}
+		}
+	}
+}
+
+pub struct AccountIdToMultiLocation;
+impl Convert<AccountId, MultiLocation> for AccountIdToMultiLocation {
+	fn convert(account: AccountId) -> MultiLocation {
+		X1(AccountId32 { network: NetworkId::Any, id: account.into() }).into()
+	}
+}
 
 parameter_types! {
 	pub const Version: RuntimeVersion = VERSION;
@@ -630,18 +728,16 @@ pub type LocationToAccountId = (
 );
 
 /// Means for transacting assets on this chain.
-pub type LocalAssetTransactor = CurrencyAdapter<
-    // Use this currency:
-    Balances,
-    // Use this currency when it is a fungible asset matching the given location or name:
-    IsConcrete<RelayLocation>,
-    // Do a simple punn to convert an AccountId32 MultiLocation into a native chain account ID:
-    LocationToAccountId,
-    // Our chain's account ID type (we can't get away without mentioning it explicitly):
-    AccountId,
-    // We don't track any teleports.
-    (),
+pub type LocalAssetTransactor = MultiCurrencyAdapter<
+	Currencies,
+	UnknownTokens,
+	IsNativeConcrete<CurrencyId, CurrencyIdConvert>,
+	AccountId,
+	LocationToAccountId,
+	CurrencyId,
+	CurrencyIdConvert,
 >;
+
 /// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
 /// ready for dispatching a transaction with Xcm's `Transact`. There is an `OriginKind` which can
 /// biases the kind of local `Origin` it will become.
@@ -689,21 +785,40 @@ pub type Barrier = (
     // ^^^ Parent and its exec plurality get free execution
 );
 
-pub struct XcmConfig;
+parameter_types! {
+	pub KsmPerSecond: (AssetId, u128) = (MultiLocation::parent().into(), ksm_per_second());
+	pub LTPerSecond: (AssetId, u128) = (MultiLocation::new(1, X2(Parachain(ParachainInfo::parachain_id().into()),
+		GeneralKey(native::LT::TokenSymbol.to_vec()))).into(), ksm_per_second() * 100);
+	pub KICOPerSecond: (AssetId, u128) = (MultiLocation::new(1, X2(Parachain(ParachainInfo::parachain_id().into()),
+		GeneralKey(native::KICO::TokenSymbol.to_vec()))).into(), ksm_per_second() * 100);
+	pub LTPPerSecond: (AssetId, u128) = (MultiLocation::new(
+				1,
+				X2(Parachain(listen::PARA_ID.into()), GeneralKey(listen::LTP::TokenSymbol.to_vec()))
+			).into(), ksm_per_second() * 100);
+}
 
+pub type Trader = (
+	FixedRateOfFungible<KsmPerSecond, ToTreasury>,
+	FixedRateOfFungible<LTPerSecond, ToTreasury>,
+	FixedRateOfFungible<KICOPerSecond, ToTreasury>,
+	FixedRateOfFungible<LTPPerSecond, ToTreasury>,
+);
+
+
+pub struct XcmConfig;
 impl Config for XcmConfig {
     type Call = Call;
     type XcmSender = XcmRouter;
     // How to withdraw and deposit an asset.
-    type AssetTransactor = LocalAssetTransactor;  // fixme
+    type AssetTransactor = LocalAssetTransactor;
     type OriginConverter = XcmOriginToTransactDispatchOrigin;
-    type IsReserve = NativeAsset;  // fixme
+    type IsReserve = NativeAsset;
     type IsTeleporter = ();
     // Teleporting is disabled.
     type LocationInverter = LocationInverter<Ancestry>;
     type Barrier = Barrier;
     type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
-    type Trader = UsingComponents<IdentityFee<Balance>, RelayLocation, AccountId, Balances, ()>;  // fixme
+    type Trader = Trader;
     type ResponseHandler = PolkadotXcm;
     type AssetTrap = PolkadotXcm;
     type AssetClaims = PolkadotXcm;
@@ -850,7 +965,7 @@ parameter_types! {
 }
 
 parameter_type_with_key! {
-	pub ExistentialDeposits: |_currency_id: AssetId| -> Balance {
+	pub ExistentialDeposits: |_currency_id: CurrencyId| -> Balance {
 		Zero::zero()
 	};
 }
@@ -914,8 +1029,8 @@ impl orml_vesting::Config for Runtime {
 
 parameter_types! {
 	pub const CreateConsume: Balance = 100 * DOLLARS;
-	pub const DICOAssetId: AssetId = 0;
-	pub const MaxCreatableCurrencyId: AssetId = 4_000_000_000;
+	pub const DICOAssetId: CurrencyId = 0;
+	pub const MaxCreatableCurrencyId: CurrencyId = 4_000_000_000;
 }
 
 impl pallet_currencies::Config for Runtime {
@@ -1034,7 +1149,7 @@ parameter_types! {
 	pub const ChillDuration: BlockNumber = 10 * MINUTES;
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(5u8);
-	pub const UsdtCurrencyId: AssetId = 5;
+	pub const UsdtCurrencyId: CurrencyId = 5;
 
 }
 
@@ -1098,6 +1213,39 @@ impl pallet_nft::Config for Runtime {
     type PowerHandler = Ico;
 }
 
+impl orml_unknown_tokens::Config for Runtime {
+	type Event = Event;
+}
+
+pub type EnsureRootOrThreeFourthsCouncil = EnsureOneOf<
+	AccountId,
+	EnsureRoot<AccountId>,
+	pallet_collective::EnsureProportionAtLeast<_3, _4, AccountId, CouncilCollective>,
+>;
+
+impl orml_xcm::Config for Runtime {
+	type Event = Event;
+	type SovereignOrigin = EnsureRootOrThreeFourthsCouncil;
+}
+
+parameter_types! {
+	pub const BaseXcmWeight: Weight = 100_000_000;
+	pub SelfLocation: MultiLocation = MultiLocation::new(1, X1(Parachain(ParachainInfo::parachain_id().into())));
+}
+
+impl orml_xtokens::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type CurrencyIdConvert = CurrencyIdConvert;
+	type AccountIdToMultiLocation = AccountIdToMultiLocation;
+	type SelfLocation = SelfLocation;
+	type XcmExecutor = XcmExecutor<XcmConfig>;
+	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
+	type BaseXcmWeight = BaseXcmWeight;
+	type LocationInverter = LocationInverter<Ancestry>; // fixme Ancestry这个用kusama网络的话需要更改
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -1133,6 +1281,9 @@ construct_runtime!(
 		//  3rd Party
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 40,
 		Vesting: orml_vesting::{Pallet, Storage, Call, Event<T>, Config<T>} = 41,
+		UnknownTokens: orml_unknown_tokens::{Pallet, Storage, Event} = 42,
+		OrmlXcm: orml_xcm::{Pallet, Call, Event<T>} = 43,
+		XTokens: orml_xtokens::{Pallet, Storage, Call, Event<T>} = 44,
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,
@@ -1260,7 +1411,7 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_ico_rpc_runtime_api::IcoAmountApi<Block, AccountId, AssetId, Index, Balance> for Runtime {
+	impl pallet_ico_rpc_runtime_api::IcoAmountApi<Block, AccountId, CurrencyId, Index, Balance> for Runtime {
 		fn can_release_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
 			Ico::can_release_amount(account, currency_id, index)
 		}
