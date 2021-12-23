@@ -1,8 +1,8 @@
 relaychain:
-  image: parity/polkadot:v0.9.8
+  image: parity/polkadot:v0.9.13
   chain: rococo-local
   runtimeGenesisConfig:
-    parachainsConfiguration:
+    configuration:
       config:
         validation_upgrade_frequency: 1
         validation_upgrade_delay: 1

@@ -388,7 +388,7 @@ pub mod pallet {
 
 		///  remove a sword holder  provider to the system
 		///
-		/// - `ias_index`: KYCIndex.
+		/// - `sword_holder_index`: KYCIndex.
 		/// - `kyc_fields`: KYCFields.
 		///
 		/// Emits `SwordHolderRemoved` if successful.
@@ -401,12 +401,12 @@ pub mod pallet {
         ))]
 		pub fn kill_sword_holder(
 			origin: OriginFor<T>,
-			ias_index: KYCIndex,
+			sword_holder_index: KYCIndex,
 			kyc_fields: KYCFields,
 		) -> DispatchResultWithPostInfo {
 			T::SwordHolderOrigin::ensure_origin(origin)?;
-			Self::remove_kyc_service(ias_index.clone(), kyc_fields, false)?;
-			Self::deposit_event(Event::<T>::SwordHolderRemoved(ias_index));
+			Self::remove_kyc_service(sword_holder_index.clone(), kyc_fields, false)?;
+			Self::deposit_event(Event::<T>::SwordHolderRemoved(sword_holder_index));
 			Ok(().into())
 		}
 
