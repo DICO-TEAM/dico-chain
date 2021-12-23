@@ -358,11 +358,13 @@ pub mod module {
 		#[pallet::weight(10_000)]
 		pub fn active(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
+			Self::do_active_or_not(&owner, token, true)?;
 			TokensOf::<T>::get(&owner).iter().for_each(|t| {
-				Self::do_active_or_not(&owner, *t, false);
+				if token != *t {
+					Self::do_active_or_not(&owner, *t, false);
+				}
 			});
 
-			Self::do_active_or_not(&owner, token, true)?;
 			Self::deposit_event(Event::<T>::Active(token));
 
 			Ok(())
@@ -487,6 +489,7 @@ impl<T: Config> Pallet<T> {
 					Error::<T>::NoAvailableTokenId
 				);
 				info.total_issuance = new_total_issuance;
+				*class_info = Some(info.clone());
 				Ok(())
 			})?;
 
@@ -509,8 +512,11 @@ impl<T: Config> Pallet<T> {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
 			ensure!(!Self::is_in_sale(token.0, token.1), Error::<T>::InSale);
 			ensure!(t.owner == Some(owner.clone()), Error::<T>::NotOwner);
+
 			match is_active {
-				true => t.data.status.is_active_image = true,
+				true => {
+					ensure!(!t.data.status.is_active_image, Error::<T>::ActiveNft);
+					t.data.status.is_active_image = true },
 				_ => t.data.status.is_active_image = false,
 			}
 			*token_info = Some(t);
@@ -554,14 +560,6 @@ impl<T: Config> Pallet<T> {
 			ensure!(t.owner == Some(owner.clone()), Error::<T>::NoPermission);
 			ensure!(!Self::is_in_sale(token.0, token.1), Error::<T>::InSale);
 			ensure!(!t.data.status.is_active_image, Error::<T>::ActiveNft);
-			Classes::<T>::try_mutate(token.0, |class_info| -> DispatchResult {
-				let info = class_info.as_mut().ok_or(Error::<T>::ClassNotFound)?;
-				info.total_issuance = info
-					.total_issuance
-					.checked_sub(&One::one())
-					.ok_or(ArithmeticError::Overflow)?;
-				Ok(())
-			})?;
 
 			T::PowerHandler::add_user_power(&owner, t.data.power_threshold)?;
 			Self::remove_token_ownership(owner, token.0, token.1);
@@ -638,17 +636,12 @@ impl<T: Config> Pallet<T> {
 
 	/// Destroy NFT(non fungible token) class
 	pub fn destroy_class(issuer: &T::AccountId, class_id: T::ClassId) -> DispatchResult {
-		Classes::<T>::try_mutate_exists(class_id, |class_info| -> DispatchResult {
-			let info = class_info.take().ok_or(Error::<T>::ClassNotFound)?;
-
-			ensure!(info.issuer == *issuer, Error::<T>::NoPermission);
-			ensure!(info.total_issuance == Zero::zero(), Error::<T>::CannotDestroyClass);
-
-			IssuerOf::<T>::remove(&info.data.level);
-			Classes::<T>::remove(class_id);
-
-			Ok(())
-		})
+		let info = Classes::<T>::get(class_id).ok_or(Error::<T>::ClassNotFound)?;
+		ensure!(info.issuer == *issuer, Error::<T>::NoPermission);
+		ensure!(info.total_issuance == Zero::zero(), Error::<T>::CannotDestroyClass);
+		IssuerOf::<T>::remove(&info.data.level);
+		Classes::<T>::remove(class_id);
+		Ok(())
 	}
 
 	/// Update initializing tokens

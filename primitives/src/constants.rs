@@ -63,3 +63,35 @@ pub mod time {
 	pub const HOURS: BlockNumber = MINUTES * 60;
 	pub const DAYS: BlockNumber = HOURS * 24;
 }
+
+pub mod parachains {
+
+	/// native
+	pub mod native {
+		pub mod KICO {
+			pub const AssetId: u32 = 0;
+			pub const TokenSymbol: &[u8] = "KICO".as_bytes();
+		}
+		pub mod LT {
+			pub const AssetId: u32 = 100;
+			pub const TokenSymbol: &[u8] = "LT".as_bytes();
+		}
+	}
+
+	/// kusama
+	pub mod kusama {
+		pub mod KSM {
+			pub const AssetId: u32 = 1;
+			pub const TokenSymbol: &[u8] = "KSM".as_bytes();
+		}
+	}
+
+	/// listen
+	pub mod listen {
+		pub const PARA_ID: u32 = 1002;
+		pub mod LTP {
+			pub const AssetId: u32 = 101;
+			pub const TokenSymbol: &[u8] = "LTP".as_bytes();
+		}
+	}
+}

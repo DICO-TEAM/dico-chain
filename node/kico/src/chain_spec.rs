@@ -172,7 +172,7 @@ pub fn kico_config(id: ParaId) -> ChainSpec {
         None,
         Some(get_properties(NetworkType::KICO)),
         Extensions {
-            relay_chain: "rococo-local".into(),
+            relay_chain: "kusama-local".into(),
             para_id: id.into(),
         },
     )

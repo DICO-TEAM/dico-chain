@@ -48,6 +48,11 @@ pallet-farm-extend = { package = "pallet-farm-extend", default-features = false,
 orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
 orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
 orml-vesting = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
+orml-xcm-support = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false, branch = "master" }
+orml-unknown-tokens = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false, branch = "master" }
+orml-xcm = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false, branch = "master" }
+orml-xtokens = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false, branch = "master" }
+
 
 
 
@@ -217,6 +222,10 @@ std = [
     "orml-tokens/std",
     "orml-traits/std",
     "orml-vesting/std",
+	"orml-xcm-support/std",
+	"orml-unknown-tokens/std",
+	"orml-xcm/std",
+	"orml-xtokens/std",
 
     # polkadot
     "polkadot-parachain/std",
