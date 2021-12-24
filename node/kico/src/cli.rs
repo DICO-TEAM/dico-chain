@@ -61,11 +61,6 @@ pub struct ExportGenesisStateCommand {
     #[structopt(parse(from_os_str))]
     pub output: Option<PathBuf>,
 
-    /// Id of the parachain this state is for.
-    ///
-    /// Default: 2000
-    #[structopt(long)]
-    pub parachain_id: Option<u32>,
 
     /// Write output in binary. Default is to write in hex.
     #[structopt(short, long)]
@@ -104,9 +99,6 @@ pub struct Cli {
 
     #[structopt(flatten)]
     pub run: cumulus_client_cli::RunCmd,
-
-    #[structopt(long)]
-    pub parachain_id: Option<u32>,
 
     /// Relaychain arguments
     #[structopt(raw = true)]

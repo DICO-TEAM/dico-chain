@@ -75,13 +75,13 @@ use frame_support::{
 	},
 	PalletId,
 };
+use frame_system::pallet_prelude::*;
+pub use pallet::*;
 use sp_runtime::traits::{
 	AccountIdConversion, AppendZerosInput, CheckedAdd, CheckedDiv, SaturatedConversion, Saturating, StaticLookup, Zero,
 };
 use sp_std::convert::TryFrom;
-use frame_system::pallet_prelude::*;
 use sp_std::prelude::*;
-pub use pallet::*;
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
@@ -962,12 +962,33 @@ pub mod pallet {
 					// kyc user redo kyc
 					record_list
 						.iter()
-						.filter(|&record| record.progress != Progress::Success || record.progress != Progress::Failure)
+						.filter(|&record| {
+							!(record.progress == Progress::Success || record.progress == Progress::Failure)
+						})
 						.try_for_each(move |record| -> DispatchResult {
 							let reg = <KYCOf<T>>::take(&record.account).ok_or(Error::<T>::NotFound)?;
+							// unreserve deposit fee
 							let deposit = reg.total_deposit();
 							let _ = T::Currency::unreserve(&record.account, deposit.clone());
-							let _ = <ApplicationFormList<T>>::take(&record.account);
+							// unreserve service fee
+
+							if let Some(ApplicationForm {
+								ias,
+								sword_holder,
+								progress,
+							}) = <ApplicationFormList<T>>::take(&record.account)
+								.iter()
+								.filter(|item| matches!(item, Some(item) if item.progress == record.progress))
+								.next()
+								.ok_or(Error::<T>::NoApplication)?
+							{
+								let pay_fee = ias
+									.1
+									.fee
+									.checked_add(&sword_holder.1.fee)
+									.ok_or_else(|| DispatchError::from(Error::<T>::InvalidFee))?;
+								T::Currency::unreserve(&record.account, pay_fee);
+							}
 							runtime_print!("clear KYCOf /ApplicationFormList");
 							Ok(())
 						})?;
@@ -1174,7 +1195,9 @@ pub mod pallet {
                     }
 
 
-                    <ApplicationFormList<T>>::insert(target, app_list);
+                    Self::update_application_form(target, ias.1.account.clone(), ias.0,
+                                                  sword_holder.1.account.clone(), sword_holder.0,
+                                                  ias.1.fields, Progress::Success)?;
                     Self::update_record_list(&ias.1.account, target, &kyc_fields, Progress::Success);
                     Self::update_record_list(&sword_holder.1.account, target, &kyc_fields, Progress::Success);
                 }

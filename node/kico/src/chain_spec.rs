@@ -1,4 +1,3 @@
-use cumulus_primitives_core::ParaId;
 pub use dico_primitives::{constants::currency::*, network::*, AccountId, Balance, BlockNumber, Signature};
 use hex_literal::hex;
 use kico_runtime::{
@@ -21,6 +20,9 @@ const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
+
+pub const PARA_ID: u32 = 2000;
+
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -64,7 +66,7 @@ pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
     AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
-pub fn kico_config(id: ParaId) -> ChainSpec {
+pub fn kico_config() -> ChainSpec {
     ChainSpec::from_genesis(
         // Name
         "KICO",
@@ -164,7 +166,6 @@ pub fn kico_config(id: ParaId) -> ChainSpec {
                 &mut distribution_accounts,
                 council,
                 technical_committee,
-                id,
             )
         },
         vec![],
@@ -172,8 +173,8 @@ pub fn kico_config(id: ParaId) -> ChainSpec {
         None,
         Some(get_properties(NetworkType::KICO)),
         Extensions {
-            relay_chain: "kusama-local".into(),
-            para_id: id.into(),
+            relay_chain: "rococo-local".into(),
+            para_id: PARA_ID,
         },
     )
 }
@@ -185,7 +186,6 @@ fn kico_genesis(
     distribution_accounts: &mut Vec<(AccountId, Balance)>,
     council: Vec<AccountId>,
     technical_committee: Vec<AccountId>,
-    id: ParaId,
 ) -> kico_runtime::GenesisConfig {
     let num_endowed_accounts = endowed_accounts.len();
     const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
@@ -257,7 +257,9 @@ fn kico_genesis(
         treasury: Default::default(),
         council: CouncilConfig::default(),
         sudo: SudoConfig { key: root_key },
-        parachain_info: ParachainInfoConfig { parachain_id: id },
+        parachain_info: ParachainInfoConfig {
+            parachain_id: PARA_ID.into(),
+        },
         aura: Default::default(),
         aura_ext: Default::default(),
         parachain_system: Default::default(),
