@@ -23,7 +23,6 @@ parachains:
       base: kico
       collators:
         - alice
-
       sudo: alice
     id: 2000
     parachain: true
@@ -38,7 +37,6 @@ parachains:
       - --no-beefy
     env:
       RUST_LOG: sc_basic_authorship=trace,cumulus-consensus=trace,cumulus-collator=trace,collator_protocol=trace,collation_generation=trace,aura=debug
-    volumePath: /kico/data
     nodes:
       - flags:
           - --alice
