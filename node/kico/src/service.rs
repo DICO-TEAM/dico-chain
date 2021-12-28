@@ -32,6 +32,9 @@ use sp_keystore::SyncCryptoStorePtr;
 use sp_runtime::traits::BlakeTwo256;
 use substrate_prometheus_endpoint::Registry;
 
+use pallet_ico_rpc_runtime_api::IcoAmountApi;
+
+
 /// Native executor instance.
 pub struct ParachainRuntimeExecutor;
 
@@ -189,9 +192,12 @@ async fn start_node_impl<RuntimeApi, Executor, RB, BIQ, BIC>(
 			StateBackend = sc_client_api::StateBackendFor<TFullBackend<Block>, Block>,
 		> + sp_offchain::OffchainWorkerApi<Block>
 		+ sp_block_builder::BlockBuilder<Block>
+		+ pallet_farm_rpc::FarmRuntimeApi<Block, AccountId, PoolId, Balance>
+		+ IcoAmountApi<Block, AccountId, AssetId, Index, Balance>
 		+ cumulus_primitives_core::CollectCollationInfo<Block>
 		+ pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>
 		+ substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
+
 		sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
 		Executor: sc_executor::NativeExecutionDispatch + 'static,
 		RB: Fn(
