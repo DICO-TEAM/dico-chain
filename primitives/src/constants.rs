@@ -82,7 +82,6 @@ pub mod parachains {
 	pub mod kusama {
 		pub mod KSM {
 			pub const AssetId: u32 = 1;
-			pub const TokenSymbol: &[u8] = "KSM".as_bytes();
 		}
 	}
 

@@ -777,7 +777,7 @@ match_type! {
 pub type Barrier = (
     TakeWeightCredit,
     AllowTopLevelPaidExecutionFrom<Everything>,
-    // AllowUnpaidExecutionFrom<ParentOrParentsExecutivePlurality>,
+    AllowUnpaidExecutionFrom<ParentOrParentsExecutivePlurality>,
 	// Expected responses are OK.
 	AllowKnownQueryResponses<PolkadotXcm>,
 	// Subscriptions for version tracking are OK.
@@ -812,7 +812,7 @@ impl Config for XcmConfig {
     // How to withdraw and deposit an asset.
     type AssetTransactor = LocalAssetTransactor;
     type OriginConverter = XcmOriginToTransactDispatchOrigin;
-    type IsReserve = NativeAsset;
+    type IsReserve = MultiNativeAsset;
     type IsTeleporter = ();
     // Teleporting is disabled.
     type LocationInverter = LocationInverter<Ancestry>;
@@ -1243,7 +1243,7 @@ impl orml_xtokens::Config for Runtime {
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
 	type BaseXcmWeight = BaseXcmWeight;
-	type LocationInverter = LocationInverter<Ancestry>; // fixme Ancestry这个用kusama网络的话需要更改
+	type LocationInverter = LocationInverter<Ancestry>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
