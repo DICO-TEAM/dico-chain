@@ -110,7 +110,7 @@ pub fn kico_config() -> ChainSpec {
                 "5EemocaRg4Q1fWskskZsYv5W2eTG3DDxmocg7QMLqHNUBwtX",
                 // Market: 500 million, 10% of Balance, 90% is vesting, 12 months linear distribution
                 "5DcKbSQMBWL9rNpu4hEEgHsdhBpBjW9AroN67szRJecMDSyK",
-                // Aution:  500 million, 30% of Balance, 70% is vesting, 12 months linear distribution
+                // Aution:  500 million, 30% of Balance, 70% is vesting, 48 weeks linear distribution
                 "5HTzXU1pYHD7YG55S2TqSeQLbM9cWvEyv3Ayqjf3j33nM8pV",
             ]
                 .iter()
