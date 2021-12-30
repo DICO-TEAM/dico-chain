@@ -315,6 +315,8 @@ impl<
 /// Certification progress record
 #[derive(Copy, Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 pub enum Progress {
+	/// need reset
+	NeedReset,
 	/// pending status
 	Pending,
 	/// IAS Start this progress
@@ -342,6 +344,15 @@ pub struct Record<AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq> {
 
 	/// KYCFields .
 	pub fields: KYCFields,
+}
+
+impl <
+	AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq
+> Record<AccountId> {
+	pub fn set_progress(&mut self, progress: Progress) -> &mut Self {
+		self.progress = progress;
+		self
+	}
 }
 
 /// International Organization for Standardization (ISO)
