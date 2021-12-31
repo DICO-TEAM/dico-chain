@@ -10,14 +10,14 @@ cd $PROJECT_ROOT
 
 
 # Find the current version from Cargo.toml
-VERSION=`grep "^version" ./node/kico/Cargo.toml | egrep -o "([0-9\.]+)"`
+VERSION=`grep "^version" ./node/dico/Cargo.toml | egrep -o "([0-9\.]+)"`
 GITUSER=dicoteam
-GITREPO=kico
+GITREPO=dico
 
 # Build the image
 echo "Building ${GITUSER}/${GITREPO}:latest docker image, hang on!"
 # time docker build -f ./scripts/dockerfiles/kico/kico_builder.Dockerfile -t ${GITUSER}/${GITREPO}:latest .
-time docker build --build-arg http_proxy=http://192.168.1.36:8889 --build-arg https_proxy=http://192.168.1.36:8889 -f ./scripts/dockerfiles/kico/kico_builder.Dockerfile -t ${GITUSER}/${GITREPO}:latest .
+time docker build --build-arg http_proxy=http://192.168.1.36:8889 --build-arg https_proxy=http://192.168.1.36:8889 -f ./scripts/dockerfiles/dico/dico_builder.Dockerfile -t ${GITUSER}/${GITREPO}:latest .
 docker tag ${GITUSER}/${GITREPO}:latest ${GITUSER}/${GITREPO}:v${VERSION}
 
 # Show the list of available images for this repo

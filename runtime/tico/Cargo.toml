@@ -1,5 +1,5 @@
 [package]
-name        = "kico-runtime"
+name        = "tico-runtime"
 authors     = ["DICO-TEAM"]
 description = "A decentralized and governable ICO platform."
 license     = "Apache 2.0"
@@ -14,33 +14,37 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 codec             = { package = "parity-scale-codec", version = "2.3.1", default-features = false, features = ["derive", "max-encoded-len"] }
-serde             = { version = "1.0.124", optional           = true, default-features    = false }
-hex-literal       = { version = "0.3.4", optional             = true, default-features    = false }
-scale-info        = { version = "1.0", default-features       = false, features           = ["derive"] }
+serde             = { version = "1.0.124", optional = true, default-features = false }
+hex-literal       = { version = "0.3.4", optional = true, default-features = false }
+scale-info        = { version = "1.0", default-features = false, features = ["derive"] }
 smallvec          = { version = "1.6.1"}
 static_assertions = { version = "1.1.0" }
 
+
+
+# https://docs.rs/getrandom/0.2.3/getrandom/#indirect-dependencies
+#getrandom = { version = "0.2", features = ["js", "std"], default-features = false }
 
 
 # Local primitives
 dico-primitives = { package = "dico-primitives", default-features = false, path = "../../primitives" }
 
 # Local Dependencies
-pallet-kyc                  = { package = "pallet-kyc", default-features                  = false, path = "../../pallets/kyc" }
-pallet-template             = { package = "pallet-template", default-features             = false, path = "../../pallets/template" }
-pallet-oracle               = { package = "pallet-oracle", default-features               = false, path = "../../pallets/oracle" }
-pallet-pricedao             = { package = "pallet-pricedao", default-features             = false, path = "../../pallets/pricedao" }
-pallet-amm                  = { package = "pallet-amm", default-features                  = false, path = "../../pallets/amm" }
-pallet-farm                 = { package = "pallet-farm", default-features                 = false, path = "../../pallets/farm" }
-pallet-lbp                  = { package = "pallet-lbp", default-features                  = false, path = "../../pallets/lbp" }
-pallet-currencies           = { package = "pallet-currencies", default-features           = false, path = "../../pallets/currencies" }
-pallet-ico                  = { package = "pallet-ico", default-features                  = false, path = "../../pallets/ico" }
-pallet-dao                  = { package = "pallet-dao", default-features                  = false, path = "../../pallets/dao" }
-pallet-dico-treasury        = { package = "pallet-dico-treasury", default-features        = false, path = "../../pallets/treasury" }
-pallet-ico-rpc-runtime-api  = { package = "pallet-ico-rpc-runtime-api", default-features  = false, path = "../../pallets/ico/rpc/runtime-api" }
+pallet-kyc                  = { package = "pallet-kyc", default-features = false, path = "../../pallets/kyc" }
+pallet-template             = { package = "pallet-template", default-features = false, path = "../../pallets/template" }
+pallet-oracle               = { package = "pallet-oracle", default-features = false, path = "../../pallets/oracle" }
+pallet-pricedao             = { package = "pallet-pricedao", default-features = false, path = "../../pallets/pricedao" }
+pallet-amm                  = { package = "pallet-amm", default-features = false, path = "../../pallets/amm" }
+pallet-farm                 = { package = "pallet-farm", default-features = false, path = "../../pallets/farm" }
+pallet-lbp                  = { package = "pallet-lbp", default-features = false, path = "../../pallets/lbp" }
+pallet-currencies           = { package = "pallet-currencies", default-features = false, path = "../../pallets/currencies" }
+pallet-ico                  = { package = "pallet-ico", default-features = false, path = "../../pallets/ico" }
+pallet-dao                  = { package = "pallet-dao", default-features = false, path = "../../pallets/dao" }
+pallet-dico-treasury        = { package = "pallet-dico-treasury", default-features = false, path = "../../pallets/treasury" }
+pallet-ico-rpc-runtime-api  = { package = "pallet-ico-rpc-runtime-api", default-features = false, path = "../../pallets/ico/rpc/runtime-api" }
 pallet-farm-rpc-runtime-api = { package = "pallet-farm-rpc-runtime-api", default-features = false, path = "../../pallets/farm/rpc/runtime-api" }
-pallet-nft                  = { package = "pallet-nft", default-features                  = false, path = "../../pallets/nft" }
-pallet-farm-extend          = { package = "pallet-farm-extend", default-features          = false, path = "../../pallets/farm-extend" }
+pallet-nft                  = { package = "pallet-nft", default-features = false, path = "../../pallets/nft" }
+pallet-farm-extend          = { package = "pallet-farm-extend", default-features = false, path = "../../pallets/farm-extend" }
 
 # orml
 orml-tokens         = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
@@ -50,8 +54,6 @@ orml-xcm-support    = { git = 'https://github.com/open-web3-stack/open-runtime-m
 orml-unknown-tokens = { git = 'https://github.com/open-web3-stack/open-runtime-module-library', default-features = false, branch = "master" }
 orml-xcm            = { git = 'https://github.com/open-web3-stack/open-runtime-module-library', default-features = false, branch = "master" }
 orml-xtokens        = { git = 'https://github.com/open-web3-stack/open-runtime-module-library', default-features = false, branch = "master" }
-
-
 
 
 ## Substrate FRAME Dependencies

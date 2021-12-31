@@ -1,5 +1,5 @@
 [package]
-name        = 'kico'
+name        = 'dico'
 authors     = ["DICO-TEAM"]
 description = 'A decentralized and governable ICO platform.'
 license     = 'Apache 2.0'
@@ -17,7 +17,7 @@ targets = ['x86_64-unknown-linux-gnu']
 substrate-build-script-utils = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.13' }
 
 [[bin]]
-name = 'kico'
+name = 'dico'
 
 
 
@@ -29,19 +29,18 @@ structopt    = { version = '0.3.8' }
 serde        = { version = "1.0.124", features = ["derive"] }
 serde_json   = { version = '1.0.68' }
 hex-literal  = { version = '0.3.1' }
-
-
-
-
-
-# RPC related Dependencies
 jsonrpc-core = { version = '18.0.0' }
 
 
 
+
+# runtime
+kico-runtime               = { package = "kico-runtime", path = '../../runtime/kico' }
+tico-runtime               = { package = "tico-runtime", path = '../../runtime/tico' }
+
+
 # Local Dependencies
 dico-primitives            = { package = 'dico-primitives', path = "../../primitives" }
-kico-runtime               = { package = "kico-runtime", path = '../../runtime/kico' }
 pallet-farm-rpc            = { package = 'pallet-farm-rpc', path = "../../pallets/farm/rpc" }
 pallet-ico-rpc-runtime-api = { path = "../../pallets/ico/rpc/runtime-api"}
 pallet-ico-rpc             = { path = "../../pallets/ico/rpc/rpc" }

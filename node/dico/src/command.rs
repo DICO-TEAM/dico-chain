@@ -20,14 +20,15 @@ use std::{io::Write, net::SocketAddr};
 
 fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 	Ok(match id {
-		"" | "kico" => Box::new(chain_spec::kico_config()),
-		path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
+		"" | "tico" => Box::new(chain_spec::tico::tico_config()),
+		"kico" => Box::new(chain_spec::kico::kico_config()),
+		path => Box::new(chain_spec::kico::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 	})
 }
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"KICO Node".into()
+		"DICO Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -36,7 +37,7 @@ impl SubstrateCli for Cli {
 
 	fn description() -> String {
 		format!(
-			"KICO Node\n\nThe command-line arguments provided first will be \
+			"DICO Node\n\nThe command-line arguments provided first will be \
 		passed to the parachain node, while the arguments provided after -- will be passed \
 		to the relaychain node.\n\n\
 		{} [parachain-args] -- [relaychain-args]",
@@ -67,7 +68,7 @@ impl SubstrateCli for Cli {
 
 impl SubstrateCli for RelayChainCli {
 	fn impl_name() -> String {
-		"KICO Node".into()
+		"DICO Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -75,7 +76,7 @@ impl SubstrateCli for RelayChainCli {
 	}
 
 	fn description() -> String {
-		"KICO Node\n\nThe command-line arguments provided first will be \
+		"DICO Node\n\nThe command-line arguments provided first will be \
 		passed to the parachain node, while the arguments provided after -- will be passed \
 		to the relaychain node.\n\n\
 		parachain-collator [parachain-args] -- [relaychain-args]"
