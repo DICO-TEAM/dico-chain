@@ -16,4 +16,3 @@ relaychain:
   nodes:
     - name: alice
     - name: bob
-    - name: charlie

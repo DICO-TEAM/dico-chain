@@ -16,7 +16,6 @@ relaychain:
   nodes:
     - name: alice
     - name: bob
-    - name: charlie
 
 parachains:
   - image: dicoteam/dico-chain:latest
