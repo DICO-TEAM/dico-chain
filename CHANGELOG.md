@@ -1,6 +1,75 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.1.4] - 2022-01-04
+
+### Bug Fixes
+
+- Fix rpc expose error
+- Support MultiNativeAsset for IsReserve
+- Update vesting logic
+- Add NeedRest logic
+
+### Features
+
+- Add TICO for release testnet
+
+## [1.1.3] - 2021-12-23
+
+### Bug Fixes
+
+- Fix(farm-extend): Update `acc_reward_per_share` in the same block
+- Udapte to v0.9.13
+- Upgrade to polkadot-v0.9.13
+- Upgrade to polkadot-v0.9.13
+- Upgrade to polkadot-v0.9.13
+- Upgrade to polkadot-v0.9.13
+- Fix test bug
+- Fix the rpc bug
+- Fix the bug that can not burn nft
+
+### Features
+
+- Complete cross chain
+
+### Upgrade
+
+- Upgrade the currencies and the treasury module to latest version
+- Upgrade ico module to 0.9.13
+- Upgrade dao module to 0.9.13
+- Upgrade nft module to 0.9.13
+- Upgrade nft module to 0.9.13
+- Upgrade nft module to 0.9.13
+
+## [1.1.2] - 2021-12-09
+
+### Bug Fixes
+
+- Fix area statistics error (#133)
+- Clear_kyc_should_work
+- Adjust steps.
+- Add test case
+- Update delele ias/SwordHolder logic
+- Check whether the total deposit amount is zero.
+
+### Features
+
+- Add GenesisConfig for the currencies module
+
+### Performance
+
+- Fix period for develop (#140)
+- Add vesting account for develop (#141)
+- Release v1.1.2
+
+### Testing
+
+- Add the readme and test
+
+### Update
+
+- Add PendingInfo and VestingScheduleOf
+
 ## [1.1.1] - 2021-11-22
 
 ### Bug Fixes
