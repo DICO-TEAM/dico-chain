@@ -315,16 +315,14 @@ impl<T: Config> PriceProvider<CurrencyId> for Pallet<T> {
 	fn get_price_from_swap(currency_id0: CurrencyId, currency_id1: CurrencyId) -> Option<Price> {
 		// currency_id1: the queried currency
 		// currency_id2: stable coin's currency id,such as usdt
-		log::info!("****************get_price_from_swap:{:?}********************",currency_id0);
 		let query_currency_uint = Self::get_uint(currency_id0)?;
-		log::info!("------query_currency_uint:{:?}------",query_currency_uint);
+		// log::info!("------query_currency_uint:{:?}------",query_currency_uint);
 		// let stable_currency_uint = Self::get_uint(currency_id1)?;
 		let liquidity = pallet_amm::Pallet::<T>::get_liquidity(Pair::new(currency_id0, currency_id1))?;
 		let price: U256;
 		if currency_id0 < currency_id1 {
 			// currency_id0_liquidity/query_currency_uint
 			let reserve_in = U256::from(liquidity.0).checked_div(query_currency_uint)?;
-			log::info!("------reserve_in {:?}------",reserve_in);
 			// currency_id1_liquidity*stable_currency_uint
 			let reserve_out = U256::from(liquidity.1); //.checked_mul(stable_currency_uint)?;
 			price = pallet_amm::math::get_amount_out(U256::from(1), reserve_in, reserve_out).ok()?;
