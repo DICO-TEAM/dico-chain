@@ -73,7 +73,7 @@ pub mod parachains {
 			pub const TokenSymbol: &[u8] = "KICO".as_bytes();
 		}
 		pub mod LT {
-			pub const AssetId: u32 = 100;
+			pub const AssetId: u32 = 6;
 			pub const TokenSymbol: &[u8] = "LT".as_bytes();
 		}
 	}
