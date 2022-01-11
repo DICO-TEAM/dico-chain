@@ -66,6 +66,7 @@ frame-try-runtime            = { git = "https://github.com/paritytech/substrate"
 
 ## Substrate Pallet Dependencies
 pallet-aura                                = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
+pallet-identity                            = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
 pallet-authorship                          = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
 pallet-balances                            = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
 pallet-bounties                            = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
@@ -182,6 +183,7 @@ std = [
     "sp-version/std",
 
     "pallet-aura/std",
+    "pallet-identity/std",
     "pallet-authorship/std",
     "pallet-balances/std",
     "pallet-bounties/std",
@@ -241,6 +243,7 @@ try-runtime = [
     "frame-executive/try-runtime",
     "frame-system/try-runtime",
     "pallet-aura/try-runtime",
+    "pallet-identity/try-runtime",
     "pallet-authorship/try-runtime",
     "pallet-balances/try-runtime",
     "pallet-bounties/try-runtime",
