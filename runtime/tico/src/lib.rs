@@ -121,7 +121,7 @@ impl_opaque_keys! {
 /// This runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("TICO"),
+    spec_name: create_runtime_str!("DICO"),
     impl_name: create_runtime_str!("TICO"),
     authoring_version: 1,
     spec_version: 2,
@@ -1295,6 +1295,7 @@ construct_runtime!(
 		Elections: pallet_elections_phragmen::{Pallet, Call, Storage, Event<T>, Config<T>} = 14,
 		TechnicalMembership: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 15,
         Identity: pallet_identity::{Pallet, Call, Storage, Event<T>} = 16,
+
 		// Governance
 		Bounties: pallet_bounties::{Pallet, Call, Storage, Event<T>} = 20,
 		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>} = 21,
