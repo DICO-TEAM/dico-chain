@@ -122,9 +122,9 @@ impl_opaque_keys! {
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("DICO"),
-    impl_name: create_runtime_str!("TICO"),
+    impl_name: create_runtime_str!("DICO"),
     authoring_version: 1,
-    spec_version: 2,
+    spec_version: 3,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,

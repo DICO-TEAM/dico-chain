@@ -195,7 +195,7 @@ fn kico_genesis(
 				DicoAssetInfo {
 					owner: "5EKzRRVjvBvZfcRJPaHJCw2yecP9uQXcm6vqNcnMh6bCjpPe".parse().unwrap(),
 					metadata: Some(DicoAssetMetadata {
-						name: "kico".into(),
+						name: "KICO".into(),
 						symbol: "KICO".into(),
 						decimals: 14u8,
 					}),
