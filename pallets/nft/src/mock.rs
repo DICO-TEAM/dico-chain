@@ -5,10 +5,10 @@
 use frame_support::{construct_runtime, parameter_types};
 use sp_core::H256;
 use sp_runtime::{testing::Header, traits::IdentityLookup};
-
 use super::*;
-
 use crate as nft;
+use pallet_balances;
+type Balance = u64;
 
 parameter_types! {
 	pub const BlockHashCount: u64 = 250;
@@ -33,14 +33,30 @@ impl frame_system::Config for Runtime {
 	type BlockLength = ();
 	type Version = ();
 	type PalletInfo = PalletInfo;
-	type AccountData = ();
+	type AccountData = pallet_balances::AccountData<Balance>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type DbWeight = ();
-	type BaseCallFilter = ();
+	type BaseCallFilter = frame_support::traits::Everything;
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
+}
+
+parameter_types! {
+	pub const ExistentialDeposit: u64 = 1;
+}
+
+impl pallet_balances::Config for Runtime {
+	type Balance = Balance;
+	type DustRemoval = ();
+	type Event = Event;
+	type ExistentialDeposit = ExistentialDeposit;
+	type AccountStore = System;
+	type WeightInfo = ();
+	type MaxLocks = ();
+	type MaxReserves = ();
+	type ReserveIdentifier = [u8; 8];
 }
 
 parameter_types! {
@@ -51,10 +67,12 @@ parameter_types! {
 impl Config for Runtime {
 	type ClassId = u64;
 	type TokenId = u64;
-	type ClassData = ();
-	type TokenData = ();
 	type MaxClassMetadata = MaxClassMetadata;
 	type MaxTokenMetadata = MaxTokenMetadata;
+	type Event = Event;
+	type Currency = Balances;
+	type MaxTokenAttribute = ();
+	type PowerHandler = ();
 }
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Runtime>;
@@ -67,7 +85,8 @@ construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
-		NonFungibleTokenModule: nft::{Pallet, Storage, Config<T>},
+		NonFungibleTokenModule: nft::{Pallet, Storage, Event<T>, Call},
+		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 	}
 );
 
