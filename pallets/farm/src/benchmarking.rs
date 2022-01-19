@@ -25,39 +25,29 @@ fn funded_account<T: Config>(name: &'static str, index: u32) -> T::AccountId {
 
 benchmarks! {
 	set_halving_period {
-		let origin = T::FounderSetOrigin::successful_origin();
-		let call = Call::<T>::set_halving_period(T::BlockNumber::from(1000u32));
-
-	}: { call.dispatch_bypass_filter(origin)? }
+	}: _(RawOrigin::Root, T::BlockNumber::from(1000u32))
 	verify {
 		assert_eq!(HalvingPeriod::<T>::get(), T::BlockNumber::from(1000u32));
 	}
 
 	set_dico_per_block {
-		let origin = T::FounderSetOrigin::successful_origin();
-		let amount: Balance = 10000;
-		let call = Call::<T>::set_dico_per_block(amount);
-
-	}: { call.dispatch_bypass_filter(origin)? }
+	}: _(RawOrigin::Root, Balance::from(10000u32))
 	verify {
-		assert_eq!(DicoPerBlock::<T>::get(), amount);
+		assert_eq!(DicoPerBlock::<T>::get(), Balance::from(10000u32));
 	}
 
 	set_start_block {
-		let origin = T::FounderSetOrigin::successful_origin();
-		let call = Call::<T>::set_start_block(T::BlockNumber::from(10000u32));
-
-	}: { call.dispatch_bypass_filter(origin)? }
+	}: _(RawOrigin::Root, T::BlockNumber::from(10000u32))
 	verify {
 		assert_eq!(StartBlock::<T>::get(), T::BlockNumber::from(10000u32));
 	}
 
 	create_pool {
-		let origin = T::FounderSetOrigin::successful_origin();
+		// let origin = T::FounderSetOrigin::successful_origin();
 		let alloc_point = 1000u128;
-		let call = Call::<T>::create_pool(LIQUIDITY_ID, alloc_point);
+		// let call = Call::<T>::create_pool(LIQUIDITY_ID, alloc_point);
 
-	}: { call.dispatch_bypass_filter(origin)? }
+	}: _(RawOrigin::Root, LIQUIDITY_ID, alloc_point)
 	verify {
 		assert_eq!(TotalAllocPoint::<T>::get(), alloc_point);
 		let pool_info = PoolInfo::new(LIQUIDITY_ID, alloc_point, 1);
@@ -65,17 +55,12 @@ benchmarks! {
 	}
 
 	update_pool_alloc_point {
-		let origin = T::FounderSetOrigin::successful_origin();
-
 		let initial_alloc_point = 1000u128;
 		let update_alloc_point = 10000u128;
 		let pool_id = T::PoolId::zero();
 
-		let create_pool_call = Call::<T>::create_pool(LIQUIDITY_ID, initial_alloc_point);
-
-		let call = Call::<T>::update_pool_alloc_point(pool_id, update_alloc_point);
-
-	}: { create_pool_call.dispatch_bypass_filter(origin.clone())?; call.dispatch_bypass_filter(origin)? }
+		Farm::<T>::create_pool(RawOrigin::Root.into(), LIQUIDITY_ID, initial_alloc_point)?;
+	}: _(RawOrigin::Root, pool_id, update_alloc_point)
 	verify {
 		assert_eq!(TotalAllocPoint::<T>::get(), update_alloc_point);
 		let pool_info = PoolInfo::new(LIQUIDITY_ID, update_alloc_point, 1);
