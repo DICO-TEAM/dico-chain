@@ -50,7 +50,9 @@ mod benchmarking;
 //
 pub mod weights;
 pub mod mock;
+#[cfg(test)]
 pub mod tests;
+
 
 /// Simple index type for proposal counting.
 pub type ProposalIndex = u32;
@@ -83,18 +85,18 @@ pub enum IcoRawOrigin<AccountId, MulBalance> {
 /// Info for keeping track of a motion being voted on.
 pub struct IcoCollectiveVotes<AccountId, BlockNumber, MulBalance> {
 	/// The proposal's unique index.
-	index: ProposalIndex,
+	pub index: ProposalIndex,
 	/// The proposal's reason,
-	reason: Vec<u8>,
+	pub reason: Vec<u8>,
 	/// The number of approval IcoCollectiveVotes that are needed to pass the
 	/// motion.
-	threshold: Percent,
+	pub threshold: Percent,
 	/// The current set of voters that approved it.
-	ayes: Vec<(AccountId, MulBalance)>,
+	pub ayes: Vec<(AccountId, MulBalance)>,
 	/// The current set of voters that rejected it.
-	nays: Vec<(AccountId, MulBalance)>,
+	pub nays: Vec<(AccountId, MulBalance)>,
 	/// The hard end time of this vote.
-	end: BlockNumber,
+	pub end: BlockNumber,
 }
 
 #[frame_support::pallet]
@@ -534,7 +536,7 @@ pub mod pallet {
 
 		#[cfg(feature = "runtime-benchmarks")]
 		fn successful_origin() -> O {
-			O::from(IcoRawOrigin::Members(0u32, 0u32))
+			O::from(IcoRawOrigin::Members(MultiBalanceOf::<T>::from(1u32), MultiBalanceOf::<T>::from(1u32)))
 		}
 	}
 }

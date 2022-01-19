@@ -1,4 +1,3 @@
-#![cfg(test)]
 
 pub use super::*;
 use pallet_pricedao;

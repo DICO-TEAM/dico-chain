@@ -6,7 +6,10 @@ use sp_core::H256;
 use sp_runtime::traits::BlakeTwo256;
 
 fn proposal() -> H256 {
-	let proposal = Call::IcoTest(ico::Call::terminate_ico(KSM, 1));
+	let proposal = Call::IcoTest(ico::Call::terminate_ico {
+		currency_id: KSM,
+		index: 1u32,
+	});
 	let hash =BlakeTwo256::hash_of(&proposal);
 	Dao::propose(Origin::signed(Alice), KSM, 1, Percent::from_percent(50u8), Box::new(proposal), vec![], 15000u32);
 	assert_eq!(ProposalOf::<Test>::contains_key(KSM, hash), true);
