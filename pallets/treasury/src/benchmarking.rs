@@ -25,16 +25,70 @@ use frame_benchmarking::{account, benchmarks_instance, impl_benchmark_test_suite
 use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
 
-use crate::Module as Treasury;
+use crate::Pallet as Treasury;
 
 const SEED: u32 = 0;
 
+fn get_alice<T: Config>() -> T::AccountId {
+	let caller: T::AccountId = whitelisted_caller();
+	T::MultiCurrency::deposit(T::GetNativeCurrencyId::get(), &caller, 10000u32.into());
+	caller
+}
+
+fn get_bob<T: Config>() -> T::AccountId {
+	let caller: T::AccountId = account("bob", 1, SEED);
+	T::MultiCurrency::deposit(T::GetNativeCurrencyId::get(), &caller, 10000u32.into());
+	caller
+}
+
+fn look_up<T: Config>(who: T::AccountId) -> <T::Lookup as StaticLookup>::Source {
+	T::Lookup::unlookup(who)
+}
+
+fn propose<T: Config>() -> u32 {
+	let caller: T::AccountId = get_alice::<T>();
+	let caller_cp = look_up::<T>(caller.clone());
+	assert!(Treasury::<T>::propose_spend(RawOrigin::Signed(caller.clone()).into(), T::GetNativeCurrencyId::get(), BalanceOf::<T>::from(100u32), caller_cp).is_ok());
+	1
+
+}
+
+fn approve_propose<T: Config>() {
+	let index = propose::<T>();
+	assert!(Treasury::<T>::approve_proposal(RawOrigin::Root.into(), index).is_ok());
+}
 
 benchmarks! {
 	propose_spend {
-		let caller: T::AccountId = whitelisted_caller();
-		T::
+		let caller: T::AccountId = get_alice::<T>();
+	}:_(RawOrigin::Signed(caller.clone()), T::GetNativeCurrencyId::get(), BalanceOf::<T>::from(100u32), look_up::<T>(get_bob::<T>()))
+	verify {
+		assert_eq!(ProposalCount::<T>::get(), 1);
 	}
 
+	reject_proposal {
+		let proposal_index = propose::<T>();
+	}:_(RawOrigin::Root, 1)
+	verify {
+		assert!(!Proposals::<T>::contains_key(proposal_index));
+	}
+
+	approve_proposal {
+		let proposal_index = propose::<T>();
+	}:_(RawOrigin::Root, 1)
+	verify {
+		assert!(Approvals::<T>::get().len() > 0);
+	}
+
+	spend_fund {
+		let alice = get_alice::<T>();
+		approve_propose::<T>();
+	}:_(RawOrigin::Signed(alice.clone()))
+	verify {
+		assert!(Approvals::<T>::get().is_empty());
+	}
+
+
 }
+
 impl_benchmark_test_suite!(Treasury, crate::tests::new_test_ext(), crate::tests::Test,);

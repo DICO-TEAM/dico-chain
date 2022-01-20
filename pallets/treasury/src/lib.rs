@@ -149,7 +149,7 @@ pub mod pallet {
 			let proposer = ensure_signed(origin)?;
 
 			let beneficiary = T::Lookup::lookup(beneficiary)?;
-			let bond = Self::calculate_bond(value);
+			let bond = T::ProposalBond::get();
 
 			T::MultiCurrency::reserve(T::GetNativeCurrencyId::get(), &proposer, bond)
 				.map_err(|_| Error::<T>::InsufficientProposersBalance)?;
@@ -276,12 +276,12 @@ pub mod pallet {
 	}
 }
 
-impl <T: Config> Pallet<T> {
-	pub fn calculate_bond(value: BalanceOf<T>) -> BalanceOf<T> {
-			T::ProposalBond::get() * value
-		}
-
-}
+// impl <T: Config> Pallet<T> {
+// 	pub fn calculate_bond(value: BalanceOf<T>) -> BalanceOf<T> {
+// 			T::ProposalBond::get() * value
+// 		}
+//
+// }
 
 impl<T: Config> DicoTreasuryHandler<T::AccountId> for Module<T> {
 	fn get_treasury_account_id() -> T::AccountId {
