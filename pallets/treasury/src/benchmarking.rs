@@ -20,11 +20,9 @@
 #![cfg(feature = "runtime-benchmarks")]
 
 use super::*;
-
 use frame_benchmarking::{account, benchmarks_instance, impl_benchmark_test_suite, benchmarks, whitelisted_caller};
 use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
-
 use crate::Pallet as Treasury;
 
 const SEED: u32 = 0;
@@ -68,14 +66,14 @@ benchmarks! {
 
 	reject_proposal {
 		let proposal_index = propose::<T>();
-	}:_(RawOrigin::Root, 1)
+	}:_<T::Origin>(T::RejectOrigin::successful_origin(), 1)
 	verify {
 		assert!(!Proposals::<T>::contains_key(proposal_index));
 	}
 
 	approve_proposal {
 		let proposal_index = propose::<T>();
-	}:_(RawOrigin::Root, 1)
+	}:_<T::Origin>(T::ApproveOrigin::successful_origin(), 1)
 	verify {
 		assert!(Approvals::<T>::get().len() > 0);
 	}
