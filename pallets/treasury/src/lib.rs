@@ -19,6 +19,8 @@
 mod benchmarking;
 pub mod traits;
 pub mod weights;
+mod tests;
+
 pub use crate::pallet::*;
 
 use codec::{Decode, Encode};
@@ -147,7 +149,7 @@ pub mod pallet {
 			let proposer = ensure_signed(origin)?;
 
 			let beneficiary = T::Lookup::lookup(beneficiary)?;
-			let bond = T::ProposalBond::get();
+			let bond = Self::calculate_bond(value);
 
 			T::MultiCurrency::reserve(T::GetNativeCurrencyId::get(), &proposer, bond)
 				.map_err(|_| Error::<T>::InsufficientProposersBalance)?;
@@ -272,6 +274,13 @@ pub mod pallet {
 		Deposit(BalanceOf<T>),
 		SpendFund,
 	}
+}
+
+impl <T: Config> Pallet<T> {
+	pub fn calculate_bond(value: BalanceOf<T>) -> BalanceOf<T> {
+			T::ProposalBond::get() * value
+		}
+
 }
 
 impl<T: Config> DicoTreasuryHandler<T::AccountId> for Module<T> {
