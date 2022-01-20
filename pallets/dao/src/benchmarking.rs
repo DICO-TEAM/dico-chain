@@ -37,10 +37,9 @@ use ico::system::RawOrigin;
 use crate::Module as Collective;
 use crate::mock::Test;
 use ico::IcoParameters;
-use crate::Pallet as Dao;
+pub use crate::Pallet as Dao;
 
 const SEED: u32 = 0;
-
 const MAX_BYTES: u32 = 1_024;
 
 fn get_vote<T: Config>(currency_id: u32, hash: T::Hash) -> IcoCollectiveVotes<T::AccountId, T::BlockNumber, MultiBalanceOf<T>> {
@@ -100,3 +99,17 @@ impl_benchmark_test_suite!(
 	crate::mock::new_test_ext(),
 	crate::mock::Test,
 );
+
+#[cfg(test)]
+mod test1 {
+	use super::*;
+	use crate::mock::{new_test_ext, Test};
+	use frame_support::assert_ok;
+
+	#[test]
+	fn test_benchmarks() {
+		new_test_ext().execute_with(|| {
+			assert_ok!(Dao::<Test>::test_benchmark_close());
+		});
+	}
+}

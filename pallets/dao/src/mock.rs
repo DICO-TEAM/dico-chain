@@ -7,6 +7,7 @@ use pallet_randomness_collective_flip;
 use frame_support::{construct_runtime, parameter_types, traits::{Contains, LockIdentifier, Time}, PalletId};
 use orml_traits::parameter_type_with_key;
 use sp_core::H256;
+use sp_std::cell::RefCell;
 use sp_runtime::{
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
@@ -16,7 +17,6 @@ use pallet_pricedao::Price;
 use orml_tokens as tokens;
 pub type Block = sp_runtime::generic::Block<Header, UncheckedExtrinsic>;
 pub type UncheckedExtrinsic = sp_runtime::generic::UncheckedExtrinsic<u32, u64, Call, ()>;
-use std::cell::RefCell;
 use crate as dao;
 use frame_system;
 use pallet_balances;
