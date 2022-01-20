@@ -29,12 +29,12 @@ where
 
 		let count = values.len() as u32;
 		let minimum_count = MinimumCount::get();
-		log::info!(
-			"-----------combine_data: {:?} {:?} {:?}----------",
-			values,
-			prev_value,
-			minimum_count
-		);
+		// log::info!(
+		// 	"-----------combine_data: {:?} {:?} {:?}----------",
+		// 	values,
+		// 	prev_value,
+		// 	minimum_count
+		// );
 		if count < minimum_count {
 			return prev_value;
 		}

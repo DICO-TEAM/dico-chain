@@ -24,8 +24,8 @@ pub use primitives::{Price, CurrencyId, Balance, Moment, CORE_ASSET_ID,currency:
 // use frame_support::traits::Instance;
 
 pub mod traits;
-mod tests;
-mod mock;
+pub mod tests;
+pub mod mock;
 mod benchmarking;
 pub mod weights;
 
