@@ -29,7 +29,6 @@ use frame_support::{
 use serde::{Deserialize, Serialize};
 use frame_system::{ensure_root, ensure_signed, pallet_prelude::*};
 use sp_std::vec::Vec;
-
 use orml_traits::{
 	arithmetic::{Signed, SimpleArithmetic},
 	// currency::TransferAll,
@@ -44,7 +43,6 @@ use orml_traits::{
 	MultiLockableCurrency,
 	MultiReservableCurrency,
 };
-
 use sp_runtime::{
 	traits::{CheckedSub, MaybeSerializeDeserialize, StaticLookup, Zero},
 	DispatchError, DispatchResult,
@@ -55,12 +53,15 @@ use sp_std::{
 	marker, result,
 };
 
-// mod mock;
-// mod tests;
+
+mod mock;
 mod weights;
 pub use module::*;
 pub use weights::WeightInfo;
 pub mod currencies_trait;
+
+mod benchmarking;
+
 use currencies_trait::CurrenciesHandler;
 use dico_primitives::AssetId;
 
