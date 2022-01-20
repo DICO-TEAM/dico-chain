@@ -43,10 +43,7 @@ benchmarks! {
 	}
 
 	create_pool {
-		// let origin = T::FounderSetOrigin::successful_origin();
 		let alloc_point = 1000u128;
-		// let call = Call::<T>::create_pool(LIQUIDITY_ID, alloc_point);
-
 	}: _(RawOrigin::Root, LIQUIDITY_ID, alloc_point)
 	verify {
 		assert_eq!(TotalAllocPoint::<T>::get(), alloc_point);
