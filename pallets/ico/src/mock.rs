@@ -1,4 +1,4 @@
-#![cfg(test)]
+// #![cfg(test)]
 
 pub use super::*;
 use orml_traits::{DataFeeder, DataProvider};
@@ -343,3 +343,4 @@ pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
 	});
 	ext
 }
+
