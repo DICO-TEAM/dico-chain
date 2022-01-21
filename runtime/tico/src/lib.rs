@@ -1512,6 +1512,12 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, lbp, LBP);
 			add_benchmark!(params, batches, farm_extend, FarmExtend);
 
+			add_benchmark!(params, batches, pallet_nft, Nft);
+			add_benchmark!(params, batches, pallet-dao, Dao);
+			add_benchmark!(params, batches, pallet_dico_treasury, DicoTreasury);
+			add_benchmark!(params, batches, pallet_ico, Ico);
+			add_benchmark!(params, batches, pallet_pallet_currencies, Currencies);
+
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
 		}

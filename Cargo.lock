@@ -5344,6 +5344,7 @@ name = "pallet-currencies"
 version = "1.0.0"
 dependencies = [
  "dico-primitives",
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "orml-tokens",
@@ -5353,6 +5354,7 @@ dependencies = [
  "scale-info",
  "serde",
  "sp-core",
+ "sp-io",
  "sp-runtime",
  "sp-std",
 ]
@@ -5413,8 +5415,10 @@ dependencies = [
  "frame-support",
  "frame-system",
  "impl-trait-for-tuples",
+ "orml-tokens",
  "orml-traits",
  "pallet-balances",
+ "pallet-currencies",
  "parity-scale-codec",
  "scale-info",
  "serde",
@@ -5587,6 +5591,7 @@ name = "pallet-ico"
 version = "1.0.0"
 dependencies = [
  "dico-primitives",
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "orml-tokens",
@@ -5811,8 +5816,10 @@ dependencies = [
 name = "pallet-nft"
 version = "1.0.0"
 dependencies = [
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "pallet-balances",
  "pallet-ico",
  "parity-scale-codec",
  "scale-info",

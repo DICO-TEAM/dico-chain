@@ -49,6 +49,7 @@ pub use crate::pallet::*;
 mod benchmarking;
 //
 pub mod weights;
+#[cfg(any(feature = "runtime-benchmarks", test))]
 pub mod mock;
 #[cfg(test)]
 pub mod tests;

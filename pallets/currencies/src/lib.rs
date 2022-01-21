@@ -59,7 +59,6 @@ mod weights;
 pub use module::*;
 pub use weights::WeightInfo;
 pub mod currencies_trait;
-
 mod benchmarking;
 
 use currencies_trait::CurrenciesHandler;
