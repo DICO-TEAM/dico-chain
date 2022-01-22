@@ -8,7 +8,7 @@ use orml_traits::{DataFeeder, DataProvider, MultiCurrency};
 use frame_support::{pallet_prelude::*, transactional, dispatch, traits::Get, log,PalletId};
 use frame_support::{
 	traits::{InitializeMembers, EnsureOrigin, Contains,Currency,ReservableCurrency,ExistenceRequirement,OnUnbalanced,Imbalance},
-	sp_runtime::{traits::{AccountIdConversion,Zero},FixedPointNumber},
+	sp_runtime::{traits::{AccountIdConversion,Zero,Saturating},FixedPointNumber},
 };
 use pallet_oracle::UpdateOraclesStorgage;
 use pallet_amm::Pair;
@@ -208,12 +208,12 @@ pub mod module {
 			Ok(().into())
 		}
 
-		#[pallet::weight((<T as Config>::WeightInfo::get_price(), DispatchClass::Operational))]
-		pub fn get_price(origin: OriginFor<T>,currency_id1: CurrencyId, currency_id2: CurrencyId) -> DispatchResultWithPostInfo {
-			let price = <Self as PriceData<CurrencyId>>::get_price(currency_id1,currency_id2).ok_or(Error::<T>::Overflow)?;
-			Self::deposit_event(Event::GetPrice(currency_id1,price));
-			Ok(().into())
-		}
+		// #[pallet::weight((<T as Config>::WeightInfo::get_price(), DispatchClass::Operational))]
+		// pub fn get_price(origin: OriginFor<T>,currency_id1: CurrencyId, currency_id2: CurrencyId) -> DispatchResultWithPostInfo {
+		// 	let price = <Self as PriceData<CurrencyId>>::get_price(currency_id1,currency_id2).ok_or(Error::<T>::Overflow)?;
+		// 	Self::deposit_event(Event::GetPrice(currency_id1,price));
+		// 	Ok(().into())
+		// }
 	}
 }
 
