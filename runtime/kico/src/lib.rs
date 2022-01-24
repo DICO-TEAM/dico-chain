@@ -121,10 +121,10 @@ impl_opaque_keys! {
 /// This runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("DICO"),
-    impl_name: create_runtime_str!("DICO"),
+    spec_name: create_runtime_str!("KICO"),
+    impl_name: create_runtime_str!("KICO"),
     authoring_version: 1,
-    spec_version: 3,
+    spec_version: 4,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -963,14 +963,14 @@ impl pallet_lbp::Config for Runtime {
     type LbpId = u32;
     type WeightInfo = pallet_lbp::weights::DicoWeight<Runtime>;
     type TreasuryHandler = DicoTreasury;
-    type FounderSetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+    type FounderSetOrigin = EnsureRootOrHalfCouncil;
 }
 
 impl pallet_farm::Config for Runtime {
     type Event = Event;
     type PoolId = u32;
     type Currency = Currencies;
-    type FounderSetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+    type FounderSetOrigin = EnsureRootOrHalfCouncil;
     type NativeAssetId = DICOAssetId;
     type PalletId = FarmPalletId;
     type WeightInfo = pallet_farm::weights::DicoWeight<Runtime>;
@@ -1074,12 +1074,12 @@ impl pallet_currencies::Config for Runtime {
 // price data
 /// price
 parameter_types! {
-	pub const MaxOracleSize: u32 = 5;
-	pub const MinimumCount: u32 = 3;  // todo: The minimum number is 3
+	pub const MaxOracleSize: u32 = 100;
+	pub const MinimumCount: u32 = 5;  // todo: The minimum number is 3
 	pub const ExpiresIn: Moment = 1000 * 60 * 60; // todo: 60 mins
 	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
-	pub const FeedPledgedBalance: Balance = 500 * DOLLARS;  // todo : pledge 500 dico?
-	pub const withdrawExpirationPeriod: BlockNumber = 10 * MINUTES;   // TODO: 5 * DAYS;
+	pub const FeedPledgedBalance: Balance = 5000 * DOLLARS;  // todo : pledge 500 dico?
+	pub const withdrawExpirationPeriod: BlockNumber = 7 * DAYS;   // TODO: 5 * DAYS;
 }
 
 type DicoDataProvider = pallet_oracle::Instance1;

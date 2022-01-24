@@ -5889,6 +5889,7 @@ name = "pallet-oracle"
 version = "1.0.0"
 dependencies = [
  "dico-primitives",
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "orml-traits",

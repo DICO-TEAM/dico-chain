@@ -47,6 +47,7 @@ pub mod weights;
 mod mock;
 mod tests;
 mod traits;
+mod benchmarking;
 pub use traits::UpdateOraclesStorgage;
 
 pub use module::*;
@@ -85,10 +86,10 @@ pub mod module {
 		type Time: Time;
 
 		/// The data key type
-		type OracleKey: Parameter + Member;
+		type OracleKey: Parameter + Member + From<u32>;
 
 		/// The data value type
-		type OracleValue: Parameter + Member + Ord;
+		type OracleValue: Parameter + Member + Ord + From<u32>;
 
 		/// The root operator account id, record all sudo feeds on this account.
 		type RootOperatorAccountId: Get<Self::AccountId>;

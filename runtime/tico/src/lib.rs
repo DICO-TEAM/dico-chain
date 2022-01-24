@@ -121,10 +121,10 @@ impl_opaque_keys! {
 /// This runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("DICO"),
-    impl_name: create_runtime_str!("DICO"),
+    spec_name: create_runtime_str!("TICO"),
+    impl_name: create_runtime_str!("TICO"),
     authoring_version: 1,
-    spec_version: 3,
+    spec_version: 4,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -964,14 +964,14 @@ impl pallet_lbp::Config for Runtime {
     type LbpId = u32;
     type WeightInfo = pallet_lbp::weights::DicoWeight<Runtime>;
     type TreasuryHandler = DicoTreasury;
-    type FounderSetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+    type FounderSetOrigin = EnsureRootOrMoreThanHalfCouncil;
 }
 
 impl pallet_farm::Config for Runtime {
     type Event = Event;
     type PoolId = u32;
     type Currency = Currencies;
-    type FounderSetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+    type FounderSetOrigin = EnsureRootOrMoreThanHalfCouncil;
     type NativeAssetId = DICOAssetId;
     type PalletId = FarmPalletId;
     type WeightInfo = pallet_farm::weights::DicoWeight<Runtime>;
