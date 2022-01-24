@@ -47,9 +47,9 @@ pub use crate::pallet::*;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
-//
+
 pub mod weights;
-#[cfg(any(feature = "runtime-benchmarks", test))]
+#[cfg(test)]
 pub mod mock;
 #[cfg(test)]
 pub mod tests;
@@ -534,6 +534,11 @@ pub mod pallet {
 				r => Err(O::from(r)),
 			})
 		}
+
+		// // #[cfg(feature = "runtime-benchmarks")]
+		// fn successful_origin() -> O {
+		// 	O::from(IcoRawOrigin::Members(MultiBalanceOf::<T>::from(1u32), MultiBalanceOf::<T>::from(1u32)))
+		// }
 
 		#[cfg(feature = "runtime-benchmarks")]
 		fn successful_origin() -> O {
