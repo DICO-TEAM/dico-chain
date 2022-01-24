@@ -71,8 +71,6 @@ std = [
 	"frame-system/std",
 	"frame-support/std",
 
-
-
 	"dico-primitives/std",
 	"currencies/std",
 	"ico/std",

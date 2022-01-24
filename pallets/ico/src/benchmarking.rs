@@ -9,7 +9,6 @@ use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
 use crate::Pallet as Ico;
 use currencies::{Pallet as CurrenciesPallet, DicoAssetMetadata};
-use crate::mock::Test;
 
 const SEED: u32 = 0;
 
