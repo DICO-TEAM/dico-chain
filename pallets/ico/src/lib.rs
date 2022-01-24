@@ -57,6 +57,8 @@ use traits::{IcoHandler, PowerHandler};
 pub mod mock;
 pub mod tests;
 pub mod traits;
+
+#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
 use scale_info::TypeInfo;
