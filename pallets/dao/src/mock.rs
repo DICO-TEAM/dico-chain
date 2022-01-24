@@ -1,4 +1,4 @@
-
+#![cfg(test)]
 pub use super::*;
 use pallet_pricedao;
 use pallet_oracle;

@@ -18,7 +18,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![recursion_limit = "128"]
 
-// use codec::{Codec, Encode, Decode, MaxEncodedLen};
 use frame_support::{
 	codec::{Codec, Decode, Encode},
 	dispatch::{DispatchError, DispatchResult, DispatchResultWithPostInfo, Dispatchable, Parameter, PostDispatchInfo},
@@ -47,11 +46,8 @@ pub use crate::pallet::*;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
-//
 pub mod weights;
-#[cfg(any(feature = "runtime-benchmarks", test))]
 pub mod mock;
-#[cfg(test)]
 pub mod tests;
 
 

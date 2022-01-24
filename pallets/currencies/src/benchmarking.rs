@@ -5,6 +5,7 @@ use frame_benchmarking::{account, benchmarks_instance, impl_benchmark_test_suite
 use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
 use crate::Pallet as Currencies;
+use sp_std::vec;
 
 const SEED: u32 = 0;
 

@@ -35,7 +35,6 @@ use frame_system::Pallet as System;
 use dico_primitives::parachains::native::LT::AssetId;
 use ico::system::RawOrigin;
 use crate::Module as Collective;
-use crate::mock::Test;
 use ico::IcoParameters;
 pub use crate::Pallet as Dao;
 
