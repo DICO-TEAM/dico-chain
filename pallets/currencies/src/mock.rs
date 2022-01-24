@@ -1,14 +1,21 @@
 //! Mocks for the gradually-update module.
-
 #![cfg(test)]
-
-use frame_support::{construct_runtime, parameter_types};
+use frame_support::{construct_runtime, parameter_types, traits::Contains};
 use sp_core::H256;
 use sp_runtime::{testing::Header, traits::IdentityLookup};
 use super::*;
-use crate as nft;
+use orml_tokens as tokens;
+use crate as currencies;
+use crate::Pallet as CurrenciesPallet;
 use pallet_balances;
+use orml_traits::parameter_type_with_key;
+
+type Amount = i128;
 type Balance = u64;
+type CurrencyId = u32;
+
+pub const Alice: AccountId = 1;
+// type Cu
 
 parameter_types! {
 	pub const BlockHashCount: u64 = 250;
@@ -64,15 +71,47 @@ parameter_types! {
 	pub const MaxTokenMetadata: u32 = 1;
 }
 
-impl Config for Runtime {
-	type ClassId = u64;
-	type TokenId = u64;
-	type MaxClassMetadata = MaxClassMetadata;
-	type MaxTokenMetadata = MaxTokenMetadata;
+parameter_type_with_key! {
+	pub ExistentialDeposits: |_currency_id: u32| -> Balance {
+		Zero::zero()
+	};
+}
+
+
+pub struct MockDustRemovalWhitelist;
+impl Contains<AccountId> for MockDustRemovalWhitelist {
+	fn contains(a: &AccountId) -> bool {
+		*a == Alice
+	}
+}
+
+parameter_types! {
+	pub const MaxLocks: u32 = 50;
+	pub const GetNativeCurrencyId: CurrencyId = 0;
+	pub const CreateConsume: Balance = 100;
+	pub const MaxCreatableCurrencyId: CurrencyId = 100;
+}
+
+impl tokens::Config for Runtime {
 	type Event = Event;
-	type Currency = Balances;
-	type MaxTokenAttribute = ();
-	type PowerHandler = ();
+	type Balance = Balance;
+	type Amount = Amount;
+	type CurrencyId = CurrencyId;
+	type WeightInfo = ();
+	type ExistentialDeposits = ExistentialDeposits;
+	type OnDust = ();
+	type MaxLocks = MaxLocks;
+	type DustRemovalWhitelist = MockDustRemovalWhitelist;
+}
+
+impl Config for Runtime {
+	type Event = Event;
+	type MultiCurrency = Tokens;
+	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type WeightInfo = ();
+	type CreateConsume = CreateConsume;
+	type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
 }
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Runtime>;
@@ -85,17 +124,12 @@ construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
-		NonFungibleTokenModule: nft::{Pallet, Storage, Event<T>, Call},
+		Currencies: currencies::{ Pallet, Storage, Event<T>, Call },
+		Tokens: tokens::{Pallet, Config<T>, Storage, Event<T>},
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 	}
 );
 
-pub const ALICE: AccountId = 1;
-pub const BOB: AccountId = 2;
-pub const CLASS_ID: <Runtime as Config>::ClassId = 0;
-pub const CLASS_ID_NOT_EXIST: <Runtime as Config>::ClassId = 100;
-pub const TOKEN_ID: <Runtime as Config>::TokenId = 0;
-pub const TOKEN_ID_NOT_EXIST: <Runtime as Config>::TokenId = 100;
 
 pub struct ExtBuilder;
 

@@ -15,9 +15,10 @@ serde                 = { version = '1', optional = true }
 sp-std          = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
 sp-runtime      = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
 
-
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false, optional = true }
 frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
 frame-system  = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
+pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
 
 # local
 pallet-ico = { path = "../ico", default-features = false}
@@ -39,5 +40,13 @@ std = [
 	"frame-support/std",
 	"frame-system/std",
 	"pallet-ico/std",
+	"pallet-balances/std",
 ]
+
+runtime-benchmarks = [
+	"frame-benchmarking",
+	"frame-support/runtime-benchmarks",
+	"frame-system/runtime-benchmarks",
+]
+
 try-runtime = ["frame-support/try-runtime"]

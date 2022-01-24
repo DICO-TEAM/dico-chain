@@ -338,8 +338,9 @@ pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
 
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.execute_with(|| {
-		System::set_block_number(1);
+		// System::set_block_number(1);
 		Timestamp::set_timestamp(12345);
 	});
 	ext
 }
+

@@ -20,82 +20,73 @@
 #![cfg(feature = "runtime-benchmarks")]
 
 use super::*;
-
-use frame_benchmarking::{account, benchmarks_instance, impl_benchmark_test_suite};
+use frame_benchmarking::{account, benchmarks_instance, impl_benchmark_test_suite, benchmarks, whitelisted_caller};
 use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
-
-use crate::Module as Treasury;
+use crate::Pallet as Treasury;
 
 const SEED: u32 = 0;
 
-// Create the pre-requisite information needed to create a treasury
-// `propose_spend`.
-fn setup_proposal<T: Config<I>, I: Instance>(
-	u: u32,
-) -> (T::AccountId, BalanceOf<T, I>, <T::Lookup as StaticLookup>::Source) {
-	let caller = account("caller", u, SEED);
-	let value: BalanceOf<T, I> = T::ProposalBondMinimum::get().saturating_mul(100u32.into());
-	let _ = T::Currency::make_free_balance_be(&caller, value);
-	let beneficiary = account("beneficiary", u, SEED);
-	let beneficiary_lookup = T::Lookup::unlookup(beneficiary);
-	(caller, value, beneficiary_lookup)
+fn get_alice<T: Config>() -> T::AccountId {
+	let caller: T::AccountId = whitelisted_caller();
+	T::MultiCurrency::deposit(T::GetNativeCurrencyId::get(), &caller, 10000u32.into());
+	caller
 }
 
-// Create proposals that are approved for use in `on_initialize`.
-fn create_approved_proposals<T: Config<I>, I: Instance>(n: u32) -> Result<(), &'static str> {
-	for i in 0..n {
-		let (caller, value, lookup) = setup_proposal::<T, I>(i);
-		Treasury::<T, I>::propose_spend(RawOrigin::Signed(caller).into(), value, lookup)?;
-		let proposal_id = <ProposalCount<I>>::get() - 1;
-		Treasury::<T, I>::approve_proposal(RawOrigin::Root.into(), proposal_id)?;
-	}
-	ensure!(<Approvals<I>>::get().len() == n as usize, "Not all approved");
-	Ok(())
+fn get_bob<T: Config>() -> T::AccountId {
+	let caller: T::AccountId = account("bob", 1, SEED);
+	T::MultiCurrency::deposit(T::GetNativeCurrencyId::get(), &caller, 10000u32.into());
+	caller
 }
 
-fn setup_pot_account<T: Config<I>, I: Instance>() {
-	let pot_account = Treasury::<T, I>::account_id();
-	let value = T::Currency::minimum_balance().saturating_mul(1_000_000_000u32.into());
-	let _ = T::Currency::make_free_balance_be(&pot_account, value);
+fn look_up<T: Config>(who: T::AccountId) -> <T::Lookup as StaticLookup>::Source {
+	T::Lookup::unlookup(who)
 }
 
-benchmarks_instance! {
+fn propose<T: Config>() -> u32 {
+	let caller: T::AccountId = get_alice::<T>();
+	let caller_cp = look_up::<T>(caller.clone());
+	assert!(Treasury::<T>::propose_spend(RawOrigin::Signed(caller.clone()).into(), T::GetNativeCurrencyId::get(), BalanceOf::<T>::from(100u32), caller_cp).is_ok());
+	1
 
+}
+
+fn approve_propose<T: Config>() {
+	let index = propose::<T>();
+	assert!(Treasury::<T>::approve_proposal(RawOrigin::Root.into(), index).is_ok());
+}
+
+benchmarks! {
 	propose_spend {
-		let (caller, value, beneficiary_lookup) = setup_proposal::<T, _>(SEED);
-		// Whitelist caller account from further DB operations.
-		let caller_key = frame_system::Account::<T>::hashed_key_for(&caller);
-		frame_benchmarking::benchmarking::add_to_whitelist(caller_key.into());
-	}: _(RawOrigin::Signed(caller), value, beneficiary_lookup)
+		let caller: T::AccountId = get_alice::<T>();
+	}:_(RawOrigin::Signed(caller.clone()), T::GetNativeCurrencyId::get(), BalanceOf::<T>::from(100u32), look_up::<T>(get_bob::<T>()))
+	verify {
+		assert_eq!(ProposalCount::<T>::get(), 1);
+	}
 
 	reject_proposal {
-		let (caller, value, beneficiary_lookup) = setup_proposal::<T, _>(SEED);
-		Treasury::<T, _>::propose_spend(
-			RawOrigin::Signed(caller).into(),
-			value,
-			beneficiary_lookup
-		)?;
-		let proposal_id = Treasury::<T, _>::proposal_count() - 1;
-	}: _(RawOrigin::Root, proposal_id)
+		let proposal_index = propose::<T>();
+	}:_<T::Origin>(T::RejectOrigin::successful_origin(), 1)
+	verify {
+		assert!(!Proposals::<T>::contains_key(proposal_index));
+	}
 
 	approve_proposal {
-		let (caller, value, beneficiary_lookup) = setup_proposal::<T, _>(SEED);
-		Treasury::<T, _>::propose_spend(
-			RawOrigin::Signed(caller).into(),
-			value,
-			beneficiary_lookup
-		)?;
-		let proposal_id = Treasury::<T, _>::proposal_count() - 1;
-	}: _(RawOrigin::Root, proposal_id)
-
-	on_initialize_proposals {
-		let p in 0 .. 100;
-		setup_pot_account::<T, _>();
-		create_approved_proposals::<T, _>(p)?;
-	}: {
-		Treasury::<T, _>::on_initialize(T::BlockNumber::zero());
+		let proposal_index = propose::<T>();
+	}:_<T::Origin>(T::ApproveOrigin::successful_origin(), 1)
+	verify {
+		assert!(Approvals::<T>::get().len() > 0);
 	}
+
+	spend_fund {
+		let alice = get_alice::<T>();
+		approve_propose::<T>();
+	}:_(RawOrigin::Signed(alice.clone()))
+	verify {
+		assert!(Approvals::<T>::get().is_empty());
+	}
+
+
 }
 
 impl_benchmark_test_suite!(Treasury, crate::tests::new_test_ext(), crate::tests::Test,);

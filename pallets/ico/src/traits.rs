@@ -6,6 +6,10 @@ pub trait IcoHandler<CurrencyId, MulBalanceOf, AccountId, DispathErr, BlockNumbe
 	fn get_user_total_amount(currency_id: CurrencyId, index: u32, who: &AccountId) -> MulBalanceOf;
 	fn get_project_total_ico_amount(currency_id: CurrencyId, index: u32) -> result::Result<MulBalanceOf, DispathErr>;
 }
+use sp_runtime::DispatchResult;
+use frame_support::Parameter;
+// pub use dico_primitives::{Balance, AccountId};
+
 
 impl<
 		CurrencyId: Ord + Clone,
@@ -31,4 +35,14 @@ impl<
 pub trait PowerHandler<AccountId, DispathResult, Balance> {
 	fn sub_user_power(user: &AccountId, amount: Balance) -> DispathResult;
 	fn add_user_power(user: &AccountId, amount: Balance) -> DispathResult;
+}
+
+impl <AccountId: Default + Parameter, Balance: Default + Parameter>PowerHandler<AccountId, DispatchResult, Balance> for () {
+	fn sub_user_power(user: &AccountId, amount: Balance) -> DispatchResult {
+		Ok(())
+	}
+
+	fn add_user_power(user: &AccountId, amount: Balance) -> DispatchResult {
+		Ok(())
+	}
 }

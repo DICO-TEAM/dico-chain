@@ -16,6 +16,10 @@ frame-system  = { git = "https://github.com/paritytech/substrate.git", branch = 
 sp-runtime    = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
 sp-std        = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
 codec         = { package = "parity-scale-codec", version = "2.3.1", default-features = false, features = ["derive"] }
+frame-benchmarking = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false, optional = true }
+pallet-balances = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false }
+sp-core            = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
+sp-io              = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
 
 
 # orml
@@ -47,5 +51,13 @@ std = [
     "orml-traits/std",
     "dico-primitives/std",
     "orml-tokens/std",
+	"pallet-balances/std",
+	"sp-core/std",
+	"sp-io/std",
+]
 
+runtime-benchmarks = [
+	"frame-benchmarking",
+	"frame-support/runtime-benchmarks",
+	"frame-system/runtime-benchmarks",
 ]

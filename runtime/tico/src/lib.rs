@@ -964,14 +964,14 @@ impl pallet_lbp::Config for Runtime {
     type LbpId = u32;
     type WeightInfo = pallet_lbp::weights::DicoWeight<Runtime>;
     type TreasuryHandler = DicoTreasury;
-    type FounderSetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+    type FounderSetOrigin = EnsureRootOrMoreThanHalfCouncil;
 }
 
 impl pallet_farm::Config for Runtime {
     type Event = Event;
     type PoolId = u32;
     type Currency = Currencies;
-    type FounderSetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>;
+    type FounderSetOrigin = EnsureRootOrMoreThanHalfCouncil;
     type NativeAssetId = DICOAssetId;
     type PalletId = FarmPalletId;
     type WeightInfo = pallet_farm::weights::DicoWeight<Runtime>;
@@ -1511,6 +1511,12 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, farm, Farm);
 			add_benchmark!(params, batches, lbp, LBP);
 			add_benchmark!(params, batches, farm_extend, FarmExtend);
+
+			add_benchmark!(params, batches, pallet_nft, Nft);
+			add_benchmark!(params, batches, pallet-dao, Dao);
+			add_benchmark!(params, batches, pallet_dico_treasury, DicoTreasury);
+			add_benchmark!(params, batches, pallet_ico, Ico);
+			add_benchmark!(params, batches, pallet_pallet_currencies, Currencies);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)

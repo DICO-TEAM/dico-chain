@@ -31,6 +31,7 @@ pub const GAVIN: AccountId = 30;
 // Configure a mock runtime to test the pallet.
 pub type Block = sp_runtime::generic::Block<Header, UncheckedExtrinsic>;
 pub type UncheckedExtrinsic = sp_runtime::generic::UncheckedExtrinsic<u32, Call, u32, ()>;
+
 frame_support::construct_runtime!(
 	pub enum Test where
 		Block = Block,

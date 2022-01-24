@@ -19,6 +19,8 @@
 mod benchmarking;
 pub mod traits;
 pub mod weights;
+mod tests;
+
 pub use crate::pallet::*;
 
 use codec::{Decode, Encode};
@@ -273,6 +275,13 @@ pub mod pallet {
 		SpendFund,
 	}
 }
+
+// impl <T: Config> Pallet<T> {
+// 	pub fn calculate_bond(value: BalanceOf<T>) -> BalanceOf<T> {
+// 			T::ProposalBond::get() * value
+// 		}
+//
+// }
 
 impl<T: Config> DicoTreasuryHandler<T::AccountId> for Module<T> {
 	fn get_treasury_account_id() -> T::AccountId {

@@ -23,9 +23,13 @@ frame-system       = { git = "https://github.com/paritytech/substrate.git", bran
 pallet-balances    = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false}
 frame-benchmarking = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.13", default-features = false, optional = true }
 
+# local
+pallet-currencies = { path = "../currencies", default-features = false}
 
 # orml
 orml-traits = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', branch = "master", default-features = false}
+orml-tokens = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', branch = "master", default-features = false}
+
 
 
 [dev-dependencies]
@@ -40,16 +44,14 @@ std = [
 	"serde",
 	"codec/std",
 	"scale-info/std",
-
 	"sp-std/std",
 	"sp-runtime/std",
-
 	"frame-support/std",
 	"frame-system/std",
-
 	"pallet-balances/std",
-
 	"orml-traits/std",
+	"pallet-currencies/std",
+	"orml-tokens/std",
 ]
 
 runtime-benchmarks = [

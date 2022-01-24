@@ -57,6 +57,8 @@ use traits::{IcoHandler, PowerHandler};
 pub mod mock;
 pub mod tests;
 pub mod traits;
+mod benchmarking;
+
 use scale_info::TypeInfo;
 const ICO_ID: LockIdentifier = *b"ico     ";
 const HalfDuration: u128 = 200_000_000u128 * USDT;
@@ -125,38 +127,38 @@ pub struct IcoLock<Balance, BlockNumber> {
 
 #[derive(PartialEq, Encode, Decode, Default, RuntimeDebug, Clone, TypeInfo)]
 pub struct IcoParameters<BlockNumber, Balance, CurrencyId, AreaCode> {
-	desc: Vec<u8>,
+	pub desc: Vec<u8>,
 	/// The asset ID of the project's token
-	currency_id: CurrencyId,
+	pub currency_id: CurrencyId,
 	/// The project's official website
-	official_website: Vec<u8>,
-	is_must_kyc: bool,
+	pub official_website: Vec<u8>,
+	pub is_must_kyc: bool,
 	/// Maximum number of times a user can participate in an ICO
-	user_ico_max_times: u8,
+	pub user_ico_max_times: u8,
 	/// Total issuance of the project's tokens
-	total_issuance: Balance,
+	pub total_issuance: Balance,
 	/// The total number of tokens in circulation
-	total_circulation: Balance,
+	pub total_circulation: Balance,
 	/// The lifetime of an ICO
-	ico_duration: BlockNumber,
+	pub ico_duration: BlockNumber,
 	/// How many tokens will the project party take out to participate in the
 	/// ICO
-	total_ico_amount: Balance,
+	pub total_ico_amount: Balance,
 	/// Minimum number of USdT users can participate in.
-	user_min_amount: Balance,
+	pub user_min_amount: Balance,
 	/// Maximum number of USdT users can participate in.
-	user_max_amount: Balance,
+	pub user_max_amount: Balance,
 	/// The asset_id of token required by the initiator
-	exchange_token: CurrencyId,
+	pub exchange_token: CurrencyId,
 	/// The total amount of token required by the initiator
-	exchange_token_total_amount: Balance,
+	pub exchange_token_total_amount: Balance,
 	/// AreaCode these not participate in the ico
-	exclude_area: Vec<AreaCode>,
+	pub exclude_area: Vec<AreaCode>,
 	/// The proportion of lock-ups required
-	lock_proportion: Percent,
+	pub lock_proportion: Percent,
 	/// How often to unlock
-	unlock_duration: BlockNumber,
-	per_duration_unlock_amount: Balance,
+	pub unlock_duration: BlockNumber,
+	pub per_duration_unlock_amount: Balance,
 }
 
 #[derive(PartialEq, Encode, Decode, Default, RuntimeDebug, Clone, TypeInfo)]

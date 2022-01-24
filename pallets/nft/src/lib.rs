@@ -16,6 +16,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
 
+#[cfg(test)]
+mod mock;
+
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
+
 use codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use frame_support::{
@@ -282,7 +288,7 @@ pub mod module {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight(10_000)]
+		#[pallet::weight(70_000_000 as Weight + T::DbWeight::get().reads_writes(5, 5))]
 		pub fn create_class(origin: OriginFor<T>, metadata: Vec<u8>, data: ClassDataOf<T>) -> DispatchResult {
 			let issuer = ensure_signed(origin)?;
 			let class_id = Self::do_create_class(&issuer, metadata, data)?;
@@ -290,7 +296,7 @@ pub mod module {
 			Ok(())
 		}
 
-		#[pallet::weight(10_000)]
+		#[pallet::weight(70_000_000 as Weight + T::DbWeight::get().reads_writes(5, 5))]
 		pub fn transfer(origin: OriginFor<T>, to: T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::do_transfer(&who, &to, token)?;
@@ -298,7 +304,7 @@ pub mod module {
 			Ok(())
 		}
 
-		#[pallet::weight(10_000)]
+		#[pallet::weight(70_000_000 as Weight + T::DbWeight::get().reads_writes(5, 5))]
 		pub fn mint(
 			origin: OriginFor<T>,
 			class_id: T::ClassId,
@@ -312,7 +318,7 @@ pub mod module {
 			Ok(())
 		}
 
-		#[pallet::weight(10_000)]
+		#[pallet::weight(70_000_000 as Weight + T::DbWeight::get().reads_writes(5, 5))]
 		pub fn claim(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::do_claim(&owner, token.0, token.1)?;
@@ -320,7 +326,7 @@ pub mod module {
 			Ok(())
 		}
 
-		#[pallet::weight(10_000)]
+		#[pallet::weight(70_000_000 as Weight + T::DbWeight::get().reads_writes(5, 5))]
 		pub fn burn(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::do_burn(&owner, token)?;
@@ -328,7 +334,7 @@ pub mod module {
 			Ok(())
 		}
 
-		#[pallet::weight(10_000)]
+		#[pallet::weight(70_000_000 as Weight + T::DbWeight::get().reads_writes(5, 5))]
 		pub fn offer_token_for_sale(
 			origin: OriginFor<T>,
 			token: (T::ClassId, T::TokenId),
@@ -340,7 +346,7 @@ pub mod module {
 			Ok(())
 		}
 
-		#[pallet::weight(10_000)]
+		#[pallet::weight(70_000_000 as Weight + T::DbWeight::get().reads_writes(5, 5))]
 		pub fn withdraw_sale(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::do_withdraw_sale(&owner, token)?;
@@ -348,14 +354,14 @@ pub mod module {
 			Ok(())
 		}
 
-		#[pallet::weight(10_000)]
+		#[pallet::weight(70_000_000 as Weight + T::DbWeight::get().reads_writes(5, 5))]
 		pub fn buy_token(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let buyer = ensure_signed(origin)?;
 			Self::do_buy_token(&buyer, token)?;
 			Ok(())
 		}
 
-		#[pallet::weight(10_000)]
+		#[pallet::weight(70_000_000 as Weight + T::DbWeight::get().reads_writes(5, 5))]
 		pub fn active(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::do_active_or_not(&owner, token, true)?;
@@ -370,7 +376,7 @@ pub mod module {
 			Ok(())
 		}
 
-		#[pallet::weight(10_000)]
+		#[pallet::weight(70_000_000 as Weight + T::DbWeight::get().reads_writes(5, 5))]
 		pub fn inactive(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::do_active_or_not(&owner, token, false)?;
