@@ -58,6 +58,7 @@ orml-xtokens        = { git = 'https://github.com/open-web3-stack/open-runtime-m
 
 ## Substrate FRAME Dependencies
 frame-benchmarking           = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false, optional = true }
+frame-system-benchmarking    = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false, optional = true }
 frame-executive              = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
 frame-support                = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
 frame-system                 = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13", default-features = false }
@@ -117,6 +118,7 @@ cumulus-pallet-xcmp-queue       = { git = "https://github.com/paritytech/cumulus
 cumulus-pallet-xcm              = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.13", default-features = false }
 pallet-collator-selection       = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.13", default-features = false }
 parachain-info                  = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.13", default-features = false }
+cumulus-pallet-session-benchmarking  = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.13", default-features = false }
 
 # polkadot
 polkadot-parachain      = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.13", default-features = false }
@@ -135,23 +137,35 @@ substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", bran
 default = ["std"]
 runtime-benchmarks = [
     "hex-literal",
+    "frame-system-benchmarking",
     "frame-benchmarking/runtime-benchmarks",
     "frame-support/runtime-benchmarks",
     "frame-system/runtime-benchmarks",
-    "pallet-collective/runtime-benchmarks",
     "sp-runtime/runtime-benchmarks",
-    "pallet-timestamp/runtime-benchmarks",
+
     "xcm-builder/runtime-benchmarks",
-    "pallet-xcm/runtime-benchmarks",
     "orml-vesting/runtime-benchmarks",
     "orml-tokens/runtime-benchmarks",
 
-	"pallet-nft/runtime-benchmarks",
-	"pallet-dao/runtime-benchmarks",
-	"pallet-dico-treasury/runtime-benchmarks",
-	"pallet-currencies/runtime-benchmarks",
-	"pallet-ico/runtime-benchmarks",
+    "pallet-balances/runtime-benchmarks",
+    "pallet-collator-selection/runtime-benchmarks",
+    "pallet-timestamp/runtime-benchmarks",
+    "pallet-collective/runtime-benchmarks",
+    "pallet-xcm/runtime-benchmarks",
+    'cumulus-pallet-session-benchmarking/runtime-benchmarks',
 
+    "pallet-nft/runtime-benchmarks",
+    "pallet-dao/runtime-benchmarks",
+    "pallet-dico-treasury/runtime-benchmarks",
+    "pallet-currencies/runtime-benchmarks",
+    "pallet-ico/runtime-benchmarks",
+    "pallet-kyc/runtime-benchmarks",
+    "pallet-farm/runtime-benchmarks",
+    "pallet-farm-extend/runtime-benchmarks",
+    "pallet-amm/runtime-benchmarks",
+    "pallet-lbp/runtime-benchmarks",
+    "pallet-pricedao/runtime-benchmarks",
+    "pallet-oracle/runtime-benchmarks",
 
 ]
 std = [
