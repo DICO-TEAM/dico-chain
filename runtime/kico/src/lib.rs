@@ -1216,7 +1216,7 @@ impl pallet_dao::Config for Runtime {
     type Event = Event;
     type MotionDuration = DicoMotionDuration;
     type MaxProposals = DicoMaxProposals;
-    type WeightInfo = ();
+    // type WeightInfo = ();
     type IcoHandler = Ico;
 }
 
@@ -1499,6 +1499,12 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_farm, Farm);
 			list_benchmark!(list, extra, pallet_lbp, LBP);
 			list_benchmark!(list, extra, pallet_farm_extend, FarmExtend);
+
+			list_benchmark!(list, extra, pallet_nft, Nft);
+			list_benchmark!(list, extra, pallet_dao, Dao);
+			list_benchmark!(list, extra, pallet_ico, Ico);
+			list_benchmark!(list, extra, pallet_dico_treasury, DicoTreasury);
+			list_benchmark!(list, extra, pallet_pallet_currencies, Currencies);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 

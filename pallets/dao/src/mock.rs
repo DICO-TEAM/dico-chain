@@ -144,6 +144,7 @@ parameter_types! {
 }
 
 impl pallet_amm::Config for Test {
+	type CurrenciesHandler = Currencies;
 	type Event = Event;
 	type LiquidityAssetIdBase = LiquidityAssetIdBase;
 	type Currency = Currencies;

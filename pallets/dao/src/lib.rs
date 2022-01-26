@@ -19,7 +19,8 @@
 #![recursion_limit = "128"]
 
 // use codec::{Codec, Encode, Decode, MaxEncodedLen};
-use frame_support::{
+pub use frame_support::{
+	runtime_print,
 	codec::{Codec, Decode, Encode},
 	dispatch::{DispatchError, DispatchResult, DispatchResultWithPostInfo, Dispatchable, Parameter, PostDispatchInfo},
 	ensure,
@@ -42,13 +43,13 @@ use sp_std::{
 	prelude::*,
 	result,
 };
-pub use weights::WeightInfo;
+// pub use weights::WeightInfo;
 pub use crate::pallet::*;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-pub mod weights;
+// pub mod weights;
 #[cfg(test)]
 pub mod mock;
 #[cfg(test)]
@@ -121,7 +122,7 @@ pub mod pallet {
 			+ Into<<Self as frame_system::Config>::Event>
 			+ IsType<<Self as frame_system::Config>::Event>;
 		/// Weight information for extrinsics in this pallet.
-		type WeightInfo: WeightInfo;
+		// type WeightInfo: WeightInfo;
 
 		type IcoHandler: IcoHandler<
 			CurrencyIdOf<Self>,
@@ -198,6 +199,7 @@ pub mod pallet {
 			);
 
 			if threshold * ico_total_amount <= user_ico_amount {
+				runtime_print!("dispacth");
 				let result = proposal.dispatch(IcoRawOrigin::Members(user_ico_amount, ico_total_amount).into());
 				Self::deposit_event(Event::Executed(proposal_hash, result.map(|_| ()).map_err(|e| e.error)));
 			} else {

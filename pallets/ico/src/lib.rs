@@ -524,7 +524,7 @@ pub mod pallet {
 			let pos_opt = pending_ico.iter().position(|h| currency_id == h.ico.currency_id);
 
 			match pos_opt {
-				None => return Err(Error::<T>::PendingIcoNotExists)?,
+				None => return Err(Error::<T>::PendingIcoNotExists123)?,
 				Some(pos) => {
 					let mut pending_info = pending_ico.swap_remove(pos);
 
@@ -578,7 +578,7 @@ pub mod pallet {
 			let pos_opt = pending_ico.iter().position(|h| currency_id == h.ico.currency_id);
 
 			match pos_opt {
-				None => return Err(Error::<T>::PendingIcoNotExists)?,
+				None => return Err(Error::<T>::PendingIcoNotExists123)?,
 				Some(pos) => {
 					let pending_info = pending_ico.swap_remove(pos);
 					let mut index: u32 = 0;
@@ -637,7 +637,7 @@ pub mod pallet {
 				);
 			}
 
-			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists)?;
+			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists123)?;
 			let exchange_token_decimals = T::CurrenciesHandler::get_metadata(ico.exchange_token)?.decimals;
 			let mut total_usdt =
 				Self::exchange_token_convert_usdt(ico.exchange_token, exchange_token_decimals, amount)?;
@@ -665,7 +665,7 @@ pub mod pallet {
 		pub fn terminate_ico(origin: OriginFor<T>, currency_id: AssetId, index: u32) -> DispatchResult {
 			T::TerminateIcoOrigin::try_origin(origin).map_err(|_| Error::<T>::BadOrigin)?;
 
-			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists)?;
+			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists123)?;
 			ensure!(!ico.is_terminated, Error::<T>::IcoTerminated);
 
 			match ico.start_time.as_ref() {
@@ -696,7 +696,7 @@ pub mod pallet {
 		) -> DispatchResult {
 			let initiator = ensure_signed(origin)?;
 
-			let ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists)?;
+			let ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists123)?;
 			match ico.start_time.as_ref() {
 				Some(time) => {
 					ensure!(
@@ -737,7 +737,7 @@ pub mod pallet {
 		pub fn cancel_request(origin: OriginFor<T>, currency_id: AssetId, index: u32) -> DispatchResult {
 			let initiator = ensure_signed(origin)?;
 
-			let ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists)?;
+			let ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists123)?;
 
 			ensure!(&initiator == &ico.initiator, Error::<T>::NotInitiator);
 
@@ -762,7 +762,7 @@ pub mod pallet {
 		pub fn permit_release(origin: OriginFor<T>, currency_id: AssetId, index: u32) -> DispatchResult {
 			T::PermitReleaseOrigin::try_origin(origin).map_err(|_| Error::<T>::BadOrigin)?;
 
-			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists)?;
+			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists123)?;
 			let release_info_opt = Self::get_request_release_info(currency_id, index);
 
 			match release_info_opt {
@@ -849,7 +849,7 @@ pub mod pallet {
 		) -> DispatchResult {
 			let user = ensure_signed(origin)?;
 
-			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists)?;
+			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists123)?;
 
 			ensure!(ico.initiator == user, Error::<T>::NotInitiator);
 
@@ -878,7 +878,7 @@ pub mod pallet {
 		) -> DispatchResult {
 			let user = ensure_signed(origin)?;
 
-			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists)?;
+			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists123)?;
 
 			ensure!(ico.initiator == user, Error::<T>::NotInitiator);
 			ensure!(ico.user_ico_max_times != max_times, Error::<T>::DuplicateSet);
@@ -955,8 +955,8 @@ pub mod pallet {
 	#[pallet::error]
 	pub enum Error<T> {
 		BeingIco,
-		PendingIcoNotExists,
-		IcoNotExists,
+		PendingIcoNotExists123,
+		IcoNotExists123,
 		InExcludeArea,
 		BadOrigin,
 		IsPendingIco,
@@ -1039,7 +1039,7 @@ pub mod pallet {
 			index: u32,
 			is_do: bool,
 		) -> result::Result<MultiBalanceOf<T>, DispatchError> {
-			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists)?;
+			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists123)?;
 			ensure!(&ico.initiator != user, Error::<T>::InitiatorIsYourself);
 
 			ensure!(Self::is_ico_expire(&ico), Error::<T>::IcoNotExpireOrTerminated);
@@ -1230,7 +1230,7 @@ pub mod pallet {
 			let mut this_time_total_release = MultiBalanceOf::<T>::from(0u32);
 
 			let mut is_oprate = false;
-			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists)?;
+			let mut ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists123)?;
 
 			/// For initiator
 			if Self::is_ico_expire(&ico)
@@ -1714,7 +1714,7 @@ pub mod pallet {
 			currency_id: &AssetId,
 			index: u32,
 		) -> result::Result<bool, DispatchError> {
-			let ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists)?;
+			let ico = <Ico<T>>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists123)?;
 			if &ico.is_must_kyc == &true {
 				if Self::is_already_kyc(&who) {
 					let nations = ico.exclude_area;
@@ -2090,12 +2090,101 @@ pub mod pallet {
 }
 
 impl<T: Config> IcoHandler<AssetId, MultiBalanceOf<T>, T::AccountId, DispatchError, T::BlockNumber> for Pallet<T> {
+	fn set_ico_for_bench(currency_id: AssetId, index: u32, initiator: T::AccountId, joiner: T::AccountId, joiner1: T::AccountId) -> DispatchResult {
+		runtime_print!("create currency_id:{:?}, index: {:?}", currency_id, index);
+		let ico_info: IcoInfo<T::BlockNumber, MultiBalanceOf<T>, AssetId, AreaCode, T::AccountId> = IcoInfo {
+			desc: vec![],
+			start_time: Some(T::BlockNumber::from(0u32)),
+			is_already_kyc: false,
+			initiator: initiator.clone(),
+			total_usdt: (5000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			tag: Some((5000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>()),
+			is_terminated: false,
+			project_name: vec![],
+			token_symbol: vec![],
+			decimals: 12,
+			index: Some(1),
+			already_released_proportion: Default::default(),
+			currency_id: currency_id,
+			official_website: vec![],
+			user_ico_max_times: 2,
+			is_must_kyc: false,
+			total_issuance: (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			total_circulation: (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			ico_duration: T::BlockNumber::from(0u32),
+			total_ico_amount: (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			user_min_amount: (100 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			user_max_amount: (2000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			exchange_token: T::UsdtCurrencyId::get(),
+			exchange_token_total_amount: (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			exclude_area: vec![AreaCode::AD],
+			lock_proportion: Default::default(),
+			unlock_duration: T::BlockNumber::from(0u32),
+			per_duration_unlock_amount: MultiBalanceOf::<T>::from(0u32)
+		};
+
+		<Ico<T>>::insert(currency_id, index, ico_info);
+
+		let info1= UnRelease {
+			currency_id: currency_id,
+			inviter: None,
+			index: 1,
+			unreleased_currency_id: currency_id,
+			total_usdt: (500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			tags: vec![((500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+						(500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+						(500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+						(500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>())],
+			total: (5000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			released: MultiBalanceOf::<T>::from(0u32),
+			refund: MultiBalanceOf::<T>::from(0u32),
+			reward: None
+		};
+
+		let info2= UnRelease {
+			currency_id: currency_id,
+			inviter: None,
+			index: 1,
+			unreleased_currency_id: T::UsdtCurrencyId::get(),
+			total_usdt: (5000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			tags: vec![],
+			total: (50000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			released: MultiBalanceOf::<T>::from(0u32),
+			refund: MultiBalanceOf::<T>::from(0u32),
+			reward: None
+		};
+
+
+		let info3= UnRelease {
+			currency_id: currency_id,
+			inviter: None,
+			index: 1,
+			unreleased_currency_id: currency_id,
+			total_usdt: (1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			tags: vec![((1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+						(1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+						(1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+						(1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>())],
+			total: (5000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			released: MultiBalanceOf::<T>::from(0u32),
+			refund: MultiBalanceOf::<T>::from(0u32),
+			reward: None
+		};
+
+		<UnReleaseAssets<T>>::mutate(joiner, |h| h.push(info1));
+		<UnReleaseAssets<T>>::mutate(joiner1, |h| h.push(info3));
+		<UnReleaseAssets<T>>::mutate(initiator, |h| h.push(info2));
+
+		Ok(())
+
+	}
 	fn is_project_ico_member(
 		currency_id: AssetId,
 		index: u32,
 		who: &T::AccountId,
 	) -> result::Result<bool, DispatchError> {
-		let _ = Ico::<T>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists)?;
+		runtime_print!("currency_id:{:?}, index: {:?}", currency_id, index);
+		let _ = Ico::<T>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists123)?;
 		Ok(Self::is_member(who, currency_id, index, true))
 	}
 
@@ -2104,7 +2193,8 @@ impl<T: Config> IcoHandler<AssetId, MultiBalanceOf<T>, T::AccountId, DispatchErr
 	}
 
 	fn get_project_total_ico_amount(currency_id: AssetId, index: u32) -> Result<MultiBalanceOf<T>, DispatchError> {
-		let ico = Ico::<T>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists)?;
+		runtime_print!("currency_id:{:?}, index: {:?}", currency_id, index);
+		let ico = Ico::<T>::get(currency_id, index).ok_or(Error::<T>::IcoNotExists123)?;
 		let result = Self::balance_convert_to_u256(ico.total_ico_amount)
 			* Self::balance_convert_to_u256(Self::get_total_and_released_amount(currency_id, index, &ico.initiator).0)
 			/ Self::balance_convert_to_u256(ico.exchange_token_total_amount);
