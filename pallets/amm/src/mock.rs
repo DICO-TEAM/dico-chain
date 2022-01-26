@@ -135,6 +135,7 @@ impl Config for Test {
 	type Event = Event;
 	type LiquidityAssetIdBase = AmmLiquidityAssetIdBase;
 	type Currency = Currency;
+	type CurrenciesHandler = Currency;
 	type PalletId = AMMPalletId;
 	type WeightInfo = ();
 }

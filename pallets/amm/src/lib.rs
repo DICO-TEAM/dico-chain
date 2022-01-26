@@ -29,7 +29,6 @@ use sp_std::vec::Vec;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 
-use dico_currencies::DicoAssetMetadata;
 use orml_traits::{MultiCurrency, MultiCurrencyExtended};
 
 mod benchmarking;
@@ -64,7 +63,7 @@ pub struct LiquidityInfo(pub Balance, pub Balance, pub AssetId);
 
 // Re-export pallet items so that they can be accessed from the crate namespace.
 use crate::math::LIQUIDITY_DECIMALS;
-use dico_currencies::currencies_trait::CurrenciesHandler;
+use dico_currencies::{currencies_trait::CurrenciesHandler, DicoAssetMetadata};
 pub use pallet::*;
 
 #[frame_support::pallet]
@@ -83,6 +82,8 @@ pub mod pallet {
 
 		/// Multi currency for transfer of currencies
 		type Currency: MultiCurrencyExtended<Self::AccountId, CurrencyId = AssetId, Balance = Balance, Amount = Amount>;
+
+		type CurrenciesHandler: CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, Self::AccountId, Balance, sp_runtime::DispatchResult>;
 
 		#[pallet::constant]
 		type LiquidityAssetIdBase: Get<AssetId>;
@@ -401,8 +402,8 @@ impl<T: Config> Pallet<T> {
 		asset_a: AssetId,
 		asset_b: AssetId,
 	) -> sp_std::result::Result<AssetId, DispatchErrorWithPostInfo> {
-		let asset_a_metadata = dico_currencies::module::Pallet::<T>::get_metadata(asset_a)?;
-		let asset_b_metadata = dico_currencies::module::Pallet::<T>::get_metadata(asset_b)?;
+		let asset_a_metadata = T::CurrenciesHandler::get_metadata(asset_a)?;
+		let asset_b_metadata = T::CurrenciesHandler::get_metadata(asset_b)?;
 
 		ensure!(
 			!asset_a_metadata.name.is_empty()
@@ -421,9 +422,9 @@ impl<T: Config> Pallet<T> {
 
 		let module_account_id = Self::account_id();
 		let new_liquidity_id = Self::get_next_liquidity_id()?;
-		let amount = <<T as dico_currencies::Config>::MultiCurrency as orml_traits::MultiCurrency<
-			<T as frame_system::Config>::AccountId,
-		>>::Balance::from(0u32);
+		// let amount = <<T as dico_currencies::Config>::MultiCurrency as orml_traits::MultiCurrency<
+		// 	<T as frame_system::Config>::AccountId,
+		// >>::Balance::from(0u32);
 
 		let liquidity_metadata = DicoAssetMetadata {
 			name: liquidity_name,
@@ -431,13 +432,7 @@ impl<T: Config> Pallet<T> {
 			decimals: LIQUIDITY_DECIMALS,
 		};
 
-		dico_currencies::module::Pallet::<T>::do_create(
-			module_account_id,
-			new_liquidity_id,
-			Some(liquidity_metadata),
-			amount,
-			true,
-		)?;
+		T::CurrenciesHandler::do_create(module_account_id, new_liquidity_id, Some(liquidity_metadata), 0u128, true, )?;
 
 		Ok(new_liquidity_id)
 	}

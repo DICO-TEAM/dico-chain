@@ -43,6 +43,7 @@ benchmarks! {
 	}
 
 	create_pool {
+		let _who = funded_account::<T>("caller", 0);
 		let alloc_point = 1000u128;
 	}: _(RawOrigin::Root, LIQUIDITY_ID, alloc_point)
 	verify {
@@ -55,6 +56,7 @@ benchmarks! {
 		let initial_alloc_point = 1000u128;
 		let update_alloc_point = 10000u128;
 		let pool_id = T::PoolId::zero();
+		let _who = funded_account::<T>("caller", 0);
 
 		Farm::<T>::create_pool(RawOrigin::Root.into(), LIQUIDITY_ID, initial_alloc_point)?;
 	}: _(RawOrigin::Root, pool_id, update_alloc_point)

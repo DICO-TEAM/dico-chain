@@ -951,6 +951,7 @@ impl pallet_kyc::Config for Runtime {
 impl pallet_amm::Config for Runtime {
     type Event = Event;
     type Currency = Currencies;
+	type CurrenciesHandler = Currencies;
     type LiquidityAssetIdBase = MaxCreatableCurrencyId;
     type PalletId = AmmPalletId;
     type WeightInfo = pallet_amm::weights::DicoWeight<Runtime>;
@@ -1494,6 +1495,10 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_balances, Balances);
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
+			list_benchmark!(list, extra, pallet_amm, AMM);
+			list_benchmark!(list, extra, pallet_farm, Farm);
+			list_benchmark!(list, extra, pallet_lbp, LBP);
+			list_benchmark!(list, extra, pallet_farm_extend, FarmExtend);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -1527,10 +1532,10 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
-			add_benchmark!(params, batches, amm, AMM);
-			add_benchmark!(params, batches, farm, Farm);
-			add_benchmark!(params, batches, lbp, LBP);
-			add_benchmark!(params, batches, farm_extend, FarmExtend);
+			add_benchmark!(params, batches, pallet_amm, AMM);
+			add_benchmark!(params, batches, pallet_farm, Farm);
+			add_benchmark!(params, batches, pallet_lbp, LBP);
+			add_benchmark!(params, batches, pallet_farm_extend, FarmExtend);
 
 			add_benchmark!(params, batches, pallet_nft, Nft);
 			add_benchmark!(params, batches, pallet_dao, Dao);

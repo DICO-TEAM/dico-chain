@@ -14,6 +14,7 @@ const SEED: u32 = 1;
 
 const DOT: AssetId = 1;
 const USDC: AssetId = 2;
+const USDT: AssetId = 3;
 pub const WEIGHT_ONE: u128 = 10_000_000_000u128;
 
 fn funded_account<T: Config>(name: &'static str, index: u32) -> T::AccountId {
@@ -24,8 +25,27 @@ fn funded_account<T: Config>(name: &'static str, index: u32) -> T::AccountId {
 }
 
 benchmarks! {
+	add_fundraising_asset {
+		let min_fundraising_amount: Balance = 100_000_000_000u128;
+	}: _(RawOrigin::Root, USDC, min_fundraising_amount)
+	verify {
+		assert_eq!(SupportFundraisingAssets::<T>::get(), Some(vec![(USDC, min_fundraising_amount)]));
+	}
+
+	remove_fundraising_asset {
+		let min_fundraising_amount: Balance = 100_000_000_000u128;
+		Lbp::<T>::add_fundraising_asset(RawOrigin::Root.into(), USDC, min_fundraising_amount)?;
+		Lbp::<T>::add_fundraising_asset(RawOrigin::Root.into(), USDT, min_fundraising_amount)?;
+
+	}: _(RawOrigin::Root, USDC)
+	verify {
+		assert_eq!(SupportFundraisingAssets::<T>::get(), Some(vec![(USDT, min_fundraising_amount)]));
+	}
+
 	create_lbp {
 		let caller = funded_account::<T>("caller", 0);
+		let min_fundraising_amount: Balance = 100_000_000_000u128;
+		Lbp::<T>::add_fundraising_asset(RawOrigin::Root.into(), DOT, min_fundraising_amount)?;
 
 		let afs_asset: AssetId = USDC;
 		let fundraising_asset: AssetId = DOT;
@@ -48,6 +68,8 @@ benchmarks! {
 
 	exit_lbp {
 		let caller = funded_account::<T>("caller", 0);
+		let min_fundraising_amount: Balance = 100_000_000_000u128;
+		Lbp::<T>::add_fundraising_asset(RawOrigin::Root.into(), DOT, min_fundraising_amount)?;
 
 		Lbp::<T>::create_lbp(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -76,6 +98,9 @@ benchmarks! {
 		let saler = funded_account::<T>("caller", 0);
 		let buyer = funded_account::<T>("caller", 1);
 
+		let min_fundraising_amount: Balance = 100_000_000_000u128;
+		Lbp::<T>::add_fundraising_asset(RawOrigin::Root.into(), DOT, min_fundraising_amount)?;
+
 		Lbp::<T>::create_lbp(
 			RawOrigin::Signed(saler.clone()).into(),
 			USDC,
@@ -96,12 +121,15 @@ benchmarks! {
 	}: _(RawOrigin::Signed(buyer.clone()), USDC, 86034000000000000000000u128, DOT, 0)
 	verify {
 		assert_eq!(T::Currency::free_balance(USDC, &buyer), 10_000_000_000_000_000_000_000_000_000 - 86034000000000000000000);
-		assert_eq!(T::Currency::free_balance(DOT, &buyer), 10_000_000_000_000_000_000_000_000_000 + 51927050621361330000000);
+		assert_eq!(T::Currency::free_balance(DOT, &buyer), 10_000_000_000_000_000_000_000_000_000 + 51676197239710905000000);
 	}
 
 	swap_exact_amount_target {
 		let saler = funded_account::<T>("caller", 0);
 		let buyer = funded_account::<T>("caller", 1);
+
+		let min_fundraising_amount: Balance = 100_000_000_000u128;
+		Lbp::<T>::add_fundraising_asset(RawOrigin::Root.into(), DOT, min_fundraising_amount)?;
 
 		Lbp::<T>::create_lbp(
 			RawOrigin::Signed(saler.clone()).into(),
@@ -122,7 +150,7 @@ benchmarks! {
 
 	}: _(RawOrigin::Signed(buyer.clone()), USDC, 986034000000000000000000u128, DOT, 51927050621361330000000u128)
 	verify {
-		assert_eq!(T::Currency::free_balance(USDC, &buyer), 10_000_000_000_000_000_000_000_000_000 - 86033999974477294587667);
+		assert_eq!(T::Currency::free_balance(USDC, &buyer), 10_000_000_000_000_000_000_000_000_000 - 86466331632640497073032);
 		assert_eq!(T::Currency::free_balance(DOT, &buyer), 10_000_000_000_000_000_000_000_000_000 + 51927050621361330000000);
 	}
 }
