@@ -952,6 +952,7 @@ impl pallet_kyc::Config for Runtime {
 impl pallet_amm::Config for Runtime {
     type Event = Event;
     type Currency = Currencies;
+	type CurrenciesHandler = Currencies;
     type LiquidityAssetIdBase = MaxCreatableCurrencyId;
     type PalletId = AmmPalletId;
     type WeightInfo = pallet_amm::weights::DicoWeight<Runtime>;
