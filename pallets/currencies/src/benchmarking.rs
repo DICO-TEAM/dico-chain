@@ -2,22 +2,27 @@
 
 use super::*;
 use frame_benchmarking::{account, benchmarks_instance, impl_benchmark_test_suite, benchmarks, whitelisted_caller};
+use frame_support::runtime_print;
 use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
+use sp_runtime::SaturatedConversion;
 use sp_std::vec;
 use crate::Pallet as Currencies;
 
 const SEED: u32 = 0;
 
 fn get_alice<T: Config>() -> T::AccountId {
+	runtime_print!("get alice");
 	let caller: T::AccountId = whitelisted_caller();
-	T::MultiCurrency::deposit(T::GetNativeCurrencyId::get(), &caller, 10000u32.into());
+	T::NativeCurrency::deposit(&caller, (10000 * DOLLARS).saturated_into::<BalanceOf<T>>());
+	runtime_print!("amount: {:?}", T::MultiCurrency::free_balance(T::GetNativeCurrencyId::get(), &caller));
 	caller
 }
 
+
 fn get_bob<T: Config>() -> T::AccountId {
 	let caller: T::AccountId = account("bob", 1, SEED);
-	T::MultiCurrency::deposit(T::GetNativeCurrencyId::get(), &caller, 10000u32.into());
+	T::NativeCurrency::deposit(&caller, (10000 * DOLLARS).saturated_into::<BalanceOf<T>>());
 	caller
 }
 
@@ -29,7 +34,7 @@ fn look_up<T: Config>(who: T::AccountId) -> <T::Lookup as StaticLookup>::Source 
 fn create<T: Config>() -> (T::AccountId, u32) {
 	let Alice = get_alice::<T>();
 	let currency_id = 50;
-	assert!(Currencies::<T>::create_asset(RawOrigin::Signed(Alice.clone()).into(), currency_id, BalanceOf::<T>::from(100000u32), None).is_ok());
+	assert!(Currencies::<T>::create_asset(RawOrigin::Signed(Alice.clone()).into(), currency_id, (100000 * DOLLARS).saturated_into::<BalanceOf<T>>(), None).is_ok());
 	(Alice, currency_id)
 }
 
@@ -48,7 +53,7 @@ benchmarks! {
 	create_asset {
 		let Alice = get_alice::<T>();
 		let currency_id = 50;
-	}:_(RawOrigin::Signed(Alice.clone()), currency_id, BalanceOf::<T>::from(100000u32), None)
+	}:_(RawOrigin::Signed(Alice.clone()), currency_id, (100000 * DOLLARS).saturated_into::<BalanceOf<T>>(), None)
 	verify {
 		assert!(!T::MultiCurrency::total_issuance(currency_id).is_zero())
 	}
@@ -65,23 +70,38 @@ benchmarks! {
 	burn {
 		let (alice, id) = get_asset::<T>();
 
-	}:_(RawOrigin::Signed(alice.clone()), id, BalanceOf::<T>::from(10000u32))
+	}:_(RawOrigin::Signed(alice.clone()), id, (100 * DOLLARS).saturated_into::<BalanceOf<T>>())
 
 	transfer {
 		let (alice, id) = get_asset::<T>();
 		let bob = get_bob::<T>();
 
-	}:_(RawOrigin::Signed(alice.clone()), look_up::<T>(bob.clone()), id, BalanceOf::<T>::from(10000u32))
+	}:_(RawOrigin::Signed(alice.clone()), look_up::<T>(bob.clone()), id, (100 * DOLLARS).saturated_into::<BalanceOf<T>>())
 
 	transfer_native_currency {
 		let alice = get_alice::<T>();
 		let bob = get_bob::<T>();
-	}:_(RawOrigin::Signed(alice.clone()), look_up::<T>(bob.clone()),  BalanceOf::<T>::from(10u32))
+	}:_(RawOrigin::Signed(alice.clone()), look_up::<T>(bob.clone()),  (10 * DOLLARS).saturated_into::<BalanceOf<T>>())
 
 	update_balance {
 		let (alice, id) = get_asset::<T>();
-	}:_(RawOrigin::Root,  look_up::<T>(alice.clone()), id, AmountOf::<T>::from(10u32))
+	}:_(RawOrigin::Root,  look_up::<T>(alice.clone()), id, (10 * DOLLARS).saturated_into::<AmountOf<T>>())
 }
 
-impl_benchmark_test_suite!(Currencies, crate::mock::new_test_ext(), crate::mock::Test);
+#[cfg(test)]
+mod test1 {
+	use super::*;
+	use crate::mock::{new_test_ext, Runtime};
+	use frame_support::assert_ok;
+	#[test]
+	fn test_benchmarks() {
+		new_test_ext().execute_with(|| {
+			get_alice::<Runtime>();
+			// assert_ok!(Currencies::<Runtime>::test_benchmark_set_metadata());
+			assert_ok!(Currencies::<Runtime>::test_benchmark_update_balance());
+
+		});
+	}
+}
+// impl_benchmark_test_suite!(Currencies, crate::mock::new_test_ext(), crate::mock::Test);
 

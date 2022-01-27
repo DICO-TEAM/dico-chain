@@ -22,6 +22,7 @@ pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "p
 
 # local
 pallet-ico = { path = "../ico", default-features = false}
+dico-primitives = { path = "../../primitives", default-features = false}
 
 [dev-dependencies]
 sp-io   = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.13" }
@@ -40,6 +41,7 @@ std = [
 	"frame-support/std",
 	"frame-system/std",
 	"pallet-ico/std",
+	"dico-primitives/std",
 	"pallet-balances/std",
 ]
 

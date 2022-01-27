@@ -1,32 +1,34 @@
 #![cfg(feature = "runtime-benchmarks")]
 
 use super::*;
+use sp_runtime::SaturatedConversion;
 use frame_benchmarking::{account, benchmarks_instance, benchmarks, impl_benchmark_test_suite, whitelist_account, whitelisted_caller,
 benchmarks_instance_pallet};
 use frame_support::{assert_ok};
 
 use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
+use dico_primitives::currency::DOLLARS;
 use crate::Pallet as NFT;
 
 const SEED: u32 = 0;
 
 fn get_bob<T: Config>() -> T::AccountId{
 	let Bob = account("bob", 2, SEED);
-	T::Currency::make_free_balance_be(&Bob, BalanceOf::<T>::from(100u32));
+	T::Currency::make_free_balance_be(&Bob, (10000 * DOLLARS).saturated_into::<BalanceOf<T>>());
 	Bob
 }
 
 fn create_nft_class<T: Config>() -> (T::AccountId, T::ClassId){
 	let caller: T::AccountId = whitelisted_caller();
-	T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::from(0u32));
+	T::Currency::make_free_balance_be(&caller, (10000 * DOLLARS).saturated_into::<BalanceOf<T>>());
 	let remark_message = vec![1; 3];
 	let class = ClassData {
 		level: NftLevel::Rookie,
 		power_threshold: BalanceOf::<T>::default(),
 		claim_payment:  BalanceOf::<T>::default(),
 		images_hash: None,
-		maximum_quantity: T::TokenId::default(),
+		maximum_quantity: 100u32.into(),
 	};
 	assert!(NFT::<T>::create_class(RawOrigin::Signed(caller.clone()).into(), remark_message, class).is_ok());
 	(caller, T::ClassId::default())
@@ -140,8 +142,8 @@ benchmarks! {
 
 	active {
 		let (caller, class_id, token_id) = claim_nft_token::<T>();
-		let Bob = get_bob::<T>();
-	}:_(RawOrigin::Signed(Bob.clone()), (class_id, token_id))
+		// let Bob = get_bob::<T>();
+	}:_(RawOrigin::Signed(caller.clone()), (class_id, token_id))
 
 	inactive {
 		let (caller, class_id, token_id) = active_nft::<T>();
@@ -149,6 +151,19 @@ benchmarks! {
 	}:_(RawOrigin::Signed(caller.clone()), (class_id, token_id))
 }
 
-impl_benchmark_test_suite!(NFT, crate::mock::new_test_ext(), crate::mock::Runtime);
+// impl_benchmark_test_suite!(NFT, crate::mock::new_test_ext(), crate::mock::Runtime);
+#[cfg(test)]
+mod test1 {
+	use super::*;
+	use crate::mock::{new_test_ext, Runtime};
+	use frame_support::assert_ok;
+	#[test]
+	fn test_benchmarks() {
+		new_test_ext().execute_with(|| {
+			// assert_ok!(Currencies::<Runtime>::test_benchmark_set_metadata());
+			assert_ok!(NFT::<Runtime>::test_benchmark_inactive());
 
+		});
+	}
+}
 

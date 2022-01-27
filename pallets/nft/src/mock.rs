@@ -60,8 +60,9 @@ impl pallet_balances::Config for Runtime {
 }
 
 parameter_types! {
-	pub const MaxClassMetadata: u32 = 1;
-	pub const MaxTokenMetadata: u32 = 1;
+	pub const MaxClassMetadata: u32 = 1024;
+	pub const MaxTokenMetadata: u32 = 1024;
+	pub const MaxTokenAttribute: u32 = 1024;
 }
 
 impl Config for Runtime {
@@ -71,7 +72,7 @@ impl Config for Runtime {
 	type MaxTokenMetadata = MaxTokenMetadata;
 	type Event = Event;
 	type Currency = Balances;
-	type MaxTokenAttribute = ();
+	type MaxTokenAttribute = MaxTokenAttribute;
 	type PowerHandler = ();
 }
 
@@ -115,4 +116,15 @@ impl ExtBuilder {
 		ext.execute_with(|| System::set_block_number(1));
 		ext
 	}
+}
+
+pub fn new_test_ext() -> sp_io::TestExternalities {
+	let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
+	pallet_balances::GenesisConfig::<Runtime> {
+		// Total issuance will be 200 with treasury account initialized at ED.
+		balances: vec![(0, 100), (1, 98), (2, 1)],
+	}
+	.assimilate_storage(&mut t)
+	.unwrap();
+	t.into()
 }

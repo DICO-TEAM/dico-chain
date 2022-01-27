@@ -58,7 +58,6 @@ fn set_propose<T: Config>() -> (T::Hash, u32, u32){
 	let currency_id = 1;
 	let ico_index = 1;
 	T::IcoHandler::set_ico_for_bench(currency_id, ico_index, caller.clone(), get_alice::<T>(), get_bob::<T>());
-	// println!("-----------------------------");
 	let proposal: T::Proposal = SystemCall::<T>::remark { remark: vec![1; 3] }.into();
 	let hash = T::Hashing::hash_of(&proposal);
 

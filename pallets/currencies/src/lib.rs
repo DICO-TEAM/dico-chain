@@ -17,6 +17,7 @@
 #![allow(clippy::unused_unit)]
 use codec::Codec;
 use scale_info::TypeInfo;
+use frame_system::WeightInfo;
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
@@ -25,6 +26,8 @@ use frame_support::{
 		ReservableCurrency as PalletReservableCurrency, WithdrawReasons,
 	},
 };
+use sp_std::vec;
+
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use frame_system::{ensure_root, ensure_signed, pallet_prelude::*};
@@ -55,14 +58,14 @@ use sp_std::{
 
 
 mod mock;
-mod weights;
+// mod weights;
 pub use module::*;
-pub use weights::WeightInfo;
+// pub use weights::WeightInfo;
 pub mod currencies_trait;
 mod benchmarking;
 
 use currencies_trait::CurrenciesHandler;
-use dico_primitives::AssetId;
+pub use dico_primitives::{AssetId, constants::{currency::*, time::*}};
 
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 #[derive(Clone, Encode, Decode, Eq, PartialEq, Default, RuntimeDebug, TypeInfo)]
@@ -256,7 +259,7 @@ pub mod module {
 		///
 		/// The dispatch origin for this call must be `Signed` by the
 		/// transactor.
-		#[pallet::weight(T::WeightInfo::transfer_non_native_currency())]
+		#[pallet::weight(10000)]
 		pub fn transfer(
 			origin: OriginFor<T>,
 			dest: <T::Lookup as StaticLookup>::Source,
@@ -276,7 +279,7 @@ pub mod module {
 		///
 		/// The dispatch origin for this call must be `Signed` by the
 		/// transactor.
-		#[pallet::weight(T::WeightInfo::transfer_native_currency())]
+		#[pallet::weight(10000)]
 		pub fn transfer_native_currency(
 			origin: OriginFor<T>,
 			dest: <T::Lookup as StaticLookup>::Source,
@@ -293,7 +296,7 @@ pub mod module {
 		/// update amount of account `who` under `currency_id`.
 		///
 		/// The dispatch origin of this call must be _Root_.
-		#[pallet::weight(T::WeightInfo::update_balance_non_native_currency())]
+		#[pallet::weight(10000)]
 		pub fn update_balance(
 			origin: OriginFor<T>,
 			who: <T::Lookup as StaticLookup>::Source,
@@ -316,10 +319,19 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 	for Pallet<T>
 {
 	fn get_metadata(currency_id: AssetId) -> result::Result<DicoAssetMetadata, DispatchError> {
+		if cfg!(any(feature = "std", feature = "runtime-benchmarks", test)) {
+			return Ok(DicoAssetMetadata {
+				name: vec![],
+				symbol: vec![],
+				decimals: 12
+			});
+		}
+
 		let asset_info = DicoAssetsInfo::<T>::get(currency_id).ok_or(Error::<T>::AssetNotExists)?;
 		match asset_info.metadata {
 			Some(x) => Ok(x),
 			None => Err(Error::<T>::MetadataNotExists)?,
+
 		}
 	}
 
@@ -345,9 +357,14 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 				!Self::is_currency_id_too_large(currency_id),
 				Error::<T>::CurrencyIdTooLarge
 			);
+			#[cfg(test)]
+				println!("asset_id:{:?}，free amount: {:?}, Consume:{:?}",
+				T::GetNativeCurrencyId::get(),
+				T::NativeCurrency::free_balance(&user),
+				T::CreateConsume::get());
+
 			Self::withdraw(T::GetNativeCurrencyId::get(), &user, T::CreateConsume::get())?;
 		}
-
 		T::MultiCurrency::deposit(currency_id, &user, amount)?;
 		DicoAssetsInfo::<T>::insert(
 			currency_id,
@@ -364,9 +381,9 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 
 impl<T: Config> Pallet<T> {
 	fn is_exists_metadata(currency_id: AssetId) -> bool {
-		if currency_id == T::GetNativeCurrencyId::get() {
-			return true;
-		}
+		// if currency_id == T::GetNativeCurrencyId::get() {
+		// 	return true;
+		// }
 		match DicoAssetsInfo::<T>::get(currency_id).as_ref() {
 			Some(x) => {
 				if x.metadata.is_some() {
@@ -878,15 +895,3 @@ where
 		Currency::repatriate_reserved(slashed, beneficiary, value, status)
 	}
 }
-
-// impl<T: Config> TransferAll<T::AccountId> for Pallet<T> {
-// 	fn transfer_all(source: &T::AccountId, dest: &T::AccountId) -> DispatchResult
-// { 		with_transaction_result(|| {
-// 			// transfer non-native free to dest
-// 			T::MultiCurrency::transfer_all(source, dest)?;
-//
-// 			// transfer all free to dest
-// 			T::NativeCurrency::transfer(source, dest,
-// T::NativeCurrency::free_balance(source)) 		})
-// 	}
-// }
