@@ -256,11 +256,11 @@ impl<T: Config<I>, I: 'static> Pallet<T, I> {
 	///
 	/// Note this will update values storage if has update.
 	pub fn get(key: &T::OracleKey) -> Option<TimestampedValueOf<T, I>> {
-		log::info!("*************** get {:?} ********************", key);
+		// log::info!("*************** get {:?} ********************", key);
 		if Self::is_updated(key) {
 			<Values<T, I>>::get(key)
 		} else {
-			log::info!("-- values: {:?} --", &<Values<T, I>>::get(key));
+			// log::info!("-- values: {:?} --", &<Values<T, I>>::get(key));
 			let timestamped = Self::combined(key)?;
 			<Values<T, I>>::insert(key, timestamped.clone());
 			IsUpdated::<T, I>::insert(key, true);
@@ -294,7 +294,7 @@ impl<T: Config<I>, I: 'static> Pallet<T, I> {
 
 	fn combined(key: &T::OracleKey) -> Option<TimestampedValueOf<T, I>> {
 		let values = Self::read_raw_values(key);
-		log::info!("---values:{:?}, value:{:?}---", values, Self::values(key));
+		// log::info!("---values:{:?}, value:{:?}---", values, Self::values(key));
 
 		T::CombineData::combine_data(key, values, Self::values(key))
 	}
@@ -311,7 +311,7 @@ impl<T: Config<I>, I: 'static> Pallet<T, I> {
 			HasDispatched::<T, I>::mutate(|set| set.insert(who.clone())),
 			Error::<T, I>::AlreadyFeeded
 		);
-		log::info!("***************do_feed_values values {:?} ********************", values);
+		// log::info!("***************do_feed_values values {:?} ********************", values);
 		let now = T::Time::now();
 		for (key, value) in &values {
 			let timestamped = TimestampedValue {
@@ -370,7 +370,7 @@ impl<T: Config<I>, I: 'static> UpdateOraclesStorgage<T::AccountId, T::OracleKey>
 
 impl<T: Config<I>, I: 'static> DataProvider<T::OracleKey, T::OracleValue> for Pallet<T, I> {
 	fn get(key: &T::OracleKey) -> Option<T::OracleValue> {
-		log::info!("***************DataProvider get {:?} ********************", key);
+		// log::info!("***************DataProvider get {:?} ********************", key);
 		Self::get(key).map(|timestamped_value| timestamped_value.value)
 	}
 }
