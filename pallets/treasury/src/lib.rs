@@ -20,6 +20,8 @@ mod benchmarking;
 pub mod traits;
 // pub mod weights;
 mod tests;
+pub mod weights;
+
 pub use dico_primitives::constants::currency::DOLLARS;
 
 pub use crate::pallet::*;
@@ -41,8 +43,8 @@ use sp_runtime::{
 };
 use sp_std::prelude::*;
 use traits::DicoTreasuryHandler;
-// pub use weights::WeightInfo;
-use frame_system::WeightInfo;
+pub use weights::TreasuryWeightInfo;
+// use frame_system::WeightInfo;
 use scale_info::TypeInfo;
 use orml_traits::{
 	arithmetic::{Signed, SimpleArithmetic},
@@ -104,7 +106,7 @@ pub mod pallet {
 			+ Into<<Self as frame_system::Config>::Event>
 			+ IsType<<Self as frame_system::Config>::Event>;
 		/// Weight information for extrinsics in this pallet.
-		type WeightInfo: WeightInfo;
+		type WeightInfo: TreasuryWeightInfo;
 
 		#[pallet::constant]
 		type PalletId: Get<PalletId>;

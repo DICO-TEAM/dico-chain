@@ -60,7 +60,8 @@ pub mod traits;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
-
+pub mod weights;
+use weights::IcoWeightInfo;
 use scale_info::TypeInfo;
 const ICO_ID: LockIdentifier = *b"ico     ";
 const HalfDuration: u128 = 200_000_000u128 * USDT;
@@ -300,6 +301,8 @@ pub mod pallet {
 		type PriceData: PriceData<AssetId, Price = Balance>;
 
 		type KycHandler: KycHandler<Self::AccountId, AreaCode>;
+
+		type WeightInfo: IcoWeightInfo;
 
 		type GetNativeCurrencyId: Get<AssetId>;
 		#[pallet::constant]

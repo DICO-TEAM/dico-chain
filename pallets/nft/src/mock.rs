@@ -66,6 +66,7 @@ parameter_types! {
 }
 
 impl Config for Runtime {
+	type WeightInfo = ();
 	type ClassId = u64;
 	type TokenId = u64;
 	type MaxClassMetadata = MaxClassMetadata;

@@ -33,9 +33,63 @@
 use frame_support::{traits::Get, weights::Weight};
 use sp_std::marker::PhantomData;
 
+pub trait NftWeightInfo {
+	fn create_class() -> Weight;
+	fn mint() -> Weight;
+	fn claim() -> Weight;
+	fn burn() -> Weight;
+	fn transfer() -> Weight;
+	fn offer_token_for_sale() -> Weight;
+	fn withdraw_sale() -> Weight;
+	fn buy_token() -> Weight;
+	fn active() -> Weight;
+	fn inactive() -> Weight;
+}
+
+impl NftWeightInfo for () {
+	fn create_class() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn mint() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn claim() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn burn() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn transfer() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn offer_token_for_sale() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn withdraw_sale() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn buy_token() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn active() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn inactive() -> Weight {
+		( 0 as Weight)
+	}
+}
 /// Weight functions for `pallet_nft`.
 pub struct WeightInfo<T>(PhantomData<T>);
-impl<T: frame_system::Config> pallet_nft::WeightInfo for WeightInfo<T> {
+impl<T: frame_system::Config> NftWeightInfo for WeightInfo<T> {
 	// Storage: Nft IssuerOf (r:1 w:1)
 	// Storage: Nft NextClassId (r:1 w:1)
 	// Storage: Nft Classes (r:0 w:1)

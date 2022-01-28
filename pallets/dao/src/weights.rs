@@ -33,9 +33,34 @@
 use frame_support::{traits::Get, weights::Weight};
 use sp_std::marker::PhantomData;
 
+pub trait DaoWeightInfo {
+	fn propose() -> Weight;
+	fn vote() -> Weight;
+	fn close() -> Weight;
+	fn disapprove_proposal() -> Weight;
+}
+
+impl DaoWeightInfo for () {
+	fn propose() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn vote() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn close() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn disapprove_proposal() -> Weight {
+		( 0 as Weight)
+	}
+}
+
 /// Weight functions for `pallet_dao`.
 pub struct WeightInfo<T>(PhantomData<T>);
-impl<T: frame_system::Config> pallet_dao::WeightInfo for WeightInfo<T> {
+impl<T: frame_system::Config> DaoWeightInfo for WeightInfo<T> {
 	// Storage: Ico Ico (r:1 w:0)
 	// Storage: Ico UnReleaseAssets (r:2 w:0)
 	// Storage: Dao ProposalOf (r:1 w:1)

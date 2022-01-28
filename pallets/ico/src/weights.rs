@@ -33,9 +33,88 @@
 use frame_support::{traits::Get, weights::Weight};
 use sp_std::marker::PhantomData;
 
+pub trait IcoWeightInfo {
+	fn initiate_ico() -> Weight;
+	fn permit_ico() -> Weight;
+	fn reject_ico() -> Weight;
+	fn join() -> Weight;
+	fn terminate_ico() -> Weight;
+	fn request_release() -> Weight;
+	fn cancel_request() -> Weight;
+	fn permit_release() -> Weight;
+	fn user_release_ico_amount() -> Weight;
+	fn unlock() -> Weight;
+	fn set_system_ico_amount_bound() -> Weight;
+	fn initiator_set_ico_amount_bound() -> Weight;
+	fn initiator_set_ico_max_times() -> Weight;
+	fn get_reward() -> Weight;
+	fn set_asset_power_multiple() -> Weight;
+}
+
+impl IcoWeightInfo for () {
+	fn initiate_ico() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn permit_ico() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn reject_ico() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn join() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn terminate_ico() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn request_release() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn cancel_request() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn permit_release() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn user_release_ico_amount() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn unlock() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn set_system_ico_amount_bound() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn initiator_set_ico_amount_bound() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn initiator_set_ico_max_times() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn get_reward() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn set_asset_power_multiple() -> Weight {
+		( 0 as Weight)
+	}
+}
 /// Weight functions for `pallet_ico`.
 pub struct WeightInfo<T>(PhantomData<T>);
-impl<T: frame_system::Config> pallet_ico::WeightInfo for WeightInfo<T> {
+impl<T: frame_system::Config> IcoWeightInfo for WeightInfo<T> {
 	// Storage: Ico IcoMinUsdtAmount (r:1 w:0)
 	// Storage: Ico IcoMaxUsdtAmount (r:1 w:0)
 	// Storage: Ico PendingIco (r:1 w:1)

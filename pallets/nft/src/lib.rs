@@ -21,6 +21,8 @@ mod mock;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+pub mod weights;
+use weights::NftWeightInfo;
 
 use codec::{Decode, Encode};
 use scale_info::TypeInfo;
@@ -157,6 +159,7 @@ pub mod module {
 		type MaxTokenMetadata: Get<u32>;
 		/// The maximum size of a token's attribute.
 		type MaxTokenAttribute: Get<u32>;
+		type WeightInfo: NftWeightInfo;
 		type PowerHandler: pallet_ico::traits::PowerHandler<Self::AccountId, DispatchResult, BalanceOf<Self>>;
 	}
 	pub type AttributeOf<T> = BoundedVec<u8, <T as Config>::MaxTokenAttribute>;

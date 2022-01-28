@@ -63,7 +63,9 @@ pub use module::*;
 // pub use weights::WeightInfo;
 pub mod currencies_trait;
 mod benchmarking;
+pub mod weights;
 
+pub use weights::CurrenciesWeightInfo;
 use currencies_trait::CurrenciesHandler;
 pub use dico_primitives::{AssetId, constants::{currency::*, time::*}};
 
@@ -114,7 +116,7 @@ pub mod module {
 		type GetNativeCurrencyId: Get<AssetId>;
 
 		/// Weight information for extrinsics in this module.
-		type WeightInfo: WeightInfo;
+		type WeightInfo: CurrenciesWeightInfo;
 
 		type CreateConsume: Get<BalanceOf<Self>>;
 

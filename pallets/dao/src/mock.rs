@@ -265,6 +265,7 @@ parameter_types! {
 }
 
 impl ico::Config for Test {
+	type WeightInfo = ();
 	type Event = Event;
 	type PermitIcoOrigin = frame_system::EnsureRoot<AccountId>;
 	type RejectIcoOrigin = frame_system::EnsureRoot<AccountId>;

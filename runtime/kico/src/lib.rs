@@ -1066,7 +1066,7 @@ impl pallet_currencies::Config for Runtime {
 
     type GetNativeCurrencyId = DICOAssetId;
 
-    type WeightInfo = ();
+    type WeightInfo = pallet_currencies::weights::WeightInfo<Runtime>;
 
     type CreateConsume = CreateConsume;
     type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
@@ -1159,7 +1159,7 @@ impl pallet_dico_treasury::Config for Runtime {
     type GetNativeCurrencyId = DICOAssetId;
     type ProposalBond = DicoProposalBond;
     type SpendPeriod = DicoSpendPeriod;
-    type WeightInfo = ();
+    type WeightInfo = pallet_dico_treasury::weights::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -1203,6 +1203,7 @@ impl pallet_ico::Config for Runtime {
     type PriceData = PriceDao;
     type UsdtCurrencyId = UsdtCurrencyId;
     type KycHandler = Kyc;
+	type WeightInfo = pallet_ico::weights::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -1216,7 +1217,7 @@ impl pallet_dao::Config for Runtime {
     type Event = Event;
     type MotionDuration = DicoMotionDuration;
     type MaxProposals = DicoMaxProposals;
-    // type WeightInfo = ();
+    type WeightInfo = pallet_dao::weights::WeightInfo<Runtime>;
     type IcoHandler = Ico;
 }
 
@@ -1236,6 +1237,7 @@ impl pallet_nft::Config for Runtime {
     type MaxTokenMetadata = MaxTokenMetadata;
     type MaxTokenAttribute = MaxTokenAttribute;
     type PowerHandler = Ico;
+	type WeightInfo = pallet_nft::weights::WeightInfo<Runtime>;
 }
 
 impl orml_unknown_tokens::Config for Runtime {

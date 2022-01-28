@@ -33,9 +33,34 @@
 use frame_support::{traits::Get, weights::Weight};
 use sp_std::marker::PhantomData;
 
+pub trait TreasuryWeightInfo {
+	fn propose_spend() -> Weight;
+	fn reject_proposal() -> Weight;
+	fn approve_proposal() -> Weight;
+	fn spend_fund() -> Weight;
+}
+
+impl TreasuryWeightInfo for () {
+	fn propose_spend() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn reject_proposal() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn approve_proposal() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn spend_fund() -> Weight {
+		( 0 as Weight)
+	}
+}
+
 /// Weight functions for `pallet_dico_treasury`.
 pub struct WeightInfo<T>(PhantomData<T>);
-impl<T: frame_system::Config> pallet_dico_treasury::WeightInfo for WeightInfo<T> {
+impl<T: frame_system::Config> TreasuryWeightInfo for WeightInfo<T> {
 	// Storage: DicoTreasury ProposalCount (r:1 w:1)
 	// Storage: DicoTreasury Proposals (r:0 w:1)
 	fn propose_spend() -> Weight {

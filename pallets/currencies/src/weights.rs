@@ -33,9 +33,43 @@
 use frame_support::{traits::Get, weights::Weight};
 use sp_std::marker::PhantomData;
 
+pub trait CurrenciesWeightInfo {
+	fn create_asset() -> Weight;
+	fn set_metadata() -> Weight;
+	fn burn() -> Weight;
+	fn transfer() -> Weight;
+	fn transfer_native_currency() -> Weight;
+	fn update_balance() -> Weight;
+}
+
+impl CurrenciesWeightInfo for () {
+	fn create_asset() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn set_metadata() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn burn() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn transfer() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn transfer_native_currency() -> Weight {
+		( 0 as Weight)
+	}
+
+	fn update_balance() -> Weight {
+		( 0 as Weight)
+	}
+}
 /// Weight functions for `pallet_currencies`.
 pub struct WeightInfo<T>(PhantomData<T>);
-impl<T: frame_system::Config> pallet_currencies::WeightInfo for WeightInfo<T> {
+impl<T: frame_system::Config> CurrenciesWeightInfo for WeightInfo<T> {
 	// Storage: Currencies DicoAssetsInfo (r:1 w:1)
 	// Storage: Tokens TotalIssuance (r:1 w:1)
 	// Storage: Tokens Accounts (r:1 w:1)
