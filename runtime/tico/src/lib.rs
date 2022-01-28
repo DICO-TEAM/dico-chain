@@ -1067,7 +1067,7 @@ impl pallet_currencies::Config for Runtime {
 
     type GetNativeCurrencyId = DICOAssetId;
 
-    type WeightInfo = ();
+    type WeightInfo = pallet_currencies::weights::WeightInfo<Runtime>;
 
     type CreateConsume = CreateConsume;
     type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
@@ -1160,7 +1160,7 @@ impl pallet_dico_treasury::Config for Runtime {
     type GetNativeCurrencyId = DICOAssetId;
     type ProposalBond = DicoProposalBond;
     type SpendPeriod = DicoSpendPeriod;
-    type WeightInfo = ();
+    type WeightInfo = pallet_dico_treasury::weights::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -1204,6 +1204,7 @@ impl pallet_ico::Config for Runtime {
     type PriceData = PriceDao;
     type UsdtCurrencyId = UsdtCurrencyId;
     type KycHandler = Kyc;
+	type WeightInfo = pallet_ico::weights::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -1217,7 +1218,7 @@ impl pallet_dao::Config for Runtime {
     type Event = Event;
     type MotionDuration = DicoMotionDuration;
     type MaxProposals = DicoMaxProposals;
-    type WeightInfo = ();
+    type WeightInfo = pallet_dao::weights::WeightInfo<Runtime>;
     type IcoHandler = Ico;
 }
 
@@ -1237,6 +1238,7 @@ impl pallet_nft::Config for Runtime {
     type MaxTokenMetadata = MaxTokenMetadata;
     type MaxTokenAttribute = MaxTokenAttribute;
     type PowerHandler = Ico;
+	type WeightInfo = pallet_nft::weights::WeightInfo<Runtime>;
 }
 
 impl orml_unknown_tokens::Config for Runtime {
@@ -1501,6 +1503,12 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_lbp, LBP);
 			list_benchmark!(list, extra, pallet_farm_extend, FarmExtend);
 
+			list_benchmark!(list, extra, pallet_nft, Nft);
+			list_benchmark!(list, extra, pallet_dao, Dao);
+			list_benchmark!(list, extra, pallet_ico, Ico);
+			list_benchmark!(list, extra, pallet_dico_treasury, DicoTreasury);
+			list_benchmark!(list, extra, pallet_currencies, Currencies);
+
 			let storage_info = AllPalletsWithSystem::storage_info();
 
 			return (list, storage_info)
@@ -1542,7 +1550,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_dao, Dao);
 			add_benchmark!(params, batches, pallet_dico_treasury, DicoTreasury);
 			add_benchmark!(params, batches, pallet_ico, Ico);
-			add_benchmark!(params, batches, pallet_pallet_currencies, Currencies);
+			add_benchmark!(params, batches, pallet_currencies, Currencies);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
