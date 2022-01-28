@@ -172,7 +172,7 @@ pub mod pallet {
 		/// The user makes a proposal.
 		///
 		/// Must be a member of the project ICO.
-		#[pallet::weight(10000 + T::DbWeight::get().reads_writes(10, 5))]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::propose())]
 		pub fn propose(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
@@ -234,7 +234,7 @@ pub mod pallet {
 		/// Users vote on proposals.
 		///
 		/// Must be a member of the project ICO
-		#[pallet::weight(10000 + T::DbWeight::get().reads_writes(10, 2))]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::vote())]
 		pub fn vote(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
@@ -314,7 +314,7 @@ pub mod pallet {
 		/// The user close the proposal.
 		///
 		/// Everyone can do it
-		#[pallet::weight(10000 + T::DbWeight::get().reads_writes(10, 3))]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::close())]
 		pub fn close(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
@@ -371,7 +371,7 @@ pub mod pallet {
 		/// The root user disapprove the proposal.
 		///
 		/// Referendum
-		#[pallet::weight(10000 + T::DbWeight::get().reads_writes(0, 5))]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::disapprove_proposal())]
 		pub fn disapprove_proposal(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,

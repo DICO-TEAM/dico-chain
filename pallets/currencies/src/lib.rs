@@ -194,7 +194,7 @@ pub mod module {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Users create the asset.
-		#[pallet::weight(10000)]
+		#[pallet::weight(T::WeightInfo::create_asset())]
 		pub fn create_asset(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -210,7 +210,7 @@ pub mod module {
 		/// Users set the asset metadata.
 		///
 		/// You should have created the asset first.
-		#[pallet::weight(10000)]
+		#[pallet::weight(T::WeightInfo::set_metadata())]
 		pub fn set_metadata(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -246,7 +246,7 @@ pub mod module {
 		}
 
 		/// Users destroy their own assets.
-		#[pallet::weight(10000)]
+		#[pallet::weight(T::WeightInfo::burn())]
 		pub fn burn(origin: OriginFor<T>, currency_id: AssetId, amount: BalanceOf<T>) -> DispatchResultWithPostInfo {
 			let user = ensure_signed(origin)?;
 
@@ -261,7 +261,7 @@ pub mod module {
 		///
 		/// The dispatch origin for this call must be `Signed` by the
 		/// transactor.
-		#[pallet::weight(10000)]
+		#[pallet::weight(T::WeightInfo::transfer())]
 		pub fn transfer(
 			origin: OriginFor<T>,
 			dest: <T::Lookup as StaticLookup>::Source,
@@ -281,7 +281,7 @@ pub mod module {
 		///
 		/// The dispatch origin for this call must be `Signed` by the
 		/// transactor.
-		#[pallet::weight(10000)]
+		#[pallet::weight(T::WeightInfo::transfer_native_currency())]
 		pub fn transfer_native_currency(
 			origin: OriginFor<T>,
 			dest: <T::Lookup as StaticLookup>::Source,
@@ -298,7 +298,7 @@ pub mod module {
 		/// update amount of account `who` under `currency_id`.
 		///
 		/// The dispatch origin of this call must be _Root_.
-		#[pallet::weight(10000)]
+		#[pallet::weight(T::WeightInfo::update_balance())]
 		pub fn update_balance(
 			origin: OriginFor<T>,
 			who: <T::Lookup as StaticLookup>::Source,

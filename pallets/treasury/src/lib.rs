@@ -143,7 +143,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// The user makes a proposal about funding
-		#[pallet::weight(10000 + T::DbWeight::get().reads_writes(3, 3))]
+		#[pallet::weight(T::WeightInfo::propose_spend())]
 		pub fn propose_spend(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
@@ -178,7 +178,7 @@ pub mod pallet {
 		}
 
 		/// The council rejected the proposal.
-		#[pallet::weight(10000 + T::DbWeight::get().reads_writes(1, 2))]
+		#[pallet::weight(T::WeightInfo::reject_proposal())]
 		pub fn reject_proposal(origin: OriginFor<T>, #[pallet::compact] proposal_id: ProposalIndex) -> DispatchResult {
 			T::RejectOrigin::ensure_origin(origin)?;
 
@@ -191,7 +191,7 @@ pub mod pallet {
 		}
 
 		/// The council approve the proposal.
-		#[pallet::weight(10000 + T::DbWeight::get().reads_writes(1, 2))]
+		#[pallet::weight(T::WeightInfo::approve_proposal())]
 		pub fn approve_proposal(origin: OriginFor<T>, #[pallet::compact] proposal_id: ProposalIndex) -> DispatchResult {
 			T::ApproveOrigin::ensure_origin(origin)?;
 
@@ -209,7 +209,7 @@ pub mod pallet {
 		}
 
 		/// Users get their fund.
-		#[pallet::weight(10000 + T::DbWeight::get().reads_writes(4, 4))]
+		#[pallet::weight(T::WeightInfo::spend_fund())]
 		pub fn spend_fund(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			let mut proposal_ids = <Approvals<T>>::get();
