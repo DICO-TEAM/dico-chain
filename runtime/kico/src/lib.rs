@@ -1499,6 +1499,9 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_farm, Farm);
 			list_benchmark!(list, extra, pallet_lbp, LBP);
 			list_benchmark!(list, extra, pallet_farm_extend, FarmExtend);
+            list_benchmark!(list, extra, pallet_pricedao, PriceDao);
+            list_benchmark!(list, extra, pallet_oracle, DicoOracle);
+
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
