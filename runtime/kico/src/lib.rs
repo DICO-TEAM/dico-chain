@@ -1545,6 +1545,8 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_dico_treasury, DicoTreasury);
 			add_benchmark!(params, batches, pallet_ico, Ico);
 			add_benchmark!(params, batches, pallet_pallet_currencies, Currencies);
+            add_benchmark!(params, batches, pallet_pricedao, PriceDao);
+            add_benchmark!(params, batches, pallet_oracle, DicoOracle);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
