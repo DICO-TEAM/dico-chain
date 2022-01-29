@@ -321,15 +321,21 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 	for Pallet<T>
 {
 	fn get_metadata(currency_id: AssetId) -> result::Result<DicoAssetMetadata, DispatchError> {
-		if cfg!(any(feature = "std", feature = "runtime-benchmarks", test)) {
+		let mut asset_info_opt = DicoAssetsInfo::<T>::get(currency_id);
+		let asset_info = match asset_info_opt {
+			Some(x) => x,
+			_ => {
+				if cfg!(any(feature = "std", feature = "runtime-benchmarks", test)) {
 			return Ok(DicoAssetMetadata {
 				name: vec![],
 				symbol: vec![],
 				decimals: 12
 			});
-		}
-
-		let asset_info = DicoAssetsInfo::<T>::get(currency_id).ok_or(Error::<T>::AssetNotExists)?;
+		} else {
+					return Err(Error::<T>::AssetNotExists)?
+				}
+			},
+		};
 		match asset_info.metadata {
 			Some(x) => Ok(x),
 			None => Err(Error::<T>::MetadataNotExists)?,
