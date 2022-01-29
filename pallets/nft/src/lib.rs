@@ -25,14 +25,14 @@ pub mod weights;
 use weights::NftWeightInfo;
 
 use codec::{Decode, Encode};
-use scale_info::TypeInfo;
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
-	traits::{Currency, ExistenceRequirement, Get,  WithdrawReasons},
+	traits::{Currency, ExistenceRequirement, Get, WithdrawReasons},
 	BoundedVec, Parameter,
 };
 use pallet_ico::traits::PowerHandler;
+use scale_info::TypeInfo;
 use sp_runtime::{
 	traits::{AtLeast32BitUnsigned, CheckedAdd, CheckedSub, Hash, MaybeSerializeDeserialize, Member, One, Zero},
 	ArithmeticError, DispatchError, DispatchResult, RuntimeDebug,
@@ -48,7 +48,7 @@ use sp_std::{
 pub type Attributes = BTreeMap<Vec<u8>, Vec<u8>>;
 
 /// Class info
-#[derive(Encode, Decode, Clone, Eq, PartialEq,  RuntimeDebug, TypeInfo)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub struct ClassInfo<TokenId, AccountId, Data, ClassMetadataOf> {
 	/// Class metadata
 	pub metadata: ClassMetadataOf,
@@ -126,7 +126,7 @@ impl Default for NftLevel {
 }
 
 /// Token info
-#[derive(Encode, Decode, Clone, Eq, PartialEq,  RuntimeDebug, TypeInfo)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub struct TokenInfo<AccountId, Data, TokenMetadataOf> {
 	/// Token metadata
 	pub metadata: TokenMetadataOf,
@@ -525,7 +525,8 @@ impl<T: Config> Pallet<T> {
 			match is_active {
 				true => {
 					ensure!(!t.data.status.is_active_image, Error::<T>::ActiveNft);
-					t.data.status.is_active_image = true },
+					t.data.status.is_active_image = true
+				}
 				_ => t.data.status.is_active_image = false,
 			}
 			*token_info = Some(t);

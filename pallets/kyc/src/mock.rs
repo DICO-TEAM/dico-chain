@@ -3,12 +3,13 @@
 use super::*;
 use crate as pallet_kyc;
 
-use frame_support::{assert_ok, assert_noop, parameter_types, ord_parameter_types};
+use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types};
 use frame_support_test::TestRandomness;
+use frame_system::{EnsureOneOf, EnsureRoot, EnsureSignedBy};
 use sp_core::H256;
-use frame_system::{EnsureSignedBy, EnsureOneOf, EnsureRoot};
 use sp_runtime::{
-    testing::Header, traits::{BlakeTwo256, IdentityLookup},
+	testing::Header,
+	traits::{BlakeTwo256, IdentityLookup},
 };
 
 pub type AccountId = u64;
@@ -19,7 +20,6 @@ pub const BOB: AccountId = 2;
 pub const CHARLIE: AccountId = 3;
 pub const DAVE: AccountId = 4;
 pub const EVE: AccountId = 5;
-
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -44,44 +44,44 @@ parameter_types! {
 }
 
 impl frame_system::Config for Test {
-    type BaseCallFilter = frame_support::traits::Everything;
-    type BlockWeights = ();
-    type BlockLength = ();
-    type Origin = Origin;
-    type Index = u64;
-    type BlockNumber = u64;
-    type Hash = H256;
-    type Call = Call;
-    type Hashing = BlakeTwo256;
-    type AccountId = u64;
-    type Lookup = IdentityLookup<Self::AccountId>;
-    type Header = Header;
-    type Event = Event;
-    type BlockHashCount = BlockHashCount;
-    type DbWeight = ();
-    type Version = ();
-    type PalletInfo = PalletInfo;
-    type AccountData = pallet_balances::AccountData<u64>;
-    type OnNewAccount = ();
-    type OnKilledAccount = ();
-    type SystemWeightInfo = ();
-    type SS58Prefix = ();
-    type OnSetCode = ();
+	type BaseCallFilter = frame_support::traits::Everything;
+	type BlockWeights = ();
+	type BlockLength = ();
+	type Origin = Origin;
+	type Index = u64;
+	type BlockNumber = u64;
+	type Hash = H256;
+	type Call = Call;
+	type Hashing = BlakeTwo256;
+	type AccountId = u64;
+	type Lookup = IdentityLookup<Self::AccountId>;
+	type Header = Header;
+	type Event = Event;
+	type BlockHashCount = BlockHashCount;
+	type DbWeight = ();
+	type Version = ();
+	type PalletInfo = PalletInfo;
+	type AccountData = pallet_balances::AccountData<u64>;
+	type OnNewAccount = ();
+	type OnKilledAccount = ();
+	type SystemWeightInfo = ();
+	type SS58Prefix = ();
+	type OnSetCode = ();
 }
 
 parameter_types! {
 	pub const ExistentialDeposit: u64 = 1;
 }
 impl pallet_balances::Config for Test {
-    type Balance = Balance;
-    type Event = Event;
-    type DustRemoval = ();
-    type ExistentialDeposit = ExistentialDeposit;
-    type AccountStore = System;
-    type MaxLocks = ();
-    type MaxReserves = ();
-    type ReserveIdentifier = [u8; 8];
-    type WeightInfo = ();
+	type Balance = Balance;
+	type Event = Event;
+	type DustRemoval = ();
+	type ExistentialDeposit = ExistentialDeposit;
+	type AccountStore = System;
+	type MaxLocks = ();
+	type MaxReserves = ();
+	type ReserveIdentifier = [u8; 8];
+	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -91,7 +91,6 @@ parameter_types! {
 	pub const KYCBasicDeposit: u32 = 100;
 	pub const KYCServiceDeposit: u32 = 10000;
 }
-
 
 ord_parameter_types! {
 	pub const One: u64 = 1;
@@ -103,29 +102,29 @@ type EnsureOneOrRoot = EnsureOneOf<u64, EnsureRoot<u64>, EnsureSignedBy<One, u64
 type EnsureTwoOrRoot = EnsureOneOf<u64, EnsureRoot<u64>, EnsureSignedBy<Two, u64>>;
 type EnsureThreeOrRoot = EnsureOneOf<u64, EnsureRoot<u64>, EnsureSignedBy<Three, u64>>;
 
-
 impl Config for Test {
-    type Event = Event;
-    type Currency = Balances;
-    type PalletId = KYCPalletId;
-    type BasicDeposit = KYCBasicDeposit;
-    type ServiceDeposit = KYCServiceDeposit;
-    type MaxIAS = MaxIAS;
-    type MaxSwordHolder = MaxSwordHolder;
-    type Slashed = ();
-    type Randomness = TestRandomness<Self>;
-    type ForceOrigin = EnsureOneOrRoot;
-    type IASOrigin = EnsureTwoOrRoot;
-    type SwordHolderOrigin = EnsureThreeOrRoot;
-    type WeightInfo = ();
+	type Event = Event;
+	type Currency = Balances;
+	type PalletId = KYCPalletId;
+	type BasicDeposit = KYCBasicDeposit;
+	type ServiceDeposit = KYCServiceDeposit;
+	type MaxIAS = MaxIAS;
+	type MaxSwordHolder = MaxSwordHolder;
+	type Slashed = ();
+	type Randomness = TestRandomness<Self>;
+	type ForceOrigin = EnsureOneOrRoot;
+	type IASOrigin = EnsureTwoOrRoot;
+	type SwordHolderOrigin = EnsureThreeOrRoot;
+	type WeightInfo = ();
 }
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
-    pallet_balances::GenesisConfig::<Test> {
-        balances: vec![(ALICE, 100), (BOB, 100), (CHARLIE, 100), (DAVE, 100), (EVE, 100)],
-    }.assimilate_storage(&mut t)
-        .unwrap();
-    t.into()
+	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	pallet_balances::GenesisConfig::<Test> {
+		balances: vec![(ALICE, 100), (BOB, 100), (CHARLIE, 100), (DAVE, 100), (EVE, 100)],
+	}
+	.assimilate_storage(&mut t)
+	.unwrap();
+	t.into()
 }

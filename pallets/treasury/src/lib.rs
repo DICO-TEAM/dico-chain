@@ -45,7 +45,6 @@ use sp_std::prelude::*;
 use traits::DicoTreasuryHandler;
 pub use weights::TreasuryWeightInfo;
 // use frame_system::WeightInfo;
-use scale_info::TypeInfo;
 use orml_traits::{
 	arithmetic::{Signed, SimpleArithmetic},
 	// currency::TransferAll,
@@ -60,6 +59,7 @@ use orml_traits::{
 	MultiLockableCurrency,
 	MultiReservableCurrency,
 };
+use scale_info::TypeInfo;
 
 pub type ProposalIndex = u32;
 
