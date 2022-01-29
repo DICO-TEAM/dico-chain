@@ -171,6 +171,7 @@ impl pallet_amm::Config for Test {
 	type Currency = Currency;
 	type PalletId = AMMPalletId;
 	type WeightInfo = ();
+	type CurrenciesHandler = Currency;
 }
 
 parameter_types! {

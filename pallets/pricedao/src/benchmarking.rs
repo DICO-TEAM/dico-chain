@@ -58,7 +58,7 @@ benchmarks! {
 
     }: _<T::Origin>(origin, vec![BOB.clone()])
 	verify {
-        assert_eq!(T::BaseCurrency::total_balance(&BOB), 2000000000u32.into());
+        // assert_eq!(T::BaseCurrency::total_balance(&BOB), 2000000000u32.into());
         assert_eq!(DepositBalance::<T>::get(&BOB), None);
         assert_eq!(T::BaseCurrency::total_balance(&PriceDao::<T>::account_id()),T::PledgedBalance::get());
 	}
@@ -122,14 +122,14 @@ mod tests {
     #[test]
     fn test_del_feed_account() {
         new_test_ext().execute_with(|| {
-            assert_ok!(PriceDao::<Test>::test_benchmark_unlock_price());
+            assert_ok!(PriceDao::<Test>::test_benchmark_del_feed_account());
         });
     }
 
     #[test]
     fn test_unlock_price() {
         new_test_ext().execute_with(|| {
-            assert_ok!(PriceDao::<Test>::test_benchmark_del_feed_account());
+            assert_ok!(PriceDao::<Test>::test_benchmark_unlock_price());
         });
     }
 

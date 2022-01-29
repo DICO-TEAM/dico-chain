@@ -1076,12 +1076,12 @@ impl pallet_currencies::Config for Runtime {
 // price data
 /// price
 parameter_types! {
-	pub const MaxOracleSize: u32 = 5;
-	pub const MinimumCount: u32 = 3;  // todo: The minimum number is 3
-	pub const ExpiresIn: Moment = 1000 * 60 * 60; // todo: 60 mins
+	pub const MaxOracleSize: u32 = 100;
+	pub const MinimumCount: u32 = 5;  // todo: The minimum number is 3
+	pub const ExpiresIn: Moment = 1000 * 60 * 20; // todo: 60 mins
 	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
-	pub const FeedPledgedBalance: Balance = 500 * DOLLARS;  // todo : pledge 500 dico?
-	pub const withdrawExpirationPeriod: BlockNumber = 10 * MINUTES;   // TODO: 5 * DAYS;
+	pub const FeedPledgedBalance: Balance = 5000 * DOLLARS;  // todo : pledge 500 dico?
+	pub const withdrawExpirationPeriod: BlockNumber = 7 * DAYS;   // TODO: 5 * DAYS;
 }
 
 type DicoDataProvider = pallet_oracle::Instance1;
@@ -1502,6 +1502,9 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_farm, Farm);
 			list_benchmark!(list, extra, pallet_lbp, LBP);
 			list_benchmark!(list, extra, pallet_farm_extend, FarmExtend);
+            list_benchmark!(list, extra, pallet_pricedao, PriceDao);
+            list_benchmark!(list, extra, pallet_oracle, DicoOracle);
+
 
 			list_benchmark!(list, extra, pallet_nft, Nft);
 			list_benchmark!(list, extra, pallet_dao, Dao);
@@ -1550,6 +1553,8 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_dao, Dao);
 			add_benchmark!(params, batches, pallet_dico_treasury, DicoTreasury);
 			add_benchmark!(params, batches, pallet_ico, Ico);
+            add_benchmark!(params, batches, pallet_pricedao, PriceDao);
+            add_benchmark!(params, batches, pallet_oracle, DicoOracle);
 			add_benchmark!(params, batches, pallet_currencies, Currencies);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }

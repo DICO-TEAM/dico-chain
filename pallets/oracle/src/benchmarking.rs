@@ -2,7 +2,7 @@
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks, whitelisted_caller,impl_benchmark_test_suite};
+use frame_benchmarking::{account, benchmarks,benchmarks_instance_pallet, whitelisted_caller,impl_benchmark_test_suite};
 use frame_system::{Pallet as System,RawOrigin,Account,Origin};
 use sp_std::prelude::*;
 use primitives::{AssetId, Balance,CurrencyId};
@@ -17,9 +17,11 @@ fn funded_account<T: Config>(name: &'static str, index: u32) -> T::AccountId {
 }
 
 
-benchmarks! {
+benchmarks_instance_pallet! {
 	feed_values {
-		let BOB = funded_account::<T>("caller", 1);
+        let BOB: T::AccountId = account("caller", 1, SEED);
+        <DicoOracle<T,I> as UpdateOraclesStorgage<T::AccountId, T::OracleKey>>::insert_members(&[BOB.clone()]);
+		// let BOB = funded_account::<T>, 1);
 		// let call = Call::<T>::insert_feed_account(vec![BOB]);
 	}: _(RawOrigin::Signed(BOB.clone()), vec![(1u32.into(), 1300u32.into())])
 	verify {
