@@ -19,29 +19,26 @@
 #![cfg(feature = "runtime-benchmarks")]
 
 use super::*;
-use frame_system::RawOrigin as SystemOrigin;
+use crate::Module as Collective;
+pub use crate::Pallet as Dao;
+use dico_primitives::parachains::native::LT::AssetId;
+use frame_benchmarking::{account, benchmarks, benchmarks_instance, impl_benchmark_test_suite, whitelisted_caller};
+use frame_system::Call as SystemCall;
 use frame_system::EventRecord;
-use frame_benchmarking::{
-	benchmarks_instance,
-	account,
-	benchmarks,
-	whitelisted_caller,
-	impl_benchmark_test_suite,
-};
+use frame_system::Pallet as System;
+use frame_system::RawOrigin as SystemOrigin;
+use ico::system::RawOrigin;
+use ico::IcoParameters;
 use sp_runtime::traits::Bounded;
 use sp_std::mem::size_of;
-use frame_system::Call as SystemCall;
-use frame_system::Pallet as System;
-use dico_primitives::parachains::native::LT::AssetId;
-use ico::system::RawOrigin;
-use crate::Module as Collective;
-use ico::IcoParameters;
-pub use crate::Pallet as Dao;
 
 const SEED: u32 = 0;
 const MAX_BYTES: u32 = 1_024;
 
-fn get_vote<T: Config>(currency_id: u32, hash: T::Hash) -> IcoCollectiveVotes<T::AccountId, T::BlockNumber, MultiBalanceOf<T>> {
+fn get_vote<T: Config>(
+	currency_id: u32,
+	hash: T::Hash,
+) -> IcoCollectiveVotes<T::AccountId, T::BlockNumber, MultiBalanceOf<T>> {
 	Voting::<T>::get(currency_id, hash).unwrap()
 }
 
@@ -53,7 +50,7 @@ fn get_bob<T: Config>() -> T::AccountId {
 	account("bob", 1, SEED)
 }
 
-fn set_propose<T: Config>() -> (T::Hash, u32, u32){
+fn set_propose<T: Config>() -> (T::Hash, u32, u32) {
 	let caller: T::AccountId = whitelisted_caller();
 	let currency_id = 1;
 	let ico_index = 1;
@@ -61,9 +58,16 @@ fn set_propose<T: Config>() -> (T::Hash, u32, u32){
 	let proposal: T::Proposal = SystemCall::<T>::remark { remark: vec![1; 3] }.into();
 	let hash = T::Hashing::hash_of(&proposal);
 
-	assert!(Dao::<T>::propose(RawOrigin::Signed(get_alice::<T>()).into(), currency_id, ico_index,
-							  Percent::from_percent(30u8), Box::new(proposal),
-							  vec![1;3], 100).is_ok());
+	assert!(Dao::<T>::propose(
+		RawOrigin::Signed(get_alice::<T>()).into(),
+		currency_id,
+		ico_index,
+		Percent::from_percent(30u8),
+		Box::new(proposal),
+		vec![1; 3],
+		100
+	)
+	.is_ok());
 
 	(hash, currency_id, ico_index)
 }

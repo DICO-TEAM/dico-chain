@@ -1,20 +1,27 @@
 #![cfg(test)]
 
-use super::{Config,Balance,DataProvider,CurrencyId,Price,FixedU128,DataFeeder,Zero};
+use super::{Balance, Config, CurrencyId, DataFeeder, DataProvider, FixedU128, Price, Zero};
 use crate as pallet_price;
-use std::cell::RefCell;
-use sp_core::H256;
 use frame_system::EnsureSignedBy;
+use sp_core::H256;
+use std::cell::RefCell;
 
 use sp_runtime::{
-	traits::{BlakeTwo256, IdentityLookup}, testing::Header,FixedPointNumber,
+	testing::Header,
+	traits::{BlakeTwo256, IdentityLookup},
+	FixedPointNumber,
 };
 
-use orml_traits::parameter_type_with_key;
-use primitives::{AssetId};
-use frame_support::{construct_runtime, ord_parameter_types, parameter_types, traits::{GenesisBuild,Contains},PalletId,traits::Time};
-use frame_system as system;
 use dico_currencies::BasicCurrencyAdapter;
+use frame_support::{
+	construct_runtime, ord_parameter_types, parameter_types,
+	traits::Time,
+	traits::{Contains, GenesisBuild},
+	PalletId,
+};
+use frame_system as system;
+use orml_traits::parameter_type_with_key;
+use primitives::AssetId;
 
 pub type Amount = i128;
 pub type AccountId = u128;
@@ -87,7 +94,6 @@ impl Timestamp {
 	}
 }
 
-
 impl system::Config for Test {
 	type Origin = Origin;
 	type Call = Call;
@@ -126,7 +132,6 @@ impl pallet_oracle::Config for Test {
 	type WeightInfo = ();
 }
 
-
 impl Config for Test {
 	type Event = Event;
 	type Source = MockDataProvider;
@@ -158,8 +163,6 @@ impl DataFeeder<CurrencyId, Price, AccountId> for MockDataProvider {
 	}
 }
 
-
-
 parameter_types! {
 	pub const AMMPalletId: PalletId = PalletId(*b"dico/amm");
 	pub const AmmLiquidityAssetIdBase: AssetId = 20000000;
@@ -188,7 +191,6 @@ impl dico_currencies::Config for Test {
 	type CreateConsume = CreateConsume;
 	type MaxCreatableCurrencyId = AmmLiquidityAssetIdBase;
 }
-
 
 impl pallet_balances::Config for Test {
 	type MaxLocks = ();
@@ -227,7 +229,6 @@ impl Contains<AccountId> for MockDustRemovalWhitelist {
 	}
 }
 
-
 pub struct ExtBuilder {
 	endowed_accounts: Vec<(AccountId, Balance)>,
 }
@@ -243,8 +244,8 @@ impl Default for ExtBuilder {
 				(ALICE, DEFAULT_BALANCE),
 				(BOB, DEFAULT_BALANCE),
 				(DAVE, DEFAULT_LOW_BALANCE),
-				(EVE,DEFAULT_LOW_BALANCE),
-			]
+				(EVE, DEFAULT_LOW_BALANCE),
+			],
 		}
 	}
 }
@@ -256,11 +257,12 @@ impl ExtBuilder {
 		let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 		pallet_balances::GenesisConfig::<Test> {
 			balances: self.endowed_accounts,
-		}.assimilate_storage(&mut t).unwrap();
+		}
+		.assimilate_storage(&mut t)
+		.unwrap();
 		t.into()
 	}
 }
-
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = ExtBuilder::default().build();
@@ -270,6 +272,3 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	});
 	t
 }
-
-
-

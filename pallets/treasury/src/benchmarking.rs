@@ -20,22 +20,30 @@
 #![cfg(feature = "runtime-benchmarks")]
 
 use super::*;
-use frame_benchmarking::{account, benchmarks_instance, impl_benchmark_test_suite, benchmarks, whitelisted_caller};
+use crate::Pallet as Treasury;
+use frame_benchmarking::{account, benchmarks, benchmarks_instance, impl_benchmark_test_suite, whitelisted_caller};
 use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
-use crate::Pallet as Treasury;
 
 const SEED: u32 = 0;
 
 fn get_alice<T: Config>() -> T::AccountId {
 	let caller: T::AccountId = whitelisted_caller();
-	T::MultiCurrency::deposit(T::GetNativeCurrencyId::get(), &caller, (10000 * DOLLARS).saturated_into::<BalanceOf<T>>());
+	T::MultiCurrency::deposit(
+		T::GetNativeCurrencyId::get(),
+		&caller,
+		(10000 * DOLLARS).saturated_into::<BalanceOf<T>>(),
+	);
 	caller
 }
 
 fn get_bob<T: Config>() -> T::AccountId {
 	let caller: T::AccountId = account("bob", 1, SEED);
-	T::MultiCurrency::deposit(T::GetNativeCurrencyId::get(), &caller, (10000 * DOLLARS).saturated_into::<BalanceOf<T>>());
+	T::MultiCurrency::deposit(
+		T::GetNativeCurrencyId::get(),
+		&caller,
+		(10000 * DOLLARS).saturated_into::<BalanceOf<T>>(),
+	);
 	caller
 }
 
@@ -46,9 +54,14 @@ fn look_up<T: Config>(who: T::AccountId) -> <T::Lookup as StaticLookup>::Source 
 fn propose<T: Config>() -> u32 {
 	let caller: T::AccountId = get_alice::<T>();
 	let caller_cp = look_up::<T>(caller.clone());
-	assert!(Treasury::<T>::propose_spend(RawOrigin::Signed(caller.clone()).into(), T::GetNativeCurrencyId::get(), BalanceOf::<T>::from(100u32), caller_cp).is_ok());
+	assert!(Treasury::<T>::propose_spend(
+		RawOrigin::Signed(caller.clone()).into(),
+		T::GetNativeCurrencyId::get(),
+		BalanceOf::<T>::from(100u32),
+		caller_cp
+	)
+	.is_ok());
 	0
-
 }
 
 fn approve_propose<T: Config>() {
@@ -97,7 +110,6 @@ mod test1 {
 			get_alice::<Test>();
 			// assert_ok!(Currencies::<Runtime>::test_benchmark_set_metadata());
 			assert_ok!(Treasury::<Test>::test_benchmark_spend_fund());
-
 		});
 	}
 }

@@ -2,12 +2,12 @@
 
 #![cfg(test)]
 
-use frame_support::{construct_runtime, parameter_types};
-use sp_core::H256;
-use sp_runtime::{testing::Header, traits::IdentityLookup};
 use super::*;
 use crate as nft;
+use frame_support::{construct_runtime, parameter_types};
 use pallet_balances;
+use sp_core::H256;
+use sp_runtime::{testing::Header, traits::IdentityLookup};
 type Balance = u64;
 
 parameter_types! {
@@ -120,7 +120,9 @@ impl ExtBuilder {
 }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
+	let mut t = frame_system::GenesisConfig::default()
+		.build_storage::<Runtime>()
+		.unwrap();
 	pallet_balances::GenesisConfig::<Runtime> {
 		// Total issuance will be 200 with treasury account initialized at ED.
 		balances: vec![(0, 100), (1, 98), (2, 1)],

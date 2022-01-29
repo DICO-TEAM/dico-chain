@@ -6,7 +6,7 @@ use crate as amm;
 use crate::Config;
 use dico_currencies::BasicCurrencyAdapter;
 use dico_primitives::{AssetId, Balance, BlockNumber};
-use frame_support::traits::{GenesisBuild, Contains};
+use frame_support::traits::{Contains, GenesisBuild};
 use frame_support::{parameter_types, PalletId};
 use frame_system as system;
 use orml_traits::parameter_type_with_key;
@@ -44,7 +44,6 @@ frame_support::construct_runtime!(
 		 Balances: pallet_balances::{Pallet, Event<T>},
 	 }
 );
-
 
 pub struct MockDustRemovalWhitelist;
 impl Contains<AccountId> for MockDustRemovalWhitelist {

@@ -3,15 +3,15 @@
 use super::*;
 
 use frame_benchmarking::{account, benchmarks};
-use frame_system::RawOrigin;
 use frame_support::assert_ok;
+use frame_system::RawOrigin;
 use sp_std::prelude::*;
 
 use crate::Pallet as AMM;
 
-use dico_primitives::{AssetId, Balance};
-use dico_currencies::{Pallet as CurrenciesPallet, DicoAssetMetadata};
+use dico_currencies::{DicoAssetMetadata, Pallet as CurrenciesPallet};
 use dico_primitives::currency::DOLLARS;
+use dico_primitives::{AssetId, Balance};
 
 pub const KSM: AssetId = 1000;
 pub const DOT: AssetId = 2000;
@@ -21,19 +21,31 @@ const SEED: u32 = 1;
 fn preset_asset<T: Config>() {
 	let caster: T::AccountId = account("caster", 10, SEED);
 
-	assert_ok!(T::Currency::deposit(0, &caster, 10000*DOLLARS));
+	assert_ok!(T::Currency::deposit(0, &caster, 10000 * DOLLARS));
 
-	assert_ok!(T::CurrenciesHandler::do_create(caster.clone(), DOT, Some(DicoAssetMetadata{
-		name: "Polkadot".into(),
-		symbol: "DOT".into(),
-		decimals: 10
-	}), 0, false));
+	assert_ok!(T::CurrenciesHandler::do_create(
+		caster.clone(),
+		DOT,
+		Some(DicoAssetMetadata {
+			name: "Polkadot".into(),
+			symbol: "DOT".into(),
+			decimals: 10
+		}),
+		0,
+		false
+	));
 
-	assert_ok!(T::CurrenciesHandler::do_create(caster.clone(), KSM, Some(DicoAssetMetadata{
-		name: "Kusama".into(),
-		symbol: "KSM".into(),
-		decimals: 10
-	}), 0, false));
+	assert_ok!(T::CurrenciesHandler::do_create(
+		caster.clone(),
+		KSM,
+		Some(DicoAssetMetadata {
+			name: "Kusama".into(),
+			symbol: "KSM".into(),
+			decimals: 10
+		}),
+		0,
+		false
+	));
 }
 
 fn funded_account<T: Config>(name: &'static str, index: u32) -> T::AccountId {

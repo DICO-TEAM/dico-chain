@@ -1,11 +1,11 @@
 #![feature(derive_default_enum)]
 
-use codec::{Decode, Encode,MaxEncodedLen};
+use codec::{Decode, Encode, MaxEncodedLen};
+use scale_info::TypeInfo;
 use sp_runtime::traits::{AppendZerosInput, Saturating, StaticLookup, Zero};
 use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
 use sp_std::{fmt::Debug, iter::once, ops::Add};
-use scale_info::TypeInfo;
 
 pub type KYCIndex = u32;
 pub type CurvePubicKey = [u8; 32];
@@ -185,16 +185,16 @@ impl<Balance: Encode + Decode + Copy + Clone + Debug + Eq + PartialEq + Zero + A
 	pub(crate) fn total_deposit(&self) -> Balance {
 		self.deposit
 			+ self
-			.judgements
-			.iter()
-			.map(|(_, _, ref j, _)| {
-				if let Judgement::FeePaid(fee) = j {
-					*fee
-				} else {
-					Zero::zero()
-				}
-			})
-			.fold(Zero::zero(), |a, i| a + i)
+				.judgements
+				.iter()
+				.map(|(_, _, ref j, _)| {
+					if let Judgement::FeePaid(fee) = j {
+						*fee
+					} else {
+						Zero::zero()
+					}
+				})
+				.fold(Zero::zero(), |a, i| a + i)
 	}
 }
 
@@ -232,9 +232,9 @@ pub struct IASInfo<
 }
 
 impl<
-	Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
-	AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
-> IASInfo<Balance, AccountId>
+		Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
+		AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
+	> IASInfo<Balance, AccountId>
 {
 	pub fn set_account(&mut self, account: AccountId) -> &mut Self {
 		self.account = account;
@@ -274,9 +274,9 @@ pub struct ApplicationForm<
 }
 
 impl<
-	Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
-	AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
-> ApplicationForm<Balance, AccountId>
+		Balance: Encode + Decode + Clone + Debug + Eq + PartialEq,
+		AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq,
+	> ApplicationForm<Balance, AccountId>
 {
 	pub fn set_ias(&mut self, index: KYCIndex, ias: IASInfo<Balance, AccountId>) -> &mut Self {
 		self.ias = (index, ias);
@@ -346,9 +346,7 @@ pub struct Record<AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq> {
 	pub fields: KYCFields,
 }
 
-impl <
-	AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq
-> Record<AccountId> {
+impl<AccountId: Encode + Decode + Clone + Debug + Eq + PartialEq> Record<AccountId> {
 	pub fn set_progress(&mut self, progress: Progress) -> &mut Self {
 		self.progress = progress;
 		self
