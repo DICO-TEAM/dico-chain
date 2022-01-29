@@ -130,23 +130,32 @@ construct_runtime!(
 	}
 );
 
+pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
+	let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
 
-pub struct ExtBuilder;
-
-impl Default for ExtBuilder {
-	fn default() -> Self {
-		ExtBuilder
-	}
+	let mut ext = sp_io::TestExternalities::new(t);
+	ext.execute_with(|| { System::set_block_number(1);
+		// Timestamp::set_timestamp(12345);
+	});
+	ext
 }
 
-impl ExtBuilder {
-	pub fn build(self) -> sp_io::TestExternalities {
-		let t = frame_system::GenesisConfig::default()
-			.build_storage::<Runtime>()
-			.unwrap();
-
-		let mut ext = sp_io::TestExternalities::new(t);
-		ext.execute_with(|| System::set_block_number(1));
-		ext
-	}
-}
+// pub struct ExtBuilder;
+//
+// impl Default for ExtBuilder {
+// 	fn default() -> Self {
+// 		ExtBuilder
+// 	}
+// }
+//
+// impl ExtBuilder {
+// 	pub fn build(self) -> sp_io::TestExternalities {
+// 		let t = frame_system::GenesisConfig::default()
+// 			.build_storage::<Runtime>()
+// 			.unwrap();
+//
+// 		let mut ext = sp_io::TestExternalities::new(t);
+// 		ext.execute_with(|| System::set_block_number(1));
+// 		ext
+// 	}
+// }

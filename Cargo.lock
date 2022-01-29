@@ -5426,6 +5426,7 @@ dependencies = [
 name = "pallet-dico-treasury"
 version = "1.0.0"
 dependencies = [
+ "dico-primitives",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -5831,6 +5832,7 @@ dependencies = [
 name = "pallet-nft"
 version = "1.0.0"
 dependencies = [
+ "dico-primitives",
  "frame-benchmarking",
  "frame-support",
  "frame-system",

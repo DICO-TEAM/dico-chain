@@ -25,6 +25,7 @@ frame-benchmarking = { git = "https://github.com/paritytech/substrate.git", bran
 
 # local
 pallet-currencies = { path = "../currencies", default-features = false}
+dico-primitives = { path = "../../primitives", default-features = false}
 
 # orml
 orml-traits = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', branch = "master", default-features = false}
@@ -52,6 +53,7 @@ std = [
 	"orml-traits/std",
 	"pallet-currencies/std",
 	"orml-tokens/std",
+	"dico-primitives/std",
 ]
 
 runtime-benchmarks = [

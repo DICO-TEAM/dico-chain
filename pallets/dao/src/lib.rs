@@ -19,7 +19,8 @@
 #![recursion_limit = "128"]
 
 // use codec::{Codec, Encode, Decode, MaxEncodedLen};
-use frame_support::{
+pub use frame_support::{
+	runtime_print,
 	codec::{Codec, Decode, Encode},
 	dispatch::{DispatchError, DispatchResult, DispatchResultWithPostInfo, Dispatchable, Parameter, PostDispatchInfo},
 	ensure,
@@ -42,18 +43,19 @@ use sp_std::{
 	prelude::*,
 	result,
 };
-pub use weights::WeightInfo;
+// pub use weights::WeightInfo;
 pub use crate::pallet::*;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-pub mod weights;
+// pub mod weights;
 #[cfg(test)]
 pub mod mock;
 #[cfg(test)]
 pub mod tests;
-
+pub mod weights;
+pub use weights::DaoWeightInfo;
 
 /// Simple index type for proposal counting.
 pub type ProposalIndex = u32;
@@ -121,7 +123,7 @@ pub mod pallet {
 			+ Into<<Self as frame_system::Config>::Event>
 			+ IsType<<Self as frame_system::Config>::Event>;
 		/// Weight information for extrinsics in this pallet.
-		type WeightInfo: WeightInfo;
+		type WeightInfo: DaoWeightInfo;
 
 		type IcoHandler: IcoHandler<
 			CurrencyIdOf<Self>,
@@ -170,7 +172,7 @@ pub mod pallet {
 		/// The user makes a proposal.
 		///
 		/// Must be a member of the project ICO.
-		#[pallet::weight(10000 + T::DbWeight::get().reads_writes(10, 5))]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::propose())]
 		pub fn propose(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
@@ -198,6 +200,7 @@ pub mod pallet {
 			);
 
 			if threshold * ico_total_amount <= user_ico_amount {
+				runtime_print!("dispacth");
 				let result = proposal.dispatch(IcoRawOrigin::Members(user_ico_amount, ico_total_amount).into());
 				Self::deposit_event(Event::Executed(proposal_hash, result.map(|_| ()).map_err(|e| e.error)));
 			} else {
@@ -231,7 +234,7 @@ pub mod pallet {
 		/// Users vote on proposals.
 		///
 		/// Must be a member of the project ICO
-		#[pallet::weight(10000 + T::DbWeight::get().reads_writes(10, 2))]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::vote())]
 		pub fn vote(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
@@ -311,7 +314,7 @@ pub mod pallet {
 		/// The user close the proposal.
 		///
 		/// Everyone can do it
-		#[pallet::weight(10000 + T::DbWeight::get().reads_writes(10, 3))]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::close())]
 		pub fn close(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
@@ -368,7 +371,7 @@ pub mod pallet {
 		/// The root user disapprove the proposal.
 		///
 		/// Referendum
-		#[pallet::weight(10000 + T::DbWeight::get().reads_writes(0, 5))]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::disapprove_proposal())]
 		pub fn disapprove_proposal(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,

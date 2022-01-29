@@ -127,6 +127,7 @@ parameter_types! {
 }
 
 impl pallet_amm::Config for Test {
+	type CurrenciesHandler = Currencies;
 	type Event = Event;
 	type LiquidityAssetIdBase = LiquidityAssetIdBase;
 	type Currency = Currencies;
@@ -246,6 +247,7 @@ parameter_types! {
 }
 
 impl Config for Test {
+	type WeightInfo = ();
 	type Event = Event;
 	type PermitIcoOrigin = frame_system::EnsureRoot<AccountId>;
 	type RejectIcoOrigin = frame_system::EnsureRoot<AccountId>;
