@@ -43,7 +43,6 @@ use sp_std::{convert::TryInto, fmt::Debug, prelude::*, vec};
 pub use crate::default_combine_data::DefaultCombineData;
 
 mod default_combine_data;
-pub mod weights;
 mod mock;
 mod tests;
 mod traits;
@@ -52,14 +51,14 @@ pub use traits::UpdateOraclesStorgage;
 
 pub use module::*;
 
+pub mod weights;
+use weights::WeightInfo;
+
+
 #[frame_support::pallet]
 pub mod module {
 	use super::*;
 
-	pub trait WeightInfo {
-		fn feed_values(c: u32) -> Weight;
-		fn on_finalize() -> Weight;
-	}
 
 	pub(crate) type MomentOf<T, I = ()> = <<T as Config<I>>::Time as Time>::Moment;
 	pub(crate) type TimestampedValueOf<T, I = ()> = TimestampedValue<<T as Config<I>>::OracleValue, MomentOf<T, I>>;
@@ -190,10 +189,6 @@ pub mod module {
 
 	#[pallet::hooks]
 	impl<T: Config<I>, I: 'static> Hooks<T::BlockNumber> for Pallet<T, I> {
-		/// `on_initialize` to return the weight used in `on_finalize`.
-		fn on_initialize(_n: T::BlockNumber) -> Weight {
-			T::WeightInfo::on_finalize()
-		}
 
 		fn on_finalize(_n: T::BlockNumber) {
 			// cleanup for next block
@@ -228,7 +223,7 @@ pub mod module {
 		/// Feed the external value.
 		///
 		/// Require authorized operator.
-		#[pallet::weight(T::WeightInfo::feed_values(values.len() as u32))]
+		#[pallet::weight(T::WeightInfo::feed_values())]
 		pub fn feed_values(
 			origin: OriginFor<T>,
 			values: Vec<(T::OracleKey, T::OracleValue)>,

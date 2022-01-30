@@ -5,6 +5,7 @@ use crate as pallet_kyc;
 
 use frame_support::{assert_ok, assert_noop, parameter_types, ord_parameter_types};
 use frame_support_test::TestRandomness;
+use frame_system::RawOrigin;
 use sp_core::H256;
 use frame_system::{EnsureSignedBy, EnsureOneOf, EnsureRoot};
 use sp_runtime::{
@@ -124,7 +125,7 @@ impl Config for Test {
 pub fn new_test_ext() -> sp_io::TestExternalities {
     let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
     pallet_balances::GenesisConfig::<Test> {
-        balances: vec![(ALICE, 100), (BOB, 100), (CHARLIE, 100), (DAVE, 100), (EVE, 100)],
+        balances: vec![(RawOrigin::Root.into(),100),(ALICE, 100), (BOB, 100), (CHARLIE, 100), (DAVE, 100), (EVE, 100)],
     }.assimilate_storage(&mut t)
         .unwrap();
     t.into()

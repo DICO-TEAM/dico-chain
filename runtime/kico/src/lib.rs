@@ -89,6 +89,7 @@ pub use pallet_template;
 
 use pallet_farm_rpc_runtime_api as farm_rpc;
 
+mod weights;
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 /// A Block signed with a Justification
@@ -311,7 +312,7 @@ impl frame_system::Config for Runtime {
     /// The basic call filter to use in dispatchable.
     type BaseCallFilter = Everything;
     /// Weight information for the extrinsics of this pallet.
-    type SystemWeightInfo = ();
+    type SystemWeightInfo = weights::frame_system::WeightInfo<Runtime>;
     /// Block & extrinsics weights: base values and limits.
     type BlockWeights = RuntimeBlockWeights;
     /// The maximum length of a block (in bytes).
@@ -331,7 +332,7 @@ impl pallet_timestamp::Config for Runtime {
     type Moment = u64;
     type OnTimestampSet = ();
     type MinimumPeriod = MinimumPeriod;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_timestamp::WeightInfo<Runtime>;
 }
 
 impl pallet_utility::Config for Runtime {
@@ -354,7 +355,7 @@ impl pallet_multisig::Config for Runtime {
     type DepositBase = MultisigDepositBase;
     type DepositFactor = MultisigDepositFactor;
     type MaxSignatories = MaxSignatories;
-    type WeightInfo = ();
+    type WeightInfo = weights::pallet_multisig::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -373,7 +374,7 @@ impl pallet_balances::Config for Runtime {
     type DustRemoval = ();
     type ExistentialDeposit = ExistentialDeposit;
     type AccountStore = System;
-    type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_balances::WeightInfo<Runtime>;
     type MaxLocks = MaxLocks;
     type MaxReserves = MaxReserves;
     type ReserveIdentifier = [u8; 8];
@@ -560,7 +561,7 @@ impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
     type MembershipInitialized = TechnicalCommittee;
     type MembershipChanged = TechnicalCommittee;
     type MaxMembers = TechnicalMaxMembers;
-    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = weights::pallet_membership::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -945,7 +946,7 @@ impl pallet_kyc::Config for Runtime {
     type ForceOrigin = EnsureRootOrHalfCouncil;
     type IASOrigin = EnsureRootOrHalfCouncil;
     type SwordHolderOrigin = EnsureRootOrHalfCouncil;
-    type WeightInfo = pallet_kyc::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = pallet_kyc::weights::DicoWeight<Runtime>;
 }
 
 impl pallet_amm::Config for Runtime {
@@ -1066,7 +1067,7 @@ impl pallet_currencies::Config for Runtime {
 
     type GetNativeCurrencyId = DICOAssetId;
 
-    type WeightInfo = pallet_currencies::weights::WeightInfo<Runtime>;
+    type WeightInfo = pallet_currencies::weights::DicoWeight<Runtime>;
 
     type CreateConsume = CreateConsume;
     type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
@@ -1094,7 +1095,7 @@ impl pallet_oracle::Config<DicoDataProvider> for Runtime {
     type OracleValue = Price;
     type MaxOracleSize = MaxOracleSize;
     type RootOperatorAccountId = ZeroAccountId;
-    type WeightInfo = pallet_oracle::weights::OracleWeight<Runtime>;
+    type WeightInfo = pallet_oracle::weights::DicoWeight<Runtime>;
 }
 
 pub type TimeStampedPrice = pallet_oracle::TimestampedValue<Price, Moment>;
@@ -1132,7 +1133,7 @@ impl pallet_pricedao::Config for Runtime {
     type BaseCurrency = Balances;
     type PledgedBalance = FeedPledgedBalance;
     type WithdrawExpirationPeriod = withdrawExpirationPeriod;
-    type WeightInfo = pallet_pricedao::weights::PriceWeight<Runtime>;
+    type WeightInfo = pallet_pricedao::weights::DicoWeight<Runtime>;
 }
 
 parameter_types! {
@@ -1159,7 +1160,7 @@ impl pallet_dico_treasury::Config for Runtime {
     type GetNativeCurrencyId = DICOAssetId;
     type ProposalBond = DicoProposalBond;
     type SpendPeriod = DicoSpendPeriod;
-    type WeightInfo = pallet_dico_treasury::weights::WeightInfo<Runtime>;
+    type WeightInfo = pallet_dico_treasury::weights::DicoWeight<Runtime>;
 }
 
 parameter_types! {
@@ -1203,7 +1204,7 @@ impl pallet_ico::Config for Runtime {
     type PriceData = PriceDao;
     type UsdtCurrencyId = UsdtCurrencyId;
     type KycHandler = Kyc;
-	type WeightInfo = pallet_ico::weights::WeightInfo<Runtime>;
+	type WeightInfo = pallet_ico::weights::DicoWeight<Runtime>;
 }
 
 parameter_types! {
@@ -1217,7 +1218,7 @@ impl pallet_dao::Config for Runtime {
     type Event = Event;
     type MotionDuration = DicoMotionDuration;
     type MaxProposals = DicoMaxProposals;
-    type WeightInfo = pallet_dao::weights::WeightInfo<Runtime>;
+    type WeightInfo = pallet_dao::weights::DicoWeight<Runtime>;
     type IcoHandler = Ico;
 }
 
@@ -1237,7 +1238,7 @@ impl pallet_nft::Config for Runtime {
     type MaxTokenMetadata = MaxTokenMetadata;
     type MaxTokenAttribute = MaxTokenAttribute;
     type PowerHandler = Ico;
-	type WeightInfo = pallet_nft::weights::WeightInfo<Runtime>;
+	type WeightInfo = pallet_nft::weights::DicoWeight<Runtime>;
 }
 
 impl orml_unknown_tokens::Config for Runtime {
@@ -1496,6 +1497,8 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
 			list_benchmark!(list, extra, pallet_balances, Balances);
 			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
+            list_benchmark!(list, extra, pallet_multisig, Multisig);
+            list_benchmark!(list, extra, pallet_membership, TechnicalMembership);
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
 			list_benchmark!(list, extra, pallet_amm, AMM);
 			list_benchmark!(list, extra, pallet_farm, Farm);
@@ -1506,6 +1509,7 @@ impl_runtime_apis! {
 
 
 			list_benchmark!(list, extra, pallet_nft, Nft);
+			list_benchmark!(list, extra, pallet_kyc, Kyc);
 			list_benchmark!(list, extra, pallet_dao, Dao);
 			list_benchmark!(list, extra, pallet_ico, Ico);
 			list_benchmark!(list, extra, pallet_dico_treasury, DicoTreasury);
@@ -1543,11 +1547,14 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
 			add_benchmark!(params, batches, pallet_balances, Balances);
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
+            add_benchmark!(params, batches, pallet_multisig, Multisig);
+			add_benchmark!(params, batches, pallet_membership, TechnicalMembership);
 			add_benchmark!(params, batches, pallet_amm, AMM);
 			add_benchmark!(params, batches, pallet_farm, Farm);
 			add_benchmark!(params, batches, pallet_lbp, LBP);
 			add_benchmark!(params, batches, pallet_farm_extend, FarmExtend);
 
+			add_benchmark!(params, batches, pallet_kyc, Kyc);
 			add_benchmark!(params, batches, pallet_nft, Nft);
 			add_benchmark!(params, batches, pallet_dao, Dao);
 			add_benchmark!(params, batches, pallet_dico_treasury, DicoTreasury);

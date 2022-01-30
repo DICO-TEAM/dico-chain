@@ -31,7 +31,6 @@
 //!
 //! * `ias_set_fee` - Set the fee required to be paid for a judgement to be given by the IAS.
 //! * `ias_provide_judgement` - Provide a judgement to an KYC account.
-//! * `ias_request_sword_holder` - Certification is handed over to sword holder
 //!
 //!
 //!
@@ -423,7 +422,7 @@ pub mod pallet {
         /// - TODO
         /// # </weight>
         #[pallet::weight(T::WeightInfo::remove_kyc(
-        T::MaxSwordHolder::get().into(), // R
+        T::MaxIAS::get().into()
         ))]
         pub fn remove_kyc(
             origin: OriginFor<T>,
@@ -475,8 +474,7 @@ pub mod pallet {
         /// - TODO
         /// # </weight>
         #[pallet::weight(T::WeightInfo::set_kyc(
-        T::MaxIAS::get().into(), // R
-        T::MaxSwordHolder::get().into(), // X
+        T::MaxIAS::get().into()
         ))]
         pub fn set_kyc(origin: OriginFor<T>, info: KYCInfo) -> DispatchResultWithPostInfo {
             let sender = ensure_signed(origin)?;
@@ -509,10 +507,8 @@ pub mod pallet {
             Self::deposit_event(Event::<T>::KYCSet(sender));
 
             Ok(Some(T::WeightInfo::set_kyc(
-                T::MaxIAS::get().into(),         // R
-                T::MaxSwordHolder::get().into(), // X
-            ))
-                .into())
+                T::MaxIAS::get().into()
+            )).into())
         }
 
         /// Users clean up their own KYC
@@ -525,8 +521,7 @@ pub mod pallet {
         /// - TODO
         /// # </weight>
         #[pallet::weight(T::WeightInfo::clear_kyc(
-        T::MaxIAS::get().into(), // R
-        T::MaxSwordHolder::get().into(), // X
+        T::MaxIAS::get().into()
         ))]
         pub fn clear_kyc(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let sender = ensure_signed(origin)?;
@@ -567,7 +562,6 @@ pub mod pallet {
                             T::Currency::unreserve(&sender, deposit.clone());
                         }
                     }
-
                 }
                 Ok(())
             })?;
@@ -578,8 +572,7 @@ pub mod pallet {
             Self::deposit_event(Event::<T>::KYCCleared(sender));
 
             Ok(Some(T::WeightInfo::clear_kyc(
-                T::MaxIAS::get().into(),         // R
-                T::MaxSwordHolder::get().into(), // X
+                T::MaxIAS::get().into()
             ))
                 .into())
         }
@@ -597,8 +590,7 @@ pub mod pallet {
         /// - TODO
         /// # </weight>
         #[pallet::weight(T::WeightInfo::apply_certification(
-        T::MaxIAS::get().into(), // R
-        T::MaxSwordHolder::get().into(), // X
+        T::MaxIAS::get().into()
         ))]
         pub fn apply_certification(
             origin: OriginFor<T>,
@@ -654,8 +646,7 @@ pub mod pallet {
         /// - TODO
         /// # </weight>
         #[pallet::weight(T::WeightInfo::request_judgement(
-        T::MaxIAS::get().into(), // R
-        T::MaxSwordHolder::get().into(), // X
+        T::MaxIAS::get().into()
         ))]
         pub fn request_judgement(
             origin: OriginFor<T>,
@@ -667,8 +658,7 @@ pub mod pallet {
             Self::do_request_judgement(&sender, kyc_fields, ias_index.clone(), message)?;
             Self::deposit_event(Event::<T>::JudgementRequested(sender, ias_index));
             Ok(Some(T::WeightInfo::request_judgement(
-                T::MaxIAS::get().into(),         // R
-                T::MaxSwordHolder::get().into(), // X
+                T::MaxIAS::get().into()
             ))
                 .into())
         }
@@ -717,8 +707,7 @@ pub mod pallet {
         /// - TODO
         /// # </weight>
         #[pallet::weight(T::WeightInfo::ias_provide_judgement(
-        T::MaxIAS::get().into(), // R
-        T::MaxSwordHolder::get().into(), // X
+        T::MaxIAS::get().into()
         ))]
         pub fn ias_provide_judgement(
             origin: OriginFor<T>,
@@ -744,8 +733,7 @@ pub mod pallet {
 
             Self::deposit_event(Event::<T>::JudgementGiven(target, kyc_index));
             Ok(Some(T::WeightInfo::ias_provide_judgement(
-                T::MaxIAS::get().into(),         // R
-                T::MaxSwordHolder::get().into(), // X
+                T::MaxIAS::get().into()
             ))
                 .into())
         }
@@ -789,8 +777,7 @@ pub mod pallet {
         /// - TODO
         /// # </weight>
         #[pallet::weight(T::WeightInfo::sword_holder_provide_judgement(
-        T::MaxIAS::get().into(), // R
-        T::MaxSwordHolder::get().into(), // X
+        T::MaxSwordHolder::get().into()
         ))]
         pub fn sword_holder_provide_judgement(
             origin: OriginFor<T>,
@@ -806,8 +793,7 @@ pub mod pallet {
             Self::sword_do_provide_judgement(&sender, kyc_fields, kyc_index.clone(), &target, &auth, &id)?;
             Self::deposit_event(Event::<T>::AuthenticationGiven(target, kyc_index));
             Ok(Some(T::WeightInfo::sword_holder_provide_judgement(
-                T::MaxIAS::get().into(),         // R
-                T::MaxSwordHolder::get().into(), // X
+                T::MaxSwordHolder::get().into()     // R
             ))
                 .into())
         }
@@ -916,12 +902,12 @@ pub mod pallet {
                 ias_list = <SwordHolderOf<T>>::get(&kyc_fields);
             }
 
-            ensure!(
-				ias_list
-					.iter()
-					.all(|ias| matches!(ias, Some(i) if &i.account != &ias_info_cp.account)),
-				Error::<T>::AccountExists
-			);
+            // ensure!(
+            // 	ias_list
+            // 		.iter()
+            // 		.all(|ias| matches!(ias, Some(i) if &i.account != &ias_info_cp.account)),
+            // 	Error::<T>::AccountExists
+            // );
 
             let ias_list_length = ias_list.len() as u32;
             ensure!(ias_list_length + 1 > kyc_index, Error::<T>::OutofBounds);
@@ -990,11 +976,9 @@ pub mod pallet {
                             let _ = T::Currency::unreserve(&record.account, deposit.clone());
 
                             // change progress to Progress::NeedReset,unreserve service fee by kyc user self(clear_kyc)
-                            <ApplicationFormList<T>>::mutate(&record.account,|app_list|-> DispatchResult {
+                            <ApplicationFormList<T>>::mutate(&record.account, |app_list| -> DispatchResult {
                                 for app in app_list.iter_mut() {
-
-                                    if matches!(app, Some(e) if e.ias.1.account == ias_account.clone() || e.sword_holder.1.account == ias_account.clone()){
-
+                                    if matches!(app, Some(e) if e.ias.1.account == ias_account.clone() || e.sword_holder.1.account == ias_account.clone()) {
                                         app.as_mut().map(|mut a| {
                                             a.progress = Progress::NeedReset;
                                             a

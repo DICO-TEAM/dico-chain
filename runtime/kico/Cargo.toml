@@ -148,6 +148,8 @@ runtime-benchmarks = [
     "pallet-balances/runtime-benchmarks",
     "pallet-collator-selection/runtime-benchmarks",
     "pallet-timestamp/runtime-benchmarks",
+    "pallet-membership/runtime-benchmarks",
+    "pallet-multisig/runtime-benchmarks",
     "pallet-collective/runtime-benchmarks",
     "pallet-xcm/runtime-benchmarks",
     'cumulus-pallet-session-benchmarking/runtime-benchmarks',
@@ -225,7 +227,7 @@ std = [
     "pallet-randomness-collective-flip/std",
     "pallet-elections-phragmen/std",
 
-    # localhost
+    # local
     "dico-primitives/std",
     "pallet-template/std",
     "pallet-kyc/std",

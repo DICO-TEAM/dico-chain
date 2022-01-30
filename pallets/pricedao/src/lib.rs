@@ -160,7 +160,7 @@ pub mod module {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Council slash accounts
-		#[pallet::weight((<T as Config>::WeightInfo::del_feed_account(accounts.len() as u32), DispatchClass::Operational))]
+		#[pallet::weight((<T as Config>::WeightInfo::del_feed_account(), DispatchClass::Operational))]
 		pub fn del_feed_account(origin: OriginFor<T>, accounts: Vec<T::AccountId>) -> DispatchResultWithPostInfo {
 			T::FeedOrigin::ensure_origin(origin)?;
 			let new_account = accounts.iter().filter(|&i| Self::slash(i.clone())).map(|i|i.clone()).
@@ -169,7 +169,7 @@ pub mod module {
 			Ok(().into())
 		}
 
-		#[pallet::weight((<T as Config>::WeightInfo::insert_feed_account(accounts.len() as u32), DispatchClass::Operational))]
+		#[pallet::weight((<T as Config>::WeightInfo::insert_feed_account(), DispatchClass::Operational))]
 		pub fn insert_feed_account(origin: OriginFor<T>, accounts: Vec<T::AccountId>) -> DispatchResultWithPostInfo {
 			T::FeedOrigin::ensure_origin(origin)?;
 			// pledge

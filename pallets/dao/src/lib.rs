@@ -55,7 +55,7 @@ pub mod mock;
 #[cfg(test)]
 pub mod tests;
 pub mod weights;
-pub use weights::DaoWeightInfo;
+pub use weights::WeightInfo;
 
 /// Simple index type for proposal counting.
 pub type ProposalIndex = u32;
@@ -123,7 +123,7 @@ pub mod pallet {
 			+ Into<<Self as frame_system::Config>::Event>
 			+ IsType<<Self as frame_system::Config>::Event>;
 		/// Weight information for extrinsics in this pallet.
-		type WeightInfo: DaoWeightInfo;
+		type WeightInfo: WeightInfo;
 
 		type IcoHandler: IcoHandler<
 			CurrencyIdOf<Self>,

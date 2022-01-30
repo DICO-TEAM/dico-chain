@@ -15,8 +15,6 @@
 
 * `ias_set_fee` - Set the fee required to be paid for a judgement to be given by the IAS.
 * `ias_provide_judgement` - Provide a judgement to an KYC account.
-* `ias_request_sword_holder` - Certification is handed over to sword holder
-
 
 
 #### For sword holder

@@ -43,7 +43,8 @@ use sp_runtime::{
 };
 use sp_std::prelude::*;
 use traits::DicoTreasuryHandler;
-pub use weights::TreasuryWeightInfo;
+
+pub use weights::WeightInfo;
 // use frame_system::WeightInfo;
 use scale_info::TypeInfo;
 use orml_traits::{
@@ -91,6 +92,7 @@ pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 
+
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		/// Origin from which approvals must come.
@@ -106,7 +108,7 @@ pub mod pallet {
 			+ Into<<Self as frame_system::Config>::Event>
 			+ IsType<<Self as frame_system::Config>::Event>;
 		/// Weight information for extrinsics in this pallet.
-		type WeightInfo: TreasuryWeightInfo;
+		type WeightInfo: WeightInfo;
 
 		#[pallet::constant]
 		type PalletId: Get<PalletId>;

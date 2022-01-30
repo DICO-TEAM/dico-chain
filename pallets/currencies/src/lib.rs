@@ -17,7 +17,6 @@
 #![allow(clippy::unused_unit)]
 use codec::Codec;
 use scale_info::TypeInfo;
-use frame_system::WeightInfo;
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
@@ -58,14 +57,13 @@ use sp_std::{
 
 
 mod mock;
-// mod weights;
 pub use module::*;
-// pub use weights::WeightInfo;
 pub mod currencies_trait;
 mod benchmarking;
 pub mod weights;
 
-pub use weights::CurrenciesWeightInfo;
+pub use weights::WeightInfo;
+
 use currencies_trait::CurrenciesHandler;
 pub use dico_primitives::{AssetId, constants::{currency::*, time::*}};
 
@@ -116,7 +114,7 @@ pub mod module {
 		type GetNativeCurrencyId: Get<AssetId>;
 
 		/// Weight information for extrinsics in this module.
-		type WeightInfo: CurrenciesWeightInfo;
+		type WeightInfo: WeightInfo;
 
 		type CreateConsume: Get<BalanceOf<Self>>;
 
