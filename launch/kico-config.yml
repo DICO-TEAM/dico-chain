@@ -35,30 +35,12 @@ parachains:
     parachain: true
     flags:
       - --rpc-methods=unsafe
-      - --rpc-cors=all
-      - --ws-max-connections=4096
       - --force-authoring
-      - --unsafe-pruning
-      - --pruning=archive
       - --wasm-execution=compiled
       - --execution=wasm
-      - --database=RocksDb
-      - --state-cache-size=0
     relaychainFlags:
-      - --rpc-methods=unsafe
-      - --rpc-cors=all
-      - --ws-max-connections=4096
-      - --force-authoring
-      - --unsafe-pruning
-      - --ws-external
-      - --rpc-external
-      - --pruning=1000
       - --wasm-execution=compiled
       - --execution=wasm
-      - --database=RocksDb
-      - --state-cache-size=0
-      - --execution=wasm
-      - --no-telemetry
       - --no-beefy
     env:
       RUST_LOG: sc_basic_authorship=trace,cumulus-consensus=trace,cumulus-collator=trace,collator_protocol=trace,collation_generation=trace,aura=debug

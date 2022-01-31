@@ -10,8 +10,15 @@ relaychain:
     RUST_LOG: parachain::candidate-backing=trace,parachain::candidate-selection=trace,parachain::pvf=trace,parachain::collator-protocol=trace,parachain::provisioner=trace
   flags:
     - --rpc-methods=unsafe
+    - --ws-max-connections=4096
+    - --force-authoring
+    - --unsafe-pruning
+    - --pruning=1000
     - --wasm-execution=compiled
+    - --database=RocksDb
+    - --state-cache-size=0
     - --execution=wasm
+    - --no-telemetry
     - --no-beefy
   nodes:
     - name: alice

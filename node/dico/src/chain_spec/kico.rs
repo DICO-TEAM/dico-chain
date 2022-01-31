@@ -12,7 +12,7 @@ use sp_runtime::traits::Zero;
 
 use crate::chain_spec::{get_account_id_from_seed, get_authority_keys_from_seed, Extensions, STAGING_TELEMETRY_URL};
 
-pub const PARA_ID: u32 = 2000;
+pub const PARA_ID: u32 = 2107;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
