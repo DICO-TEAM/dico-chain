@@ -164,6 +164,7 @@ pub mod module {
 		StorageMap<_, Blake2_128Concat, AssetId, DicoAssetInfo<T::AccountId, DicoAssetMetadata>>;
 
 	#[pallet::pallet]
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	#[pallet::hooks]
@@ -819,6 +820,7 @@ where
 		+ Codec
 		+ Copy
 		+ MaybeSerializeDeserialize
+		+ MaxEncodedLen
 		+ Debug
 		+ Default,
 	Currency: PalletCurrency<AccountId>,

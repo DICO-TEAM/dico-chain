@@ -138,7 +138,8 @@ pub mod pallet {
     }
 
     #[pallet::pallet]
-    #[pallet::generate_store(pub (super) trait Store)]
+    #[pallet::generate_store(pub(super) trait Store)]
+    #[pallet::without_storage_info]
     pub struct Pallet<T>(_);
 
     /// Keeps track of the Nonce used in the randomness generator.
@@ -149,42 +150,42 @@ pub mod pallet {
     /// area data of user account
     #[pallet::storage]
     #[pallet::getter(fn area_data)]
-    pub(super) type AreaData<T: Config> = StorageMap<_, Twox64Concat, AreaCode, u64, ValueQuery>;
+    pub(super) type AreaData<T: Config> = StorageMap<_, Blake2_128Concat, AreaCode, u64, ValueQuery>;
 
     /// kyc of account
     #[pallet::storage]
     #[pallet::getter(fn kyc)]
     pub(super) type KYCOf<T: Config> =
-    StorageMap<_, Twox64Concat, T::AccountId, Registration<BalanceOf<T>>, OptionQuery>;
+    StorageMap<_, Blake2_128Concat, T::AccountId, Registration<BalanceOf<T>>, OptionQuery>;
 
     /// the black list of kyc user
     #[pallet::storage]
     #[pallet::getter(fn blacklist)]
     pub(super) type BlackListOf<T: Config> =
-    StorageMap<_, Twox64Concat, T::AccountId, BlackInfo<BalanceOf<T>>, OptionQuery>;
+    StorageMap<_, Blake2_128Concat, T::AccountId, BlackInfo<BalanceOf<T>>, OptionQuery>;
 
     /// List of identity authentication service(IAS) in a  kyc field
     #[pallet::storage]
     #[pallet::getter(fn ias_list)]
     pub(super) type IASListOf<T: Config> =
-    StorageMap<_, Twox64Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
+    StorageMap<_, Blake2_128Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
 
     /// List of SwordHolder in a  kyc field
     #[pallet::storage]
     #[pallet::getter(fn sword_holder)]
     pub(super) type SwordHolderOf<T: Config> =
-    StorageMap<_, Twox64Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
+    StorageMap<_, Blake2_128Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
 
     /// Records Of IAS/SwordHolder
     #[pallet::storage]
     #[pallet::getter(fn records)]
     pub(super) type RecordsOf<T: Config> =
-    StorageMap<_, Twox64Concat, T::AccountId, Vec<Record<T::AccountId>>, ValueQuery>;
+    StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Record<T::AccountId>>, ValueQuery>;
 
     /// Unique information storage filtering
     #[pallet::storage]
     #[pallet::getter(fn unique_id)]
-    pub(super) type UniqueIdOf<T: Config> = StorageMap<_, Twox64Concat, KYCFields, Vec<Data>, ValueQuery>;
+    pub(super) type UniqueIdOf<T: Config> = StorageMap<_, Blake2_128Concat, KYCFields, Vec<Data>, ValueQuery>;
 
     /// message: (sender, recipient -> data)
     #[pallet::storage]
@@ -196,7 +197,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn application_form)]
     pub(super) type ApplicationFormList<T: Config> =
-    StorageMap<_, Twox64Concat, T::AccountId, Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
+    StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
 
     #[pallet::event]
     #[pallet::generate_deposit(pub (super) fn deposit_event)]

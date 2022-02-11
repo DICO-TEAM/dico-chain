@@ -29,6 +29,7 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
+// https://github.com/paritytech/substrate/blob/HEAD/frame/support/procedural/src/pallet/parse/pallet_struct.rs
 #[frame_support::pallet]
 pub mod pallet {
 	use frame_support::{dispatch::DispatchResultWithPostInfo, pallet_prelude::*};
