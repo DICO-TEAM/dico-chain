@@ -478,7 +478,16 @@ impl<T: Config> Pallet<T> {
 				Error::<T>::NotIssuer
 			);
 
-            let mut data = TokenDataOf::<T>::default();
+            let mut data = TokenData {
+			class_id: Default::default(),
+			hash: Default::default(),
+			power_threshold: Default::default(),
+			claim_payment: Default::default(),
+			attribute: Default::default(),
+			image_hash: vec![],
+			sell_records: vec![],
+			status: Default::default(),
+		};
             let hash = Self::get_hash(class_id, token_id);
             data.hash = hash;
             data.class_id = class_id;

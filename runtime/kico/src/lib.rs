@@ -12,7 +12,7 @@ use dico_primitives::{
     AccountId, AccountIndex, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment,
     PoolId, Price, Signature,
 };
-pub use orml_xcm_support::{IsNativeConcrete, MultiCurrencyAdapter, MultiNativeAsset};
+pub use orml_xcm_support::{IsNativeConcrete, MultiCurrencyAdapter, MultiNativeAsset, DepositToAlternative};
 use orml_traits::{ create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended, MultiCurrency};
 use pallet_currencies::BasicCurrencyAdapter;
 use sp_api::impl_runtime_apis;
@@ -36,6 +36,7 @@ use static_assertions::const_assert;
 use frame_support::{
     construct_runtime, match_type, parameter_types,
     traits::{
+		EnsureOneOf,
         Contains, Currency, EqualPrivilegeOnly, Everything, Imbalance, InstanceFilter, KeyOwnerProofSystem, LockIdentifier,
         Nothing, OnUnbalanced, U128CurrencyToVote,
     },
@@ -46,7 +47,7 @@ use frame_support::{
     PalletId, RuntimeDebug,
 };
 use frame_system::limits::{BlockLength, BlockWeights};
-use frame_system::{EnsureOneOf, EnsureRoot};
+use frame_system::{EnsureRoot};
 
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
@@ -440,7 +441,6 @@ impl pallet_democracy::Config for Runtime {
     // To cancel a proposal before it has been passed, the technical committee must be unanimous or
     // Root must agree.
     type CancelProposalOrigin = EnsureOneOf<
-        AccountId,
         EnsureRoot<AccountId>,
         pallet_collective::EnsureProportionAtLeast<_1, _1, AccountId, TechnicalCollective>,
     >;
@@ -546,7 +546,6 @@ impl pallet_collective::Config<TechnicalCollective> for Runtime {
 }
 
 type EnsureRootOrHalfCouncil = EnsureOneOf<
-    AccountId,
     EnsureRoot<AccountId>,
     pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>,
 >;
@@ -581,18 +580,18 @@ parameter_types! {
 	pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
 	pub const BountyValueMinimum: Balance = 5 * DOLLARS;
 	pub const MaxApprovals: u32 = 100;
+	pub const ProposalBondMaximum: Balance = 100 * DOLLARS;
 }
 
 impl pallet_treasury::Config for Runtime {
     type PalletId = TreasuryPalletId;
+	type ProposalBondMaximum = ProposalBondMaximum;
     type Currency = Balances;
     type ApproveOrigin = EnsureOneOf<
-        AccountId,
         EnsureRoot<AccountId>,
         pallet_collective::EnsureProportionAtLeast<_3, _5, AccountId, CouncilCollective>,
     >;
     type RejectOrigin = EnsureOneOf<
-        AccountId,
         EnsureRoot<AccountId>,
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>,
     >;
@@ -665,7 +664,6 @@ parameter_types! {
 }
 
 type EnsureRootOrMoreThanHalfCouncil = EnsureOneOf<
-    AccountId,
     EnsureRoot<AccountId>,
     pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>,
 >;
@@ -696,7 +694,7 @@ parameter_types! {
 
 impl cumulus_pallet_parachain_system::Config for Runtime {
     type Event = Event;
-    type OnValidationData = ();
+	type OnSystemEvent = ();
     type SelfParaId = parachain_info::Pallet<Runtime>;
     type OutboundXcmpMessageSource = XcmpQueue;
     type DmpMessageHandler = DmpQueue;
@@ -728,6 +726,10 @@ pub type LocationToAccountId = (
     AccountId32Aliases<RelayNetwork, AccountId>,
 );
 
+parameter_types! {
+	pub DicoTreasuryAccount: AccountId = TreasuryPalletId::get().into_account();
+}
+
 /// Means for transacting assets on this chain.
 pub type LocalAssetTransactor = MultiCurrencyAdapter<
 	Currencies,
@@ -737,6 +739,7 @@ pub type LocalAssetTransactor = MultiCurrencyAdapter<
 	LocationToAccountId,
 	CurrencyId,
 	CurrencyIdConvert,
+	DepositToAlternative<DicoTreasuryAccount, Currencies, CurrencyId, AccountId, Balance>,
 >;
 
 /// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
@@ -874,6 +877,7 @@ impl cumulus_pallet_xcm::Config for Runtime {
 
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
     type Event = Event;
+	type ExecuteOverweightOrigin = EnsureRoot<AccountId>;
     type XcmExecutor = XcmExecutor<XcmConfig>;
     type ChannelInfo = ParachainSystem;
     type VersionWrapper = PolkadotXcm;
@@ -881,8 +885,8 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
 
 impl cumulus_pallet_dmp_queue::Config for Runtime {
     type Event = Event;
+	type ExecuteOverweightOrigin = EnsureRoot<AccountId>;
     type XcmExecutor = XcmExecutor<XcmConfig>;
-    type ExecuteOverweightOrigin = frame_system::EnsureRoot<AccountId>;
 }
 
 impl pallet_aura::Config for Runtime {
@@ -1119,7 +1123,6 @@ parameter_types! {
 }
 
 type EnsureRootOrTwoThirdsGeneralCouncil = EnsureOneOf<
-    AccountId,
     EnsureRoot<AccountId>,
     pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, CouncilCollective>,
 >;
@@ -1144,14 +1147,12 @@ parameter_types! {
 
 impl pallet_dico_treasury::Config for Runtime {
     type ApproveOrigin = EnsureOneOf<
-        AccountId,
         EnsureRoot<AccountId>,
         pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>,
     >;
     type PalletId = TreasuryPalletId;
     type MultiCurrency = Currencies;
     type RejectOrigin = EnsureOneOf<
-        AccountId,
         EnsureRoot<AccountId>,
         pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, CouncilCollective>,
     >;
@@ -1246,7 +1247,6 @@ impl orml_unknown_tokens::Config for Runtime {
 }
 
 pub type EnsureRootOrThreeFourthsCouncil = EnsureOneOf<
-	AccountId,
 	EnsureRoot<AccountId>,
 	pallet_collective::EnsureProportionAtLeast<_3, _4, AccountId, CouncilCollective>,
 >;
@@ -1259,11 +1259,13 @@ impl orml_xcm::Config for Runtime {
 parameter_types! {
 	pub const BaseXcmWeight: Weight = 100_000_000;
 	pub SelfLocation: MultiLocation = MultiLocation::new(1, X1(Parachain(ParachainInfo::parachain_id().into())));
+	pub const MaxAssetsForTransfer: usize = 2;
 }
 
 impl orml_xtokens::Config for Runtime {
 	type Event = Event;
 	type Balance = Balance;
+	type MaxAssetsForTransfer = MaxAssetsForTransfer;
 	type CurrencyId = CurrencyId;
 	type CurrencyIdConvert = CurrencyIdConvert;
 	type AccountIdToMultiLocation = AccountIdToMultiLocation;
@@ -1435,8 +1437,8 @@ impl_runtime_apis! {
 
 
 	impl cumulus_primitives_core::CollectCollationInfo<Block> for Runtime {
-		fn collect_collation_info() -> cumulus_primitives_core::CollationInfo {
-			ParachainSystem::collect_collation_info()
+		fn collect_collation_info(header: &<Block as BlockT>::Header) -> cumulus_primitives_core::CollationInfo {
+			ParachainSystem::collect_collation_info(header)
 		}
 	}
 
