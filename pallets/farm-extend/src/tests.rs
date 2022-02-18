@@ -198,7 +198,10 @@ fn deposit_asset_should_work_2() {
 		assert_ok!(FarmExtend::deposit_asset(Origin::signed(ALICE), 0, 0,));
 		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
 		// reward_debt = 15000000000 * 1000_000_000_000 / 1e12 = 15000000000
-		assert_eq!(Currency::free_balance(DOT, &ALICE), DEFAULT_ASSET_AMOUNT + 15000000000 - 1_000_000_000 * 1000);
+		assert_eq!(
+			Currency::free_balance(DOT, &ALICE),
+			DEFAULT_ASSET_AMOUNT + 15000000000 - 1_000_000_000 * 1000
+		);
 		let participant_extend = ParticipantExtend::new(1000_000_000_000, 15000000000);
 		assert_eq!(ParticipantExtends::<Test>::get(0, ALICE), Some(participant_extend));
 	});
@@ -340,7 +343,6 @@ fn withdraw_asset_should_work() {
 	});
 }
 
-
 #[test]
 fn withdraw_asset_should_work_2() {
 	new_test_ext().execute_with(|| {
@@ -379,9 +381,11 @@ fn withdraw_asset_should_work_2() {
 		assert_ok!(FarmExtend::withdraw_asset(Origin::signed(ALICE), 0, 0,));
 		assert_eq!(PoolExtends::<Test>::get(0), Some(pool_extend_info));
 		// reward_debt = 15000000000 * 1000_000_000_000 / 1e12 = 15000000000
-		assert_eq!(Currency::free_balance(DOT, &ALICE), DEFAULT_ASSET_AMOUNT + 15000000000 - 1_000_000_000 * 1000);
+		assert_eq!(
+			Currency::free_balance(DOT, &ALICE),
+			DEFAULT_ASSET_AMOUNT + 15000000000 - 1_000_000_000 * 1000
+		);
 		let participant_extend = ParticipantExtend::new(1000_000_000_000, 15000000000);
 		assert_eq!(ParticipantExtends::<Test>::get(0, ALICE), Some(participant_extend));
 	});
 }
-

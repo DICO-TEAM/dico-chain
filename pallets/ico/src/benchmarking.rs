@@ -1,54 +1,83 @@
 #![cfg(feature = "runtime-benchmarks")]
 
 use super::*;
-use sp_std::vec;
-use frame_benchmarking::{account, benchmarks_instance, benchmarks, impl_benchmark_test_suite, whitelist_account, whitelisted_caller,
-benchmarks_instance_pallet};
-use frame_support::{assert_ok};
+use crate::Pallet as Ico;
+use currencies::{DicoAssetMetadata, Pallet as CurrenciesPallet};
+use frame_benchmarking::{
+	account, benchmarks, benchmarks_instance, benchmarks_instance_pallet, impl_benchmark_test_suite, whitelist_account,
+	whitelisted_caller,
+};
+use frame_support::assert_ok;
 use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
-use crate::Pallet as Ico;
-use currencies::{Pallet as CurrenciesPallet, DicoAssetMetadata};
+use sp_std::vec;
 
 const SEED: u32 = 0;
 
 fn create_asset<T: Config>() {
 	let alice = get_alice::<T>();
-	assert_ok!(T::CurrenciesHandler::do_create(alice.clone(), T::GetNativeCurrencyId::get(), Some(DicoAssetMetadata {
-		name: vec![],
-		symbol: vec![],
-		decimals: 12
-	}),
+	assert_ok!(T::CurrenciesHandler::do_create(
+		alice.clone(),
+		T::GetNativeCurrencyId::get(),
+		Some(DicoAssetMetadata {
+			name: vec![],
+			symbol: vec![],
+			decimals: 12
+		}),
 		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-		false));
-	assert_ok!(T::CurrenciesHandler::do_create(alice.clone(), T::UsdtCurrencyId::get(), Some(DicoAssetMetadata {
-		name: vec![],
-		symbol: vec![],
-		decimals: 12
-	}),
-		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),false));
-
+		false
+	));
+	assert_ok!(T::CurrenciesHandler::do_create(
+		alice.clone(),
+		T::UsdtCurrencyId::get(),
+		Some(DicoAssetMetadata {
+			name: vec![],
+			symbol: vec![],
+			decimals: 12
+		}),
+		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+		false
+	));
 }
 
 fn get_alice<T: Config>() -> T::AccountId {
 	let caller: T::AccountId = whitelisted_caller();
-	T::MultiCurrency::deposit(T::GetNativeCurrencyId::get(), &caller, (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>());
+	T::MultiCurrency::deposit(
+		T::GetNativeCurrencyId::get(),
+		&caller,
+		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+	);
 	T::MultiCurrency::deposit(50, &caller, (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>());
 	caller
-
 }
 
 fn get_bob<T: Config>() -> T::AccountId {
 	let caller: T::AccountId = account("bob", 1, SEED);
-	T::MultiCurrency::deposit(T::GetNativeCurrencyId::get(), &caller, (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>());
-	T::MultiCurrency::deposit(T::UsdtCurrencyId::get(), &caller, (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>());
+	T::MultiCurrency::deposit(
+		T::GetNativeCurrencyId::get(),
+		&caller,
+		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+	);
+	T::MultiCurrency::deposit(
+		T::UsdtCurrencyId::get(),
+		&caller,
+		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+	);
 	caller
 }
 
 fn get_haha<T: Config>() -> T::AccountId {
 	let caller: T::AccountId = account("haha", 1, SEED);
-	T::MultiCurrency::deposit(T::UsdtCurrencyId::get(), &caller, (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>());
-	T::MultiCurrency::deposit(T::GetNativeCurrencyId::get(), &caller, (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>());
+	T::MultiCurrency::deposit(
+		T::UsdtCurrencyId::get(),
+		&caller,
+		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+	);
+	T::MultiCurrency::deposit(
+		T::GetNativeCurrencyId::get(),
+		&caller,
+		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+	);
 	caller
 }
 
@@ -61,19 +90,30 @@ fn set_ico<T: Config>() -> CurrencyId {
 	IcoMaxUsdtAmount::<T>::put((5000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>());
 	let currency_id = T::UsdtCurrencyId::get();
 	if cfg!(test) {
-
-	T::CurrenciesHandler::do_create(alice.clone(),  T::GetNativeCurrencyId::get(), Some(DicoAssetMetadata {
-		name: vec![1; 3],
-		symbol: vec![1; 3],
-		decimals: 12
-	}), (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(), false);
+		T::CurrenciesHandler::do_create(
+			alice.clone(),
+			T::GetNativeCurrencyId::get(),
+			Some(DicoAssetMetadata {
+				name: vec![1; 3],
+				symbol: vec![1; 3],
+				decimals: 12,
+			}),
+			(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			false,
+		);
 	}
 
-	T::CurrenciesHandler::do_create(alice.clone(), currency_id, Some(DicoAssetMetadata {
-		name: vec![1; 4],
-		symbol: vec![1; 4],
-		decimals: 12
-	}), (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(), false);
+	T::CurrenciesHandler::do_create(
+		alice.clone(),
+		currency_id,
+		Some(DicoAssetMetadata {
+			name: vec![1; 4],
+			symbol: vec![1; 4],
+			decimals: 12,
+		}),
+		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+		false,
+	);
 	let bob: T::AccountId = get_bob::<T>();
 	T::MultiCurrency::deposit(currency_id, &bob, 10000u128.saturated_into::<MultiBalanceOf<T>>());
 	let ico_info = IcoParameters {
@@ -95,7 +135,10 @@ fn set_ico<T: Config>() -> CurrencyId {
 		unlock_duration: T::BlockNumber::from(1u32),
 		per_duration_unlock_amount: MultiBalanceOf::<T>::from(100u32),
 	};
-	assert_ok!(Ico::<T>::initiate_ico(RawOrigin::Signed(alice.clone()).into(), ico_info));
+	assert_ok!(Ico::<T>::initiate_ico(
+		RawOrigin::Signed(alice.clone()).into(),
+		ico_info
+	));
 	T::GetNativeCurrencyId::get()
 }
 
@@ -103,7 +146,13 @@ fn get_ico<T: Config>() -> (CurrencyId, u32) {
 	let id = set_ico::<T>();
 	assert_ok!(Ico::<T>::permit_ico(T::PermitIcoOrigin::successful_origin(), id));
 	frame_system::Pallet::<T>::set_block_number(36002u32.into());
-	assert_ok!(Ico::<T>::join(RawOrigin::Signed(get_haha::<T>()).into(), id, 1, (200 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(), None));
+	assert_ok!(Ico::<T>::join(
+		RawOrigin::Signed(get_haha::<T>()).into(),
+		id,
+		1,
+		(200 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+		None
+	));
 	(id, 1)
 }
 
@@ -111,21 +160,34 @@ fn release_requests<T: Config>() -> (CurrencyId, u32) {
 	let (id, index) = get_ico::<T>();
 	let alice = get_alice::<T>();
 	frame_system::Pallet::<T>::set_block_number(36020u32.into());
-	assert_ok!(Ico::<T>::request_release(RawOrigin::Signed(alice.clone()).into(), id, index, Percent::from_percent(10u8)));
+	assert_ok!(Ico::<T>::request_release(
+		RawOrigin::Signed(alice.clone()).into(),
+		id,
+		index,
+		Percent::from_percent(10u8)
+	));
 	(id, index)
 }
 
 fn release_permit<T: Config>() -> (CurrencyId, u32) {
 	let (id, index) = release_requests::<T>();
 	let alice = get_alice::<T>();
-	assert_ok!(Ico::<T>::permit_release(T::PermitReleaseOrigin::successful_origin(), id, index));
+	assert_ok!(Ico::<T>::permit_release(
+		T::PermitReleaseOrigin::successful_origin(),
+		id,
+		index
+	));
 	(id, index)
 }
 
 fn haha_get_release_amount<T: Config>() -> (T::AccountId, CurrencyId, u32) {
 	let (id, index) = release_permit::<T>();
 	let haha = get_haha::<T>();
-	assert_ok!(Ico::<T>::user_release_ico_amount(RawOrigin::Signed(haha.clone()).into(), id, index));
+	assert_ok!(Ico::<T>::user_release_ico_amount(
+		RawOrigin::Signed(haha.clone()).into(),
+		id,
+		index
+	));
 	(haha, id, index)
 }
 
@@ -269,7 +331,6 @@ mod test1 {
 		new_test_ext().execute_with(|| {
 			// assert_ok!(Currencies::<Runtime>::test_benchmark_set_metadata());
 			assert_ok!(Ico::<Test>::test_benchmark_initiate_ico());
-
 		});
 	}
 }

@@ -22,17 +22,18 @@ mod mock;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 pub mod weights;
+
 use weights::WeightInfo;
 
 use codec::{Decode, Encode};
-use scale_info::TypeInfo;
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
-	traits::{Currency, ExistenceRequirement, Get,  WithdrawReasons},
+	traits::{Currency, ExistenceRequirement, Get, WithdrawReasons},
 	BoundedVec, Parameter,
 };
 use pallet_ico::traits::PowerHandler;
+use scale_info::TypeInfo;
 use sp_runtime::{
 	traits::{AtLeast32BitUnsigned, CheckedAdd, CheckedSub, Hash, MaybeSerializeDeserialize, Member, One, Zero},
 	ArithmeticError, DispatchError, DispatchResult, RuntimeDebug,
@@ -48,7 +49,7 @@ use sp_std::{
 pub type Attributes = BTreeMap<Vec<u8>, Vec<u8>>;
 
 /// Class info
-#[derive(Encode, Decode, Clone, Eq, PartialEq,  RuntimeDebug, TypeInfo)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub struct ClassInfo<TokenId, AccountId, Data, ClassMetadataOf> {
 	/// Class metadata
 	pub metadata: ClassMetadataOf,
@@ -126,7 +127,7 @@ impl Default for NftLevel {
 }
 
 /// Token info
-#[derive(Encode, Decode, Clone, Eq, PartialEq,  RuntimeDebug, TypeInfo)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 pub struct TokenInfo<AccountId, Data, TokenMetadataOf> {
 	/// Token metadata
 	pub metadata: TokenMetadataOf,
@@ -162,6 +163,7 @@ pub mod module {
 		type WeightInfo: WeightInfo;
 		type PowerHandler: pallet_ico::traits::PowerHandler<Self::AccountId, DispatchResult, BalanceOf<Self>>;
 	}
+
 	pub type AttributeOf<T> = BoundedVec<u8, <T as Config>::MaxTokenAttribute>;
 	pub type ClassMetadataOf<T> = BoundedVec<u8, <T as Config>::MaxClassMetadata>;
 	pub type SaleInfoOf<T> = SaleInfo<
@@ -284,6 +286,7 @@ pub mod module {
 	//BTreeSet<Vec<u8>>;
 
 	#[pallet::pallet]
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	#[pallet::hooks]
@@ -475,7 +478,16 @@ impl<T: Config> Pallet<T> {
 				Error::<T>::NotIssuer
 			);
 
-			let mut data = TokenDataOf::<T>::default();
+			let mut data = TokenData {
+				class_id: Default::default(),
+				hash: Default::default(),
+				power_threshold: Default::default(),
+				claim_payment: Default::default(),
+				attribute: Default::default(),
+				image_hash: vec![],
+				sell_records: vec![],
+				status: Default::default(),
+			};
 			let hash = Self::get_hash(class_id, token_id);
 			data.hash = hash;
 			data.class_id = class_id;
@@ -525,7 +537,8 @@ impl<T: Config> Pallet<T> {
 			match is_active {
 				true => {
 					ensure!(!t.data.status.is_active_image, Error::<T>::ActiveNft);
-					t.data.status.is_active_image = true },
+					t.data.status.is_active_image = true
+				}
 				_ => t.data.status.is_active_image = false,
 			}
 			*token_info = Some(t);

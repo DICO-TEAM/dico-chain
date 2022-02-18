@@ -1,48 +1,56 @@
 #![cfg(feature = "runtime-benchmarks")]
 
 use super::*;
+use frame_benchmarking::{
+	account, benchmarks, benchmarks_instance, benchmarks_instance_pallet, impl_benchmark_test_suite, whitelist_account,
+	whitelisted_caller,
+};
+use frame_support::assert_ok;
 use sp_runtime::SaturatedConversion;
-use frame_benchmarking::{account, benchmarks_instance, benchmarks, impl_benchmark_test_suite, whitelist_account, whitelisted_caller,
-benchmarks_instance_pallet};
-use frame_support::{assert_ok};
 
+use crate::Pallet as NFT;
+use dico_primitives::currency::DOLLARS;
 use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
-use dico_primitives::currency::DOLLARS;
-use crate::Pallet as NFT;
 
 const SEED: u32 = 0;
 
-fn get_bob<T: Config>() -> T::AccountId{
+fn get_bob<T: Config>() -> T::AccountId {
 	let Bob = account("bob", 2, SEED);
 	T::Currency::make_free_balance_be(&Bob, (10000 * DOLLARS).saturated_into::<BalanceOf<T>>());
 	Bob
 }
 
-fn create_nft_class<T: Config>() -> (T::AccountId, T::ClassId){
+fn create_nft_class<T: Config>() -> (T::AccountId, T::ClassId) {
 	let caller: T::AccountId = whitelisted_caller();
 	T::Currency::make_free_balance_be(&caller, (10000 * DOLLARS).saturated_into::<BalanceOf<T>>());
 	let remark_message = vec![1; 3];
 	let class = ClassData {
 		level: NftLevel::Rookie,
 		power_threshold: BalanceOf::<T>::default(),
-		claim_payment:  BalanceOf::<T>::default(),
+		claim_payment: BalanceOf::<T>::default(),
 		images_hash: None,
 		maximum_quantity: 100u32.into(),
 	};
 	assert!(NFT::<T>::create_class(RawOrigin::Signed(caller.clone()).into(), remark_message, class).is_ok());
 	(caller, T::ClassId::default())
-
 }
 
-fn create_nft_token<T: Config>() -> (T::AccountId, T::ClassId, T::TokenId){
+fn create_nft_token<T: Config>() -> (T::AccountId, T::ClassId, T::TokenId) {
 	let (caller, class_id) = create_nft_class::<T>();
 	let string = vec![1; 3];
-	assert!(NFT::<T>::mint(RawOrigin::Signed(caller.clone()).into(), class_id, string.clone(), string.clone(), string).is_ok());
+	assert!(NFT::<T>::mint(
+		RawOrigin::Signed(caller.clone()).into(),
+		class_id,
+		string.clone(),
+		string.clone(),
+		string
+	)
+	.is_ok());
 	(caller, class_id, T::TokenId::default())
 }
 
-fn claim_nft_token<T: Config>() -> (T::AccountId, T::ClassId, T::TokenId){
+fn claim_nft_token<T: Config>() -> (T::AccountId, T::ClassId, T::TokenId) {
 	let (caller, class_id, token_id) = create_nft_token::<T>();
 	assert!(NFT::<T>::claim(RawOrigin::Signed(caller.clone()).into(), (class_id, token_id)).is_ok());
 	(caller, class_id, T::TokenId::default())
@@ -50,16 +58,20 @@ fn claim_nft_token<T: Config>() -> (T::AccountId, T::ClassId, T::TokenId){
 
 fn sale_token<T: Config>() -> (T::ClassId, T::TokenId) {
 	let (caller, class_id, token_id) = claim_nft_token::<T>();
-	assert!(NFT::<T>::offer_token_for_sale(RawOrigin::Signed(caller.clone()).into(), (class_id, token_id), BalanceOf::<T>::from(20u32)).is_ok());
+	assert!(NFT::<T>::offer_token_for_sale(
+		RawOrigin::Signed(caller.clone()).into(),
+		(class_id, token_id),
+		BalanceOf::<T>::from(20u32)
+	)
+	.is_ok());
 	(class_id, token_id)
 }
 
 fn active_nft<T: Config>() -> (T::AccountId, T::ClassId, T::TokenId) {
 	let (caller, class_id, token_id) = claim_nft_token::<T>();
 	assert!(NFT::<T>::active(RawOrigin::Signed(caller.clone()).into(), (class_id, token_id)).is_ok());
-		(caller, class_id, token_id)
+	(caller, class_id, token_id)
 }
-
 
 benchmarks! {
 	create_class {
@@ -162,8 +174,6 @@ mod test1 {
 		new_test_ext().execute_with(|| {
 			// assert_ok!(Currencies::<Runtime>::test_benchmark_set_metadata());
 			assert_ok!(NFT::<Runtime>::test_benchmark_inactive());
-
 		});
 	}
 }
-

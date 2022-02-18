@@ -6,7 +6,7 @@ use orml_traits::{DataFeeder, DataProvider};
 use dico_treasury;
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{LockIdentifier, Time, Contains},
+	traits::{Contains, LockIdentifier, Time},
 	PalletId,
 };
 use orml_traits::parameter_type_with_key;
@@ -15,9 +15,9 @@ use pallet_pricedao;
 use pallet_randomness_collective_flip;
 use sp_core::H256;
 use sp_runtime::{
-	AccountId32,
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
+	AccountId32,
 };
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -345,4 +345,3 @@ pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
 	});
 	ext
 }
-

@@ -9,7 +9,6 @@
 #![allow(clippy::upper_case_acronyms)]
 
 use codec::{Decode, Encode};
-use scale_info::TypeInfo;
 use core::convert::TryFrom;
 use dico_primitives::{to_balance, to_u256, Amount, AssetId, Balance, BlockNumber};
 use frame_support::{
@@ -22,6 +21,7 @@ use frame_support::{
 };
 use frame_system::pallet_prelude::*;
 use orml_traits::{MultiCurrency, MultiCurrencyExtended};
+use scale_info::TypeInfo;
 use sp_core::U256;
 use sp_runtime::{
 	traits::{AccountIdConversion, SaturatedConversion},
@@ -103,6 +103,7 @@ pub mod pallet {
 	use super::*;
 
 	#[pallet::pallet]
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	#[pallet::hooks]

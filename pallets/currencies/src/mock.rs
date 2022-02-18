@@ -1,14 +1,14 @@
 //! Mocks for the gradually-update module.
 #![cfg(test)]
-use frame_support::{construct_runtime, parameter_types, traits::Contains};
-use sp_core::H256;
-use sp_runtime::{testing::Header, traits::IdentityLookup};
 use super::*;
-use orml_tokens as tokens;
 use crate as currencies;
 use crate::Pallet as CurrenciesPallet;
-use pallet_balances;
+use frame_support::{construct_runtime, parameter_types, traits::Contains};
+use orml_tokens as tokens;
 use orml_traits::parameter_type_with_key;
+use pallet_balances;
+use sp_core::H256;
+use sp_runtime::{testing::Header, traits::IdentityLookup};
 
 type Amount = i128;
 type Balance = u64;
@@ -77,7 +77,6 @@ parameter_type_with_key! {
 	};
 }
 
-
 pub struct MockDustRemovalWhitelist;
 impl Contains<AccountId> for MockDustRemovalWhitelist {
 	fn contains(a: &AccountId) -> bool {
@@ -131,10 +130,13 @@ construct_runtime!(
 );
 
 pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
-	let mut t = frame_system::GenesisConfig::default().build_storage::<Runtime>().unwrap();
+	let mut t = frame_system::GenesisConfig::default()
+		.build_storage::<Runtime>()
+		.unwrap();
 
 	let mut ext = sp_io::TestExternalities::new(t);
-	ext.execute_with(|| { System::set_block_number(1);
+	ext.execute_with(|| {
+		System::set_block_number(1);
 		// Timestamp::set_timestamp(12345);
 	});
 	ext

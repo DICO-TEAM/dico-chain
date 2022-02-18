@@ -20,24 +20,28 @@
 #![cfg(test)]
 
 use super::*;
+use crate as treasury;
+use frame_support::{
+	assert_noop, assert_ok, parameter_types,
+	traits::{Contains, OnInitialize},
+	PalletId,
+};
 use orml_tokens;
 use orml_traits::parameter_type_with_key;
-use crate as treasury;
-use frame_support::{PalletId, assert_noop, assert_ok, parameter_types, traits::{OnInitialize, Contains}};
-use std::cell::RefCell;
 use pallet_currencies::BasicCurrencyAdapter;
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
 };
+use std::cell::RefCell;
 
 pub type Balance = u64;
 pub type Amount = i128;
 pub type BlockNumber = u32;
 type CurrencyId = u32;
 pub type AccountId = u128;
-pub  const Alice: u128 = 1;
+pub const Alice: u128 = 1;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -90,7 +94,6 @@ parameter_types! {
 	pub const ExistentialDeposit: Balance = 1;
 }
 impl pallet_balances::Config for Test {
-
 	type MaxLocks = ();
 	type Balance = Balance;
 	type Event = Event;

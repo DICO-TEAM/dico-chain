@@ -9,7 +9,6 @@
 #![allow(clippy::upper_case_acronyms)]
 
 use codec::{Decode, Encode};
-use scale_info::TypeInfo;
 use core::convert::TryFrom;
 use dico_primitives::{to_balance, to_u256, Amount, AssetId, Balance};
 use frame_support::{
@@ -22,6 +21,7 @@ use frame_support::{
 	transactional, PalletId,
 };
 use frame_system::{ensure_signed, pallet_prelude::*};
+use scale_info::TypeInfo;
 use sp_core::U256;
 use sp_runtime::{traits::AccountIdConversion, ArithmeticError, RuntimeDebug};
 use sp_std::vec::Vec;
@@ -71,6 +71,7 @@ pub mod pallet {
 	use super::*;
 
 	#[pallet::pallet]
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	#[pallet::hooks]
@@ -83,7 +84,14 @@ pub mod pallet {
 		/// Multi currency for transfer of currencies
 		type Currency: MultiCurrencyExtended<Self::AccountId, CurrencyId = AssetId, Balance = Balance, Amount = Amount>;
 
-		type CurrenciesHandler: CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, Self::AccountId, Balance, sp_runtime::DispatchResult>;
+		type CurrenciesHandler: CurrenciesHandler<
+			AssetId,
+			DicoAssetMetadata,
+			DispatchError,
+			Self::AccountId,
+			Balance,
+			sp_runtime::DispatchResult,
+		>;
 
 		#[pallet::constant]
 		type LiquidityAssetIdBase: Get<AssetId>;
@@ -432,7 +440,13 @@ impl<T: Config> Pallet<T> {
 			decimals: LIQUIDITY_DECIMALS,
 		};
 
-		T::CurrenciesHandler::do_create(module_account_id, new_liquidity_id, Some(liquidity_metadata), 0u128, true, )?;
+		T::CurrenciesHandler::do_create(
+			module_account_id,
+			new_liquidity_id,
+			Some(liquidity_metadata),
+			0u128,
+			true,
+		)?;
 
 		Ok(new_liquidity_id)
 	}

@@ -16,7 +16,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
 use codec::Codec;
-use scale_info::TypeInfo;
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
@@ -25,12 +24,10 @@ use frame_support::{
 		ReservableCurrency as PalletReservableCurrency, WithdrawReasons,
 	},
 };
+use scale_info::TypeInfo;
 use sp_std::vec;
 
-#[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
 use frame_system::{ensure_root, ensure_signed, pallet_prelude::*};
-use sp_std::vec::Vec;
 use orml_traits::{
 	arithmetic::{Signed, SimpleArithmetic},
 	// currency::TransferAll,
@@ -45,27 +42,32 @@ use orml_traits::{
 	MultiLockableCurrency,
 	MultiReservableCurrency,
 };
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 use sp_runtime::{
 	traits::{CheckedSub, MaybeSerializeDeserialize, StaticLookup, Zero},
 	DispatchError, DispatchResult,
 };
+use sp_std::vec::Vec;
 use sp_std::{
 	convert::{TryFrom, TryInto},
 	fmt::Debug,
 	marker, result,
 };
 
-
 mod mock;
 pub use module::*;
-pub mod currencies_trait;
 mod benchmarking;
+pub mod currencies_trait;
 pub mod weights;
 
 pub use weights::WeightInfo;
 
 use currencies_trait::CurrenciesHandler;
-pub use dico_primitives::{AssetId, constants::{currency::*, time::*}};
+pub use dico_primitives::{
+	constants::{currency::*, time::*},
+	AssetId,
+};
 
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 #[derive(Clone, Encode, Decode, Eq, PartialEq, Default, RuntimeDebug, TypeInfo)]
@@ -164,6 +166,7 @@ pub mod module {
 		StorageMap<_, Blake2_128Concat, AssetId, DicoAssetInfo<T::AccountId, DicoAssetMetadata>>;
 
 	#[pallet::pallet]
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	#[pallet::hooks]
@@ -177,17 +180,20 @@ pub mod module {
 	#[cfg(feature = "std")]
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
-			Self { assets: Default::default() }
+			Self {
+				assets: Default::default(),
+			}
 		}
 	}
 
 	#[pallet::genesis_build]
 	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
 		fn build(&self) {
-			self.assets.iter().for_each(|asset_info| DicoAssetsInfo::<T>::insert(asset_info.0, asset_info.1.clone()))
+			self.assets
+				.iter()
+				.for_each(|asset_info| DicoAssetsInfo::<T>::insert(asset_info.0, asset_info.1.clone()))
 		}
-			}
-
+	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
@@ -311,8 +317,6 @@ pub mod module {
 			Ok(().into())
 		}
 	}
-
-
 }
 
 impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::AccountId, BalanceOf<T>, DispatchResult>
@@ -324,20 +328,19 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 			Some(x) => x,
 			_ => {
 				if cfg!(any(feature = "std", feature = "runtime-benchmarks", test)) {
-			return Ok(DicoAssetMetadata {
-				name: vec![],
-				symbol: vec![],
-				decimals: 12
-			});
-		} else {
-					return Err(Error::<T>::AssetNotExists)?
+					return Ok(DicoAssetMetadata {
+						name: vec![],
+						symbol: vec![],
+						decimals: 12,
+					});
+				} else {
+					return Err(Error::<T>::AssetNotExists)?;
 				}
-			},
+			}
 		};
 		match asset_info.metadata {
 			Some(x) => Ok(x),
 			None => Err(Error::<T>::MetadataNotExists)?,
-
 		}
 	}
 
@@ -364,10 +367,12 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 				Error::<T>::CurrencyIdTooLarge
 			);
 			#[cfg(test)]
-				println!("asset_id:{:?}，free amount: {:?}, Consume:{:?}",
+			println!(
+				"asset_id:{:?}，free amount: {:?}, Consume:{:?}",
 				T::GetNativeCurrencyId::get(),
 				T::NativeCurrency::free_balance(&user),
-				T::CreateConsume::get());
+				T::CreateConsume::get()
+			);
 
 			Self::withdraw(T::GetNativeCurrencyId::get(), &user, T::CreateConsume::get())?;
 		}
@@ -819,6 +824,7 @@ where
 		+ Codec
 		+ Copy
 		+ MaybeSerializeDeserialize
+		+ MaxEncodedLen
 		+ Debug
 		+ Default,
 	Currency: PalletCurrency<AccountId>,

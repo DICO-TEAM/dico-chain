@@ -61,8 +61,8 @@ pub mod traits;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 pub mod weights;
-use weights::WeightInfo;
 use scale_info::TypeInfo;
+use weights::WeightInfo;
 const ICO_ID: LockIdentifier = *b"ico     ";
 const HalfDuration: u128 = 200_000_000u128 * USDT;
 pub const USDT: u128 = 1000_000u128;
@@ -437,6 +437,7 @@ pub mod pallet {
 	>;
 
 	#[pallet::pallet]
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	#[pallet::call]
@@ -674,7 +675,11 @@ pub mod pallet {
 			match ico.start_time.as_ref() {
 				Some(time) => {
 					#[cfg(test)]
-					 	println!("time: {:?}, now:{:?}", time.saturating_add(T::TerminateProtectPeriod::get() * ico.ico_duration), Self::now());
+					println!(
+						"time: {:?}, now:{:?}",
+						time.saturating_add(T::TerminateProtectPeriod::get() * ico.ico_duration),
+						Self::now()
+					);
 					ensure!(
 						time.saturating_add(T::TerminateProtectPeriod::get() * ico.ico_duration) < Self::now(),
 						Error::<T>::TerminateProtectTime
@@ -705,7 +710,11 @@ pub mod pallet {
 			match ico.start_time.as_ref() {
 				Some(time) => {
 					#[cfg(test)]
-						println!("time: {:?}, now:{:?}", time.saturating_add(T::ReleaseProtectPeriod::get() * ico.ico_duration), Self::now());
+					println!(
+						"time: {:?}, now:{:?}",
+						time.saturating_add(T::ReleaseProtectPeriod::get() * ico.ico_duration),
+						Self::now()
+					);
 					ensure!(
 						time.saturating_add(T::ReleaseProtectPeriod::get() * ico.ico_duration) < Self::now()
 							|| ico.is_terminated,
@@ -1640,11 +1649,12 @@ pub mod pallet {
 			match ico.start_time {
 				Some(time) => {
 					#[cfg(test)]
-						println!("time: {:?}, now:{:?}", time, Self::now());
+					println!("time: {:?}, now:{:?}", time, Self::now());
 					ensure!(time <= Self::now(), Error::<T>::IsNotStartIcoTime);
 					if cfg!(any(feature = "std", feature = "runtime-benchmarks", test)) == false {
 						ensure!(ico.ico_duration + time >= Self::now(), Error::<T>::IcoExpire);
-					} },
+					}
+				}
 
 				None => Err(Error::<T>::StartTimeNotExists)?,
 			}
@@ -1917,11 +1927,10 @@ pub mod pallet {
 				);
 				if cfg!(any(feature = "std", feature = "runtime-benchmarks", test)) == false {
 					ensure!(
-					info.per_duration_unlock_amount > 0u128.saturated_into::<MultiBalanceOf<T>>(),
-					Error::<T>::UnlockAmountIsZero
-				);
+						info.per_duration_unlock_amount > 0u128.saturated_into::<MultiBalanceOf<T>>(),
+						Error::<T>::UnlockAmountIsZero
+					);
 				}
-
 			}
 
 			ensure!(!Self::is_pending_ico(&info.currency_id), Error::<T>::IsPendingIco);
@@ -1930,15 +1939,15 @@ pub mod pallet {
 				Error::<T>::BalanceInsufficient
 			);
 
-			if cfg!(any(feature = "std", feature = "runtime-benchmarks", test)) == false  {
+			if cfg!(any(feature = "std", feature = "runtime-benchmarks", test)) == false {
 				ensure!(
-				T::MultiCurrency::can_reserve(
-					info.exchange_token,
-					&who,
-					T::InitiatorBond::get() * info.exchange_token_total_amount
-				),
-				Error::<T>::ExchangeTokenBalanceTooLow
-			);
+					T::MultiCurrency::can_reserve(
+						info.exchange_token,
+						&who,
+						T::InitiatorBond::get() * info.exchange_token_total_amount
+					),
+					Error::<T>::ExchangeTokenBalanceTooLow
+				);
 			}
 
 			Ok(true)
@@ -2114,7 +2123,13 @@ pub mod pallet {
 }
 
 impl<T: Config> IcoHandler<AssetId, MultiBalanceOf<T>, T::AccountId, DispatchError, T::BlockNumber> for Pallet<T> {
-	fn set_ico_for_bench(currency_id: AssetId, index: u32, initiator: T::AccountId, joiner: T::AccountId, joiner1: T::AccountId) -> DispatchResult {
+	fn set_ico_for_bench(
+		currency_id: AssetId,
+		index: u32,
+		initiator: T::AccountId,
+		joiner: T::AccountId,
+		joiner1: T::AccountId,
+	) -> DispatchResult {
 		runtime_print!("create currency_id:{:?}, index: {:?}", currency_id, index);
 		let ico_info: IcoInfo<T::BlockNumber, MultiBalanceOf<T>, AssetId, AreaCode, T::AccountId> = IcoInfo {
 			desc: vec![],
@@ -2144,28 +2159,30 @@ impl<T: Config> IcoHandler<AssetId, MultiBalanceOf<T>, T::AccountId, DispatchErr
 			exclude_area: vec![AreaCode::AD],
 			lock_proportion: Default::default(),
 			unlock_duration: T::BlockNumber::from(0u32),
-			per_duration_unlock_amount: MultiBalanceOf::<T>::from(0u32)
+			per_duration_unlock_amount: MultiBalanceOf::<T>::from(0u32),
 		};
 
 		<Ico<T>>::insert(currency_id, index, ico_info);
 
-		let info1= UnRelease {
+		let info1 = UnRelease {
 			currency_id: currency_id,
 			inviter: None,
 			index: 1,
 			unreleased_currency_id: currency_id,
 			total_usdt: (500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-			tags: vec![((500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-						(500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-						(500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-						(500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>())],
+			tags: vec![(
+				(500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+				(500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+				(500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+				(500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			)],
 			total: (5000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 			released: MultiBalanceOf::<T>::from(0u32),
 			refund: MultiBalanceOf::<T>::from(0u32),
-			reward: None
+			reward: None,
 		};
 
-		let info2= UnRelease {
+		let info2 = UnRelease {
 			currency_id: currency_id,
 			inviter: None,
 			index: 1,
@@ -2175,24 +2192,25 @@ impl<T: Config> IcoHandler<AssetId, MultiBalanceOf<T>, T::AccountId, DispatchErr
 			total: (50000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 			released: MultiBalanceOf::<T>::from(0u32),
 			refund: MultiBalanceOf::<T>::from(0u32),
-			reward: None
+			reward: None,
 		};
 
-
-		let info3= UnRelease {
+		let info3 = UnRelease {
 			currency_id: currency_id,
 			inviter: None,
 			index: 1,
 			unreleased_currency_id: currency_id,
 			total_usdt: (1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-			tags: vec![((1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-						(1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-						(1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-						(1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>())],
+			tags: vec![(
+				(1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+				(1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+				(1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+				(1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
+			)],
 			total: (5000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 			released: MultiBalanceOf::<T>::from(0u32),
 			refund: MultiBalanceOf::<T>::from(0u32),
-			reward: None
+			reward: None,
 		};
 
 		<UnReleaseAssets<T>>::mutate(joiner, |h| h.push(info1));
@@ -2200,7 +2218,6 @@ impl<T: Config> IcoHandler<AssetId, MultiBalanceOf<T>, T::AccountId, DispatchErr
 		<UnReleaseAssets<T>>::mutate(initiator, |h| h.push(info2));
 
 		Ok(())
-
 	}
 	fn is_project_ico_member(
 		currency_id: AssetId,
