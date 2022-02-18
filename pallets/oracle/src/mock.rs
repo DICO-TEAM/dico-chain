@@ -9,8 +9,8 @@ use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
 };
 
+pub use primitives::{CurrencyId, Price};
 use std::cell::RefCell;
-pub use primitives::{Price, CurrencyId};
 
 mod oracle {
 	pub use super::super::*;
@@ -83,7 +83,7 @@ impl Config for Test {
 	type OracleKey = Key;
 	type OracleValue = Value;
 	type RootOperatorAccountId = RootOperatorAccountId;
-	type MaxOracleSize =MaxOracleSize;
+	type MaxOracleSize = MaxOracleSize;
 	type WeightInfo = ();
 }
 

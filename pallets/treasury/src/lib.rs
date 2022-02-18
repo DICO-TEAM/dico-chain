@@ -36,7 +36,6 @@ use frame_support::{decl_error, decl_event, decl_module, decl_storage, ensure, p
 use frame_system::ensure_signed;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_runtime::SaturatedConversion;
 use sp_runtime::{
 	traits::{AccountIdConversion, Saturating, StaticLookup, Zero},
 	Permill, RuntimeDebug,
@@ -46,7 +45,6 @@ use traits::DicoTreasuryHandler;
 
 pub use weights::WeightInfo;
 // use frame_system::WeightInfo;
-use scale_info::TypeInfo;
 use orml_traits::{
 	arithmetic::{Signed, SimpleArithmetic},
 	// currency::TransferAll,
@@ -61,6 +59,7 @@ use orml_traits::{
 	MultiLockableCurrency,
 	MultiReservableCurrency,
 };
+use scale_info::TypeInfo;
 
 pub type ProposalIndex = u32;
 
@@ -91,7 +90,6 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
-
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {

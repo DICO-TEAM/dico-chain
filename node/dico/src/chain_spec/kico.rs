@@ -115,6 +115,7 @@ pub fn kico_config() -> ChainSpec {
 		},
 		vec![],
 		TelemetryEndpoints::new(vec![(STAGING_TELEMETRY_URL.into(), 0)]).ok(),
+		Some("kico"),
 		None,
 		Some(get_properties(NetworkType::KICO)),
 		Extensions {
@@ -204,7 +205,9 @@ fn kico_genesis(
 		},
 		treasury: Default::default(),
 		council: CouncilConfig::default(),
-		sudo: SudoConfig { key: root_key },
+		sudo: SudoConfig {
+			key: Some(root_key),
+		},
 		parachain_info: ParachainInfoConfig {
 			parachain_id: PARA_ID.into(),
 		},

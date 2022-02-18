@@ -38,21 +38,21 @@ pub struct DicoWeight<T>(PhantomData<T>);
 
 impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	fn feed_values() -> Weight {
-		( 100 as Weight)
+		(100 as Weight)
 	}
 
 	fn on_finalize() -> Weight {
-		( 100 as Weight)
+		(100 as Weight)
 	}
 }
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
 	fn feed_values() -> Weight {
-		( 0 as Weight)
+		(0 as Weight)
 	}
 
 	fn on_finalize() -> Weight {
-		( 0 as Weight)
+		(0 as Weight)
 	}
 }

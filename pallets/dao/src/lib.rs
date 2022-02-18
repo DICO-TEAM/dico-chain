@@ -20,19 +20,18 @@
 
 // use codec::{Codec, Encode, Decode, MaxEncodedLen};
 pub use frame_support::{
-	runtime_print,
 	codec::{Codec, Decode, Encode},
 	dispatch::{DispatchError, DispatchResult, DispatchResultWithPostInfo, Dispatchable, Parameter, PostDispatchInfo},
-	ensure,
+	ensure, runtime_print,
 	traits::{ChangeMembers, Currency, EnsureOrigin, Get, InitializeMembers, ReservableCurrency},
 	weights::{DispatchClass, GetDispatchInfo, Pays, Weight},
 };
-use scale_info::TypeInfo;
 use frame_system::{self as system, ensure_root, ensure_signed};
 use ico;
 use ico::traits::IcoHandler;
 use orml_traits::{BalanceStatus, MultiCurrency, MultiReservableCurrency};
 use pallet_timestamp;
+use scale_info::TypeInfo;
 use sp_core::u32_trait::Value as U32;
 use sp_io;
 use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Member, SaturatedConversion, Saturating};
@@ -546,7 +545,10 @@ pub mod pallet {
 
 		#[cfg(feature = "runtime-benchmarks")]
 		fn successful_origin() -> O {
-			O::from(IcoRawOrigin::Members(MultiBalanceOf::<T>::from(1u32), MultiBalanceOf::<T>::from(1u32)))
+			O::from(IcoRawOrigin::Members(
+				MultiBalanceOf::<T>::from(1u32),
+				MultiBalanceOf::<T>::from(1u32),
+			))
 		}
 	}
 }

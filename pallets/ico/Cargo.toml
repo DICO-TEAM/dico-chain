@@ -11,11 +11,12 @@ edition     = '2021'
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-scale-info = { version = "1.0", default-features = false, features = ["derive"] }
-primitive-types = { default-features = false, version = '0.10.1' }
-codec                 = { package = 'parity-scale-codec', version = '2.3.1', default-features = false }
+scale-info      = { version = "1.0", default-features   = false, features                         = ["derive"] }
+primitive-types = { version = '0.10.1',default-features = false}
+codec           = { version = '2.3.1',package           = 'parity-scale-codec',  default-features = false }
 
-frame-benchmarking = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.16", default-features = false, optional = true }
+
+frame-benchmarking                = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.16", default-features = false, optional = true }
 frame-support                     = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.16", default-features = false}
 frame-system                      = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.16", default-features = false}
 sp-runtime                        = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.16", default-features = false}

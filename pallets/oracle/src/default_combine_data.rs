@@ -1,7 +1,5 @@
 use crate::{Config, MomentOf, TimestampedValueOf};
-use frame_support::log;
-use sp_runtime::{traits::Member, DispatchResult, RuntimeDebug};
-use sp_std::{fmt::Debug, marker, prelude::*};
+use sp_std::{marker, prelude::*};
 
 use frame_support::traits::{Get, Time};
 use orml_traits::CombineData;

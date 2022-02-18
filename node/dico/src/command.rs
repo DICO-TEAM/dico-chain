@@ -1,7 +1,7 @@
 use crate::{
 	chain_spec,
 	cli::{Cli, RelayChainCli, Subcommand},
-	service::{new_partial, ParachainRuntimeExecutor},
+	service::{new_partial, IdentifyVariant},
 };
 use codec::Encode;
 use cumulus_client_service::genesis::generate_genesis_block;
@@ -13,7 +13,10 @@ use sc_cli::{
 	ChainSpec, CliConfiguration, DefaultConfigurationValues, ImportParams, KeystoreParams, NetworkParams, Result,
 	RuntimeVersion, SharedParams, SubstrateCli,
 };
-use sc_service::config::{BasePath, PrometheusConfig};
+use sc_service::{
+	config::{BasePath, PrometheusConfig},
+	PartialComponents, TaskManager,
+};
 use sp_core::hexdisplay::HexDisplay;
 use sp_runtime::traits::Block as BlockT;
 use std::{io::Write, net::SocketAddr};
@@ -22,7 +25,9 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, St
 	Ok(match id {
 		"" | "tico" => Box::new(chain_spec::tico::tico_config()),
 		"kico" => Box::new(chain_spec::kico::kico_config()),
-		path => Box::new(chain_spec::kico::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
+		path => Box::new(chain_spec::kico::ChainSpec::from_json_file(std::path::PathBuf::from(
+			path,
+		))?),
 	})
 }
 
@@ -116,10 +121,30 @@ fn extract_genesis_wasm(chain_spec: &Box<dyn sc_service::ChainSpec>) -> Result<V
 macro_rules! construct_async_run {
 	(|$components:ident, $cli:ident, $cmd:ident, $config:ident| $( $code:tt )* ) => {{
 		let runner = $cli.create_runner($cmd)?;
+        let chain_spec = &runner.config().chain_spec;
+
+        if chain_spec.is_tico() {
+			#[allow(unused_imports)]
+            use crate::service::TICORuntimeExecutor as Executor;
+			#[allow(unused_imports)]
+            use tico_runtime::{RuntimeApi, Block};
+
+            $( $code )*
+        } else if chain_spec.is_kico() {
+			#[allow(unused_imports)]
+            use crate::service::KICORuntimeExecutor as Executor;
+			#[allow(unused_imports)]
+            use kico_runtime::{RuntimeApi, Block};
+
+            $( $code )*
+        } else {
+            unreachable!();
+        }
+
 		runner.async_run(|$config| {
 			let $components = new_partial::<
 				RuntimeApi,
-				ParachainRuntimeExecutor,
+				Executor,
 				_
 			>(
 				&$config,
@@ -129,6 +154,28 @@ macro_rules! construct_async_run {
 			{ $( $code )* }.map(|v| (v, task_manager))
 		})
 	}}
+}
+
+macro_rules! switch_runtime {
+    ($chain_spec:expr, { $( $code:tt )* }) => {
+        if $chain_spec.is_tico() {
+			#[allow(unused_imports)]
+            use crate::service::TICORuntimeExecutor as Executor;
+			#[allow(unused_imports)]
+            use tico_runtime::{RuntimeApi, Block};
+
+            $( $code )*
+        } else if $chain_spec.is_kico() {
+			#[allow(unused_imports)]
+            use crate::service::KICORuntimeExecutor as Executor;
+			#[allow(unused_imports)]
+            use kico_runtime::{RuntimeApi, Block};
+
+            $( $code )*
+        } else {
+            unreachable!();
+        }
+    };
 }
 
 /// Parse command line arguments into service configuration.
@@ -145,19 +192,72 @@ pub fn run() -> Result<()> {
 		Some(Subcommand::Verify(cmd)) => cmd.run(),
 		Some(Subcommand::Vanity(cmd)) => cmd.run(),
 		Some(Subcommand::CheckBlock(cmd)) => {
-			construct_async_run!(|components, cli, cmd, config| {
-				Ok(cmd.run(components.client, components.import_queue))
+			let runner = cli.create_runner(cmd)?;
+			let chain_spec = &runner.config().chain_spec;
+			switch_runtime!(chain_spec, {
+				runner.async_run(|config| {
+					let PartialComponents {
+						client,
+						task_manager,
+						import_queue,
+						..
+					} = crate::service::new_partial::<RuntimeApi, Executor, _>(
+						&config,
+						crate::service::parachain_build_import_queue,
+					)?;
+					Ok((cmd.run(client, import_queue), task_manager))
+				})
 			})
 		}
 		Some(Subcommand::ExportBlocks(cmd)) => {
-			construct_async_run!(|components, cli, cmd, config| { Ok(cmd.run(components.client, config.database)) })
+			let runner = cli.create_runner(cmd)?;
+			let chain_spec = &runner.config().chain_spec;
+
+			switch_runtime!(chain_spec, {
+				runner.async_run(|config| {
+					let PartialComponents {
+						client, task_manager, ..
+					} = crate::service::new_partial::<RuntimeApi, Executor, _>(
+						&config,
+						crate::service::parachain_build_import_queue,
+					)?;
+					Ok((cmd.run(client, config.database), task_manager))
+				})
+			})
 		}
 		Some(Subcommand::ExportState(cmd)) => {
-			construct_async_run!(|components, cli, cmd, config| { Ok(cmd.run(components.client, config.chain_spec)) })
+			let runner = cli.create_runner(cmd)?;
+			let chain_spec = &runner.config().chain_spec;
+
+			switch_runtime!(chain_spec, {
+				runner.async_run(|config| {
+					let PartialComponents {
+						client, task_manager, ..
+					} = crate::service::new_partial::<RuntimeApi, Executor, _>(
+						&config,
+						crate::service::parachain_build_import_queue,
+					)?;
+					Ok((cmd.run(client, config.chain_spec), task_manager))
+				})
+			})
 		}
 		Some(Subcommand::ImportBlocks(cmd)) => {
-			construct_async_run!(|components, cli, cmd, config| {
-				Ok(cmd.run(components.client, components.import_queue))
+			let runner = cli.create_runner(cmd)?;
+			let chain_spec = &runner.config().chain_spec;
+
+			switch_runtime!(chain_spec, {
+				runner.async_run(|config| {
+					let PartialComponents {
+						client,
+						task_manager,
+						import_queue,
+						..
+					} = crate::service::new_partial::<RuntimeApi, Executor, _>(
+						&config,
+						crate::service::parachain_build_import_queue,
+					)?;
+					Ok((cmd.run(client, import_queue), task_manager))
+				})
 			})
 		}
 		Some(Subcommand::PurgeChain(cmd)) => {
@@ -168,30 +268,43 @@ pub fn run() -> Result<()> {
 					&config,
 					[RelayChainCli::executable_name().to_string()]
 						.iter()
-						.chain(cli.relaychain_args.iter()),
+						.chain(cli.relay_chain_args.iter()),
 				);
 
-				let polkadot_config = SubstrateCli::create_configuration(
-					&polkadot_cli,
-					&polkadot_cli,
-					config.tokio_handle.clone(),
-				)
-					.map_err(|err| format!("Relay chain argument error: {}", err))?;
+				let polkadot_config =
+					SubstrateCli::create_configuration(&polkadot_cli, &polkadot_cli, config.tokio_handle.clone())
+						.map_err(|err| format!("Relay chain argument error: {}", err))?;
 
 				cmd.run(config, polkadot_config)
 			})
 		}
 		Some(Subcommand::Revert(cmd)) => {
-			construct_async_run!(|components, cli, cmd, config| { Ok(cmd.run(components.client, components.backend)) })
+			let runner = cli.create_runner(cmd)?;
+			let chain_spec = &runner.config().chain_spec;
+
+			switch_runtime!(chain_spec, {
+				runner.async_run(|config| {
+					let PartialComponents {
+						client,
+						task_manager,
+						backend,
+						..
+					} = crate::service::new_partial::<RuntimeApi, Executor, _>(
+						&config,
+						crate::service::parachain_build_import_queue,
+					)?;
+					Ok((cmd.run(client, backend), task_manager))
+				})
+			})
 		}
 		Some(Subcommand::ExportGenesisState(params)) => {
 			let mut builder = sc_cli::LoggerBuilder::new("");
 			builder.with_profiling(sc_tracing::TracingReceiver::Log, "");
 			let _ = builder.init();
 
-			let block: Block = generate_genesis_block(&load_spec(
-				&params.chain.clone().unwrap_or_default(),
-			)?)?;
+			let spec = load_spec(&params.chain.clone().unwrap_or_default())?;
+			let state_version = Cli::native_runtime_version(&spec).state_version();
+			let block: Block = generate_genesis_block(&spec, state_version)?;
 			let raw_header = block.header().encode();
 			let output_buf = if params.raw {
 				raw_header
@@ -230,8 +343,11 @@ pub fn run() -> Result<()> {
 		Some(Subcommand::Benchmark(cmd)) => {
 			if cfg!(feature = "runtime-benchmarks") {
 				let runner = cli.create_runner(cmd)?;
+				let chain_spec = &runner.config().chain_spec;
 
-				runner.sync_run(|config| cmd.run::<Block, ParachainRuntimeExecutor>(config))
+				switch_runtime!(chain_spec, {
+					runner.sync_run(|config| cmd.run::<Block, Executor>(config))
+				})
 			} else {
 				Err("Benchmarking wasn't enabled when building the node. \
 				You can enable it with `--features runtime-benchmarks`."
@@ -240,41 +356,49 @@ pub fn run() -> Result<()> {
 		}
 		None => {
 			let runner = cli.create_runner(&cli.run.normalize())?;
+			let chain_spec = &runner.config().chain_spec;
 
-			runner.run_node_until_exit(|config| async move {
-				let para_id = chain_spec::Extensions::try_get(&*config.chain_spec)
-					.map(|e| e.para_id)
-					.ok_or("Could not find parachain extension for chain-spec.")?;
+			switch_runtime!(chain_spec, {
+				runner.run_node_until_exit(|config| async move {
+					let para_id = chain_spec::Extensions::try_get(&*config.chain_spec)
+						.map(|e| e.para_id)
+						.ok_or_else(|| "Could not find parachain ID in chain-spec.")?;
 
-				let id = ParaId::from(para_id);
+					let polkadot_cli = RelayChainCli::new(
+						&config,
+						[RelayChainCli::executable_name()]
+							.iter()
+							.chain(cli.relay_chain_args.iter()),
+					);
 
-				let polkadot_cli = RelayChainCli::new(
-					&config,
-					[RelayChainCli::executable_name().to_string()]
-						.iter()
-						.chain(cli.relaychain_args.iter()),
-				);
+					let id = ParaId::from(para_id);
 
+					let parachain_account =
+						AccountIdConversion::<polkadot_primitives::v0::AccountId>::into_account(&id);
 
-				let parachain_account = AccountIdConversion::<polkadot_primitives::v0::AccountId>::into_account(&id);
+					let state_version = RelayChainCli::native_runtime_version(&config.chain_spec).state_version();
+					let block: Block =
+						generate_genesis_block(&config.chain_spec, state_version).map_err(|e| format!("{:?}", e))?;
+					let genesis_state = format!("0x{:?}", HexDisplay::from(&block.header().encode()));
 
-				let block: Block = generate_genesis_block(&config.chain_spec).map_err(|e| format!("{:?}", e))?;
-				let genesis_state = format!("0x{:?}", HexDisplay::from(&block.header().encode()));
+					let tokio_handle = config.tokio_handle.clone();
+					let polkadot_config =
+						SubstrateCli::create_configuration(&polkadot_cli, &polkadot_cli, tokio_handle)
+							.map_err(|err| format!("Relay chain argument error: {}", err))?;
 
-				let tokio_handle = config.tokio_handle.clone();
-				let polkadot_config =
-					SubstrateCli::create_configuration(&polkadot_cli, &polkadot_cli, tokio_handle)
-						.map_err(|err| format!("Relay chain argument error: {}", err))?;
+					info!("Parachain id: {:?}", id);
+					info!("Parachain Account: {}", parachain_account);
+					info!("Parachain genesis state: {}", genesis_state);
+					info!(
+						"Is collating: {}",
+						if config.role.is_authority() { "yes" } else { "no" }
+					);
 
-				info!("Parachain id: {:?}", id);
-				info!("Parachain Account: {}", parachain_account);
-				info!("Parachain genesis state: {}", genesis_state);
-				info!("Is collating: {}", if config.role.is_authority() { "yes" } else { "no" });
-
-				crate::service::start_parachain_node(config, polkadot_config, id)
-					.await
-					.map(|r| r.0)
-					.map_err(Into::into)
+					crate::service::start_parachain_node::<RuntimeApi, Executor>(config, polkadot_config, id)
+						.await
+						.map(|r| r.0)
+						.map_err(Into::into)
+				})
 			})
 		}
 	}
@@ -334,11 +458,24 @@ impl CliConfiguration<Self> for RelayChainCli {
 		self.base.base.rpc_ws(default_listen_port)
 	}
 
-	fn prometheus_config(&self, default_listen_port: u16) -> Result<Option<PrometheusConfig>> {
-		self.base.base.prometheus_config(default_listen_port)
+	fn prometheus_config(
+		&self,
+		default_listen_port: u16,
+		chain_spec: &Box<dyn ChainSpec>,
+	) -> Result<Option<PrometheusConfig>> {
+		self.base.base.prometheus_config(default_listen_port, chain_spec)
 	}
 
-	fn init<C: SubstrateCli>(&self) -> Result<()> {
+	fn init<F>(
+		&self,
+		_support_url: &String,
+		_impl_version: &String,
+		_logger_hook: F,
+		_config: &sc_service::Configuration,
+	) -> Result<()>
+	where
+		F: FnOnce(&mut sc_cli::LoggerBuilder, &sc_service::Configuration),
+	{
 		unreachable!("PolkadotCli is never initialized; qed");
 	}
 
@@ -375,7 +512,6 @@ impl CliConfiguration<Self> for RelayChainCli {
 	fn rpc_cors(&self, is_dev: bool) -> Result<Option<Vec<String>>> {
 		self.base.base.rpc_cors(is_dev)
 	}
-
 
 	fn default_heap_pages(&self) -> Result<Option<u64>> {
 		self.base.base.default_heap_pages()

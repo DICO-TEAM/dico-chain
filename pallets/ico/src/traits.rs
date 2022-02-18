@@ -2,15 +2,20 @@
 
 use sp_std::{prelude::*, result};
 pub trait IcoHandler<CurrencyId, MulBalanceOf, AccountId, DispathErr, BlockNumber> {
-	fn set_ico_for_bench(currency_id: CurrencyId, index: u32, initiator: AccountId, joiner: AccountId, joiner1: AccountId) -> DispatchResult;
+	fn set_ico_for_bench(
+		currency_id: CurrencyId,
+		index: u32,
+		initiator: AccountId,
+		joiner: AccountId,
+		joiner1: AccountId,
+	) -> DispatchResult;
 	fn is_project_ico_member(currency_id: CurrencyId, index: u32, who: &AccountId) -> result::Result<bool, DispathErr>;
 	fn get_user_total_amount(currency_id: CurrencyId, index: u32, who: &AccountId) -> MulBalanceOf;
 	fn get_project_total_ico_amount(currency_id: CurrencyId, index: u32) -> result::Result<MulBalanceOf, DispathErr>;
 }
-use sp_runtime::DispatchResult;
 use frame_support::Parameter;
+use sp_runtime::DispatchResult;
 // pub use dico_primitives::{Balance, AccountId};
-
 
 impl<
 		CurrencyId: Ord + Clone,
@@ -20,7 +25,13 @@ impl<
 		BlockNumber: Ord + Clone + Default,
 	> IcoHandler<CurrencyId, MulBalanceOf, AccountId, DispathErr, BlockNumber> for ()
 {
-	fn set_ico_for_bench(currency_id: CurrencyId, index: u32, account_id: AccountId, joiner: AccountId, joiner1: AccountId) -> DispatchResult {
+	fn set_ico_for_bench(
+		currency_id: CurrencyId,
+		index: u32,
+		account_id: AccountId,
+		joiner: AccountId,
+		joiner1: AccountId,
+	) -> DispatchResult {
 		Ok(())
 	}
 
@@ -42,7 +53,9 @@ pub trait PowerHandler<AccountId, DispathResult, Balance> {
 	fn add_user_power(user: &AccountId, amount: Balance) -> DispathResult;
 }
 
-impl <AccountId: Default + Parameter, Balance: Default + Parameter>PowerHandler<AccountId, DispatchResult, Balance> for () {
+impl<AccountId: Default + Parameter, Balance: Default + Parameter> PowerHandler<AccountId, DispatchResult, Balance>
+	for ()
+{
 	fn sub_user_power(user: &AccountId, amount: Balance) -> DispatchResult {
 		Ok(())
 	}

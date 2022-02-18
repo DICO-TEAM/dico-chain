@@ -16,7 +16,7 @@
 use codec::{self, Codec, Decode, Encode};
 use jsonrpc_core::{
 	futures::future::{self as rpc_future},
-	Error as RpcError, ErrorCode, Result
+	Error as RpcError, ErrorCode, Result,
 };
 use jsonrpc_derive::rpc;
 use pallet_ico_rpc_runtime_api::IcoAmountApi;
@@ -32,15 +32,9 @@ use std::sync::Arc;
 #[rpc]
 pub trait IcoApi<AccountId, CurrencyId, Index, Balance> {
 	#[rpc(name = "ico_canReleaseAmount", alias("canReleaseAmount"))]
-	fn can_release_amount(
-		&self,
-		account: AccountId,
-		currency_id: CurrencyId,
-		index: Index,
-	) -> Result<NumberOrHex>;
+	fn can_release_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> Result<NumberOrHex>;
 	#[rpc(name = "ico_getRewardAmount", alias("getRewardAmount"))]
-	fn get_reward_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index)
-		-> Result<NumberOrHex>;
+	fn get_reward_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> Result<NumberOrHex>;
 	#[rpc(name = "ico_canUnlockAmount", alias("canUnlockAmount"))]
 	fn can_unlock_amount(&self, user: AccountId, currency_id: CurrencyId, index: Index) -> Result<NumberOrHex>;
 	#[rpc(name = "ico_canJoinAmount", alias("canJoinAmount"))]
@@ -99,12 +93,7 @@ where
 	CurrencyId: Clone + std::fmt::Display + Codec,
 	Balance: Codec + traits::MaybeDisplay + Copy + TryInto<NumberOrHex> + std::marker::Send + 'static,
 {
-	fn can_release_amount(
-		&self,
-		account: AccountId,
-		currency_id: CurrencyId,
-		index: Index,
-	) -> Result<NumberOrHex> {
+	fn can_release_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> Result<NumberOrHex> {
 		let get_release_amount = || {
 			let api = self.client.runtime_api();
 			let best = self.client.info().best_hash;
@@ -205,12 +194,7 @@ where
 		can_join_amount()
 	}
 
-	fn get_reward_amount(
-		&self,
-		account: AccountId,
-		currency_id: CurrencyId,
-		index: Index,
-	) -> Result<NumberOrHex> {
+	fn get_reward_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> Result<NumberOrHex> {
 		let get_reward_amount = || {
 			let api = self.client.runtime_api();
 			let best = self.client.info().best_hash;
@@ -237,12 +221,7 @@ where
 		get_reward_amount()
 	}
 
-	fn can_unlock_amount(
-		&self,
-		account: AccountId,
-		currency_id: CurrencyId,
-		index: Index,
-	) -> Result<NumberOrHex> {
+	fn can_unlock_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> Result<NumberOrHex> {
 		let get_unlock_amount = || {
 			let api = self.client.runtime_api();
 			let best = self.client.info().best_hash;

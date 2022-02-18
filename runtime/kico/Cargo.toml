@@ -86,6 +86,7 @@ pallet-treasury                            = { git = "https://github.com/parityt
 pallet-utility                             = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
 pallet-randomness-collective-flip          = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
 pallet-elections-phragmen                  = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.16', default-features = false }
+pallet-preimage                            = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.16', default-features = false }
 
 
 ## Substrate Primitive Dependencies
