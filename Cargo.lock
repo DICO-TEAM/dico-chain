@@ -1831,7 +1831,7 @@ dependencies = [
 
 [[package]]
 name = "dico"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "cumulus-client-cli",
  "cumulus-client-collator",
@@ -3494,7 +3494,7 @@ dependencies = [
 
 [[package]]
 name = "kico-runtime"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",
@@ -11134,7 +11134,7 @@ dependencies = [
 
 [[package]]
 name = "tico-runtime"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",

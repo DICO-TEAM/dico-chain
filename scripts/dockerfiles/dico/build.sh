@@ -16,8 +16,7 @@ GITREPO=dico
 
 # Build the image
 echo "Building ${GITUSER}/${GITREPO}:latest docker image, hang on!"
-time docker build -f ./scripts/dockerfiles/dico/dico_builder.Dockerfile -t ${GITUSER}/${GITREPO}:latest .
-#time docker build --build-arg http_proxy=http://192.168.1.36:8889 --build-arg https_proxy=http://192.168.1.36:8889 -f ./scripts/dockerfiles/dico/dico_builder.Dockerfile -t ${GITUSER}/${GITREPO}:latest .
+time docker build --network=host -f ./scripts/dockerfiles/dico/dico_builder.Dockerfile -t ${GITUSER}/${GITREPO}:latest .
 docker tag ${GITUSER}/${GITREPO}:latest ${GITUSER}/${GITREPO}:v${VERSION}
 
 # Show the list of available images for this repo
