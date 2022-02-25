@@ -1206,6 +1206,7 @@ parameter_types! {
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(5u8);
 	pub const UsdtCurrencyId: CurrencyId = 5;
+	pub const KusdCurrencyId: CurrencyId = 10;
 
 }
 
@@ -1235,6 +1236,7 @@ impl pallet_ico::Config for Runtime {
 	type UsdtCurrencyId = UsdtCurrencyId;
 	type KycHandler = Kyc;
 	type WeightInfo = pallet_ico::weights::DicoWeight<Runtime>;
+	type KusdCurrencyId = KusdCurrencyId;
 }
 
 parameter_types! {
