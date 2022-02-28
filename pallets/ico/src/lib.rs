@@ -53,6 +53,8 @@ pub use sp_std::convert::{Into, TryFrom, TryInto};
 use sp_std::vec::Vec;
 use sp_std::{collections::btree_map::BTreeMap, prelude::*, result};
 use traits::{IcoHandler, PowerHandler};
+use scale_info::TypeInfo;
+use weights::WeightInfo;
 
 pub mod mock;
 pub mod tests;
@@ -61,11 +63,8 @@ pub mod traits;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 pub mod weights;
-use scale_info::TypeInfo;
-use weights::WeightInfo;
 const ICO_ID: LockIdentifier = *b"ico     ";
-const HalfDuration: u128 = 200_000_000u128 * USDT;
-pub const USDT: u128 = 1000_000u128;
+const HalfDuration: u128 = 200_000_000u128 * KUSD;
 
 #[derive(PartialEq, Encode, Decode, RuntimeDebug, Clone, TypeInfo)]
 pub enum IcoStatus {
@@ -327,6 +326,8 @@ pub mod pallet {
 		type InviteeRewardProportion: Get<Percent>;
 		#[pallet::constant]
 		type UsdtCurrencyId: Get<AssetId>;
+		#[pallet::constant]
+		type KusdCurrencyId: Get<AssetId>;
 	}
 
 	#[pallet::storage]
@@ -1791,10 +1792,10 @@ pub mod pallet {
 		}
 
 		pub fn get_token_price(currency_id: AssetId) -> MultiBalanceOf<T> {
-			if currency_id == T::UsdtCurrencyId::get() {
-				return MultiBalanceOf::<T>::from(1_000_000u32);
+			if currency_id == T::KusdCurrencyId::get() {
+				return KUSD.saturated_into::<MultiBalanceOf<T>>();
 			}
-			match T::PriceData::get_price(currency_id, T::UsdtCurrencyId::get()) {
+			match T::PriceData::get_price(currency_id, T::KusdCurrencyId::get()) {
 				Some(x) => {
 					runtime_print!(
 						" ---------------the token {:?}, price is {:?} ------------------",
