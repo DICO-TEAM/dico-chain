@@ -66,6 +66,7 @@ parameter_types! {
 		frame_system::limits::BlockWeights::simple_max(1024);
 }
 impl frame_system::Config for Test {
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	type BaseCallFilter = frame_support::traits::Everything;
 	type BlockWeights = ();
 	type BlockLength = ();

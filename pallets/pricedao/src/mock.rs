@@ -16,7 +16,7 @@ use dico_currencies::BasicCurrencyAdapter;
 use frame_support::{
 	construct_runtime, ord_parameter_types, parameter_types,
 	traits::Time,
-	traits::{Contains, GenesisBuild},
+	traits::{ConstU32, Contains, GenesisBuild},
 	PalletId,
 };
 use frame_system as system;
@@ -118,6 +118,7 @@ impl system::Config for Test {
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 impl pallet_oracle::Config for Test {

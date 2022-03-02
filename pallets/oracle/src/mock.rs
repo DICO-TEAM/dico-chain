@@ -2,7 +2,10 @@
 
 use super::*;
 
-use frame_support::{construct_runtime, parameter_types, traits::GenesisBuild};
+use frame_support::{
+	construct_runtime, parameter_types,
+	traits::{ConstU32, GenesisBuild},
+};
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
@@ -47,6 +50,7 @@ impl frame_system::Config for Test {
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 thread_local! {

@@ -53,7 +53,7 @@ fn initialize() {
 			start_time: Some(0u64),
 			is_already_kyc: false,
 			initiator: Alice,
-			total_usdt: 3500_0000 * USDT,
+			total_usdt: 3500_0000 * KUSD,
 			tag: None,
 			is_terminated: false,
 			project_name: b"KUSAMA".to_vec(),
@@ -155,12 +155,12 @@ fn join_should_work() {
 pub fn calculate_total_reward_should_work() {
 	new_test_ext().execute_with(|| {
 		initialize();
-		TotalUsdt::<Test>::put(1_8000_0000 * USDT);
+		TotalUsdt::<Test>::put(1_8000_0000 * KUSD);
 		let ico = Ico::<Test>::get(KSM, 1).unwrap();
 		print!("ico: {:#?}\n", ico);
 		let reward = IcoTest::calculate_total_reward(&ico);
 		println!("reward: {:?}", reward);
-		assert_eq!(reward, 13750000 * USDT + 1);
+		assert_eq!(reward, 13750000 * KUSD + 1);
 	});
 }
 

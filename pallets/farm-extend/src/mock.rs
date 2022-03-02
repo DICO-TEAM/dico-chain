@@ -5,7 +5,7 @@
 use crate as farm_extend;
 use crate::Config;
 use dico_primitives::{AssetId, Balance};
-use frame_support::traits::{Contains, GenesisBuild};
+use frame_support::traits::{ConstU32, Contains, GenesisBuild};
 use frame_support::{ord_parameter_types, parameter_types, PalletId};
 use frame_system as system;
 use frame_system::EnsureSignedBy;
@@ -79,6 +79,7 @@ impl system::Config for Test {
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 parameter_type_with_key! {

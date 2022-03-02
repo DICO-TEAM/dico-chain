@@ -6,7 +6,7 @@ use crate as amm;
 use crate::Config;
 use dico_currencies::BasicCurrencyAdapter;
 use dico_primitives::{AssetId, Balance, BlockNumber};
-use frame_support::traits::{Contains, GenesisBuild};
+use frame_support::traits::{ConstU32,Contains, GenesisBuild};
 use frame_support::{parameter_types, PalletId};
 use frame_system as system;
 use orml_traits::parameter_type_with_key;
@@ -83,6 +83,7 @@ impl system::Config for Test {
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 impl pallet_balances::Config for Test {

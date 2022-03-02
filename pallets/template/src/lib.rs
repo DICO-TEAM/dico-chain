@@ -17,7 +17,7 @@
 
 /// Edit this file to define custom logic or remove it if it is not needed.
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
-/// <https://substrate.dev/docs/en/knowledgebase/runtime/frame>
+/// <https://docs.substrate.io/v3/runtime/frame>
 pub use pallet::*;
 
 #[cfg(test)]
@@ -29,7 +29,6 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-// https://github.com/paritytech/substrate/blob/HEAD/frame/support/procedural/src/pallet/parse/pallet_struct.rs
 #[frame_support::pallet]
 pub mod pallet {
 	use frame_support::{dispatch::DispatchResultWithPostInfo, pallet_prelude::*};
@@ -47,15 +46,15 @@ pub mod pallet {
 	pub struct Pallet<T>(_);
 
 	// The pallet's runtime storage items.
-	// https://substrate.dev/docs/en/knowledgebase/runtime/storage
+	// https://docs.substrate.io/v3/runtime/storage
 	#[pallet::storage]
 	#[pallet::getter(fn something)]
 	// Learn more about declaring storage items:
-	// https://substrate.dev/docs/en/knowledgebase/runtime/storage#declaring-storage-items
+	// https://docs.substrate.io/v3/runtime/storage#declaring-storage-items
 	pub type Something<T> = StorageValue<_, u32>;
 
 	// Pallets use events to inform users when important changes are made.
-	// https://substrate.dev/docs/en/knowledgebase/runtime/events
+	// https://docs.substrate.io/v3/runtime/events-and-errors
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -87,7 +86,7 @@ pub mod pallet {
 		pub fn do_something(origin: OriginFor<T>, something: u32) -> DispatchResultWithPostInfo {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
-			// https://substrate.dev/docs/en/knowledgebase/runtime/origin
+			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.

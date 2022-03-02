@@ -46,6 +46,8 @@ pub const DICO: CurrencyId = 0;
 pub const KSM: CurrencyId = 20;
 pub const NewDAYS: u64 = 1000;
 pub const NEW_USDT: CurrencyId = 5;
+pub const kUSD: CurrencyId = 10;
+pub const USDT: u128 = 100_000_000_000_000;
 
 construct_runtime!(
 	pub enum Test where
@@ -221,6 +223,7 @@ parameter_types! {
 }
 
 impl frame_system::Config for Test {
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	type BaseCallFilter = frame_support::traits::Everything;
 	type BlockWeights = ();
 	type BlockLength = ();
@@ -260,6 +263,7 @@ parameter_types! {
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const UsdtCurrencyId: AssetId = NEW_USDT;
+	pub const KusdCurrencyId: AssetId = kUSD;
 
 }
 
@@ -290,6 +294,7 @@ impl ico::Config for Test {
 	type PriceData = PriceDao;
 	type UsdtCurrencyId = UsdtCurrencyId;
 	type KycHandler = Kyc;
+	type KusdCurrencyId = KusdCurrencyId;
 }
 
 parameter_types! {
