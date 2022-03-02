@@ -25,9 +25,8 @@ use crate as ico;
 use frame_system;
 use pallet_balances;
 use std::cell::RefCell;
-
 use currencies::{self as dico_currencies, BasicCurrencyAdapter};
-
+use KUSD;
 type Key = u32;
 type Value = u128;
 pub type AccountId = u128;
@@ -43,6 +42,7 @@ pub const DICO: CurrencyId = 0;
 pub const KSM: CurrencyId = 20;
 pub const NewDAYS: u64 = 1000;
 pub const NEW_USDT: CurrencyId = 5;
+pub const kUSD: CurrencyId = 10;
 pub const DAVE: AccountId = 3;
 
 construct_runtime!(
@@ -204,6 +204,7 @@ parameter_types! {
 }
 
 impl frame_system::Config for Test {
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	type BaseCallFilter = frame_support::traits::Everything;
 	type BlockWeights = ();
 	type BlockLength = ();
@@ -232,7 +233,7 @@ impl frame_system::Config for Test {
 parameter_types! {
 	pub const MinProportion: Percent = Percent::from_percent(20u8);
 	pub const GetNativeCurrencyId: CurrencyId = DICO;
-	pub const IcoTotalReward: Balance = 2_0000_0000 * USDT;
+	pub const IcoTotalReward: Balance = 2_0000_0000 * KUSD;
 	pub const InitiatorPledge: Balance = DOLLARS;
 	pub const RequestPledge: Balance = DOLLARS;
 	pub const RequestExpire: u64 = 100;
@@ -243,6 +244,7 @@ parameter_types! {
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const UsdtCurrencyId: AssetId = NEW_USDT;
+	pub const KusdCurrencyId: AssetId = kUSD;
 
 }
 
@@ -273,6 +275,7 @@ impl Config for Test {
 	type PriceData = PriceDao;
 	type UsdtCurrencyId = UsdtCurrencyId;
 	type KycHandler = Kyc;
+	type KusdCurrencyId = KusdCurrencyId;
 }
 
 parameter_types! {
