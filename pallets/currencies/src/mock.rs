@@ -3,10 +3,7 @@
 use super::*;
 use crate as currencies;
 use crate::Pallet as CurrenciesPallet;
-use frame_support::{
-	construct_runtime, parameter_types,
-	traits::{ConstU32, Contains},
-};
+use frame_support::{construct_runtime, parameter_types, traits::Contains};
 use orml_tokens as tokens;
 use orml_traits::parameter_type_with_key;
 use pallet_balances;
@@ -28,6 +25,7 @@ pub type AccountId = u128;
 pub type BlockNumber = u64;
 
 impl frame_system::Config for Runtime {
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	type Origin = Origin;
 	type Index = u64;
 	type BlockNumber = BlockNumber;
@@ -51,7 +49,6 @@ impl frame_system::Config for Runtime {
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
-	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 parameter_types! {

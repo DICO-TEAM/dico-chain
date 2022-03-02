@@ -19,7 +19,7 @@ use crate::pallet::*;
 pub use crate::pallet::*;
 use codec::{Decode, Encode};
 use currencies::{currencies_trait::CurrenciesHandler, DicoAssetInfo, DicoAssetMetadata};
-use dico_primitives::{currency::*, time::*};
+pub use dico_primitives::{currency::*, time::*};
 pub use dico_primitives::{AssetId, CurrencyId};
 use dico_primitives::{Balance, Price};
 use dico_treasury::traits::DicoTreasuryHandler;

@@ -23,7 +23,7 @@ use super::*;
 use crate as treasury;
 use frame_support::{
 	assert_noop, assert_ok, parameter_types,
-	traits::{ConstU32, Contains, OnInitialize},
+	traits::{Contains, OnInitialize},
 	PalletId,
 };
 use orml_tokens;
@@ -66,6 +66,7 @@ parameter_types! {
 		frame_system::limits::BlockWeights::simple_max(1024);
 }
 impl frame_system::Config for Test {
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	type BaseCallFilter = frame_support::traits::Everything;
 	type BlockWeights = ();
 	type BlockLength = ();
@@ -89,7 +90,6 @@ impl frame_system::Config for Test {
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
-	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 parameter_types! {
 	pub const ExistentialDeposit: Balance = 1;
