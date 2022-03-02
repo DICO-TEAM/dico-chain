@@ -3,10 +3,13 @@
 use super::*;
 use crate as pallet_kyc;
 
-use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types};
+use frame_support::{
+	assert_noop, assert_ok, ord_parameter_types, parameter_types,
+	traits::{ConstU32, ConstU64, EnsureOneOf},
+};
 use frame_support_test::TestRandomness;
-use frame_system::RawOrigin;
-use frame_system::{EnsureOneOf, EnsureRoot, EnsureSignedBy};
+use frame_system::{EnsureRoot, EnsureSignedBy, RawOrigin};
+
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
@@ -68,6 +71,7 @@ impl frame_system::Config for Test {
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 parameter_types! {
@@ -99,9 +103,9 @@ ord_parameter_types! {
 	pub const Three: u64 = 3;
 }
 
-type EnsureOneOrRoot = EnsureOneOf<u64, EnsureRoot<u64>, EnsureSignedBy<One, u64>>;
-type EnsureTwoOrRoot = EnsureOneOf<u64, EnsureRoot<u64>, EnsureSignedBy<Two, u64>>;
-type EnsureThreeOrRoot = EnsureOneOf<u64, EnsureRoot<u64>, EnsureSignedBy<Three, u64>>;
+type EnsureOneOrRoot = EnsureOneOf<EnsureRoot<u64>, EnsureSignedBy<One, u64>>;
+type EnsureTwoOrRoot = EnsureOneOf<EnsureRoot<u64>, EnsureSignedBy<Two, u64>>;
+type EnsureThreeOrRoot = EnsureOneOf<EnsureRoot<u64>, EnsureSignedBy<Three, u64>>;
 
 impl Config for Test {
 	type Event = Event;
@@ -124,7 +128,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 	pallet_balances::GenesisConfig::<Test> {
 		balances: vec![
-			(RawOrigin::Root.into(), 100),
+			// (RawOrigin::Root.into(), 100),
 			(ALICE, 100),
 			(BOB, 100),
 			(CHARLIE, 100),

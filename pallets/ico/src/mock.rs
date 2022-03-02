@@ -6,7 +6,7 @@ use orml_traits::{DataFeeder, DataProvider};
 use dico_treasury;
 use frame_support::{
 	construct_runtime, parameter_types,
-	traits::{Contains, LockIdentifier, Time},
+	traits::{ConstU32, Contains, LockIdentifier, Time},
 	PalletId,
 };
 use orml_traits::parameter_type_with_key;
@@ -44,6 +44,8 @@ pub const KSM: CurrencyId = 20;
 pub const NewDAYS: u64 = 1000;
 pub const NEW_USDT: CurrencyId = 5;
 pub const DAVE: AccountId = 3;
+pub const USDT: AssetId = 4000;
+pub const Kusd: AssetId = 4000;
 
 construct_runtime!(
 	pub enum Test where
@@ -227,6 +229,7 @@ impl frame_system::Config for Test {
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
 	type OnSetCode = ();
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 parameter_types! {
@@ -243,6 +246,7 @@ parameter_types! {
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const UsdtCurrencyId: AssetId = NEW_USDT;
+	pub const KusdCurrencyId: AssetId = Kusd;
 
 }
 
@@ -273,6 +277,7 @@ impl Config for Test {
 	type PriceData = PriceDao;
 	type UsdtCurrencyId = UsdtCurrencyId;
 	type KycHandler = Kyc;
+	type KusdCurrencyId = KusdCurrencyId;
 }
 
 parameter_types! {
