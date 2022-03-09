@@ -44,7 +44,6 @@ where
 {
 	// custom rpc api
 	use pallet_ico_rpc::{FullIco, IcoApi};
-	use pallet_ico_rpc_runtime_api::IcoAmountApi;
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
 	use substrate_frame_rpc_system::{FullSystem, SystemApi};
 

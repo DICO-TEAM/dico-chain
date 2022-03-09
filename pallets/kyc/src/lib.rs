@@ -77,9 +77,8 @@ use frame_support::{
 use frame_system::pallet_prelude::*;
 pub use pallet::*;
 use sp_runtime::traits::{
-	AccountIdConversion, AppendZerosInput, CheckedAdd, CheckedDiv, SaturatedConversion, Saturating, StaticLookup, Zero,
+	AccountIdConversion, CheckedAdd, SaturatedConversion, Zero,
 };
-use sp_std::convert::TryFrom;
 use sp_std::prelude::*;
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -456,7 +455,7 @@ pub mod pallet {
 				basic_deposit,
 				WithdrawReasons::FEE,
 				ExistenceRequirement::KeepAlive,
-			);
+			)?;
 
 			<BlackListOf<T>>::insert(&target, black_info);
 
@@ -530,7 +529,7 @@ pub mod pallet {
 		pub fn clear_kyc(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
 
-			let mut app_list = <ApplicationFormList<T>>::get(&sender);
+			let app_list = <ApplicationFormList<T>>::get(&sender);
 
 			ensure!(
 				app_list
@@ -962,7 +961,7 @@ pub mod pallet {
 				if ias.is_some() {
 					let ias_clone = ias.clone();
 					let ias_account = &ias_clone.unwrap().account;
-					let mut record_list: Vec<Record<T::AccountId>> = <RecordsOf<T>>::get(&ias_account);
+					let record_list: Vec<Record<T::AccountId>> = <RecordsOf<T>>::get(&ias_account);
 					let _ = T::Currency::unreserve(&ias_account, service_deposit);
 					// kyc user redo kyc
 					record_list
@@ -988,7 +987,7 @@ pub mod pallet {
 										if let Some(ApplicationForm {
 											ias,
 											sword_holder,
-											progress,
+											progress:_,
 										}) = app
 										{
 											Self::update_record_list(
@@ -996,13 +995,13 @@ pub mod pallet {
 												&record.account,
 												&kyc_fields,
 												Progress::NeedReset,
-											);
+											)?;
 											Self::update_record_list(
 												&sword_holder.1.account,
 												&record.account,
 												&kyc_fields,
 												Progress::NeedReset,
-											);
+											)?;
 										}
 									}
 								}
@@ -1036,10 +1035,10 @@ pub mod pallet {
 			kyc_index: KYCIndex,
 			message: Message,
 		) -> sp_std::result::Result<(), DispatchError> {
-			let mut app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
+			let app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
 				<ApplicationFormList<T>>::get(who);
 
-			if let Some(ApplicationForm { ias, sword_holder, progress }) = app_list
+			if let Some(ApplicationForm { ias, sword_holder, progress:_ }) = app_list
                 .iter()
                 .filter(|item| matches!(item, Some(item) if item.ias.1.fields == kyc_fields && item.ias.0 == kyc_index && item.progress == Progress::Pending))
                 .next()
@@ -1090,11 +1089,11 @@ pub mod pallet {
 			id: Data,
 			message: Message,
 		) -> sp_std::result::Result<(), DispatchError> {
-			let mut app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
+			let app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
 				<ApplicationFormList<T>>::get(target);
-			let mut app_list_cp = app_list.clone();
+			let app_list_cp = app_list.clone();
 
-			if let Some(ApplicationForm { ias, sword_holder, progress }) = app_list_cp
+			if let Some(ApplicationForm { ias, sword_holder, progress:_ }) = app_list_cp
                 .iter()
                 .filter(|item| matches!(item, Some(item) if item.ias.1.fields == kyc_fields && item.ias.1.account == who.clone() && item.ias.0 == kyc_index && item.progress == Progress::IasDoing))
                 .next()
@@ -1121,15 +1120,15 @@ pub mod pallet {
                 for record in record_list.iter_mut() {
                     if record.account == target.clone() && record.fields == kyc_fields.clone() {
                         record.progress = Progress::IasDone;
-                        Self::update_record_list(&sword_holder.1.account, &record.account, &kyc_fields, Progress::IasDone);
+                        Self::update_record_list(&sword_holder.1.account, &record.account, &kyc_fields, Progress::IasDone)?;
                     }
                 }
                 <RecordsOf<T>>::insert(who, record_list);
 
                 if judgement == Judgement::PASS {
-                    let mut unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
+                    let unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
                     ensure!(!unique_id_list.contains(&id), Error::<T>::NotUniqueID);
-                    Self::add_unique_id_list(&kyc_fields, id);
+                    Self::add_unique_id_list(&kyc_fields, id)?;
                 }
 
                 Self::update_application_form(target, ias.1.account.clone(), ias.0,
@@ -1151,15 +1150,15 @@ pub mod pallet {
 			id: &Data,
 		) -> sp_std::result::Result<(), DispatchError> {
 			if authentication == &Authentication::Success {
-				let mut unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
+				let unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
 				ensure!(unique_id_list.contains(&id), Error::<T>::NotContainsUniqueID);
 			}
 
 			let mut app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
 				<ApplicationFormList<T>>::get(target);
-			let mut app_list_cp = app_list.clone();
+			let app_list_cp = app_list.clone();
 
-			if let Some(ApplicationForm { ias, sword_holder, progress }) = app_list_cp
+			if let Some(ApplicationForm { ias, sword_holder, progress:_ }) = app_list_cp
                 .iter()
                 .filter(|item| matches!(item, Some(item) if item.sword_holder.1.fields == kyc_fields && item.sword_holder.1.account == who.clone() && item.sword_holder.0 == kyc_index && item.progress == Progress::IasDone))
                 .next()
@@ -1168,12 +1167,12 @@ pub mod pallet {
                     let pay_fee = ias.1.fee
                         .checked_add(&sword_holder.1.fee)
                         .ok_or_else(|| DispatchError::from(Error::<T>::InvalidFee))?;
-                    Self::update_record_list(&ias.1.account, target, &kyc_fields, Progress::Failure);
-                    Self::update_record_list(&sword_holder.1.account, target, &kyc_fields, Progress::Failure);
+                    Self::update_record_list(&ias.1.account, target, &kyc_fields, Progress::Failure)?;
+                    Self::update_record_list(&sword_holder.1.account, target, &kyc_fields, Progress::Failure)?;
                     Self::update_application_form(target, ias.1.account.clone(), ias.0,
                                                   sword_holder.1.account.clone(), sword_holder.0,
                                                   ias.1.fields, Progress::Failure)?;
-                    Self::update_kyc_auth(target, &kyc_fields, ias.0.clone(), authentication);
+                    Self::update_kyc_auth(target, &kyc_fields, ias.0.clone(), authentication)?;
                     T::Currency::unreserve(target, pay_fee);
                 } else {
                     for application in app_list.iter_mut() {
@@ -1215,8 +1214,8 @@ pub mod pallet {
                     Self::update_application_form(target, ias.1.account.clone(), ias.0,
                                                   sword_holder.1.account.clone(), sword_holder.0,
                                                   ias.1.fields, Progress::Success)?;
-                    Self::update_record_list(&ias.1.account, target, &kyc_fields, Progress::Success);
-                    Self::update_record_list(&sword_holder.1.account, target, &kyc_fields, Progress::Success);
+                    Self::update_record_list(&ias.1.account, target, &kyc_fields, Progress::Success)?;
+                    Self::update_record_list(&sword_holder.1.account, target, &kyc_fields, Progress::Success)?;
                 }
             }
 			Ok(())
@@ -1381,7 +1380,7 @@ pub mod pallet {
 		) -> sp_std::result::Result<(), DispatchError> {
 			let mut registration = <KYCOf<T>>::get(who).ok_or(Error::<T>::InvalidTarget)?;
 			for element in registration.judgements.iter_mut() {
-				let (field, index, judgement, _) = &element;
+				let (field, index, _judgement, _) = &element;
 				if field == kyc_fields && index == &kyc_index {
 					element.3 = *auth;
 				}

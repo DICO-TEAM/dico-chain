@@ -1,11 +1,9 @@
-#![feature(derive_default_enum)]
-
 use codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
-use sp_runtime::traits::{AppendZerosInput, Saturating, StaticLookup, Zero};
+use sp_runtime::traits::{AppendZerosInput, Zero};
 use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
-use sp_std::{fmt::Debug, iter::once, ops::Add};
+use sp_std::{fmt::Debug, ops::Add};
 
 pub type KYCIndex = u32;
 pub type CurvePubicKey = [u8; 32];
@@ -297,7 +295,7 @@ impl<
 		match self {
 			Self {
 				ias,
-				sword_holder,
+				sword_holder:_,
 				progress,
 			} => {
 				// When Progress is Failure, can apply again.
@@ -307,7 +305,6 @@ impl<
 					false
 				}
 			}
-			_ => false,
 		}
 	}
 }
@@ -879,7 +876,6 @@ impl AreaCode {
 			| AreaCode::IR
 			| AreaCode::BD
 			| AreaCode::NP
-			| AreaCode::CN
 			| AreaCode::TW
 			| AreaCode::KH
 			| AreaCode::ID

@@ -5,9 +5,9 @@ use sc_telemetry::TelemetryEndpoints;
 use sp_core::sr25519;
 use sp_runtime::traits::Zero;
 use tico_runtime::{
-	AuraConfig, AuraId, BalancesConfig, CollatorSelectionConfig, CouncilConfig, CurrenciesConfig, DemocracyConfig,
-	ElectionsConfig, GenesisConfig, ParachainInfoConfig, Perbill, SessionConfig, SessionKeys, SudoConfig, SystemConfig,
-	TechnicalCommitteeConfig, TechnicalMembershipConfig, VestingConfig, WASM_BINARY,
+	AuraId, BalancesConfig, CollatorSelectionConfig, CouncilConfig, CurrenciesConfig, DemocracyConfig,
+	ElectionsConfig, GenesisConfig, ParachainInfoConfig, SessionConfig, SessionKeys, SudoConfig, SystemConfig,
+	TechnicalMembershipConfig, VestingConfig, WASM_BINARY,
 };
 
 use crate::chain_spec::{get_account_id_from_seed, get_authority_keys_from_seed, Extensions, STAGING_TELEMETRY_URL};

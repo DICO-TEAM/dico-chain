@@ -28,17 +28,17 @@ use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 
 use frame_support::{
-	ensure, log,
+	ensure,
 	pallet_prelude::*,
-	traits::{Get, InitializeMembers, Time},
-	weights::{Pays, Weight},
+	traits::{Get, Time},
+	weights::{Pays},
 	Parameter,
 };
 use frame_system::{ensure_root, ensure_signed, pallet_prelude::*};
 pub use orml_traits::{CombineData, DataFeeder, DataProvider, DataProviderExtended, OnNewData};
 use orml_utilities::OrderedSet;
 use sp_runtime::{traits::Member, DispatchResult, RuntimeDebug};
-use sp_std::{convert::TryInto, fmt::Debug, prelude::*, vec};
+use sp_std::{convert::TryInto, prelude::*, vec};
 
 pub use crate::default_combine_data::DefaultCombineData;
 

@@ -1,5 +1,4 @@
 use sp_core::U256;
-use sp_runtime::{ArithmeticError, RuntimeDebug};
 
 pub trait PriceProvider<CurrencyId> {
 	type Price;

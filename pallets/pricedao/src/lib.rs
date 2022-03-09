@@ -2,30 +2,27 @@
 
 use codec::{Decode, Encode};
 use dico_currencies;
-use frame_support::{dispatch, log, pallet_prelude::*, traits::Get, transactional, PalletId};
+use frame_support::{log, pallet_prelude::*, traits::Get, PalletId};
 use frame_support::{
 	sp_runtime::{
-		traits::{AccountIdConversion, Saturating, Zero},
-		FixedPointNumber,
+		traits::{AccountIdConversion, Zero},
 	},
 	traits::{
-		Contains, Currency, EnsureOrigin, ExistenceRequirement, Imbalance, InitializeMembers, OnUnbalanced,
+		Currency, EnsureOrigin, ExistenceRequirement,
 		ReservableCurrency,
 	},
 };
 use frame_system::{self as system, ensure_signed, pallet_prelude::*};
-use orml_traits::{DataFeeder, DataProvider, MultiCurrency};
+use orml_traits::{DataFeeder, DataProvider};
 use pallet_amm::Pair;
 use pallet_oracle::UpdateOraclesStorgage;
-use sp_runtime::{ArithmeticError, RuntimeDebug};
-use sp_std::{fmt::Debug, prelude::*};
+use sp_runtime::{RuntimeDebug};
+use sp_std::prelude::*;
 // use frame_support::log;
 // use serde::{Deserialize, Serialize};
 
-use orml_utilities::with_transaction_result;
 use scale_info::TypeInfo;
-use sp_runtime::{DispatchError, DispatchResult, FixedU128};
-// use support::{DEXManager, ExchangeRateProvider, Price, PriceProvider};
+use sp_runtime::{DispatchResult};
 pub use primitives::{currency::DOLLARS, Balance, CurrencyId, Moment, Price, CORE_ASSET_ID};
 // use frame_support::traits::Instance;
 
@@ -45,13 +42,9 @@ pub use traits::{PriceData, PriceProvider};
 #[frame_support::pallet]
 pub mod module {
 	use super::*;
-	use frame_support::storage::child::len;
 
 	pub(crate) type BalanceOf<T> =
 		<<T as Config>::BaseCurrency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-
-	pub(crate) type NegativeImbalanceOf<T> =
-		<<T as Config>::BaseCurrency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
 
 	#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo)]
 	#[cfg_attr(test, derive(Default))]

@@ -1,8 +1,8 @@
 pub use dico_primitives::{constants::currency::*, network::*, AccountId, Balance, BlockNumber, Signature};
 use kico_runtime::{
-	AuraConfig, AuraId, BalancesConfig, CollatorSelectionConfig, CouncilConfig, CurrenciesConfig, DemocracyConfig,
-	ElectionsConfig, GenesisConfig, ParachainInfoConfig, Perbill, SessionConfig, SessionKeys, SudoConfig, SystemConfig,
-	TechnicalCommitteeConfig, TechnicalMembershipConfig, VestingConfig, WASM_BINARY,
+	AuraId, BalancesConfig, CollatorSelectionConfig, CouncilConfig, CurrenciesConfig, DemocracyConfig,
+	ElectionsConfig, GenesisConfig, ParachainInfoConfig, SessionConfig, SessionKeys, SudoConfig, SystemConfig,
+	TechnicalMembershipConfig, VestingConfig, WASM_BINARY,
 };
 use pallet_currencies::{DicoAssetInfo, DicoAssetMetadata};
 use sc_service::ChainType;
