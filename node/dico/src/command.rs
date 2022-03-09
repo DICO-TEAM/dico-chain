@@ -536,4 +536,8 @@ impl CliConfiguration<Self> for RelayChainCli {
 	fn telemetry_endpoints(&self, chain_spec: &Box<dyn ChainSpec>) -> Result<Option<sc_telemetry::TelemetryEndpoints>> {
 		self.base.base.telemetry_endpoints(chain_spec)
 	}
+
+	fn node_name(&self) -> Result<String> {
+		self.base.base.node_name()
+	}
 }
