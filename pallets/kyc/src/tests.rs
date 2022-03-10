@@ -2,7 +2,7 @@
 #[cfg(test)]
 use super::*;
 use crate::{mock::*, Error};
-use frame_support::{assert_err, assert_noop, assert_ok};
+use frame_support::{assert_noop, assert_ok};
 
 fn alice_kyc() -> KYCInfo {
 	KYCInfo {
@@ -65,11 +65,11 @@ fn bob_message() -> [u8; 128] {
 #[test]
 fn initial_state() {
 	new_test_ext().execute_with(|| {
-		assert_eq!(Balances::free_balance(&ALICE), 100);
-		assert_eq!(Balances::free_balance(&BOB), 100);
-		assert_eq!(Balances::free_balance(&CHARLIE), 100);
-		assert_eq!(Balances::free_balance(&DAVE), 100);
-		assert_eq!(Balances::free_balance(&EVE), 100);
+		assert_eq!(Balances::free_balance(&ALICE), 10000);
+		assert_eq!(Balances::free_balance(&BOB), 10000);
+		assert_eq!(Balances::free_balance(&CHARLIE), 10000);
+		assert_eq!(Balances::free_balance(&DAVE), 10000);
+		assert_eq!(Balances::free_balance(&EVE), 10000);
 	});
 }
 

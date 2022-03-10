@@ -4,11 +4,11 @@ use super::*;
 use crate as pallet_kyc;
 
 use frame_support::{
-	assert_noop, assert_ok, ord_parameter_types, parameter_types,
-	traits::{ConstU32, ConstU64, EnsureOneOf},
+	ord_parameter_types, parameter_types,
+	traits::{EnsureOneOf},
 };
 use frame_support_test::TestRandomness;
-use frame_system::{EnsureRoot, EnsureSignedBy, RawOrigin};
+use frame_system::{EnsureRoot, EnsureSignedBy};
 
 use sp_core::H256;
 use sp_runtime::{
@@ -128,15 +128,14 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 	pallet_balances::GenesisConfig::<Test> {
 		balances: vec![
-			// (RawOrigin::Root.into(), 100),
-			(ALICE, 100),
-			(BOB, 100),
-			(CHARLIE, 100),
-			(DAVE, 100),
-			(EVE, 100),
+			(ALICE, 10000),
+			(BOB, 10000),
+			(CHARLIE, 10000),
+			(DAVE, 10000),
+			(EVE, 10000),
 		],
 	}
-	.assimilate_storage(&mut t)
-	.unwrap();
+		.assimilate_storage(&mut t)
+		.unwrap();
 	t.into()
 }
