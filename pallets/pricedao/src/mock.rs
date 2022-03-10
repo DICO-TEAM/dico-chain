@@ -1,6 +1,6 @@
 #![cfg(test)]
 
-use super::{Balance, Config, CurrencyId, DataFeeder, DataProvider, FixedU128, Price, Zero};
+use super::{Balance, Config, CurrencyId, DataFeeder, DataProvider, Price, Zero};
 use crate as pallet_price;
 use frame_system::EnsureSignedBy;
 use sp_core::H256;

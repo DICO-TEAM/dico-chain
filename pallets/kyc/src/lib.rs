@@ -77,15 +77,14 @@ use frame_support::{
 use frame_system::pallet_prelude::*;
 pub use pallet::*;
 use sp_runtime::traits::{
-	AccountIdConversion, AppendZerosInput, CheckedAdd, CheckedDiv, SaturatedConversion, Saturating, StaticLookup, Zero,
+	AccountIdConversion, CheckedAdd, SaturatedConversion, Zero,
 };
-use sp_std::convert::TryFrom;
 use sp_std::prelude::*;
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 type NegativeImbalanceOf<T> =
-	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
+<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -156,31 +155,31 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn kyc)]
 	pub(super) type KYCOf<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, Registration<BalanceOf<T>>, OptionQuery>;
+	StorageMap<_, Blake2_128Concat, T::AccountId, Registration<BalanceOf<T>>, OptionQuery>;
 
 	/// the black list of kyc user
 	#[pallet::storage]
 	#[pallet::getter(fn blacklist)]
 	pub(super) type BlackListOf<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, BlackInfo<BalanceOf<T>>, OptionQuery>;
+	StorageMap<_, Blake2_128Concat, T::AccountId, BlackInfo<BalanceOf<T>>, OptionQuery>;
 
 	/// List of identity authentication service(IAS) in a  kyc field
 	#[pallet::storage]
 	#[pallet::getter(fn ias_list)]
 	pub(super) type IASListOf<T: Config> =
-		StorageMap<_, Blake2_128Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
+	StorageMap<_, Blake2_128Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
 
 	/// List of SwordHolder in a  kyc field
 	#[pallet::storage]
 	#[pallet::getter(fn sword_holder)]
 	pub(super) type SwordHolderOf<T: Config> =
-		StorageMap<_, Blake2_128Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
+	StorageMap<_, Blake2_128Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
 
 	/// Records Of IAS/SwordHolder
 	#[pallet::storage]
 	#[pallet::getter(fn records)]
 	pub(super) type RecordsOf<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Record<T::AccountId>>, ValueQuery>;
+	StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Record<T::AccountId>>, ValueQuery>;
 
 	/// Unique information storage filtering
 	#[pallet::storage]
@@ -191,7 +190,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn message)]
 	pub(super) type MessageList<T: Config> =
-		StorageDoubleMap<_, Blake2_128Concat, T::AccountId, Blake2_128Concat, T::AccountId, Vec<Message>, ValueQuery>;
+	StorageDoubleMap<_, Blake2_128Concat, T::AccountId, Blake2_128Concat, T::AccountId, Vec<Message>, ValueQuery>;
 
 	///ApplicationFormList: AccountId -> Vec<ApplicationForm>
 	#[pallet::storage]
@@ -330,8 +329,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::add_ias(
-        T::MaxIAS::get().into()
-        ))]
+		T::MaxIAS::get().into()
+		))]
 		pub fn add_ias(
 			origin: OriginFor<T>,
 			ias_index: KYCIndex,
@@ -354,8 +353,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::kill_ias(
-        T::MaxIAS::get().into()
-        ))]
+		T::MaxIAS::get().into()
+		))]
 		pub fn kill_ias(
 			origin: OriginFor<T>,
 			ias_index: KYCIndex,
@@ -378,8 +377,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::add_sword_holder(
-        T::MaxSwordHolder::get().into()
-        ))]
+		T::MaxSwordHolder::get().into()
+		))]
 		pub fn add_sword_holder(
 			origin: OriginFor<T>,
 			sword_index: KYCIndex,
@@ -402,8 +401,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::kill_sword_holder(
-        T::MaxSwordHolder::get().into()
-        ))]
+		T::MaxSwordHolder::get().into()
+		))]
 		pub fn kill_sword_holder(
 			origin: OriginFor<T>,
 			sword_holder_index: KYCIndex,
@@ -428,8 +427,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::remove_kyc(
-        T::MaxIAS::get().into()
-        ))]
+		T::MaxIAS::get().into()
+		))]
 		pub fn remove_kyc(
 			origin: OriginFor<T>,
 			target: T::AccountId,
@@ -456,7 +455,7 @@ pub mod pallet {
 				basic_deposit,
 				WithdrawReasons::FEE,
 				ExistenceRequirement::KeepAlive,
-			);
+			)?;
 
 			<BlackListOf<T>>::insert(&target, black_info);
 
@@ -465,7 +464,7 @@ pub mod pallet {
 			Ok(Some(T::WeightInfo::remove_kyc(
 				T::MaxSwordHolder::get().into(), // R
 			))
-			.into())
+				.into())
 		}
 
 		/// User setting KYC
@@ -480,8 +479,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::set_kyc(
-        T::MaxIAS::get().into()
-        ))]
+		T::MaxIAS::get().into()
+		))]
 		pub fn set_kyc(origin: OriginFor<T>, info: KYCInfo) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
 			ensure!(!<BlackListOf<T>>::contains_key(&sender), Error::<T>::Blacklisted);
@@ -525,12 +524,12 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::clear_kyc(
-        T::MaxIAS::get().into()
-        ))]
+		T::MaxIAS::get().into()
+		))]
 		pub fn clear_kyc(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
 
-			let mut app_list = <ApplicationFormList<T>>::get(&sender);
+			let app_list = <ApplicationFormList<T>>::get(&sender);
 
 			ensure!(
 				app_list
@@ -546,10 +545,10 @@ pub mod pallet {
 
 			app_list.into_iter().try_for_each(|app| -> DispatchResult {
 				if let Some(ApplicationForm {
-					ias,
-					sword_holder,
-					progress,
-				}) = app
+								ias,
+								sword_holder,
+								progress,
+							}) = app
 				{
 					match progress {
 						Progress::Success | Progress::Failure => {
@@ -597,8 +596,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::apply_certification(
-        T::MaxIAS::get().into()
-        ))]
+		T::MaxIAS::get().into()
+		))]
 		pub fn apply_certification(
 			origin: OriginFor<T>,
 			kyc_fields: KYCFields,
@@ -653,8 +652,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::request_judgement(
-        T::MaxIAS::get().into()
-        ))]
+		T::MaxIAS::get().into()
+		))]
 		pub fn request_judgement(
 			origin: OriginFor<T>,
 			kyc_fields: KYCFields,
@@ -678,8 +677,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::ias_set_fee(
-        T::MaxIAS::get().into()
-        ))]
+		T::MaxIAS::get().into()
+		))]
 		pub fn ias_set_fee(
 			origin: OriginFor<T>,
 			kyc_fields: KYCFields,
@@ -711,8 +710,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::ias_provide_judgement(
-        T::MaxIAS::get().into()
-        ))]
+		T::MaxIAS::get().into()
+		))]
 		pub fn ias_provide_judgement(
 			origin: OriginFor<T>,
 			kyc_fields: KYCFields,
@@ -750,8 +749,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::sword_holder_set_fee(
-        T::MaxSwordHolder::get().into()
-        ))]
+		T::MaxSwordHolder::get().into()
+		))]
 		pub fn sword_holder_set_fee(
 			origin: OriginFor<T>,
 			kyc_fields: KYCFields,
@@ -778,8 +777,8 @@ pub mod pallet {
 		/// - TODO
 		/// # </weight>
 		#[pallet::weight(T::WeightInfo::sword_holder_provide_judgement(
-        T::MaxSwordHolder::get().into()
-        ))]
+		T::MaxSwordHolder::get().into()
+		))]
 		pub fn sword_holder_provide_judgement(
 			origin: OriginFor<T>,
 			kyc_fields: KYCFields,
@@ -796,7 +795,7 @@ pub mod pallet {
 			Ok(Some(T::WeightInfo::sword_holder_provide_judgement(
 				T::MaxSwordHolder::get().into(), // R
 			))
-			.into())
+				.into())
 		}
 	}
 
@@ -962,7 +961,7 @@ pub mod pallet {
 				if ias.is_some() {
 					let ias_clone = ias.clone();
 					let ias_account = &ias_clone.unwrap().account;
-					let mut record_list: Vec<Record<T::AccountId>> = <RecordsOf<T>>::get(&ias_account);
+					let record_list: Vec<Record<T::AccountId>> = <RecordsOf<T>>::get(&ias_account);
 					let _ = T::Currency::unreserve(&ias_account, service_deposit);
 					// kyc user redo kyc
 					record_list
@@ -986,23 +985,23 @@ pub mod pallet {
 											a
 										});
 										if let Some(ApplicationForm {
-											ias,
-											sword_holder,
-											progress,
-										}) = app
+														ias,
+														sword_holder,
+														progress:_,
+													}) = app
 										{
 											Self::update_record_list(
 												&ias.1.account,
 												&record.account,
 												&kyc_fields,
 												Progress::NeedReset,
-											);
+											)?;
 											Self::update_record_list(
 												&sword_holder.1.account,
 												&record.account,
 												&kyc_fields,
 												Progress::NeedReset,
-											);
+											)?;
 										}
 									}
 								}
@@ -1036,47 +1035,47 @@ pub mod pallet {
 			kyc_index: KYCIndex,
 			message: Message,
 		) -> sp_std::result::Result<(), DispatchError> {
-			let mut app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
+			let app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
 				<ApplicationFormList<T>>::get(who);
 
-			if let Some(ApplicationForm { ias, sword_holder, progress }) = app_list
-                .iter()
-                .filter(|item| matches!(item, Some(item) if item.ias.1.fields == kyc_fields && item.ias.0 == kyc_index && item.progress == Progress::Pending))
-                .next()
-                .ok_or(Error::<T>::NoApplication)? {
-                let mut registration = <KYCOf<T>>::get(&who).ok_or(Error::<T>::NoKYC)?;
+			if let Some(ApplicationForm { ias, sword_holder, progress:_ }) = app_list
+				.iter()
+				.filter(|item| matches!(item, Some(item) if item.ias.1.fields == kyc_fields && item.ias.0 == kyc_index && item.progress == Progress::Pending))
+				.next()
+				.ok_or(Error::<T>::NoApplication)? {
+				let mut registration = <KYCOf<T>>::get(&who).ok_or(Error::<T>::NoKYC)?;
 
-                let pay_fee = ias.1.fee
-                    .checked_add(&sword_holder.1.fee)
-                    .ok_or_else(|| DispatchError::from(Error::<T>::InvalidFee))?;
+				let pay_fee = ias.1.fee
+					.checked_add(&sword_holder.1.fee)
+					.ok_or_else(|| DispatchError::from(Error::<T>::InvalidFee))?;
 
-                let item = (
-                    kyc_fields.clone(),
-                    kyc_index,
-                    Judgement::FeePaid(pay_fee.clone()),
-                    Authentication::Pending,
-                );
+				let item = (
+					kyc_fields.clone(),
+					kyc_index,
+					Judgement::FeePaid(pay_fee.clone()),
+					Authentication::Pending,
+				);
 
-                registration.judgements.push(item);
+				registration.judgements.push(item);
 
-                T::Currency::reserve(&who, pay_fee)?;
+				T::Currency::reserve(&who, pay_fee)?;
 
-                <KYCOf<T>>::insert(&who, registration);
+				<KYCOf<T>>::insert(&who, registration);
 
-                let record = Record {
-                    account: who.clone(),
-                    progress: Progress::IasDoing,
-                    fields: kyc_fields,
-                };
-                Self::update_application_form(&who, ias.1.account.clone(), ias.0,
-                                              sword_holder.1.account.clone(), sword_holder.0,
-                                              ias.1.fields, Progress::IasDoing)?;
+				let record = Record {
+					account: who.clone(),
+					progress: Progress::IasDoing,
+					fields: kyc_fields,
+				};
+				Self::update_application_form(&who, ias.1.account.clone(), ias.0,
+											  sword_holder.1.account.clone(), sword_holder.0,
+											  ias.1.fields, Progress::IasDoing)?;
 
-                // add record to ias records
-                Self::add_record_list(&ias.1.account, record.clone())?;
-                Self::add_record_list(&sword_holder.1.account, record)?;
-                Self::add_message_list(&who, &ias.1.account, message)?;
-            }
+				// add record to ias records
+				Self::add_record_list(&ias.1.account, record.clone())?;
+				Self::add_record_list(&sword_holder.1.account, record)?;
+				Self::add_message_list(&who, &ias.1.account, message)?;
+			}
 			Ok(())
 		}
 
@@ -1090,53 +1089,53 @@ pub mod pallet {
 			id: Data,
 			message: Message,
 		) -> sp_std::result::Result<(), DispatchError> {
-			let mut app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
+			let app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
 				<ApplicationFormList<T>>::get(target);
-			let mut app_list_cp = app_list.clone();
+			let app_list_cp = app_list.clone();
 
-			if let Some(ApplicationForm { ias, sword_holder, progress }) = app_list_cp
-                .iter()
-                .filter(|item| matches!(item, Some(item) if item.ias.1.fields == kyc_fields && item.ias.1.account == who.clone() && item.ias.0 == kyc_index && item.progress == Progress::IasDoing))
-                .next()
-                .ok_or(Error::<T>::NoApplication)? {
-                let mut registration = <KYCOf<T>>::get(&target).ok_or(Error::<T>::NoKYC)?;
+			if let Some(ApplicationForm { ias, sword_holder, progress:_ }) = app_list_cp
+				.iter()
+				.filter(|item| matches!(item, Some(item) if item.ias.1.fields == kyc_fields && item.ias.1.account == who.clone() && item.ias.0 == kyc_index && item.progress == Progress::IasDoing))
+				.next()
+				.ok_or(Error::<T>::NoApplication)? {
+				let mut registration = <KYCOf<T>>::get(&target).ok_or(Error::<T>::NoKYC)?;
 
 
-                for element in registration.judgements.iter_mut() {
-                    let (field, index, _judgement, _auth) = &element;
-                    if field.clone() == kyc_fields && index.clone() == kyc_index {
-                        *element = (
-                            kyc_fields.clone(),
-                            kyc_index.clone(),
-                            judgement.clone(),
-                            Authentication::Pending,
-                        )
-                    }
-                }
+				for element in registration.judgements.iter_mut() {
+					let (field, index, _judgement, _auth) = &element;
+					if field.clone() == kyc_fields && index.clone() == kyc_index {
+						*element = (
+							kyc_fields.clone(),
+							kyc_index.clone(),
+							judgement.clone(),
+							Authentication::Pending,
+						)
+					}
+				}
 
-                <KYCOf<T>>::insert(&target, registration);
+				<KYCOf<T>>::insert(&target, registration);
 
-                let mut record_list: Vec<Record<T::AccountId>> = <RecordsOf<T>>::get(who);
+				let mut record_list: Vec<Record<T::AccountId>> = <RecordsOf<T>>::get(who);
 
-                for record in record_list.iter_mut() {
-                    if record.account == target.clone() && record.fields == kyc_fields.clone() {
-                        record.progress = Progress::IasDone;
-                        Self::update_record_list(&sword_holder.1.account, &record.account, &kyc_fields, Progress::IasDone);
-                    }
-                }
-                <RecordsOf<T>>::insert(who, record_list);
+				for record in record_list.iter_mut() {
+					if record.account == target.clone() && record.fields == kyc_fields.clone() {
+						record.progress = Progress::IasDone;
+						Self::update_record_list(&sword_holder.1.account, &record.account, &kyc_fields, Progress::IasDone)?;
+					}
+				}
+				<RecordsOf<T>>::insert(who, record_list);
 
-                if judgement == Judgement::PASS {
-                    let mut unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
-                    ensure!(!unique_id_list.contains(&id), Error::<T>::NotUniqueID);
-                    Self::add_unique_id_list(&kyc_fields, id);
-                }
+				if judgement == Judgement::PASS {
+					let unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
+					ensure!(!unique_id_list.contains(&id), Error::<T>::NotUniqueID);
+					Self::add_unique_id_list(&kyc_fields, id)?;
+				}
 
-                Self::update_application_form(target, ias.1.account.clone(), ias.0,
-                                              sword_holder.1.account.clone(), sword_holder.0,
-                                              ias.1.fields, Progress::IasDone)?;
-                Self::add_message_list(who, &sword_holder.1.account, message)?;
-            }
+				Self::update_application_form(target, ias.1.account.clone(), ias.0,
+											  sword_holder.1.account.clone(), sword_holder.0,
+											  ias.1.fields, Progress::IasDone)?;
+				Self::add_message_list(who, &sword_holder.1.account, message)?;
+			}
 
 			Ok(())
 		}
@@ -1151,74 +1150,74 @@ pub mod pallet {
 			id: &Data,
 		) -> sp_std::result::Result<(), DispatchError> {
 			if authentication == &Authentication::Success {
-				let mut unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
+				let unique_id_list = <UniqueIdOf<T>>::get(&kyc_fields);
 				ensure!(unique_id_list.contains(&id), Error::<T>::NotContainsUniqueID);
 			}
 
 			let mut app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
 				<ApplicationFormList<T>>::get(target);
-			let mut app_list_cp = app_list.clone();
+			let app_list_cp = app_list.clone();
 
-			if let Some(ApplicationForm { ias, sword_holder, progress }) = app_list_cp
-                .iter()
-                .filter(|item| matches!(item, Some(item) if item.sword_holder.1.fields == kyc_fields && item.sword_holder.1.account == who.clone() && item.sword_holder.0 == kyc_index && item.progress == Progress::IasDone))
-                .next()
-                .ok_or(Error::<T>::NoApplication)? {
-                if authentication.has_failure() {
-                    let pay_fee = ias.1.fee
-                        .checked_add(&sword_holder.1.fee)
-                        .ok_or_else(|| DispatchError::from(Error::<T>::InvalidFee))?;
-                    Self::update_record_list(&ias.1.account, target, &kyc_fields, Progress::Failure);
-                    Self::update_record_list(&sword_holder.1.account, target, &kyc_fields, Progress::Failure);
-                    Self::update_application_form(target, ias.1.account.clone(), ias.0,
-                                                  sword_holder.1.account.clone(), sword_holder.0,
-                                                  ias.1.fields, Progress::Failure)?;
-                    Self::update_kyc_auth(target, &kyc_fields, ias.0.clone(), authentication);
-                    T::Currency::unreserve(target, pay_fee);
-                } else {
-                    for application in app_list.iter_mut() {
-                        if matches!(application, Some(app)  if app.sword_holder.1.fields == kyc_fields && app.sword_holder.0 == kyc_index && app.sword_holder.1.account == who.clone() && app.progress == Progress::IasDone)
-                        {
-                            let mut registration = <KYCOf<T>>::get(target).ok_or(Error::<T>::InvalidTarget)?;
-                            for element in registration.judgements.iter_mut() {
-                                let (field, index, judgement, auth) = &element;
-                                if field == &kyc_fields && index == &kyc_index && auth.is_pending() {
-                                    if judgement == &Judgement::PASS {
-                                        let _ = T::Currency::repatriate_reserved(
-                                            target,
-                                            &ias.1.account,
-                                            ias.1.fee,
-                                            BalanceStatus::Free,
-                                        );
-                                        let _ = T::Currency::repatriate_reserved(
-                                            &target,
-                                            &sword_holder.1.account,
-                                            sword_holder.1.fee,
-                                            BalanceStatus::Free,
-                                        );
-                                        Self::increment_area_count(&registration.info.area)?;
-                                    }
-                                    element.3 = *authentication;
-                                }
-                            }
+			if let Some(ApplicationForm { ias, sword_holder, progress:_ }) = app_list_cp
+				.iter()
+				.filter(|item| matches!(item, Some(item) if item.sword_holder.1.fields == kyc_fields && item.sword_holder.1.account == who.clone() && item.sword_holder.0 == kyc_index && item.progress == Progress::IasDone))
+				.next()
+				.ok_or(Error::<T>::NoApplication)? {
+				if authentication.has_failure() {
+					let pay_fee = ias.1.fee
+						.checked_add(&sword_holder.1.fee)
+						.ok_or_else(|| DispatchError::from(Error::<T>::InvalidFee))?;
+					Self::update_record_list(&ias.1.account, target, &kyc_fields, Progress::Failure)?;
+					Self::update_record_list(&sword_holder.1.account, target, &kyc_fields, Progress::Failure)?;
+					Self::update_application_form(target, ias.1.account.clone(), ias.0,
+												  sword_holder.1.account.clone(), sword_holder.0,
+												  ias.1.fields, Progress::Failure)?;
+					Self::update_kyc_auth(target, &kyc_fields, ias.0.clone(), authentication)?;
+					T::Currency::unreserve(target, pay_fee);
+				} else {
+					for application in app_list.iter_mut() {
+						if matches!(application, Some(app)  if app.sword_holder.1.fields == kyc_fields && app.sword_holder.0 == kyc_index && app.sword_holder.1.account == who.clone() && app.progress == Progress::IasDone)
+						{
+							let mut registration = <KYCOf<T>>::get(target).ok_or(Error::<T>::InvalidTarget)?;
+							for element in registration.judgements.iter_mut() {
+								let (field, index, judgement, auth) = &element;
+								if field == &kyc_fields && index == &kyc_index && auth.is_pending() {
+									if judgement == &Judgement::PASS {
+										let _ = T::Currency::repatriate_reserved(
+											target,
+											&ias.1.account,
+											ias.1.fee,
+											BalanceStatus::Free,
+										);
+										let _ = T::Currency::repatriate_reserved(
+											&target,
+											&sword_holder.1.account,
+											sword_holder.1.fee,
+											BalanceStatus::Free,
+										);
+										Self::increment_area_count(&registration.info.area)?;
+									}
+									element.3 = *authentication;
+								}
+							}
 
-                            <KYCOf<T>>::insert(&target, registration);
+							<KYCOf<T>>::insert(&target, registration);
 
-                            application.as_mut().map(|i| {
-                                i.set_progress(Progress::Success);
-                                i
-                            });
-                        }
-                    }
+							application.as_mut().map(|i| {
+								i.set_progress(Progress::Success);
+								i
+							});
+						}
+					}
 
 
-                    Self::update_application_form(target, ias.1.account.clone(), ias.0,
-                                                  sword_holder.1.account.clone(), sword_holder.0,
-                                                  ias.1.fields, Progress::Success)?;
-                    Self::update_record_list(&ias.1.account, target, &kyc_fields, Progress::Success);
-                    Self::update_record_list(&sword_holder.1.account, target, &kyc_fields, Progress::Success);
-                }
-            }
+					Self::update_application_form(target, ias.1.account.clone(), ias.0,
+												  sword_holder.1.account.clone(), sword_holder.0,
+												  ias.1.fields, Progress::Success)?;
+					Self::update_record_list(&ias.1.account, target, &kyc_fields, Progress::Success)?;
+					Self::update_record_list(&sword_holder.1.account, target, &kyc_fields, Progress::Success)?;
+				}
+			}
 			Ok(())
 		}
 
@@ -1381,7 +1380,7 @@ pub mod pallet {
 		) -> sp_std::result::Result<(), DispatchError> {
 			let mut registration = <KYCOf<T>>::get(who).ok_or(Error::<T>::InvalidTarget)?;
 			for element in registration.judgements.iter_mut() {
-				let (field, index, judgement, _) = &element;
+				let (field, index, _judgement, _) = &element;
 				if field == kyc_fields && index == &kyc_index {
 					element.3 = *auth;
 				}

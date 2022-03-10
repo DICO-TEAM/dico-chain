@@ -6,14 +6,13 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use codec::{Decode, Encode};
 use dico_primitives::{
 	constants::{currency::*, parachains::*, time::*},
-	AccountId, AccountIndex, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, PoolId,
+	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, PoolId,
 	Price, Signature,
 };
 use orml_traits::{
-	create_median_value_data_provider, parameter_type_with_key, DataFeeder, DataProviderExtended, MultiCurrency,
+	create_median_value_data_provider, parameter_type_with_key, DataFeeder, MultiCurrency,
 };
 pub use orml_xcm_support::{DepositToAlternative, IsNativeConcrete, MultiCurrencyAdapter, MultiNativeAsset};
 use pallet_currencies::BasicCurrencyAdapter;
@@ -23,10 +22,10 @@ use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
 		AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, BlockNumberProvider, Convert,
-		IdentifyAccount, SaturatedConversion, StaticLookup, Verify, Zero,
+		Zero,
 	},
-	transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
-	ApplyExtrinsicResult, DispatchResult, MultiSignature, Percent,
+	transaction_validity::{TransactionSource, TransactionValidity},
+	ApplyExtrinsicResult, DispatchResult, Percent,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -38,14 +37,14 @@ use static_assertions::const_assert;
 use frame_support::{
 	construct_runtime, match_type, parameter_types,
 	traits::{
-		Contains, Currency, EnsureOneOf, EqualPrivilegeOnly, Everything, Imbalance, InstanceFilter,
-		KeyOwnerProofSystem, LockIdentifier, Nothing, OnUnbalanced, U128CurrencyToVote,
+		Contains, EnsureOneOf, EqualPrivilegeOnly, Everything,
+		LockIdentifier, Nothing, U128CurrencyToVote,
 	},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, WEIGHT_PER_SECOND},
 		DispatchClass, IdentityFee, Weight,
 	},
-	PalletId, RuntimeDebug,
+	PalletId,
 };
 use frame_system::limits::{BlockLength, BlockWeights};
 use frame_system::EnsureRoot;
@@ -54,7 +53,6 @@ pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::u32_trait::{_1, _2, _3, _4, _5};
-use sp_runtime::curve::PiecewiseLinear;
 
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -63,18 +61,19 @@ pub use sp_runtime::{MultiAddress, Perbill, Permill};
 // Polkadot Imports
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain::primitives::Sibling;
-use polkadot_runtime_common::{BlockHashCount, RocksDbWeight, SlowAdjustingFeeUpdate};
+use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 
 // XCM Imports
 use xcm::latest::prelude::*;
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
-	AllowUnpaidExecutionFrom, CurrencyAdapter, EnsureXcmOrigin, FixedRateOfFungible, FixedWeightBounds, IsConcrete,
-	LocationInverter, NativeAsset, ParentAsSuperuser, ParentIsDefault, RelayChainAsNative, SiblingParachainAsNative,
+	AllowUnpaidExecutionFrom, EnsureXcmOrigin, FixedRateOfFungible, FixedWeightBounds,
+	LocationInverter, ParentAsSuperuser, RelayChainAsNative, SiblingParachainAsNative,
 	SiblingParachainConvertsVia, SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation,
-	TakeRevenue, TakeWeightCredit, UsingComponents,
+	TakeRevenue, TakeWeightCredit,ParentIsPreset
 };
 use xcm_executor::{Config, XcmExecutor};
+
 
 pub use pallet_amm;
 pub use pallet_farm;
@@ -108,8 +107,14 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signatu
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPallets>;
+/// Executive: handles dispatch to the various modules.
+pub type Executive = frame_executive::Executive<
+	Runtime,
+	Block,
+	frame_system::ChainContext<Runtime>,
+	Runtime,
+	AllPalletsWithSystem,
+>;
 
 impl_opaque_keys! {
 	pub struct SessionKeys {
@@ -749,7 +754,7 @@ parameter_types! {
 /// `Transact` in order to determine the dispatch Origin.
 pub type LocationToAccountId = (
 	// The parent (Relay-chain) origin converts to the default `AccountId`.
-	ParentIsDefault<AccountId>,
+	ParentIsPreset<AccountId>,
 	// Sibling parachain origins convert to AccountId via the `ParaId::into`.
 	SiblingParachainConvertsVia<Sibling, AccountId>,
 	// Straight up local `AccountId32` origins just alias directly to `AccountId`.
@@ -906,10 +911,12 @@ impl cumulus_pallet_xcm::Config for Runtime {
 
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type Event = Event;
-	type ExecuteOverweightOrigin = EnsureRoot<AccountId>;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 	type ChannelInfo = ParachainSystem;
-	type VersionWrapper = PolkadotXcm;
+	type VersionWrapper = ();
+	type ExecuteOverweightOrigin = EnsureRoot<AccountId>;
+	type ControllerOrigin = EnsureRoot<AccountId>;
+	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
 }
 
 impl cumulus_pallet_dmp_queue::Config for Runtime {
@@ -1107,14 +1114,13 @@ impl pallet_currencies::Config for Runtime {
 }
 
 // price data
-/// price
 parameter_types! {
 	pub const MaxOracleSize: u32 = 100;
 	pub const MinimumCount: u32 = 5;  // todo: The minimum number is 3
 	pub const ExpiresIn: Moment = 1000 * 60 * 20; // todo: 60 mins
 	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
 	pub const FeedPledgedBalance: Balance = 5000 * DOLLARS;  // todo : pledge 500 dico?
-	pub const withdrawExpirationPeriod: BlockNumber = 7 * DAYS;   // TODO: 5 * DAYS;
+	pub const WithdrawExpirationPeriod: BlockNumber = 7 * DAYS;   // TODO: 5 * DAYS;
 }
 
 type DicoDataProvider = pallet_oracle::Instance1;
@@ -1164,7 +1170,7 @@ impl pallet_pricedao::Config for Runtime {
 	type DicoTreasuryModuleId = DicoTreasuryModuleId;
 	type BaseCurrency = Balances;
 	type PledgedBalance = FeedPledgedBalance;
-	type WithdrawExpirationPeriod = withdrawExpirationPeriod;
+	type WithdrawExpirationPeriod = WithdrawExpirationPeriod;
 	type WeightInfo = pallet_pricedao::weights::DicoWeight<Runtime>;
 }
 
@@ -1293,6 +1299,12 @@ parameter_types! {
 	pub const MaxAssetsForTransfer: usize = 2;
 }
 
+parameter_type_with_key! {
+	pub ParachainMinFee: |_location: MultiLocation| -> u128 {
+		u128::MAX
+	};
+}
+
 impl orml_xtokens::Config for Runtime {
 	type Event = Event;
 	type Balance = Balance;
@@ -1305,6 +1317,7 @@ impl orml_xtokens::Config for Runtime {
 	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
 	type BaseXcmWeight = BaseXcmWeight;
 	type LocationInverter = LocationInverter<Ancestry>;
+	type MinXcmFee = ParachainMinFee;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.

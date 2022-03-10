@@ -17,7 +17,6 @@ use cumulus_relay_chain_interface::RelayChainInterface;
 use cumulus_relay_chain_local::build_relay_chain_interface;
 
 // Substrate Imports
-use pallet_ico_rpc_runtime_api::IcoAmountApi;
 use sc_client_api::ExecutorProvider;
 use sc_executor::NativeElseWasmExecutor;
 use sc_network::NetworkService;
