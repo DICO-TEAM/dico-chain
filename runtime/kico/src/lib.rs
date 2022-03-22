@@ -81,8 +81,6 @@ pub use pallet_farm_extend;
 pub use pallet_kyc;
 pub use pallet_lbp;
 pub use pallet_pricedao;
-/// Import the template pallet.
-pub use pallet_template;
 
 use pallet_farm_rpc_runtime_api as farm_rpc;
 
@@ -955,10 +953,7 @@ impl pallet_identity::Config for Runtime {
 	type WeightInfo = ();
 }
 
-/// Configure the pallet template in pallets/template.
-impl pallet_template::Config for Runtime {
-	type Event = Event;
-}
+
 
 parameter_types! {
 	pub const KYCPalletId: PalletId = PalletId(*b"dico/kyc");
@@ -1371,8 +1366,6 @@ construct_runtime!(
 		ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>} = 54,
 		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 55,
 		//local pallet
-		TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>} = 60,
-
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>} = 70,
 
 		DicoTreasury: pallet_dico_treasury::{Pallet, Call, Storage, Event<T>} = 71,
