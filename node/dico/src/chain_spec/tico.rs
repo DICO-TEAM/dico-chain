@@ -7,7 +7,7 @@ use sp_runtime::traits::Zero;
 use tico_runtime::{
 	AuraId, BalancesConfig, CollatorSelectionConfig, CouncilConfig, CurrenciesConfig, DemocracyConfig,
 	ElectionsConfig, GenesisConfig, ParachainInfoConfig, SessionConfig, SessionKeys, SudoConfig, SystemConfig,
-	TechnicalMembershipConfig, VestingConfig, WASM_BINARY,
+	TechnicalMembershipConfig, VestingConfig, PolkadotXcmConfig, WASM_BINARY,
 };
 
 use crate::chain_spec::{get_account_id_from_seed, get_authority_keys_from_seed, Extensions, STAGING_TELEMETRY_URL};
@@ -222,5 +222,8 @@ fn tico_genesis(
 		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
+		polkadot_xcm: PolkadotXcmConfig {
+			safe_xcm_version: Some(2),
+		},
 	}
 }
