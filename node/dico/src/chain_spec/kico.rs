@@ -2,7 +2,7 @@ pub use dico_primitives::{constants::currency::*, network::*, AccountId, Balance
 use kico_runtime::{
 	AuraId, BalancesConfig, CollatorSelectionConfig, CouncilConfig, CurrenciesConfig, DemocracyConfig,
 	ElectionsConfig, GenesisConfig, ParachainInfoConfig, SessionConfig, SessionKeys, SudoConfig, SystemConfig,
-	TechnicalMembershipConfig, VestingConfig, WASM_BINARY,
+	TechnicalMembershipConfig, VestingConfig, PolkadotXcmConfig, WASM_BINARY,
 };
 use pallet_currencies::{DicoAssetInfo, DicoAssetMetadata};
 use sc_service::ChainType;
@@ -214,5 +214,8 @@ fn kico_genesis(
 		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
+		polkadot_xcm: PolkadotXcmConfig {
+			safe_xcm_version: Some(2),
+		},
 	}
 }
