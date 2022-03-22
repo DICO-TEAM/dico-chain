@@ -27,7 +27,7 @@ dico-primitives = { package = "dico-primitives", default-features = false, path 
 
 # Local Dependencies
 pallet-kyc                  = { package = "pallet-kyc", default-features                  = false, path = "../../pallets/kyc" }
-pallet-template             = { package = "pallet-template", default-features             = false, path = "../../pallets/template" }
+#pallet-template             = { package = "pallet-template", default-features             = false, path = "../../pallets/template" }
 pallet-oracle               = { package = "pallet-oracle", default-features               = false, path = "../../pallets/oracle" }
 pallet-pricedao             = { package = "pallet-pricedao", default-features             = false, path = "../../pallets/pricedao" }
 pallet-amm                  = { package = "pallet-amm", default-features                  = false, path = "../../pallets/amm" }
@@ -230,7 +230,7 @@ std = [
 
     # local
     "dico-primitives/std",
-    "pallet-template/std",
+#    "pallet-template/std",
     "pallet-kyc/std",
     "pallet-amm/std",
     "pallet-farm/std",
