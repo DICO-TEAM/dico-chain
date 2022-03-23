@@ -1,6 +1,45 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [unreleased]
+
+### Update
+
+- Add KusdCurrencyId
+
+## [1.2.1] - 2022-02-18
+
+### Bug Fixes
+
+- Fix the bug that nft module can not compile and update runtime/lib.rs
+
+### Performance
+
+- Upgrade to polkadot-v0.9.16
+
+### Build
+
+- Add srtool.sh for build runtime
+
+## [1.2.0] - 2022-01-31
+
+### Bug Fixes
+
+- Add root into funder set of lbp and farm pallets.
+
+
+### Features
+
+- Modify the TODO configuration
+- Add benchmark script
+- Generate weight with becnhmark
+- Set kico parachain id
+
+### Update
+
+- Update the weight of nft module for testing
+
+
 ## [1.1.4] - 2022-01-04
 
 ### Bug Fixes
@@ -19,14 +58,8 @@ All notable changes to this project will be documented in this file.
 ### Bug Fixes
 
 - Fix(farm-extend): Update `acc_reward_per_share` in the same block
-- Udapte to v0.9.13
-- Upgrade to polkadot-v0.9.13
-- Upgrade to polkadot-v0.9.13
-- Upgrade to polkadot-v0.9.13
 - Upgrade to polkadot-v0.9.13
 - Fix test bug
-- Fix the rpc bug
-- Fix the bug that can not burn nft
 
 ### Features
 
@@ -35,11 +68,7 @@ All notable changes to this project will be documented in this file.
 ### Upgrade
 
 - Upgrade the currencies and the treasury module to latest version
-- Upgrade ico module to 0.9.13
-- Upgrade dao module to 0.9.13
-- Upgrade nft module to 0.9.13
-- Upgrade nft module to 0.9.13
-- Upgrade nft module to 0.9.13
+
 
 ## [1.1.2] - 2021-12-09
 
@@ -129,11 +158,7 @@ All notable changes to this project will be documented in this file.
 
 - Add:How to Contribute
 - Add Development wiki
-- Add development wiki
 - Add PULL_REQUEST_TEMPLATE.md (#119)
-- Add README.md file.
-- Add README.md file.
-- Add README.md file.
 - Add README.md file.
 
 ### Feat
@@ -184,15 +209,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fix
 
-- Fix the bug
-- Fix the bug that can not cpmpile
-- Update the json
 - Fix the rpc bugs
-- Fix some bugs
-- Fix the bug that token has no class id
-- Fix the bug
-- Fix some bugs
-- Fix the bug
 
 ### Miscellaneous Tasks
 
@@ -221,7 +238,6 @@ All notable changes to this project will be documented in this file.
 
 ### Update
 
-- Update the README.md
 - Update the README.md of the ico module
 
 ### Build
@@ -246,10 +262,6 @@ All notable changes to this project will be documented in this file.
 - Update the README.md
 - Update the mock
 - Update the test
-- Update the mock
-- Update the test
-- Use substrate3.0 syntax
-- Use substrate3.0 syntax
 - Use substrate3.0 syntax
 - Update the cargo.toml
 
@@ -263,7 +275,6 @@ All notable changes to this project will be documented in this file.
 ### Features
 
 - Add the dao, ico and dico-treasury module
-- Add the RPC and API in ico module
 - Add the RPC and API in ico module
 - Add oralce and price pallet
 
