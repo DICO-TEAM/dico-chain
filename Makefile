@@ -35,7 +35,11 @@ build:
 
 .PHONY: test
 test:
-	cargo test
+	SKIP_WASM_BUILD= cargo test
+
+.PHONY: check
+check:
+	SKIP_WASM_BUILD= cargo check --all-targets --features runtime-benchmarks
 
 .PHONY: benchmarks
 benchmarks:
