@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 pub mod macros;
 pub use macros::*;
 pub mod constants;
+pub mod tokens;
 pub use constants::*;
 
 /// An index to a block.
@@ -75,6 +76,8 @@ pub type Block = generic::Block<Header, OpaqueExtrinsic>;
 pub type BlockId = generic::BlockId<Block>;
 
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+
+pub use cumulus_primitives_core::ParaId;
 
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
