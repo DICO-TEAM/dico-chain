@@ -8,24 +8,19 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use dico_primitives::{
 	constants::{currency::*, parachains::*, time::*},
-	tokens::{KAR, DICO, KICO, KSM, KUSD, LKSM},
-	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, PoolId, Price,
+	tokens::{KAR, KICO, DICO, KSM, USDT, KUSD, LKSM},
+	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
 	Signature,
 };
 
-use orml_traits::{
-	create_median_value_data_provider, parameter_type_with_key, DataFeeder, MultiCurrency,
-};
+use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, MultiCurrency};
 pub use orml_xcm_support::{DepositToAlternative, IsNativeConcrete, MultiCurrencyAdapter, MultiNativeAsset};
 use pallet_currencies::BasicCurrencyAdapter;
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{
-		AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, BlockNumberProvider, Convert,
-		Zero,
-	},
+	traits::{AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, BlockNumberProvider, Convert, Zero},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, DispatchResult, Percent,
 };
@@ -38,10 +33,7 @@ use static_assertions::const_assert;
 // A few exports that help ease life for downstream crates.
 use frame_support::{
 	construct_runtime, match_type, parameter_types,
-	traits::{
-		Contains, EnsureOneOf, EqualPrivilegeOnly, Everything,
-		LockIdentifier, Nothing, U128CurrencyToVote,
-	},
+	traits::{Contains, EnsureOneOf, EqualPrivilegeOnly, Everything, LockIdentifier, Nothing, U128CurrencyToVote},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, WEIGHT_PER_SECOND},
 		DispatchClass, IdentityFee, Weight,
@@ -69,10 +61,9 @@ use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 use xcm::latest::prelude::*;
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
-	AllowUnpaidExecutionFrom, EnsureXcmOrigin, FixedRateOfFungible, FixedWeightBounds,
-	LocationInverter, ParentAsSuperuser, RelayChainAsNative, SiblingParachainAsNative,
-	SiblingParachainConvertsVia, SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation,
-	TakeRevenue, TakeWeightCredit,ParentIsPreset
+	AllowUnpaidExecutionFrom, EnsureXcmOrigin, FixedRateOfFungible, FixedWeightBounds, LocationInverter,
+	ParentAsSuperuser, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
+	SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation, TakeRevenue, TakeWeightCredit,
 };
 use xcm_executor::{Config, XcmExecutor};
 
@@ -83,13 +74,11 @@ pub use pallet_kyc;
 pub use pallet_lbp;
 pub use pallet_pricedao;
 
-
-use pallet_farm_rpc_runtime_api as farm_rpc;
 use crate::constants::*;
+use pallet_farm_rpc_runtime_api as farm_rpc;
 
-mod weights;
 mod constants;
-
+mod weights;
 
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
@@ -111,13 +100,8 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signatu
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<
-	Runtime,
-	Block,
-	frame_system::ChainContext<Runtime>,
-	Runtime,
-	AllPalletsWithSystem,
->;
+pub type Executive =
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
 
 impl_opaque_keys! {
 	pub struct SessionKeys {
@@ -272,7 +256,7 @@ impl Convert<AccountId, MultiLocation> for AccountIdToMultiLocation {
 			network: NetworkId::Any,
 			id: account_id.into(),
 		})
-			.into()
+		.into()
 	}
 }
 
@@ -292,7 +276,6 @@ impl TakeRevenue for ToTreasury {
 		}
 	}
 }
-
 
 parameter_types! {
 	pub const Version: RuntimeVersion = VERSION;
@@ -857,44 +840,43 @@ pub type Barrier = (
 	// ^^^ Parent and its exec plurality get free execution
 );
 
-
 parameter_types! {
-    pub KsmPerSecond: (AssetId, u128) = (MultiLocation::parent().into(), ksm_per_second());
-    pub KicoPerSecond: (AssetId, u128) = (
-        MultiLocation::new(
-            1,
-            X2(Parachain(ParachainInfo::parachain_id().into()), GeneralKey(b"KICO".to_vec())),
-        ).into(),
-        ksm_per_second() * 30
-    );
+	pub KsmPerSecond: (AssetId, u128) = (MultiLocation::parent().into(), ksm_per_second());
+	pub KicoPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(ParachainInfo::parachain_id().into()), GeneralKey(b"KICO".to_vec())),
+		).into(),
+		ksm_per_second() * 30
+	);
 	pub DicoPerSecond: (AssetId, u128) = (
-        MultiLocation::new(
-            1,
-            X2(Parachain(ParachainInfo::parachain_id().into()), GeneralKey(b"DICO".to_vec())),
-        ).into(),
-        ksm_per_second() * 30
-    );
-    pub KusdPerSecond: (AssetId, u128) = (
-        MultiLocation::new(
-            1,
-            X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::KUSD_KEY.to_vec())),
-        ).into(),
-        ksm_per_second() * 100
-    );
-    pub KarPerSecond: (AssetId, u128) = (
-        MultiLocation::new(
-            1,
-            X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::KAR_KEY.to_vec())),
-        ).into(),
-        ksm_per_second() * 50
-    );
-    pub LKSMPerSecond: (AssetId, u128) = (
-        MultiLocation::new(
-            1,
-            X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::LKSM_KEY.to_vec())),
-        ).into(),
-        ksm_per_second()
-    );
+		MultiLocation::new(
+			1,
+			X2(Parachain(ParachainInfo::parachain_id().into()), GeneralKey(b"DICO".to_vec())),
+		).into(),
+		ksm_per_second() * 30
+	);
+	pub KusdPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::KUSD_KEY.to_vec())),
+		).into(),
+		ksm_per_second() * 100
+	);
+	pub KarPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::KAR_KEY.to_vec())),
+		).into(),
+		ksm_per_second() * 50
+	);
+	pub LKSMPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::LKSM_KEY.to_vec())),
+		).into(),
+		ksm_per_second()
+	);
 }
 
 pub type Trader = (
@@ -1017,7 +999,6 @@ impl pallet_identity::Config for Runtime {
 	type RegistrarOrigin = EnsureRootOrHalfCouncil;
 	type WeightInfo = ();
 }
-
 
 parameter_types! {
 	pub const KYCPalletId: PalletId = PalletId(*b"dico/kyc");
@@ -1270,8 +1251,8 @@ parameter_types! {
 	pub const ChillDuration: BlockNumber = 10 * MINUTES;
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(5u8);
-	pub const UsdtCurrencyId: CurrencyId = 5;
-	pub const KusdCurrencyId: CurrencyId = 10;
+	pub const UsdtCurrencyId: CurrencyId = USDT;
+	pub const KusdCurrencyId: CurrencyId = KUSD;
 }
 
 impl pallet_ico::Config for Runtime {

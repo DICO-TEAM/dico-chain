@@ -77,6 +77,8 @@ pub type BlockId = generic::BlockId<Block>;
 
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 
+pub use cumulus_primitives_core::ParaId;
+
 #[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum TokenSymbol {

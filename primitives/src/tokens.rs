@@ -5,12 +5,16 @@ pub const KICO: CurrencyId = 0;
 pub const DICO: CurrencyId = 1;
 
 
+// substrate stable coin
+pub const USDT: CurrencyId = 5;
+pub const USDC: CurrencyId = 6;
+
+pub const KUSD: CurrencyId = 10;
+pub const AUSD: CurrencyId = 11;
 
 // famous ecosystem
-pub const BTC: CurrencyId = 10;
-pub const ETH: CurrencyId = 11;
-pub const USDT: CurrencyId = 12;
-pub const USDC: CurrencyId = 13;
+pub const BTC: CurrencyId = 20;
+pub const ETH: CurrencyId = 21;
 
 
 // substrate ecosystem
@@ -21,6 +25,4 @@ pub const ACA: CurrencyId = 103;
 pub const LKSM: CurrencyId = 104;
 pub const LDOT: CurrencyId = 105;
 
-// substrate stable coin
-pub const KUSD: CurrencyId = 200;
-pub const AUSD: CurrencyId = 201;
+

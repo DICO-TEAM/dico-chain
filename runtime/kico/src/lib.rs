@@ -8,8 +8,8 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use dico_primitives::{
 	constants::{currency::*, parachains::*, time::*},
-	tokens::{KAR, KICO, KSM, KUSD, LKSM},
-	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, PoolId, Price,
+	tokens::{KAR, KICO, KSM, USDT, KUSD, LKSM},
+	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
 	Signature,
 };
 use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, MultiCurrency};
@@ -73,8 +73,8 @@ pub use pallet_kyc;
 pub use pallet_lbp;
 pub use pallet_pricedao;
 
-use pallet_farm_rpc_runtime_api as farm_rpc;
 use crate::constants::*;
+use pallet_farm_rpc_runtime_api as farm_rpc;
 
 pub mod constants;
 mod weights;
@@ -827,35 +827,35 @@ pub type Barrier = (
 );
 
 parameter_types! {
-    pub KsmPerSecond: (AssetId, u128) = (MultiLocation::parent().into(), ksm_per_second());
-    pub KicoPerSecond: (AssetId, u128) = (
-        MultiLocation::new(
-            1,
-            X2(Parachain(ParachainInfo::parachain_id().into()), GeneralKey(b"KICO".to_vec())),
-        ).into(),
-        ksm_per_second() * 30
-    );
-    pub KusdPerSecond: (AssetId, u128) = (
-        MultiLocation::new(
-            1,
-            X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::KUSD_KEY.to_vec())),
-        ).into(),
-        ksm_per_second() * 100
-    );
-    pub KarPerSecond: (AssetId, u128) = (
-        MultiLocation::new(
-            1,
-            X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::KAR_KEY.to_vec())),
-        ).into(),
-        ksm_per_second() * 50
-    );
-    pub LKSMPerSecond: (AssetId, u128) = (
-        MultiLocation::new(
-            1,
-            X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::LKSM_KEY.to_vec())),
-        ).into(),
-        ksm_per_second()
-    );
+	pub KsmPerSecond: (AssetId, u128) = (MultiLocation::parent().into(), ksm_per_second());
+	pub KicoPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(ParachainInfo::parachain_id().into()), GeneralKey(b"KICO".to_vec())),
+		).into(),
+		ksm_per_second() * 30
+	);
+	pub KusdPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::KUSD_KEY.to_vec())),
+		).into(),
+		ksm_per_second() * 100
+	);
+	pub KarPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::KAR_KEY.to_vec())),
+		).into(),
+		ksm_per_second() * 50
+	);
+	pub LKSMPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::LKSM_KEY.to_vec())),
+		).into(),
+		ksm_per_second()
+	);
 }
 
 pub type Trader = (
@@ -1115,7 +1115,7 @@ impl orml_vesting::Config for Runtime {
 
 parameter_types! {
 	pub const CreateConsume: Balance = 100 * DOLLARS;
-	pub const DICOAssetId: CurrencyId = 0;
+	pub const DICOAssetId: CurrencyId = KICO;
 	pub const MaxCreatableCurrencyId: CurrencyId = 4_000_000_000;
 }
 
@@ -1231,8 +1231,8 @@ parameter_types! {
 	pub const ChillDuration: BlockNumber = 10 * MINUTES;
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(5u8);
-	pub const UsdtCurrencyId: CurrencyId = 5;
-	pub const KusdCurrencyId: CurrencyId = 10;
+	pub const UsdtCurrencyId: CurrencyId = USDT;
+	pub const KusdCurrencyId: CurrencyId = KUSD;
 
 }
 
