@@ -115,7 +115,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("KICO"),
 	impl_name: create_runtime_str!("KICO"),
 	authoring_version: 1,
-	spec_version: 1220,
+	spec_version: 1230,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -725,8 +725,8 @@ impl pallet_collator_selection::Config for Runtime {
 }
 
 parameter_types! {
-	pub ReservedXcmpWeight: Weight = RuntimeBlockWeights::get().max_block / 4;
-	pub ReservedDmpWeight: Weight = RuntimeBlockWeights::get().max_block / 4;
+	pub const ReservedXcmpWeight: Weight = MAXIMUM_BLOCK_WEIGHT / 4;
+	pub const ReservedDmpWeight: Weight = MAXIMUM_BLOCK_WEIGHT / 4;
 }
 
 impl cumulus_pallet_parachain_system::Config for Runtime {
@@ -805,7 +805,7 @@ pub type XcmOriginToTransactDispatchOrigin = (
 
 parameter_types! {
 	// One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
-	pub UnitWeightCost: Weight = 200_000_000;
+	pub UnitWeightCost: Weight = 100_000_000;
 }
 
 match_type! {
@@ -818,7 +818,7 @@ match_type! {
 pub type Barrier = (
 	TakeWeightCredit,
 	AllowTopLevelPaidExecutionFrom<Everything>,
-	AllowUnpaidExecutionFrom<ParentOrParentsExecutivePlurality>,
+	// AllowUnpaidExecutionFrom<ParentOrParentsExecutivePlurality>,
 	// Expected responses are OK.
 	AllowKnownQueryResponses<PolkadotXcm>,
 	// Subscriptions for version tracking are OK.
@@ -835,6 +835,13 @@ parameter_types! {
 		).into(),
 		ksm_per_second() * 30
 	);
+	pub KicoPerSecondOfCanonicalLocation: (AssetId, u128) = (
+        MultiLocation::new(
+            0,
+            X1(GeneralKey(b"KICO".to_vec())),
+        ).into(),
+        ksm_per_second() * 30
+    );
 	pub KusdPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
@@ -860,7 +867,9 @@ parameter_types! {
 
 pub type Trader = (
 	FixedRateOfFungible<KsmPerSecond, ToTreasury>,
+	FixedRateOfFungible<KicoPerSecondOfCanonicalLocation, ToTreasury>,
 	FixedRateOfFungible<KicoPerSecond, ToTreasury>,
+	// Karura
 	FixedRateOfFungible<KusdPerSecond, ToTreasury>,
 	FixedRateOfFungible<KarPerSecond, ToTreasury>,
 	FixedRateOfFungible<LKSMPerSecond, ToTreasury>,
@@ -937,7 +946,7 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type Event = Event;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 	type ChannelInfo = ParachainSystem;
-	type VersionWrapper = ();
+	type VersionWrapper = PolkadotXcm;
 	type ExecuteOverweightOrigin = EnsureRoot<AccountId>;
 	type ControllerOrigin = EnsureRoot<AccountId>;
 	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
