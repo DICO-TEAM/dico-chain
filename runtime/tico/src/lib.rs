@@ -877,6 +877,13 @@ parameter_types! {
 		).into(),
 		ksm_per_second() * 100
 	);
+	pub AusdPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::AUSD_KEY.to_vec())),
+		).into(),
+		ksm_per_second() * 100
+	);
 	pub KarPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
@@ -901,6 +908,7 @@ pub type Trader = (
 	FixedRateOfFungible<DicoPerSecondOfCanonicalLocation, ToTreasury>,
 
 	FixedRateOfFungible<KusdPerSecond, ToTreasury>,
+	FixedRateOfFungible<AusdPerSecond, ToTreasury>,
 	FixedRateOfFungible<KarPerSecond, ToTreasury>,
 	FixedRateOfFungible<LKSMPerSecond, ToTreasury>,
 );
