@@ -29,7 +29,7 @@ fn create_asset<T: Config>() {
 	));
 	assert_ok!(T::CurrenciesHandler::do_create(
 		alice.clone(),
-		T::UsdtCurrencyId::get(),
+		T::USDCurrencyId::get(),
 		Some(DicoAssetMetadata {
 			name: vec![],
 			symbol: vec![],
@@ -59,7 +59,7 @@ fn get_bob<T: Config>() -> T::AccountId {
 		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 	);
 	T::MultiCurrency::deposit(
-		T::UsdtCurrencyId::get(),
+		T::USDCurrencyId::get(),
 		&caller,
 		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 	);
@@ -69,7 +69,7 @@ fn get_bob<T: Config>() -> T::AccountId {
 fn get_haha<T: Config>() -> T::AccountId {
 	let caller: T::AccountId = account("haha", 1, SEED);
 	T::MultiCurrency::deposit(
-		T::UsdtCurrencyId::get(),
+		T::USDCurrencyId::get(),
 		&caller,
 		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 	);
@@ -88,7 +88,7 @@ fn look_up<T: Config>(who: T::AccountId) -> <T::Lookup as StaticLookup>::Source 
 fn set_ico<T: Config>() -> CurrencyId {
 	let alice: T::AccountId = get_alice::<T>();
 	IcoMaxUsdtAmount::<T>::put((5000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>());
-	let currency_id = T::UsdtCurrencyId::get();
+	let currency_id = T::USDCurrencyId::get();
 	if cfg!(test) {
 		T::CurrenciesHandler::do_create(
 			alice.clone(),
@@ -195,7 +195,7 @@ benchmarks! {
 	initiate_ico {
 		let alice: T::AccountId = get_alice::<T>();
 		IcoMaxUsdtAmount::<T>::put((5000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>());
-		let currency_id = T::UsdtCurrencyId::get();
+		let currency_id = T::USDCurrencyId::get();
 		if cfg!(test) {
 			assert!(T::CurrenciesHandler::do_create(alice.clone(), T::GetNativeCurrencyId::get(), Some(DicoAssetMetadata {
 			name: vec![1; 4],
@@ -314,7 +314,7 @@ benchmarks! {
 
 	set_asset_power_multiple {
 
-	}:_(RawOrigin::Root, T::UsdtCurrencyId::get(), PowerMultiple {
+	}:_(RawOrigin::Root, T::USDCurrencyId::get(), PowerMultiple {
 		up: 10,
 		down: 2,
 	})

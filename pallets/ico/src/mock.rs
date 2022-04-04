@@ -26,7 +26,7 @@ use frame_system;
 use pallet_balances;
 use std::cell::RefCell;
 use currencies::{self as dico_currencies, BasicCurrencyAdapter};
-use KUSD;
+use USD;
 type Key = u32;
 type Value = u128;
 pub type AccountId = u128;
@@ -233,7 +233,7 @@ impl frame_system::Config for Test {
 parameter_types! {
 	pub const MinProportion: Percent = Percent::from_percent(20u8);
 	pub const GetNativeCurrencyId: CurrencyId = DICO;
-	pub const IcoTotalReward: Balance = 2_0000_0000 * KUSD;
+	pub const IcoTotalReward: Balance = 2_0000_0000 * USD;
 	pub const InitiatorPledge: Balance = DOLLARS;
 	pub const RequestPledge: Balance = DOLLARS;
 	pub const RequestExpire: u64 = 100;
@@ -243,8 +243,7 @@ parameter_types! {
 	pub const ChillDuration: BlockNumber = 5 * DAYS;
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(10u8);
-	pub const UsdtCurrencyId: AssetId = NEW_USDT;
-	pub const KusdCurrencyId: AssetId = kUSD;
+	pub const USDCurrencyId: AssetId = kUSD;
 
 }
 
@@ -265,7 +264,6 @@ impl Config for Test {
 	type RequestExpire = RequestExpire;
 	type CurrenciesHandler = Currencies;
 	type IcoTotalReward = IcoTotalReward;
-
 	type DicoTreasuryHandler = DicoTreasury;
 	type TerminateProtectPeriod = TerminateProtectPeriod;
 	type ReleaseProtectPeriod = ReleaseProtectPeriod;
@@ -273,9 +271,8 @@ impl Config for Test {
 	type InviterRewardProportion = InviterRewardProportion;
 	type InviteeRewardProportion = InviteeRewardProportion;
 	type PriceData = PriceDao;
-	type UsdtCurrencyId = UsdtCurrencyId;
 	type KycHandler = Kyc;
-	type KusdCurrencyId = KusdCurrencyId;
+	type USDCurrencyId = USDCurrencyId;
 }
 
 parameter_types! {
