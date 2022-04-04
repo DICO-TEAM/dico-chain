@@ -1276,8 +1276,7 @@ parameter_types! {
 	pub const ChillDuration: BlockNumber = 10 * MINUTES;
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(5u8);
-	pub const UsdtCurrencyId: CurrencyId = USDT;
-	pub const KusdCurrencyId: CurrencyId = KUSD;
+	pub const USDCurrencyId: CurrencyId = KUSD;
 }
 
 impl pallet_ico::Config for Runtime {
@@ -1303,10 +1302,9 @@ impl pallet_ico::Config for Runtime {
 	type InviterRewardProportion = InviterRewardProportion;
 	type InviteeRewardProportion = InviteeRewardProportion;
 	type PriceData = PriceDao;
-	type UsdtCurrencyId = UsdtCurrencyId;
 	type KycHandler = Kyc;
 	type WeightInfo = pallet_ico::weights::DicoWeight<Runtime>;
-	type KusdCurrencyId = KusdCurrencyId;
+	type USDCurrencyId = USDCurrencyId;
 }
 
 parameter_types! {

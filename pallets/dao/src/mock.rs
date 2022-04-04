@@ -262,8 +262,7 @@ parameter_types! {
 	pub const ChillDuration: BlockNumber = 5 * DAYS;
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(10u8);
-	pub const UsdtCurrencyId: AssetId = NEW_USDT;
-	pub const KusdCurrencyId: AssetId = kUSD;
+	pub const USDCurrencyId: AssetId = kUSD;
 
 }
 
@@ -284,7 +283,6 @@ impl ico::Config for Test {
 	type RequestExpire = RequestExpire;
 	type CurrenciesHandler = Currencies;
 	type IcoTotalReward = IcoTotalReward;
-
 	type DicoTreasuryHandler = DicoTreasury;
 	type TerminateProtectPeriod = TerminateProtectPeriod;
 	type ReleaseProtectPeriod = ReleaseProtectPeriod;
@@ -292,9 +290,8 @@ impl ico::Config for Test {
 	type InviterRewardProportion = InviterRewardProportion;
 	type InviteeRewardProportion = InviteeRewardProportion;
 	type PriceData = PriceDao;
-	type UsdtCurrencyId = UsdtCurrencyId;
 	type KycHandler = Kyc;
-	type KusdCurrencyId = KusdCurrencyId;
+	type USDCurrencyId = USDCurrencyIdd;
 }
 
 parameter_types! {

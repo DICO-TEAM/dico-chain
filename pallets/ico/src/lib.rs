@@ -64,7 +64,7 @@ pub mod traits;
 mod benchmarking;
 pub mod weights;
 const ICO_ID: LockIdentifier = *b"ico     ";
-const HalfDuration: u128 = 200_000_000u128 * KUSD;
+const HalfDuration: u128 = 200_000_000u128 * USD;
 
 #[derive(PartialEq, Encode, Decode, RuntimeDebug, Clone, TypeInfo)]
 pub enum IcoStatus {
@@ -325,9 +325,7 @@ pub mod pallet {
 		#[pallet::constant]
 		type InviteeRewardProportion: Get<Percent>;
 		#[pallet::constant]
-		type UsdtCurrencyId: Get<AssetId>;
-		#[pallet::constant]
-		type KusdCurrencyId: Get<AssetId>;
+		type USDCurrencyId: Get<AssetId>;
 	}
 
 	#[pallet::storage]
@@ -1792,10 +1790,10 @@ pub mod pallet {
 		}
 
 		pub fn get_token_price(currency_id: AssetId) -> MultiBalanceOf<T> {
-			if currency_id == T::KusdCurrencyId::get() {
-				return KUSD.saturated_into::<MultiBalanceOf<T>>();
+			if currency_id == T::USDCurrencyId::get() {
+				return USD.saturated_into::<MultiBalanceOf<T>>();
 			}
-			match T::PriceData::get_price(currency_id, T::KusdCurrencyId::get()) {
+			match T::PriceData::get_price(currency_id, T::USDCurrencyId::get()) {
 				Some(x) => {
 					runtime_print!(
 						" ---------------the token {:?}, price is {:?} ------------------",
@@ -2155,7 +2153,7 @@ impl<T: Config> IcoHandler<AssetId, MultiBalanceOf<T>, T::AccountId, DispatchErr
 			total_ico_amount: (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 			user_min_amount: (100 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 			user_max_amount: (2000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-			exchange_token: T::UsdtCurrencyId::get(),
+			exchange_token: T::USDCurrencyId::get(),
 			exchange_token_total_amount: (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 			exclude_area: vec![AreaCode::AD],
 			lock_proportion: Default::default(),
@@ -2187,7 +2185,7 @@ impl<T: Config> IcoHandler<AssetId, MultiBalanceOf<T>, T::AccountId, DispatchErr
 			currency_id: currency_id,
 			inviter: None,
 			index: 1,
-			unreleased_currency_id: T::UsdtCurrencyId::get(),
+			unreleased_currency_id: T::USDCurrencyId::get(),
 			total_usdt: (5000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 			tags: vec![],
 			total: (50000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),

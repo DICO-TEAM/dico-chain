@@ -10,7 +10,7 @@ pub mod currency {
 	pub const MILLICENTS: Balance = 1_000 * MICROCENTS;
 	pub const CENTS: Balance = 1_000 * MILLICENTS; // assume this is worth about a cent.
 	pub const DOLLARS: Balance = 100 * CENTS;
-	pub const KUSD: Balance = CENTS;
+	pub const USD: Balance = CENTS;
 	// kilo
 	pub const KILODOLLARS: Balance = 1000 * DOLLARS;
 	// million
