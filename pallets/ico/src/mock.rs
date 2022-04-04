@@ -26,7 +26,7 @@ use frame_system;
 use pallet_balances;
 use std::cell::RefCell;
 use currencies::{self as dico_currencies, BasicCurrencyAdapter};
-use KUSD;
+use USD;
 type Key = u32;
 type Value = u128;
 pub type AccountId = u128;
@@ -233,7 +233,7 @@ impl frame_system::Config for Test {
 parameter_types! {
 	pub const MinProportion: Percent = Percent::from_percent(20u8);
 	pub const GetNativeCurrencyId: CurrencyId = DICO;
-	pub const IcoTotalReward: Balance = 2_0000_0000 * KUSD;
+	pub const IcoTotalReward: Balance = 2_0000_0000 * USD;
 	pub const InitiatorPledge: Balance = DOLLARS;
 	pub const RequestPledge: Balance = DOLLARS;
 	pub const RequestExpire: u64 = 100;

@@ -291,7 +291,7 @@ impl ico::Config for Test {
 	type InviteeRewardProportion = InviteeRewardProportion;
 	type PriceData = PriceDao;
 	type KycHandler = Kyc;
-	type USDCurrencyId = USDCurrencyIdd;
+	type USDCurrencyId = USDCurrencyId;
 }
 
 parameter_types! {
