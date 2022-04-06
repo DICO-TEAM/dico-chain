@@ -392,7 +392,7 @@ impl pallet_multisig::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ExistentialDeposit: u128 = 1 * CENTS;
+	pub const ExistentialDeposit: u128 = 1 * DOLLARS;
 	pub const TransferFee: u128 = 1 * CENTS;
 	pub const CreationFee: u128 = 1 * CENTS;
 	pub const MaxLocks: u32 = 50;
