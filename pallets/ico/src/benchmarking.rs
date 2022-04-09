@@ -20,8 +20,8 @@ fn create_asset<T: Config>() {
 		alice.clone(),
 		T::GetNativeCurrencyId::get(),
 		Some(DicoAssetMetadata {
-			name: vec![],
-			symbol: vec![],
+			name: vec![1;4],
+			symbol: vec![1;4],
 			decimals: 12
 		}),
 		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
@@ -31,8 +31,8 @@ fn create_asset<T: Config>() {
 		alice.clone(),
 		T::USDCurrencyId::get(),
 		Some(DicoAssetMetadata {
-			name: vec![],
-			symbol: vec![],
+			name: vec![1;4],
+			symbol: vec![1;4],
 			decimals: 12
 		}),
 		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
@@ -117,9 +117,9 @@ fn set_ico<T: Config>() -> CurrencyId {
 	let bob: T::AccountId = get_bob::<T>();
 	T::MultiCurrency::deposit(currency_id, &bob, 10000u128.saturated_into::<MultiBalanceOf<T>>());
 	let ico_info = IcoParameters {
-		desc: vec![],
+		desc: vec![1;100],
 		currency_id: T::GetNativeCurrencyId::get(),
-		official_website: vec![],
+		official_website: vec![1;20],
 		is_must_kyc: false,
 		user_ico_max_times: 2,
 		total_issuance: (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
@@ -130,7 +130,7 @@ fn set_ico<T: Config>() -> CurrencyId {
 		user_max_amount: (500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 		exchange_token: currency_id,
 		exchange_token_total_amount: (1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-		exclude_area: vec![],
+		exclude_area: vec![1;4],
 		lock_proportion: Percent::from_percent(10u8),
 		unlock_duration: T::BlockNumber::from(1u32),
 		per_duration_unlock_amount: MultiBalanceOf::<T>::from(100u32),
@@ -213,9 +213,9 @@ benchmarks! {
 		let bob: T::AccountId = get_bob::<T>();
 		T::MultiCurrency::deposit(currency_id, &bob, (100000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>());
 		let ico_info = IcoParameters {
-			desc: vec![],
+			desc: vec![1;100],
 			currency_id: T::GetNativeCurrencyId::get(),
-			official_website: vec![],
+			official_website: vec![1;20],
 			is_must_kyc: false,
 			user_ico_max_times: 2,
 			total_issuance: (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
@@ -226,7 +226,7 @@ benchmarks! {
 			user_max_amount: (500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 			exchange_token: currency_id,
 			exchange_token_total_amount: (1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-			exclude_area: vec![],
+			exclude_area: vec![1;4],
 			lock_proportion: Default::default(),
 			unlock_duration: T::BlockNumber::from(0u32),
 			per_duration_unlock_amount: MultiBalanceOf::<T>::from(100u32),

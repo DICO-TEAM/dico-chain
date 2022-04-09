@@ -24,7 +24,7 @@ fn get_bob<T: Config>() -> T::AccountId {
 fn create_nft_class<T: Config>() -> (T::AccountId, T::ClassId) {
 	let caller: T::AccountId = whitelisted_caller();
 	T::Currency::make_free_balance_be(&caller, (10000 * DOLLARS).saturated_into::<BalanceOf<T>>());
-	let remark_message = vec![1; 3];
+	let remark_message = vec![1; 100];
 	let class = ClassData {
 		level: NftLevel::Rookie,
 		power_threshold: BalanceOf::<T>::default(),
@@ -38,7 +38,7 @@ fn create_nft_class<T: Config>() -> (T::AccountId, T::ClassId) {
 
 fn create_nft_token<T: Config>() -> (T::AccountId, T::ClassId, T::TokenId) {
 	let (caller, class_id) = create_nft_class::<T>();
-	let string = vec![1; 3];
+	let string = vec![1; 100];
 	assert!(NFT::<T>::mint(
 		RawOrigin::Signed(caller.clone()).into(),
 		class_id,
@@ -76,7 +76,7 @@ fn active_nft<T: Config>() -> (T::AccountId, T::ClassId, T::TokenId) {
 benchmarks! {
 	create_class {
 		let caller: T::AccountId = whitelisted_caller();
-		let remark_message = vec![1; 3];
+		let remark_message = vec![1; 100];
 
 	}:_(RawOrigin::Signed(caller.clone()), remark_message, ClassData {
 		level: NftLevel::Rookie,
@@ -91,7 +91,7 @@ benchmarks! {
 
 	mint {
 		let (caller, class_id) = create_nft_class::<T>();
-		let string = vec![1; 3];
+		let string = vec![1; 100];
 	}:_(RawOrigin::Signed(caller.clone()), class_id, string.clone(), string.clone(), string.clone())
 	verify {
 		assert_eq!(Tokens::<T>::contains_key(class_id, T::TokenId::default()), true);
