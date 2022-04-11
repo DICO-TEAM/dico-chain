@@ -4,7 +4,7 @@
 //! DATE: 2022-01-29, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
 //! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("tico"), DB CACHE: 128
 
-// Executed Command:
+// // Executed Command:
 // target/release/dico
 // benchmark
 // --chain=tico
@@ -16,11 +16,11 @@
 // --repeat=20
 // --template=./.maintain/pallet-weight-template.hbs
 // --output
-// ./pallets/ico/src/weights.rs
-
-#![cfg_attr(rustfmt, rustfmt_skip)]
-#![allow(unused_parens)]
-#![allow(unused_imports)]
+// ./pallets/ico/src/weights1.rs
+//
+// #![cfg_attr(rustfmt, rustfmt_skip)]
+// #![allow(unused_parens)]
+// #![allow(unused_imports)]
 
 use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
 use sp_std::marker::PhantomData;
