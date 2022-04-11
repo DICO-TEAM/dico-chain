@@ -34,7 +34,7 @@ use frame_support::{
 	construct_runtime, match_type, parameter_types,
 	traits::{Contains, EnsureOneOf, EqualPrivilegeOnly, Everything, LockIdentifier, Nothing, U128CurrencyToVote},
 	weights::{
-		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, WEIGHT_PER_SECOND},
+		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
 		DispatchClass, IdentityFee, Weight,
 	},
 	PalletId,
