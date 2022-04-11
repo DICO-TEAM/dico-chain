@@ -44,6 +44,3 @@ jobs:
 
     - name: Test Code
       run: cargo test
-
-    - name: Runtime Benchmarks
-      run: cargo build --release --features runtime-benchmarks
