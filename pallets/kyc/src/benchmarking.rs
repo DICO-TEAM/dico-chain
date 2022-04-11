@@ -73,7 +73,6 @@ benchmarks! {
 	clear_kyc {
 		let caller: T::AccountId = whitelisted_caller();
 		let caller_origin = <T as frame_system::Config>::Origin::from(RawOrigin::Signed(caller.clone()));
-		let caller_lookup = <T::Lookup as StaticLookup>::unlookup(caller.clone());
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 
 		let r in 1 .. T::MaxIAS::get() - 1 => add_adminer::<T>(r)?;
@@ -92,7 +91,6 @@ benchmarks! {
 		let r in 1 .. T::MaxIAS::get() - 1 => add_adminer::<T>(r)?;
 		let caller: T::AccountId = account("caller", r, SEED);
 		let caller_origin = <T as frame_system::Config>::Origin::from(RawOrigin::Signed(caller.clone()));
-		let caller_lookup = <T::Lookup as StaticLookup>::unlookup(caller.clone());
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 
 		KYC::<T>::set_kyc(caller_origin.clone(), create_kyc())?;
@@ -108,7 +106,6 @@ benchmarks! {
 
 		let caller: T::AccountId = whitelisted_caller();
 		let caller_origin = <T as frame_system::Config>::Origin::from(RawOrigin::Signed(caller.clone()));
-		let caller_lookup = <T::Lookup as StaticLookup>::unlookup(caller.clone());
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 
 		let caller_kyc = create_kyc();
@@ -281,7 +278,6 @@ benchmarks! {
 
 		let caller: T::AccountId = account("target", 2, SEED);
 		let caller_origin = <T as frame_system::Config>::Origin::from(RawOrigin::Signed(caller.clone()));
-		let caller_lookup = <T::Lookup as StaticLookup>::unlookup(caller.clone());
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 
 		let caller_kyc = create_kyc();
@@ -326,7 +322,6 @@ benchmarks! {
 
 		let caller: T::AccountId = account("target", 2, SEED);
 		let caller_origin = <T as frame_system::Config>::Origin::from(RawOrigin::Signed(caller.clone()));
-		let caller_lookup = <T::Lookup as StaticLookup>::unlookup(caller.clone());
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 
 		let caller_kyc = create_kyc();
@@ -374,7 +369,6 @@ benchmarks! {
 
 		let caller: T::AccountId = account("target", 2, SEED);
 		let caller_origin = <T as frame_system::Config>::Origin::from(RawOrigin::Signed(caller.clone()));
-		let caller_lookup = <T::Lookup as StaticLookup>::unlookup(caller.clone());
 		let _ = T::Currency::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
 
 		let caller_kyc = create_kyc();
