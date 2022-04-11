@@ -16,10 +16,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: clear disk space
-        run: bash ./script/free_disk_space.sh"
-
-
       - name: Check Code
         run: cargo check
 
