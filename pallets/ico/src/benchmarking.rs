@@ -11,6 +11,7 @@ use frame_support::assert_ok;
 use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
 use sp_std::vec;
+use pallet_kyc::types::AreaCode;
 
 const SEED: u32 = 0;
 
@@ -130,7 +131,7 @@ fn set_ico<T: Config>() -> CurrencyId {
 		user_max_amount: (500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 		exchange_token: currency_id,
 		exchange_token_total_amount: (1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-		exclude_area: vec![1;4],
+		exclude_area: vec![AreaCode::AF],
 		lock_proportion: Percent::from_percent(10u8),
 		unlock_duration: T::BlockNumber::from(1u32),
 		per_duration_unlock_amount: MultiBalanceOf::<T>::from(100u32),
@@ -226,7 +227,7 @@ benchmarks! {
 			user_max_amount: (500 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
 			exchange_token: currency_id,
 			exchange_token_total_amount: (1000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
-			exclude_area: vec![1;4],
+			exclude_area: vec![AreaCode::AF],
 			lock_proportion: Default::default(),
 			unlock_duration: T::BlockNumber::from(0u32),
 			per_duration_unlock_amount: MultiBalanceOf::<T>::from(100u32),
