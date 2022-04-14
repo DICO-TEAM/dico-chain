@@ -59,6 +59,7 @@ mod tests;
 pub mod traits;
 pub mod types;
 pub mod weights;
+pub mod migrations;
 
 use crate::traits::KycHandler;
 use crate::types::*;
