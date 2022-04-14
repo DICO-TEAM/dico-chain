@@ -307,6 +307,82 @@ parameter_types! {
 	pub const SS58Prefix: u16 = 42;
 }
 
+pub struct BaseCallFilter;
+impl Contains<Call> for BaseCallFilter {
+	fn contains(call: &Call) -> bool {
+		matches!(
+            call,
+            // System
+            Call::System(_) |
+            Call::Timestamp(_) |
+            Call::Balances(_) |
+            Call::Multisig(_) |
+            Call::Balances(_) |
+            Call::Scheduler(_) |
+            Call::Preimage(_) |
+
+            // Council,Membership
+            Call::Democracy(_) |
+            Call::Council(_) |
+            Call::TechnicalCommittee(_) |
+            Call::Elections(_) |
+            Call::TechnicalMembership(_) |
+            Call::Identity(_) |
+
+            // treasury
+            Call::Bounties(_) |
+            Call::Treasury(_) |
+
+            // Consensus
+            Call::Authorship(_) |
+            Call::CollatorSelection(_) |
+            Call::CollatorSelection(_) |
+            Call::Session(_) |
+
+            // 3rd Party
+            Call::Vesting(_) |
+            Call::OrmlXcm(_) |
+            Call::XTokens(_) |
+
+
+            // Parachain
+            Call::XcmpQueue(_) |
+            Call::PolkadotXcm(_) |
+            Call::CumulusXcm(_) |
+            Call::DmpQueue(_) |
+            Call::DmpQueue(_) |
+            Call::ParachainSystem(_) |
+
+            // local pallet
+            Call::Kyc(_) |
+            Call::DicoTreasury(_) |
+            Call::Dao(_) |
+            Call::Ico(_) |
+            Call::Ico(_) |
+            Call::AMM(_) |
+            Call::Nft(_) |
+            Call::LBP(_) |
+            Call::Farm(_) |
+            Call::FarmExtend(_) |
+            Call::PriceDao(_) |
+            Call::Currencies(_) |
+            Call::DicoOracle(_) |
+
+			// temp
+			Call::Sudo(_)
+        )
+
+	}
+}
+
+pub struct CallFilterRouter;
+impl Contains<Call> for CallFilterRouter {
+	fn contains(call: &Call) -> bool {
+		BaseCallFilter::contains(call)
+	}
+}
+
+
 impl frame_system::Config for Runtime {
 	/// The identifier used to distinguish between accounts.
 	type AccountId = AccountId;
@@ -342,7 +418,7 @@ impl frame_system::Config for Runtime {
 	/// The weight of database operations that the runtime can invoke.
 	type DbWeight = RocksDbWeight;
 	/// The basic call filter to use in dispatchable.
-	type BaseCallFilter = Everything;
+	type BaseCallFilter = CallFilterRouter;
 	/// Weight information for the extrinsics of this pallet.
 	type SystemWeightInfo = ();
 	/// Block & extrinsics weights: base values and limits.
