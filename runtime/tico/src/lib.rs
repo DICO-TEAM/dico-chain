@@ -381,7 +381,7 @@ impl Contains<Call> for BaseCallFilter {
              Call::ParachainSystem(_) |
 
              // local pallet
-             // Call::Kyc(_) |
+             Call::Kyc(_) |
              Call::DicoTreasury(_) |
              Call::Dao(_) |
              Call::Ico(_) |
