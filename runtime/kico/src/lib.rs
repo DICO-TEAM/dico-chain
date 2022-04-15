@@ -362,14 +362,12 @@ impl Contains<Call> for BaseCallFilter {
              Call::PolkadotXcm(_) |
              Call::CumulusXcm(_) |
              Call::DmpQueue(_) |
-             Call::DmpQueue(_) |
              Call::ParachainSystem(_) |
 
              // local pallet
              Call::Kyc(_) |
              Call::DicoTreasury(_) |
              Call::Dao(_) |
-             Call::Ico(_) |
              Call::Ico(_) |
              Call::AMM(_) |
              Call::Nft(_) |
