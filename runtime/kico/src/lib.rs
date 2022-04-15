@@ -8,7 +8,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use dico_primitives::{
 	constants::{currency::*, parachains::*, time::*},
-	tokens::{KAR, KICO, KSM, USDT, KUSD, LKSM},
+	tokens::{KAR, KICO, KSM, KUSD, LKSM, USDT},
 	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
 	Signature,
 };
@@ -32,7 +32,10 @@ use static_assertions::const_assert;
 // A few exports that help ease life for downstream crates.
 use frame_support::{
 	construct_runtime, match_type, parameter_types,
-	traits::{Contains, EnsureOneOf, EqualPrivilegeOnly, Everything, LockIdentifier, Nothing, U128CurrencyToVote},
+	traits::{
+		Contains, EnsureOneOf, EqualPrivilegeOnly, Everything, LockIdentifier, Nothing, OnRuntimeUpgrade,
+		U128CurrencyToVote,
+	},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
 		DispatchClass, IdentityFee, Weight,
@@ -99,9 +102,32 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signatu
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
-/// Executive: handles dispatch to the various modules.
-pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
+pub type Executive = frame_executive::Executive<
+	Runtime,
+	Block,
+	frame_system::ChainContext<Runtime>,
+	Runtime,
+	AllPalletsWithSystem,
+	KYCMigrationV2,
+>;
+
+pub struct KYCMigrationV2;
+
+impl OnRuntimeUpgrade for KYCMigrationV2 {
+	fn on_runtime_upgrade() -> frame_support::weights::Weight {
+		pallet_kyc::migrations::v2::migrate::<Runtime>()
+	}
+
+	#[cfg(feature = "try-runtime")]
+	fn pre_upgrade() -> Result<(), &'static str> {
+		pallet_kyc::migrations::v2::pre_migrate::<Runtime>()
+	}
+
+	#[cfg(feature = "try-runtime")]
+	fn post_upgrade() -> Result<(), &'static str> {
+		pallet_kyc::migrations::v2::post_migrate::<Runtime>()
+	}
+}
 
 impl_opaque_keys! {
 	pub struct SessionKeys {
@@ -115,7 +141,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("KICO"),
 	impl_name: create_runtime_str!("KICO"),
 	authoring_version: 1,
-	spec_version: 1250,
+	spec_version: 1260,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -293,6 +319,82 @@ parameter_types! {
 	pub const SS58Prefix: u16 = 42;
 }
 
+pub struct BaseCallFilter;
+impl Contains<Call> for BaseCallFilter {
+	fn contains(call: &Call) -> bool {
+		matches!(
+             call,
+             // System
+             Call::System(_) |
+             Call::Timestamp(_) |
+             Call::Balances(_) |
+             Call::Multisig(_) |
+             Call::Balances(_) |
+             Call::Scheduler(_) |
+             Call::Preimage(_) |
+
+             // Council,Membership
+             Call::Democracy(_) |
+             Call::Council(_) |
+             Call::TechnicalCommittee(_) |
+             Call::Elections(_) |
+             Call::TechnicalMembership(_) |
+             Call::Identity(_) |
+
+             // treasury
+             Call::Bounties(_) |
+             Call::Treasury(_) |
+
+             // Consensus
+             Call::Authorship(_) |
+             Call::CollatorSelection(_) |
+             Call::CollatorSelection(_) |
+             Call::Session(_) |
+
+             // 3rd Party
+             Call::Vesting(_) |
+             Call::OrmlXcm(_) |
+             Call::XTokens(_) |
+
+
+             // Parachain
+             Call::XcmpQueue(_) |
+             Call::PolkadotXcm(_) |
+             Call::CumulusXcm(_) |
+             Call::DmpQueue(_) |
+             Call::DmpQueue(_) |
+             Call::ParachainSystem(_) |
+
+             // local pallet
+             // Call::Kyc(_) |
+             Call::DicoTreasury(_) |
+             Call::Dao(_) |
+             Call::Ico(_) |
+             Call::Ico(_) |
+             Call::AMM(_) |
+             Call::Nft(_) |
+             Call::LBP(_) |
+             Call::Farm(_) |
+             Call::FarmExtend(_) |
+             Call::PriceDao(_) |
+             Call::Currencies(_) |
+             Call::DicoOracle(_) |
+
+ 			// temp
+ 			Call::Sudo(_)
+         )
+
+	}
+}
+
+pub struct CallFilterRouter;
+impl Contains<Call> for CallFilterRouter {
+	fn contains(call: &Call) -> bool {
+		BaseCallFilter::contains(call)
+	}
+}
+
+
 impl frame_system::Config for Runtime {
 	/// The identifier used to distinguish between accounts.
 	type AccountId = AccountId;
@@ -328,7 +430,7 @@ impl frame_system::Config for Runtime {
 	/// The weight of database operations that the runtime can invoke.
 	type DbWeight = RocksDbWeight;
 	/// The basic call filter to use in dispatchable.
-	type BaseCallFilter = Everything;
+	type BaseCallFilter = CallFilterRouter;
 	/// Weight information for the extrinsics of this pallet.
 	type SystemWeightInfo = ();
 	/// Block & extrinsics weights: base values and limits.
@@ -836,12 +938,12 @@ parameter_types! {
 		ksm_per_second() * 30
 	);
 	pub KicoPerSecondOfCanonicalLocation: (AssetId, u128) = (
-        MultiLocation::new(
-            0,
-            X1(GeneralKey(b"KICO".to_vec())),
-        ).into(),
-        ksm_per_second() * 30
-    );
+		MultiLocation::new(
+			0,
+			X1(GeneralKey(b"KICO".to_vec())),
+		).into(),
+		ksm_per_second() * 30
+	);
 	pub KusdPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
