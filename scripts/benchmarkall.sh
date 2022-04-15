@@ -8,7 +8,7 @@ cd ${PROJECT_ROOT}
 
 steps=50
 repeat=20
-chain=tico
+chain=kico
 pallets=(
 	amm
 	currencies
