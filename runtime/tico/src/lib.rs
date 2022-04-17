@@ -347,7 +347,7 @@ impl Contains<Call> for BaseCallFilter {
 			Call::Balances(_) |
 			Call::Scheduler(_) |
 			Call::Preimage(_) |
-			Call::Utility(_) ｜
+			Call::Utility(_) |
 
 			// Council,Membership
 			Call::Democracy(_) |

@@ -332,7 +332,7 @@ impl Contains<Call> for BaseCallFilter {
 			Call::Balances(_) |
 			Call::Scheduler(_) |
 			Call::Preimage(_) |
-			Call::Utility(_) ｜
+			Call::Utility(_) |
 
 			// Council,Membership
 			Call::Democracy(_) |
@@ -348,7 +348,6 @@ impl Contains<Call> for BaseCallFilter {
 
 			// Consensus
 			Call::Authorship(_) |
-			Call::CollatorSelection(_) |
 			Call::CollatorSelection(_) |
 			Call::Session(_) |
 
@@ -377,7 +376,7 @@ impl Contains<Call> for BaseCallFilter {
 			Call::FarmExtend(_) |
 			Call::PriceDao(_) |
 			Call::Currencies(_) |
-			Call::DicoOracle(_) |
+			Call::DicoOracle(_)
 
 			// temp
 			// Call::Sudo(_)
