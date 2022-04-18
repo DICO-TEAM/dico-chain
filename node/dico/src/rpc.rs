@@ -1,5 +1,3 @@
-#![warn(missing_docs)]
-
 use std::sync::Arc;
 
 use dico_primitives::{AccountId, AssetId, Balance, Block, Index, Nonce, PoolId};

@@ -342,7 +342,6 @@ impl Contains<Call> for BaseCallFilter {
 			// System
 			Call::System(_) |
 			Call::Timestamp(_) |
-			Call::Balances(_) |
 			Call::Multisig(_) |
 			Call::Balances(_) |
 			Call::Scheduler(_) |
