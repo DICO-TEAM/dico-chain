@@ -4,7 +4,7 @@ use sp_api::{CallApiAt, NumberFor, ProvideRuntimeApi};
 use sp_blockchain::HeaderBackend;
 use sp_consensus::BlockStatus;
 use sp_runtime::{
-	generic::{self, SignedBlock},
+	generic::{SignedBlock},
 	traits::{BlakeTwo256, Block as BlockT},
 	Justifications,
 };
@@ -130,7 +130,9 @@ pub trait ClientHandle {
 #[allow(dead_code)]
 #[derive(Clone)]
 pub enum Client {
+	/// TICO
 	TICO(Arc<crate::service::FullClient<tico_runtime::RuntimeApi, crate::service::TICORuntimeExecutor>>),
+	/// KICO
 	KICO(Arc<crate::service::FullClient<kico_runtime::RuntimeApi, crate::service::KICORuntimeExecutor>>),
 }
 

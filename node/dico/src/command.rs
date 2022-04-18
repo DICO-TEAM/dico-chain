@@ -1,7 +1,7 @@
 use crate::{
 	chain_spec,
 	cli::{Cli, RelayChainCli, Subcommand},
-	service::{new_partial, IdentifyVariant},
+	service::{IdentifyVariant},
 };
 use codec::Encode;
 use cumulus_client_service::genesis::generate_genesis_block;
@@ -15,7 +15,7 @@ use sc_cli::{
 };
 use sc_service::{
 	config::{BasePath, PrometheusConfig},
-	PartialComponents, TaskManager,
+	PartialComponents,
 };
 use sp_core::hexdisplay::HexDisplay;
 use sp_runtime::traits::Block as BlockT;
