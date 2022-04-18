@@ -341,60 +341,61 @@ impl Contains<Call> for BaseCallFilter {
 			call,
 			// System
 			Call::System(_) |
-             Call::Timestamp(_) |
-             Call::Balances(_) |
-             Call::Multisig(_) |
-             Call::Balances(_) |
-             Call::Scheduler(_) |
-             Call::Preimage(_) |
+			Call::Timestamp(_) |
+			Call::Balances(_) |
+			Call::Multisig(_) |
+			Call::Balances(_) |
+			Call::Scheduler(_) |
+			Call::Preimage(_) |
+			Call::Utility(_) |
 
-             // Council,Membership
-             Call::Democracy(_) |
-             Call::Council(_) |
-             Call::TechnicalCommittee(_) |
-             Call::Elections(_) |
-             Call::TechnicalMembership(_) |
-             Call::Identity(_) |
+			// Council,Membership
+			Call::Democracy(_) |
+			Call::Council(_) |
+			Call::TechnicalCommittee(_) |
+			Call::Elections(_) |
+			Call::TechnicalMembership(_) |
+			Call::Identity(_) |
 
-             // treasury
-             Call::Bounties(_) |
-             Call::Treasury(_) |
+			// treasury
+			Call::Bounties(_) |
+			Call::Treasury(_) |
 
-             // Consensus
-             Call::Authorship(_) |
-             Call::CollatorSelection(_) |
-             Call::CollatorSelection(_) |
-             Call::Session(_) |
+			// Consensus
+			Call::Authorship(_) |
+			Call::CollatorSelection(_) |
+			Call::Session(_) |
 
-             // 3rd Party
-             Call::Vesting(_) |
-             Call::OrmlXcm(_) |
-             Call::XTokens(_) |
+			// 3rd Party
+			Call::Vesting(_) |
+			Call::OrmlXcm(_) |
+			Call::XTokens(_) |
 
 
-             // Parachain
-             Call::XcmpQueue(_) |
-             Call::PolkadotXcm(_) |
-             Call::CumulusXcm(_) |
-             Call::DmpQueue(_) |
-             Call::ParachainSystem(_) |
+			// Parachain
+			Call::XcmpQueue(_) |
+			Call::PolkadotXcm(_) |
+			Call::CumulusXcm(_) |
+			Call::DmpQueue(_) |
+			Call::ParachainSystem(_) |
 
-             // local pallet
-             Call::Kyc(_) |
-             Call::DicoTreasury(_) |
-             Call::Dao(_) |
-             Call::Ico(_) |
-             Call::AMM(_) |
-             Call::Nft(_) |
-             Call::LBP(_) |
-             Call::Farm(_) |
-             Call::FarmExtend(_) |
-             Call::PriceDao(_) |
-             Call::Currencies(_) |
-             Call::DicoOracle(_) |
+			// local pallet
+			Call::Kyc(_) |
+			Call::DicoTreasury(_) |
+			Call::Dao(_) |
+			Call::Ico(_) |
+			Call::AMM(_) |
+			Call::Nft(_) |
+			Call::LBP(_) |
+			Call::Farm(_) |
+			Call::FarmExtend(_) |
+			Call::PriceDao(_) |
+			Call::Currencies(_) |
+			Call::DicoOracle(_) |
 
- 			// temp
- 			Call::Sudo(_)
+
+			// temp
+			Call::Sudo(_)
 		)
 	}
 }
@@ -471,7 +472,7 @@ impl pallet_utility::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
 	type PalletsOrigin = OriginCaller;
-	type WeightInfo = ();
+	type WeightInfo = pallet_utility::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {

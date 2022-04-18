@@ -323,63 +323,63 @@ pub struct BaseCallFilter;
 impl Contains<Call> for BaseCallFilter {
 	fn contains(call: &Call) -> bool {
 		matches!(
-             call,
-             // System
-             Call::System(_) |
-             Call::Timestamp(_) |
-             Call::Balances(_) |
-             Call::Multisig(_) |
-             Call::Balances(_) |
-             Call::Scheduler(_) |
-             Call::Preimage(_) |
+			call,
+			// System
+			Call::System(_) |
+			Call::Timestamp(_) |
+			Call::Balances(_) |
+			Call::Multisig(_) |
+			Call::Balances(_) |
+			Call::Scheduler(_) |
+			Call::Preimage(_) |
+			Call::Utility(_) |
 
-             // Council,Membership
-             Call::Democracy(_) |
-             Call::Council(_) |
-             Call::TechnicalCommittee(_) |
-             Call::Elections(_) |
-             Call::TechnicalMembership(_) |
-             Call::Identity(_) |
+			// Council,Membership
+			Call::Democracy(_) |
+			Call::Council(_) |
+			Call::TechnicalCommittee(_) |
+			Call::Elections(_) |
+			Call::TechnicalMembership(_) |
+			Call::Identity(_) |
 
-             // treasury
-             Call::Bounties(_) |
-             Call::Treasury(_) |
+			// treasury
+			Call::Bounties(_) |
+			Call::Treasury(_) |
 
-             // Consensus
-             Call::Authorship(_) |
-             Call::CollatorSelection(_) |
-             Call::CollatorSelection(_) |
-             Call::Session(_) |
+			// Consensus
+			Call::Authorship(_) |
+			Call::CollatorSelection(_) |
+			Call::Session(_) |
 
-             // 3rd Party
-             Call::Vesting(_) |
-             Call::OrmlXcm(_) |
-             Call::XTokens(_) |
+			// 3rd Party
+			Call::Vesting(_) |
+			Call::OrmlXcm(_) |
+			Call::XTokens(_) |
 
 
-             // Parachain
-             Call::XcmpQueue(_) |
-             Call::PolkadotXcm(_) |
-             Call::CumulusXcm(_) |
-             Call::DmpQueue(_) |
-             Call::ParachainSystem(_) |
+			// Parachain
+			Call::XcmpQueue(_) |
+			Call::PolkadotXcm(_) |
+			Call::CumulusXcm(_) |
+			Call::DmpQueue(_) |
+			Call::ParachainSystem(_) |
 
-             // local pallet
-             Call::Kyc(_) |
-             Call::DicoTreasury(_) |
-             Call::Dao(_) |
-             Call::Ico(_) |
-             Call::AMM(_) |
-             Call::Nft(_) |
-             Call::LBP(_) |
-             Call::Farm(_) |
-             Call::FarmExtend(_) |
-             Call::PriceDao(_) |
-             Call::Currencies(_) |
-             Call::DicoOracle(_) |
+			// local pallet
+			Call::Kyc(_) |
+			Call::DicoTreasury(_) |
+			Call::Dao(_) |
+			Call::Ico(_) |
+			Call::AMM(_) |
+			Call::Nft(_) |
+			Call::LBP(_) |
+			Call::Farm(_) |
+			Call::FarmExtend(_) |
+			Call::PriceDao(_) |
+			Call::Currencies(_) |
+			Call::DicoOracle(_)
 
- 			// temp
- 			Call::Sudo(_)
+			// temp
+			// Call::Sudo(_)
          )
 
 	}
@@ -430,7 +430,7 @@ impl frame_system::Config for Runtime {
 	/// The basic call filter to use in dispatchable.
 	type BaseCallFilter = CallFilterRouter;
 	/// Weight information for the extrinsics of this pallet.
-	type SystemWeightInfo = ();
+	type SystemWeightInfo = weights::frame_system::WeightInfo<Runtime>;
 	/// Block & extrinsics weights: base values and limits.
 	type BlockWeights = RuntimeBlockWeights;
 	/// The maximum length of a block (in bytes).
@@ -458,7 +458,7 @@ impl pallet_utility::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
 	type PalletsOrigin = OriginCaller;
-	type WeightInfo = ();
+	type WeightInfo = pallet_utility::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -490,10 +490,10 @@ impl pallet_balances::Config for Runtime {
 	type Balance = Balance;
 	/// The ubiquitous event type.
 	type Event = Event;
-	type DustRemoval = ();
+	type DustRemoval = Treasury;
 	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = System;
-	type WeightInfo = ();
+	type WeightInfo = weights::pallet_balances::WeightInfo<Runtime>;
 	type MaxLocks = MaxLocks;
 	type MaxReserves = MaxReserves;
 	type ReserveIdentifier = [u8; 8];
@@ -520,8 +520,8 @@ impl pallet_sudo::Config for Runtime {
 }
 
 parameter_types! {
-	pub const LaunchPeriod: BlockNumber = 7 * 24 * 60 * MINUTES;
-	pub const VotingPeriod: BlockNumber = 7 * 24 * 60 * MINUTES;
+	pub const LaunchPeriod: BlockNumber = 5 * 24 * 60 * MINUTES;
+	pub const VotingPeriod: BlockNumber = 5 * 24 * 60 * MINUTES;
 	pub const FastTrackVotingPeriod: BlockNumber = 3 * 60 * MINUTES;
 	pub const InstantAllowed: bool = true;
 	pub const MinimumDeposit: Balance = 100 * DOLLARS;
@@ -597,7 +597,7 @@ impl pallet_democracy::Config for Runtime {
 }
 
 parameter_types! {
-	pub const CouncilMotionDuration: BlockNumber = 5 * DAYS;
+	pub const CouncilMotionDuration: BlockNumber = 3 * DAYS;
 	pub const CouncilMaxProposals: u32 = 100;
 	pub const CouncilMaxMembers: u32 = 100;
 }
@@ -612,7 +612,7 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 	type MaxProposals = CouncilMaxProposals;
 	type MaxMembers = CouncilMaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
-	type WeightInfo = ();
+	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -664,7 +664,7 @@ impl pallet_bounties::Config for Runtime {
 }
 
 parameter_types! {
-	pub const TechnicalMotionDuration: BlockNumber = 5 * DAYS;
+	pub const TechnicalMotionDuration: BlockNumber = 3 * DAYS;
 	pub const TechnicalMaxProposals: u32 = 100;
 	pub const TechnicalMaxMembers: u32 = 100;
 }
@@ -679,7 +679,7 @@ impl pallet_collective::Config<TechnicalCollective> for Runtime {
 	type MaxProposals = TechnicalMaxProposals;
 	type MaxMembers = TechnicalMaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
-	type WeightInfo = ();
+	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
 }
 
 type EnsureRootOrHalfCouncil = EnsureOneOf<
@@ -740,7 +740,7 @@ impl pallet_treasury::Config for Runtime {
 	type Burn = Burn;
 	type BurnDestination = ();
 	type SpendFunds = Bounties;
-	type WeightInfo = ();
+	type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
 	type MaxApprovals = MaxApprovals;
 }
 
@@ -774,7 +774,7 @@ impl pallet_scheduler::Config for Runtime {
 	type MaximumWeight = MaximumSchedulerWeight;
 	type ScheduleOrigin = EnsureRoot<AccountId>;
 	type MaxScheduledPerBlock = MaxScheduledPerBlock;
-	type WeightInfo = ();
+	type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
 	type OriginPrivilegeCmp = EqualPrivilegeOnly;
 	type PreimageProvider = Preimage;
 	type NoPreimagePostponement = NoPreimagePostponement;
@@ -1111,7 +1111,7 @@ impl pallet_identity::Config for Runtime {
 	type Slashed = Treasury;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type RegistrarOrigin = EnsureRootOrHalfCouncil;
-	type WeightInfo = ();
+	type WeightInfo = pallet_identity::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
