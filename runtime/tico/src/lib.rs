@@ -142,7 +142,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("TICO"),
 	impl_name: create_runtime_str!("TICO"),
 	authoring_version: 1,
-	spec_version: 1260,
+	spec_version: 1300,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
