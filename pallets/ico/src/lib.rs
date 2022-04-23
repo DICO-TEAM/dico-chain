@@ -1336,7 +1336,7 @@ pub mod pallet {
 							total_amount: user_keep_lock_amount,
 							unlock_amount: 0u32.saturated_into::<MultiBalanceOf<T>>(),
 							unlock_duration: ico.unlock_duration,
-							per_duration_unlock_amount: ico.per_duration_unlock_amount,
+							per_duration_unlock_amount: Self::u256_convert_to_balance((Self::balance_convert_to_u256(thistime_release_amount) * Self::balance_convert_to_u256(ico.per_duration_unlock_amount)) / Self::balance_convert_to_u256(ico.total_ico_amount)),
 						})
 					});
 				}
