@@ -1484,7 +1484,7 @@ construct_runtime!(
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 1,
 		Utility: pallet_utility::{Pallet, Call, Event} = 2,
 		Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 3,
-		Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 4,
+		// Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 4,
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 5,
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 6,
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 7,
