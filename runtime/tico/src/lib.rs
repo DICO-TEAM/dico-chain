@@ -7,8 +7,8 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use dico_primitives::{
-	constants::{currency::*, parachains::*, time::*},
-	tokens::{DICO, KAR, KICO, KSM, KUSD, LKSM, USDT},
+	constants::{currency::*, time::*},
+	tokens::{DICO, KAR, KICO, KSM, KUSD, LKSM},
 	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
 	Signature,
 };
