@@ -1,7 +1,6 @@
 use super::*;
 use crate::{Config, Weight};
 use frame_support::{log, traits::Get};
-use sp_runtime::traits::Zero;
 
 pub mod v2 {
 	use super::*;
