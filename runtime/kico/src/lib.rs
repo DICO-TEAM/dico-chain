@@ -1270,7 +1270,7 @@ impl pallet_currencies::Config for Runtime {
 // price data
 parameter_types! {
 	pub const MaxOracleSize: u32 = 100;
-	pub const MinimumCount: u32 = 5;  // todo: The minimum number is 3
+	pub const MinimumCount: u32 = 3;  // todo: The minimum number is 3
 	pub const ExpiresIn: Moment = 1000 * 60 * 20; // todo: 60 mins
 	pub ZeroAccountId: AccountId = AccountId::from([0u8; 32]);
 	pub const FeedPledgedBalance: Balance = 5000 * DOLLARS;  // todo : pledge 500 dico?
