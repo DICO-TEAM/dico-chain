@@ -357,6 +357,7 @@ impl<T: Config<I>, I: 'static> UpdateOraclesStorgage<T::AccountId, T::OracleKey>
 	}
 
 	fn unlock_price(currency_id: T::OracleKey) {
+		OrcleKeys::<T, I>::remove(&currency_id);
 		LockedPrice::<T, I>::remove(currency_id);
 	}
 }
