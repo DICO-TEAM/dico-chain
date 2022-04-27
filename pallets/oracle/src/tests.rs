@@ -63,6 +63,27 @@ fn should_combined_data() {
 }
 
 #[test]
+fn should_unlock() {
+	new_test_ext().execute_with(|| {
+		let key: u32 = 50;
+		let key: u32 = 50;
+		<ModuleOracle as UpdateOraclesStorgage<AccountId, CurrencyId>>::insert_members(&[1, 2, 3, 4]);
+		assert_ok!(ModuleOracle::feed_values(Origin::signed(1), vec![(key, 1300)]));
+		assert_ok!(ModuleOracle::feed_values(Origin::signed(2), vec![(key, 1000)]));
+		assert_ok!(ModuleOracle::feed_values(Origin::signed(3), vec![(key, 1200)]));
+
+		// LockedPrice::<Test>::insert(&key, 1200);
+		// OrcleKeys::<Test>::insert(&key, true);
+		ModuleOracle::on_finalize(1);
+		assert_eq!(LockedPrice::<Test>::get(&key), Some(1200));
+		<ModuleOracle as UpdateOraclesStorgage<AccountId, CurrencyId>>::unlock_price(key);
+		ModuleOracle::on_finalize(2);
+		assert_eq!(LockedPrice::<Test>::get(&key), None);
+		assert_eq!(OrcleKeys::<Test>::get(&key), None);
+	});
+}
+
+#[test]
 fn should_return_none_for_non_exist_key() {
 	new_test_ext().execute_with(|| {
 		assert_eq!(ModuleOracle::get(&50), None);

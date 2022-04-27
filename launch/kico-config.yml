@@ -10,18 +10,16 @@ relaychain:
     RUST_LOG: parachain::candidate-backing=trace,parachain::candidate-selection=trace,parachain::pvf=trace,parachain::collator-protocol=trace,parachain::provisioner=trace
   flags:
     - --rpc-methods=unsafe
-    - --ws-max-connections=4096
-    - --force-authoring
-    - --unsafe-pruning
-    - --pruning=1000
-    - --wasm-execution=compiled
-    - --database=RocksDb
-    - --state-cache-size=0
     - --execution=wasm
-    - --no-telemetry
   nodes:
     - name: alice
+      wsPort: 19944
+      rpcPort: 19933
+      port: 31333
     - name: bob
+      wsPort: false
+      rpcPort: false
+      port: false
 
 parachains:
   - image: dicoteam/dico
@@ -30,18 +28,19 @@ parachains:
       collators:
         - alice
       sudo: alice
-    id: 2000
+    id: 2107
     parachain: true
     flags:
       - --rpc-methods=unsafe
       - --force-authoring
-      - --wasm-execution=compiled
       - --execution=wasm
     relaychainFlags:
-      - --wasm-execution=compiled
       - --execution=wasm
     env:
       RUST_LOG: sc_basic_authorship=trace,cumulus-consensus=trace,cumulus-collator=trace,collator_protocol=trace,collation_generation=trace,aura=debug
     nodes:
       - flags:
           - --alice
+        wsPort: 19947
+        rpcPort: 1996
+        port: 31336
