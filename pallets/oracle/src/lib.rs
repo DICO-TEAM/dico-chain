@@ -113,6 +113,8 @@ pub mod module {
 
 		/// New price is locked
 		NewLockedPrice(T::OracleKey, T::OracleValue),
+
+		UnLockedPrice(T::OracleKey),
 	}
 
 	/// Raw values for each oracle operators
@@ -357,7 +359,9 @@ impl<T: Config<I>, I: 'static> UpdateOraclesStorgage<T::AccountId, T::OracleKey>
 	}
 
 	fn unlock_price(currency_id: T::OracleKey) {
-		LockedPrice::<T, I>::remove(currency_id);
+		OrcleKeys::<T, I>::remove(&currency_id);
+		LockedPrice::<T, I>::remove(&currency_id);
+		Self::deposit_event(Event::UnLockedPrice(currency_id));
 	}
 }
 
