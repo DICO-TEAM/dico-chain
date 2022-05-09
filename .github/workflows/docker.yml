@@ -47,4 +47,4 @@ jobs:
           context: scripts/dockerfiles/dico/
           file: dico_builder.Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_ORGNAME }}/${{ matrix.bin }}:${{ steps.docker_tag.outputs.value }}
+          tags: ${{ steps.docker_tag.outputs.value }}
