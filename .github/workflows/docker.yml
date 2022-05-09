@@ -14,9 +14,6 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        bin: [ "dico" ]
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -47,4 +44,4 @@ jobs:
           context: scripts/dockerfiles/dico/
           file: dico_builder.Dockerfile
           push: true
-          tags: ${{ steps.docker_tag.outputs.value }}
+          tags: dicoteam/dico:${{ steps.docker_tag.outputs.value }}
