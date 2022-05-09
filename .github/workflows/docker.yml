@@ -41,7 +41,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: scripts/dockerfiles/dico/
-          file: dico_builder.Dockerfile
+          file: ./scripts/dockerfiles/dico/dico_builder.Dockerfile
           push: true
           tags: dicoteam/dico:${{ steps.docker_tag.outputs.value }}
