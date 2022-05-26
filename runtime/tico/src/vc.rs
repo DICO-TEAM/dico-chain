@@ -23,8 +23,8 @@ impl TryFrom<Call> for CallId {
 						daos_collective::Call::set_ensure_for_every_call{..} => Ok(1 as CallId),
 					_ => Err(()),
 				}
-			}
-			Call::VC(func) => Ok(2 as CallId),
+			},
+			Call::Vault(func) => Ok(2 as CallId),
 			Call::Nft(_) => Ok(3 as CallId),
 			Call::AMM(_) => Ok(4 as CallId),
 			Call::Currencies(_) => Ok(5 as CallId),
@@ -79,7 +79,7 @@ impl BaseDaoCallFilter<Call> for SecondId<u32, CurrencyId> {
 					daos_collective::Call::set_ensure_for_every_call{..}
 				)
 			},
-			Call::VC(_) => true,
+			Call::Vault(_) => true,
 			Call::Currencies(func) => {
 				matches!(func, pallet_currencies::Call::burn{..})
 			},
@@ -129,7 +129,7 @@ impl daos_collective::Config for Runtime {
 	type CollectiveBaseCallFilter = CollectiveBaseCallFilter;
 	type Event = Event;
 	type DefaultVote = daos_collective::PrimeDefaultVote;
-	type GetCollectiveMembers = VC;
+	type GetCollectiveMembers = Vault;
 	type MaxMembersForSystem = MaxMembersForSystem;
 	type WeightInfo = ();
 }

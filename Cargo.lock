@@ -1797,7 +1797,7 @@ dependencies = [
 [[package]]
 name = "daos-collective"
 version = "1.0.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#b94043605ff10c2314bf58b620b2334982120d7f"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#e06be2d664bd713a8418eda6d2c2ad0720009aed"
 dependencies = [
  "daos-create-dao",
  "daos-primitives",
@@ -1816,7 +1816,7 @@ dependencies = [
 [[package]]
 name = "daos-create-dao"
 version = "0.1.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#b94043605ff10c2314bf58b620b2334982120d7f"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#e06be2d664bd713a8418eda6d2c2ad0720009aed"
 dependencies = [
  "daos-primitives",
  "frame-support",
@@ -1830,7 +1830,7 @@ dependencies = [
 [[package]]
 name = "daos-doas"
 version = "1.0.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#b94043605ff10c2314bf58b620b2334982120d7f"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#e06be2d664bd713a8418eda6d2c2ad0720009aed"
 dependencies = [
  "daos-create-dao",
  "daos-primitives",
@@ -1845,7 +1845,7 @@ dependencies = [
 [[package]]
 name = "daos-primitives"
 version = "0.1.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#b94043605ff10c2314bf58b620b2334982120d7f"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#e06be2d664bd713a8418eda6d2c2ad0720009aed"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -1857,7 +1857,7 @@ dependencies = [
 [[package]]
 name = "daos-sudo"
 version = "1.0.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#b94043605ff10c2314bf58b620b2334982120d7f"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#e06be2d664bd713a8418eda6d2c2ad0720009aed"
 dependencies = [
  "daos-create-dao",
  "daos-primitives",
@@ -11620,7 +11620,7 @@ dependencies = [
  "chrono",
  "lazy_static",
  "matchers",
- "parking_lot 0.10.2",
+ "parking_lot 0.11.2",
  "regex",
  "serde",
  "serde_json",
@@ -11755,7 +11755,7 @@ version = "1.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ee73e6e4924fe940354b8d4d98cad5231175d615cd855b758adc658c0aac6a0"
 dependencies = [
- "cfg-if 0.1.10",
+ "cfg-if 1.0.0",
  "rand 0.8.5",
  "static_assertions",
 ]
