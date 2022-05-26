@@ -70,10 +70,6 @@ pub mod pallet {
 		type MultiCurrency: MultiCurrency<Self::AccountId, CurrencyId = AssetId>
 			+ MultiReservableCurrency<Self::AccountId>
 			+ MultiCurrencyExtended<Self::AccountId>;
-
-		type IcoCallFilter: Contains<<Self as dao::Config>::Call>;
-
-		type BurnCallFilter: Contains<<Self as dao::Config>::Call>;
 	}
 
 	#[pallet::pallet]
@@ -209,43 +205,6 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn ico_operate(
-			origin: OriginFor<T>,
-			dao_id: T::DaoId,
-			call: Box<<T as dao::Config>::Call>,
-		) -> DispatchResultWithPostInfo {
-			let who = dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
-			ensure!(T::IcoCallFilter::contains(&call), dao::Error::<T>::InVailCall);
-			let res = call
-				.clone()
-				.dispatch_bypass_filter(frame_system::RawOrigin::Signed(who).into());
-			Self::deposit_event(Event::<T>::IcoOperate {
-				dao_id: dao_id,
-				call: *call,
-				result: res.map(|_| ()).map_err(|e| e.error),
-			});
-			Ok(().into())
-		}
-
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn burn_operate(
-			origin: OriginFor<T>,
-			dao_id: T::DaoId,
-			call: Box<<T as dao::Config>::Call>,
-		) -> DispatchResultWithPostInfo {
-			let who = dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
-			ensure!(T::IcoCallFilter::contains(&call), dao::Error::<T>::InVailCall);
-			let res = call
-				.clone()
-				.dispatch_bypass_filter(frame_system::RawOrigin::Signed(who).into());
-			Self::deposit_event(Event::<T>::BurnOperate {
-				dao_id: dao_id,
-				call: *call,
-				result: res.map(|_| ()).map_err(|e| e.error),
-			});
-			Ok(().into())
-		}
 	}
 }
 

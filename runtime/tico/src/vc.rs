@@ -24,7 +24,10 @@ impl TryFrom<Call> for CallId {
 					_ => Err(()),
 				}
 			}
-			Call::Vc(func) => Ok(2 as CallId),
+			Call::VC(func) => Ok(2 as CallId),
+			Call::Nft(_) => Ok(3 as CallId),
+			Call::AMM(_) => Ok(4 as CallId),
+			Call::Currencies(_) => Ok(5 as CallId),
 			_ => Err(()),
 		}
 	}
@@ -76,7 +79,15 @@ impl BaseDaoCallFilter<Call> for SecondId<u32, CurrencyId> {
 					daos_collective::Call::set_ensure_for_every_call{..}
 				)
 			},
-			Call::Vc(_) => true,
+			Call::VC(_) => true,
+			Call::Currencies(func) => {
+				matches!(func, pallet_currencies::Call::burn{..})
+			},
+			Call::AMM(func) => true,
+			Call::Nft(func) => {
+				matches!(func, pallet_nft::Call::buy_token{..} | pallet_nft::Call::burn{..})
+			},
+
 			_ => false,
 		}
 	}
@@ -118,7 +129,7 @@ impl daos_collective::Config for Runtime {
 	type CollectiveBaseCallFilter = CollectiveBaseCallFilter;
 	type Event = Event;
 	type DefaultVote = daos_collective::PrimeDefaultVote;
-	type GetCollectiveMembers = Vc;
+	type GetCollectiveMembers = VC;
 	type MaxMembersForSystem = MaxMembersForSystem;
 	type WeightInfo = ();
 }
@@ -129,34 +140,9 @@ impl daos_doas::Config for Runtime {
 	type DoAsOrigin = DaoCollective;
 }
 
-pub struct IcoCallFilter;
-
-impl Contains<Call> for IcoCallFilter {
-	fn contains(call: &Call) -> bool {
-		match call {
-			Call::Ico(_) => true,
-			_ => false,
-		}
-	}
-}
-
-pub struct BurnCallFilter;
-
-impl Contains<Call> for BurnCallFilter {
-	fn contains(call: &Call) -> bool {
-		match call {
-			Call::AMM(_) => true,
-			Call::Nft(_) => true,
-			_ => false,
-		}
-	}
-}
-
 impl pallet_vc::Config for Runtime {
 	type Event = Event;
 	type MultiCurrency = Currencies;
-	type IcoCallFilter = IcoCallFilter;
-	type BurnCallFilter = BurnCallFilter;
 }
 
 

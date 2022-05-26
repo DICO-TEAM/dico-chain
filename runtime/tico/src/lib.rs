@@ -1557,7 +1557,7 @@ construct_runtime!(
 		DaoSudo: daos_sudo::{Pallet, Storage, Call, Event<T>} = 61,
 		DaoCollective: daos_collective::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
 		DoAS: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
-		Vc: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
+		VC: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
 
 		//local pallet
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>} = 70,
