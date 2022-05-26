@@ -76,12 +76,15 @@ pub use pallet_farm_extend;
 pub use pallet_kyc;
 pub use pallet_lbp;
 pub use pallet_pricedao;
+pub use vc::*;
+pub use pallet_vc;
 
 use crate::constants::*;
 use pallet_farm_rpc_runtime_api as farm_rpc;
 
 mod constants;
 mod weights;
+mod vc;
 
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
@@ -1498,6 +1501,7 @@ impl orml_xtokens::Config for Runtime {
 	type MinXcmFee = ParachainMinFee;
 }
 
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -1545,9 +1549,16 @@ construct_runtime!(
 		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 51,
 		CumulusXcm: cumulus_pallet_xcm::{Pallet, Call, Event<T>, Origin} = 52,
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 53,
-
 		ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>} = 54,
 		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 55,
+
+		// vc
+		CreateDao: daos_create_dao::{Pallet, Storage, Call, Event<T>} = 60,
+		DaoSudo: daos_sudo::{Pallet, Storage, Call, Event<T>} = 61,
+		DaoCollective: daos_collective::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
+		DoAS: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
+		Vc: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
+
 		//local pallet
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>} = 70,
 

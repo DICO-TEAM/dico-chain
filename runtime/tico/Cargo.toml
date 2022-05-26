@@ -25,6 +25,12 @@ static_assertions = { version = "1.1.0" }
 # https://docs.rs/getrandom/0.2.3/getrandom/#indirect-dependencies
 #getrandom = { version = "0.2", features = ["js", "std"], default-features = false }
 
+# dao
+daos-collective = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
+daos-create-dao = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
+daos-doas = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
+daos-sudo = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
+daos-primitives = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
 
 # Local primitives
 dico-primitives = { package = "dico-primitives", default-features = false, path = "../../primitives" }
@@ -45,6 +51,7 @@ pallet-ico-rpc-runtime-api  = { package = "pallet-ico-rpc-runtime-api", default-
 pallet-farm-rpc-runtime-api = { package = "pallet-farm-rpc-runtime-api", default-features = false, path = "../../pallets/farm/rpc/runtime-api" }
 pallet-nft                  = { package = "pallet-nft", default-features = false, path = "../../pallets/nft" }
 pallet-farm-extend          = { package = "pallet-farm-extend", default-features = false, path = "../../pallets/farm-extend" }
+pallet-vc= { package = "pallet-vc", default-features = false, path = "../../pallets/vc" }
 
 # orml
 orml-tokens         = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
@@ -245,6 +252,13 @@ std = [
     "pallet-farm-rpc-runtime-api/std",
     "pallet-nft/std",
     "pallet-farm-extend/std",
+	"pallet-vc/std",
+	# dao
+	"daos-collective/std",
+	"daos-create-dao/std",
+	"daos-doas/std",
+	"daos-sudo/std",
+	"daos-primitives/std",
     # orml
     "orml-tokens/std",
     "orml-traits/std",

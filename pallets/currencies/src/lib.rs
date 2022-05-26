@@ -411,6 +411,13 @@ impl<T: Config> Pallet<T> {
         false
     }
 
+	pub fn is_owner(currency_id: AssetId, who: &T::AccountId) -> bool {
+		if let Some(info) = DicoAssetsInfo::<T>::get(currency_id).as_ref() {
+            return &info.owner == who;
+        }
+		false
+	}
+
     fn is_currency_id_too_large(currency_id: AssetId) -> bool {
         if currency_id >= T::MaxCreatableCurrencyId::get() {
             return true;

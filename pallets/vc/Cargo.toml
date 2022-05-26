@@ -1,0 +1,57 @@
+[package]
+name        = 'pallet-vc'
+authors     = ["DICO-TEAM"]
+description = 'FRAME pallet template for defining custom runtime logic.'
+license     = 'Apache 2.0'
+version     = '3.0.0'
+homepage    = 'https://github.com/DICO-TEAM/dico-chain'
+repository  = 'https://github.com/DICO-TEAM/dico-chain'
+edition     = '2021'
+
+
+[package.metadata.docs.rs]
+targets = ['x86_64-unknown-linux-gnu']
+
+[dependencies]
+scale-info 		      = { version = "1.0", default-features = false, features = ["derive"] }
+codec                 = { package = 'parity-scale-codec', version = '2.3.1', default-features = false }
+
+sp-std = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.17', default-features = false }
+sp-runtime = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.17', default-features = false }
+
+
+frame-benchmarking = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.17', default-features = false, optional = true }
+frame-support      = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.17', default-features = false }
+frame-system       = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.17', default-features = false }
+
+# daos
+daos-create-dao = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
+daos-primitives = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
+
+# orml
+orml-traits = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "master"}
+
+# local
+dico-primitives = { path = "../../primitives", default-features = false }
+
+[dev-dependencies]
+serde      = { version = "1.0.101" }
+sp-core    = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.17', default-features = false }
+sp-runtime = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.17', default-features = false }
+sp-io      = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.17', default-features = false }
+
+[features]
+default = ['std']
+runtime-benchmarks = ['frame-benchmarking']
+std = [
+	'codec/std',
+	'scale-info/std',
+	"daos-create-dao/std",
+	'frame-support/std',
+	'frame-system/std',
+	'orml-traits/std',
+	'dico-primitives/std',
+	'sp-std/std',
+	'sp-runtime/std',
+	'daos-primitives/std',
+]
