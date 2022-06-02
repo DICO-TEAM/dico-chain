@@ -1797,7 +1797,7 @@ dependencies = [
 [[package]]
 name = "daos-collective"
 version = "1.0.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#e06be2d664bd713a8418eda6d2c2ad0720009aed"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#58dfb690bb0fb459dfcf7776a4e824a76d56db31"
 dependencies = [
  "daos-create-dao",
  "daos-primitives",
@@ -1816,7 +1816,7 @@ dependencies = [
 [[package]]
 name = "daos-create-dao"
 version = "0.1.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#e06be2d664bd713a8418eda6d2c2ad0720009aed"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#58dfb690bb0fb459dfcf7776a4e824a76d56db31"
 dependencies = [
  "daos-primitives",
  "frame-support",
@@ -1830,7 +1830,7 @@ dependencies = [
 [[package]]
 name = "daos-doas"
 version = "1.0.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#e06be2d664bd713a8418eda6d2c2ad0720009aed"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#58dfb690bb0fb459dfcf7776a4e824a76d56db31"
 dependencies = [
  "daos-create-dao",
  "daos-primitives",
@@ -1845,7 +1845,7 @@ dependencies = [
 [[package]]
 name = "daos-primitives"
 version = "0.1.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#e06be2d664bd713a8418eda6d2c2ad0720009aed"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#58dfb690bb0fb459dfcf7776a4e824a76d56db31"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -1857,7 +1857,7 @@ dependencies = [
 [[package]]
 name = "daos-sudo"
 version = "1.0.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#e06be2d664bd713a8418eda6d2c2ad0720009aed"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#58dfb690bb0fb459dfcf7776a4e824a76d56db31"
 dependencies = [
  "daos-create-dao",
  "daos-primitives",
