@@ -236,6 +236,10 @@ pub mod module {
 		NoPermissionNFTLevel,
 		PowerTooLow,
 		TokenAlreadyExists,
+		Locked,
+		InUse,
+		NotClaim,
+		NoLocked,
 	}
 
 	/// Next available class ID.
@@ -285,6 +289,10 @@ pub mod module {
 	pub type AllTokensHash<T: Config> = StorageValue<_, BTreeSet<Vec<u8>>, ValueQuery>;
 	//BTreeSet<Vec<u8>>;
 
+	#[pallet::storage]
+	#[pallet::getter(fn locks)]
+	pub type Locks<T: Config> = StorageValue<_, BTreeSet<(T::ClassId, T::TokenId)>, ValueQuery>;
+
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
@@ -305,6 +313,7 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::transfer())]
 		pub fn transfer(origin: OriginFor<T>, to: T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::is_in_locking(token), Error::<T>::Locked);
 			Self::do_transfer(&who, &to, token)?;
 			Self::deposit_event(Event::<T>::Transfer(who, to, token));
 			Ok(())
@@ -335,6 +344,7 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::burn())]
 		pub fn burn(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
+			ensure!(!Self::is_in_locking(token), Error::<T>::Locked);
 			Self::do_burn(&owner, token)?;
 			Self::deposit_event(Event::<T>::Burn(owner, token.0, token.1));
 			Ok(())
@@ -347,6 +357,7 @@ pub mod module {
 			price: BalanceOf<T>,
 		) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
+			ensure!(!Self::is_in_locking(token), Error::<T>::Locked);
 			Self::do_offer_token_for_sale(&owner, token, price)?;
 			Self::deposit_event(Event::OfferTokenForSale(token.0, token.1, price));
 			Ok(())
@@ -370,6 +381,7 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::active())]
 		pub fn active(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
+			ensure!(!Self::is_in_locking(token), Error::<T>::Locked);
 			Self::do_active_or_not(&owner, token, true)?;
 			TokensOf::<T>::get(&owner).iter().for_each(|t| {
 				if token != *t {
@@ -385,6 +397,7 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::inactive())]
 		pub fn inactive(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
+			ensure!(!Self::is_in_locking(token), Error::<T>::Locked);
 			Self::do_active_or_not(&owner, token, false)?;
 			Self::deposit_event(Event::<T>::Inactive(token));
 			Ok(())
@@ -579,7 +592,7 @@ impl<T: Config> Pallet<T> {
 	pub fn do_burn(owner: &T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let mut t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
-			ensure!(t.owner == Some(owner.clone()), Error::<T>::NoPermission);
+			ensure!(t.owner == Some(owner.clone()), Error::<T>::NotOwner);
 			ensure!(!Self::is_in_sale(token.0, token.1), Error::<T>::InSale);
 			ensure!(!t.data.status.is_active_image, Error::<T>::ActiveNft);
 
@@ -777,5 +790,28 @@ impl<T: Config> Pallet<T> {
 			return Some(tokens.swap_remove(pos));
 		}
 		None
+	}
+
+	fn is_in_locking(token: (T::ClassId, T::TokenId)) -> bool {
+		Locks::<T>::get().contains(&token)
+	}
+
+	pub fn try_lock(who: &T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
+		let info = Tokens::<T>::get(token.0, token.1).ok_or(Error::<T>::TokenNotFound)?;
+		ensure!(!Self::is_in_locking(token), Error::<T>::Locked);
+		ensure!(info.owner == Some(who.clone()), Error::<T>::NotOwner);
+		ensure!(!info.data.status.is_active_image && !info.data.status.is_in_sale, Error::<T>::InUse);
+		ensure!(info.data.status.is_claimed, Error::<T>::NotClaim);
+		Locks::<T>::mutate(|h| h.insert(token));
+		Ok(())
+	}
+
+	pub fn try_unlock(who: &T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
+		let info = Tokens::<T>::get(token.0, token.1).ok_or(Error::<T>::TokenNotFound)?;
+		ensure!(info.owner == Some(who.clone()), Error::<T>::NotOwner);
+		ensure!(Self::is_in_locking(token), Error::<T>::NoLocked);
+		Locks::<T>::mutate(|h| h.remove(&token));
+		Ok(())
+
 	}
 }

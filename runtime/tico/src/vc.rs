@@ -8,7 +8,7 @@ pub use frame_support::{codec::{Decode, Encode}, parameter_types};
 pub use sp_runtime::{traits::Hash, RuntimeDebug};
 pub use scale_info::TypeInfo;
 use sp_runtime::DispatchError;
-use daos_democracy::{traits::{Vote as VoteTrait, CheckedVote, ConvertInto},};
+use daos_democracy::{Error, traits::{Vote as VoteTrait, CheckedVote, ConvertInto}};
 
 type CallId = u32;
 impl TryFrom<Call> for CallId {
@@ -97,7 +97,7 @@ impl VoteTrait<Balance, AccountId, SecondId<u32, u32>, Conviction, BlockNumber, 
 			},
 			Vote::NftTokenId(x) => {
 				if let SecondId::NftClassId(class_id) = second_id {
-					// todo nft todo
+					Nft::try_lock(&who, (*class_id, *x))?;
 					amount = DOLLARS;
 					return Ok((DOLLARS.checked_mul(conviction.convert_into()).ok_or(daos_democracy::Error::<Runtime>::Overflow)?, conviction.convert_into()))
 				}
@@ -115,13 +115,13 @@ impl VoteTrait<Balance, AccountId, SecondId<u32, u32>, Conviction, BlockNumber, 
 				}
 			},
 			Vote::NftTokenId(x) => {
-				if let SecondId::NftClassId(_) = second_id {
-					// todo nft
+				if let SecondId::NftClassId(class_id) = second_id {
+					Nft::try_unlock(&who, (*class_id, *x))?;
 					return Ok(())
 				}
 			},
 		}
-		Err(daos_democracy::Error::<Runtime>::VoteError)?
+		Err(daos_democracy::Error::<Runtime>::VoteNotEnough)?
 	}
 }
 
@@ -139,10 +139,7 @@ impl CheckedVote<SecondId<u32, u32>, DispatchError> for Vote<u32, Balance> {
 				}
 			},
 		}
-		// todo err
-		Ok(false)
-
-
+		Err(daos_democracy::Error::<Runtime>::VoteError)?
 	}
 }
 
