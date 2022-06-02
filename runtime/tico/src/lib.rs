@@ -12,7 +12,7 @@ use dico_primitives::{
 	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
 	Signature,
 };
-
+use daos_democracy;
 use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, MultiCurrency};
 pub use orml_xcm_support::{DepositToAlternative, IsNativeConcrete, MultiCurrencyAdapter, MultiNativeAsset};
 use pallet_currencies::BasicCurrencyAdapter;
@@ -1558,6 +1558,7 @@ construct_runtime!(
 		DaoCollective: daos_collective::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
 		DoAS: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
 		Vault: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
+		// DaoDemocracy: daos_democracy::{Pallet, Storage, Call, Event<T>} = 65,
 
 		//local pallet
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>} = 70,

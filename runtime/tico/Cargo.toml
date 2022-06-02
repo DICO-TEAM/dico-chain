@@ -25,12 +25,13 @@ static_assertions = { version = "1.1.0" }
 # https://docs.rs/getrandom/0.2.3/getrandom/#indirect-dependencies
 #getrandom = { version = "0.2", features = ["js", "std"], default-features = false }
 
-# dao
+# daos
 daos-collective = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
 daos-create-dao = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
 daos-doas = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
 daos-sudo = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
 daos-primitives = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
+daos-democracy = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
 
 # Local primitives
 dico-primitives = { package = "dico-primitives", default-features = false, path = "../../primitives" }
@@ -253,12 +254,13 @@ std = [
     "pallet-nft/std",
     "pallet-farm-extend/std",
 	"pallet-vc/std",
-	# dao
+	# daos
 	"daos-collective/std",
 	"daos-create-dao/std",
 	"daos-doas/std",
 	"daos-sudo/std",
 	"daos-primitives/std",
+	"daos-democracy/std",
     # orml
     "orml-tokens/std",
     "orml-traits/std",

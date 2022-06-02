@@ -7,6 +7,7 @@ pub use frame_support::{codec::{Decode, Encode}, parameter_types};
 pub use sp_runtime::{traits::Hash, RuntimeDebug};
 pub use scale_info::TypeInfo;
 use sp_runtime::DispatchError;
+use daos_democracy::{traits::{Vote as VoteTrait, CheckedVote, ConvertInto},};
 
 type CallId = u32;
 impl TryFrom<Call> for CallId {
@@ -77,6 +78,64 @@ pub enum Vote<TokenId, Balance> {
 	FungibleAmount(Balance)
 }
 
+impl Default for Vote<u32, Balance> {
+	fn default() -> Self {
+		Vote::FungibleAmount(0 as u128)
+	}
+}
+impl VoteTrait<Balance, AccountId, SecondId<u32, u32>, Conviction, BlockNumber, DispatchError> for Vote<u32, Balance>{
+	fn try_vote(&self, who: &AccountId, second_id: &SecondId<u32, u32>, conviction: &Conviction) -> Result<(Balance, BlockNumber), DispatchError> {
+		todo!()
+	}
+
+	fn vote_end_do(&self, who: &AccountId, second_id: &SecondId<u32, u32>) -> Result<(), DispatchError> {
+		todo!()
+	}
+}
+
+impl CheckedVote<SecondId<u32, u32>, DispatchError> for Vote<u32, Balance> {
+	fn is_can_vote(&self, second_id: SecondId<u32, u32>) -> Result<bool, DispatchError> {
+		todo!()
+	}
+}
+
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, Clone, TypeInfo, Copy, MaxEncodedLen)]
+pub enum Conviction {
+	X1,
+	X2,
+	X3,
+	X6,
+}
+
+impl Default for Conviction {
+	fn default() -> Self {
+		Conviction::X1
+	}
+}
+
+impl ConvertInto<Balance> for Conviction {
+	fn convert_into(&self) -> Balance {
+		match self {
+			Conviction::X1 => 1 as Balance,
+			Conviction::X2 => 2 as Balance,
+			Conviction::X3 => 3 as Balance,
+			Conviction::X6 => 6 as Balance,
+			_ => 6 as Balance,
+		}
+	}
+}
+
+impl ConvertInto<BlockNumber> for Conviction {
+	fn convert_into(&self) -> BlockNumber {
+		match self {
+			Conviction::X1 => 30 * DAYS,
+			Conviction::X2 => 60 * DAYS,
+			Conviction::X3 => 90 * DAYS,
+			Conviction::X6 => 120 * DAYS,
+			_ => 120 * DAYS
+		}
+	}
+}
 
 impl Checked<AccountId, DispatchError> for SecondId<u32, CurrencyId>{
 	fn is_can_create(&self, who: AccountId) -> Result<(), DispatchError> {
@@ -175,6 +234,30 @@ impl pallet_vc::Config for Runtime {
 	type Event = Event;
 	type MultiCurrency = Currencies;
 }
+
+parameter_types! {
+	pub const MaxPublicProps: u32 = 20;
+	pub const LaunchPeriod: BlockNumber = 2 * HOURS;
+	pub const MinimumDeposit: Balance = 10 * DOLLARS;
+	pub const VotingPeriod: BlockNumber = 1 * HOURS;
+	pub const ReservePeriod: BlockNumber = 1 * DAYS;
+	pub const EnactmentPeriod: BlockNumber = HOURS / 2;
+	pub const GetNativeCurrencyId: CurrencyId = 0;
+}
+
+// impl daos_democracy::Config for Runtime {
+// 	type Event = Event;
+// 	type Vote = Vote<u32, Balance>;
+// 	type Conviction = Conviction;
+// 	type MultiCurrency = Currencies;
+// 	type GetNativeCurrencyId = GetNativeCurrencyId;
+// 	type MaxPublicProps = MaxPublicProps;
+// 	type LaunchPeriod = LaunchPeriod;
+// 	type MinimumDeposit = MinimumDeposit;
+// 	type VotingPeriod = VotingPeriod;
+// 	type ReservePeriod = ReservePeriod;
+// 	type EnactmentPeriod = EnactmentPeriod;
+// }
 
 
 
