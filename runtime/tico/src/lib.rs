@@ -1558,7 +1558,7 @@ construct_runtime!(
 		DaoCollective: daos_collective::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
 		DoAS: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
 		Vault: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
-		// DaoDemocracy: daos_democracy::{Pallet, Storage, Call, Event<T>} = 65,
+		DaoDemocracy: daos_democracy::{Pallet, Storage, Call, Event<T>} = 65,
 
 		//local pallet
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>} = 70,

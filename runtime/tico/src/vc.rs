@@ -245,19 +245,19 @@ parameter_types! {
 	pub const GetNativeCurrencyId: CurrencyId = 0;
 }
 
-// impl daos_democracy::Config for Runtime {
-// 	type Event = Event;
-// 	type Vote = Vote<u32, Balance>;
-// 	type Conviction = Conviction;
-// 	type MultiCurrency = Currencies;
-// 	type GetNativeCurrencyId = GetNativeCurrencyId;
-// 	type MaxPublicProps = MaxPublicProps;
-// 	type LaunchPeriod = LaunchPeriod;
-// 	type MinimumDeposit = MinimumDeposit;
-// 	type VotingPeriod = VotingPeriod;
-// 	type ReservePeriod = ReservePeriod;
-// 	type EnactmentPeriod = EnactmentPeriod;
-// }
+impl daos_democracy::Config for Runtime {
+	type Event = Event;
+	type Vote = Vote<u32, Balance>;
+	type Conviction = Conviction;
+	type MultiCurrency = Currencies;
+	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type MaxPublicProps = MaxPublicProps;
+	type LaunchPeriod = LaunchPeriod;
+	type MinimumDeposit = MinimumDeposit;
+	type VotingPeriod = VotingPeriod;
+	type ReservePeriod = ReservePeriod;
+	type EnactmentPeriod = EnactmentPeriod;
+}
 
 
 

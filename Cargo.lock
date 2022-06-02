@@ -1797,7 +1797,7 @@ dependencies = [
 [[package]]
 name = "daos-collective"
 version = "1.0.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#58dfb690bb0fb459dfcf7776a4e824a76d56db31"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#4d84aa88cb1bf0eb21ca39a9f5527b8586980655"
 dependencies = [
  "daos-create-dao",
  "daos-primitives",
@@ -1816,7 +1816,7 @@ dependencies = [
 [[package]]
 name = "daos-create-dao"
 version = "0.1.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#58dfb690bb0fb459dfcf7776a4e824a76d56db31"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#4d84aa88cb1bf0eb21ca39a9f5527b8586980655"
 dependencies = [
  "daos-primitives",
  "frame-support",
@@ -1828,9 +1828,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "daos-democracy"
+version = "1.0.0"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#4d84aa88cb1bf0eb21ca39a9f5527b8586980655"
+dependencies = [
+ "daos-create-dao",
+ "frame-support",
+ "frame-system",
+ "orml-traits",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "daos-doas"
 version = "1.0.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#58dfb690bb0fb459dfcf7776a4e824a76d56db31"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#4d84aa88cb1bf0eb21ca39a9f5527b8586980655"
 dependencies = [
  "daos-create-dao",
  "daos-primitives",
@@ -1845,7 +1860,7 @@ dependencies = [
 [[package]]
 name = "daos-primitives"
 version = "0.1.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#58dfb690bb0fb459dfcf7776a4e824a76d56db31"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#4d84aa88cb1bf0eb21ca39a9f5527b8586980655"
 dependencies = [
  "frame-support",
  "parity-scale-codec",
@@ -1857,7 +1872,7 @@ dependencies = [
 [[package]]
 name = "daos-sudo"
 version = "1.0.0"
-source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#58dfb690bb0fb459dfcf7776a4e824a76d56db31"
+source = "git+https://github.com/DAOS-TEAM/daos.git?branch=polkadot-v0.9.17#4d84aa88cb1bf0eb21ca39a9f5527b8586980655"
 dependencies = [
  "daos-create-dao",
  "daos-primitives",
@@ -11312,6 +11327,7 @@ dependencies = [
  "cumulus-primitives-utility",
  "daos-collective",
  "daos-create-dao",
+ "daos-democracy",
  "daos-doas",
  "daos-primitives",
  "daos-sudo",
@@ -11620,7 +11636,7 @@ dependencies = [
  "chrono",
  "lazy_static",
  "matchers",
- "parking_lot 0.11.2",
+ "parking_lot 0.10.2",
  "regex",
  "serde",
  "serde_json",
@@ -11755,7 +11771,7 @@ version = "1.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ee73e6e4924fe940354b8d4d98cad5231175d615cd855b758adc658c0aac6a0"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if 0.1.10",
  "rand 0.8.5",
  "static_assertions",
 ]
