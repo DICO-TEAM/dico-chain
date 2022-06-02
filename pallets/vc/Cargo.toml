@@ -25,8 +25,8 @@ frame-support      = { git = 'https://github.com/paritytech/substrate', branch =
 frame-system       = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.17', default-features = false }
 
 # daos
-daos-create-dao = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
-daos-primitives = {git = "https://github.com/DAOS-TEAM/daos.git",default-features = false, branch = "polkadot-v0.9.17"}
+daos-create-dao = {path = "../daos/create-dao",default-features = false}
+daos-primitives = {path = '../daos/primitives',default-features = false}
 
 # orml
 orml-traits = { default-features = false, git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "master"}

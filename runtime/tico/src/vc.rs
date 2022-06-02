@@ -1,6 +1,7 @@
 
 use super::*;
 use daos_create_dao;
+use orml_traits::MultiReservableCurrency;
 use daos_primitives::{ids::{DaoId, Nft as NFT, Fungible}, traits::{Checked, BaseDaoCallFilter}, types::MemberCount, AccountIdConversion, TrailingZeroInput};
 pub use codec::MaxEncodedLen;
 pub use frame_support::{codec::{Decode, Encode}, parameter_types};
@@ -85,17 +86,63 @@ impl Default for Vote<u32, Balance> {
 }
 impl VoteTrait<Balance, AccountId, SecondId<u32, u32>, Conviction, BlockNumber, DispatchError> for Vote<u32, Balance>{
 	fn try_vote(&self, who: &AccountId, second_id: &SecondId<u32, u32>, conviction: &Conviction) -> Result<(Balance, BlockNumber), DispatchError> {
-		todo!()
+		let mut amount = 0 as Balance;
+		match self {
+			Vote::FungibleAmount(x) => {
+				 if let SecondId::FungibleTokenId(id) = second_id {
+					 Currencies::reserve(*id, &who, *x)?;
+					 amount = *x;
+					return Ok((amount.checked_mul(conviction.convert_into()).ok_or(daos_democracy::Error::<Runtime>::Overflow)?, conviction.convert_into()));
+				 }
+			},
+			Vote::NftTokenId(x) => {
+				if let SecondId::NftClassId(class_id) = second_id {
+					// todo nft todo
+					amount = DOLLARS;
+					return Ok((DOLLARS.checked_mul(conviction.convert_into()).ok_or(daos_democracy::Error::<Runtime>::Overflow)?, conviction.convert_into()))
+				}
+			},
+		}
+		Err(daos_democracy::Error::<Runtime>::VoteNotEnough)?
 	}
 
 	fn vote_end_do(&self, who: &AccountId, second_id: &SecondId<u32, u32>) -> Result<(), DispatchError> {
-		todo!()
+		match self {
+			Vote::FungibleAmount(x) => {
+				if let SecondId::FungibleTokenId(id) = second_id {
+					Currencies::reserve(*id, &who, *x)?;
+					return Ok(());
+				}
+			},
+			Vote::NftTokenId(x) => {
+				if let SecondId::NftClassId(_) = second_id {
+					// todo nft
+					return Ok(())
+				}
+			},
+		}
+		Err(daos_democracy::Error::<Runtime>::VoteError)?
 	}
 }
 
 impl CheckedVote<SecondId<u32, u32>, DispatchError> for Vote<u32, Balance> {
 	fn is_can_vote(&self, second_id: SecondId<u32, u32>) -> Result<bool, DispatchError> {
-		todo!()
+		match self {
+			Vote::FungibleAmount(x) => {
+				if let SecondId::FungibleTokenId(_) = second_id {
+					return Ok(true);
+				}
+			},
+			Vote::NftTokenId(x) => {
+				if let SecondId::NftClassId(_) = second_id {
+					return Ok(true)
+				}
+			},
+		}
+		// todo err
+		Ok(false)
+
+
 	}
 }
 
