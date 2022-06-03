@@ -128,6 +128,8 @@ pub mod module {
 
         /// Maximum assets that can be created
         type MaxCreatableCurrencyId: Get<AssetId>;
+
+		type USDCurrencyId: Get<AssetId>;
     }
 
     #[pallet::error]
@@ -506,10 +508,13 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
 				let fee: Fee<VcBalanceOf<T>, Permill> = pallet_vc::Pallet::<T>::fees(dao_id);
 				match fee {
 					Fee::Permill(x) => {
-						<T as module::Config>::MultiCurrency::deposit(currency_id, &dao_account, x * amount);
+						let real_fee = x * amount;
+						<T as module::Config>::MultiCurrency::transfer(currency_id, &to, &dao_account, real_fee)?;
+						<T as module::Config>::MultiCurrency::reserve(currency_id, &dao_account, real_fee);
 					},
 					Fee::Amount(x) => {
-						<T as pallet_vc::Config>::MultiCurrency::deposit(currency_id, &dao_account, x);
+						<T as pallet_vc::Config>::MultiCurrency::transfer(T::USDCurrencyId::get(), &to, &dao_account, x)?;
+						<T as pallet_vc::Config>::MultiCurrency::reserve(T::USDCurrencyId::get(), &dao_account, x);
 					},
 				}
 			},

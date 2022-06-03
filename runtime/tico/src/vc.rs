@@ -188,11 +188,8 @@ impl Checked<AccountId, DaoId, DispatchError> for SecondId<u32, CurrencyId>{
 				Currencies::try_create_dao(&who, *token_id, dao_id)?;
 			},
 			SecondId::NftClassId(class_id) => {
-				if !Nft::is_issuer(&who, *class_id) {
-					return Err(pallet_nft::Error::<Runtime>::NotIssuer)?;
-				}
-			},
-		}
+				Nft::try_create_dao(&who, *class_id, dao_id)?;
+		} }
 		Ok(())
 	}
 }

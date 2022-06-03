@@ -21,10 +21,12 @@ mod mock;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+use daos_create_dao::AccountIdConversion;
 pub mod weights;
-
+use orml_traits::{MultiCurrency, MultiReservableCurrency};
 use weights::WeightInfo;
-
+use daos_create_dao::{self as dao};
+use pallet_vc::{self, Fee};
 use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
@@ -47,6 +49,9 @@ use sp_std::{
 // mod mock;
 
 pub type Attributes = BTreeMap<Vec<u8>, Vec<u8>>;
+
+pub(crate) type VcBalanceOf<T> =
+    <<T as pallet_vc::Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::Balance;
 
 /// Class info
 #[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo)]
@@ -142,12 +147,13 @@ use sp_runtime::RuntimeString::Owned;
 
 #[frame_support::pallet]
 pub mod module {
+	use dico_primitives::AssetId;
 	use super::*;
 	use pallet_ico::ensure_signed;
 	use pallet_ico::system::pallet_prelude::OriginFor;
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config {
+	pub trait Config: frame_system::Config + dao::Config + pallet_vc::Config{
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 		/// The class ID type
 		type ClassId: Parameter + Member + AtLeast32BitUnsigned + Default + Copy;
@@ -160,6 +166,7 @@ pub mod module {
 		type MaxTokenMetadata: Get<u32>;
 		/// The maximum size of a token's attribute.
 		type MaxTokenAttribute: Get<u32>;
+		type USDCurrencyId: Get<AssetId>;
 		type WeightInfo: WeightInfo;
 		type PowerHandler: pallet_ico::traits::PowerHandler<Self::AccountId, DispatchResult, BalanceOf<Self>>;
 	}
@@ -240,6 +247,8 @@ pub mod module {
 		InUse,
 		NotClaim,
 		NoLocked,
+		DaoExists,
+		FeeErr,
 	}
 
 	/// Next available class ID.
@@ -262,6 +271,10 @@ pub mod module {
 	#[pallet::storage]
 	#[pallet::getter(fn classes)]
 	pub type Classes<T: Config> = StorageMap<_, Twox64Concat, T::ClassId, ClassInfoOf<T>>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn daos)]
+	pub type Daos<T: Config> = StorageMap<_, Identity, T::ClassId, T::DaoId>;
 
 	/// Store token info.
 	///
@@ -441,6 +454,13 @@ impl<T: Config> Pallet<T> {
 		Ok(class_id)
 	}
 
+	pub fn try_create_dao(who: &T::AccountId, class_id: T::ClassId, dao_id: T::DaoId) -> DispatchResult {
+		ensure!(Self::is_issuer(&who, class_id), Error::<T>::NotIssuer);
+		ensure!(Daos::<T>::contains_key(class_id), Error::<T>::DaoExists);
+		Daos::<T>::insert(class_id, dao_id);
+		Ok(())
+	}
+
 	/// Transfer NFT(non fungible token) from `from` account to `to` account
 	pub fn do_transfer(from: &T::AccountId, to: &T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 		Tokens::<T>::try_mutate(token.0, token.1, |token_info| -> DispatchResult {
@@ -457,7 +477,7 @@ impl<T: Config> Pallet<T> {
 				return Ok(());
 			}
 			info.owner = Some(to.clone());
-			Self::transfer_ownership(&from, &to, token.0, token.1);
+			Self::transfer_ownership(&from, &to, token.0, token.1)?;
 
 			Ok(())
 		})
@@ -597,7 +617,7 @@ impl<T: Config> Pallet<T> {
 			ensure!(!t.data.status.is_active_image, Error::<T>::ActiveNft);
 
 			T::PowerHandler::add_user_power(&owner, t.data.power_threshold)?;
-			Self::remove_token_ownership(owner, token.0, token.1);
+			Self::remove_token_ownership(owner, token.0, token.1)?;
 
 			t.owner = None;
 			t.data.power_threshold = BalanceOf::<T>::from(0u32);
@@ -663,7 +683,7 @@ impl<T: Config> Pallet<T> {
 			t.data.status.is_in_sale = false;
 			t.owner = Some(buyer.clone());
 			*token_info = Some(t);
-			Self::transfer_ownership(&old_owner, &buyer, token.0, token.1);
+			Self::transfer_ownership(&old_owner, &buyer, token.0, token.1)?;
 			Self::deposit_event(Event::BuyToken(buyer.clone(), token.0, token.1, sale_info.price));
 			Ok(())
 		})
@@ -719,9 +739,11 @@ impl<T: Config> Pallet<T> {
 		false
 	}
 
-	fn transfer_ownership(who: &T::AccountId, des: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) {
-		Self::remove_token_ownership(&who, class_id, token_id);
+	fn transfer_ownership(who: &T::AccountId, des: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) -> DispatchResult{
+
+		Self::remove_token_ownership(&who, class_id, token_id)?;
 		Self::get_token_ownership(&des, class_id, token_id);
+		Ok(())
 	}
 
 	fn get_token_ownership(who: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) {
@@ -732,12 +754,26 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
-	fn remove_token_ownership(who: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) {
+	fn remove_token_ownership(who: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) -> DispatchResult{
 		let mut tokens = TokensOf::<T>::get(who);
+		if let Some(dao_id) = Daos::<T>::get(class_id) {
+			match pallet_vc::Pallet::<T>::fees(dao_id) {
+				Fee::Amount(x) => {
+					let dao_account = dao::Pallet::<T>::get_second_id(dao_id)?.into_account();
+					T::MultiCurrency::transfer(T::USDCurrencyId::get(), &who, &dao_account, x)?;
+					T::MultiCurrency::reserve(T::USDCurrencyId::get(), &dao_account, x);
+				},
+				_ => {
+					return Err(Error::<T>::FeeErr)?;
+				},
+			}
+
+		}
 		if let Some(pos) = tokens.iter().position(|h| h.0 == class_id && h.1 == token_id) {
 			tokens.swap_remove(pos);
 			TokensOf::<T>::insert(who, tokens);
 		}
+		Ok(())
 	}
 
 	fn get_hash(class_id: T::ClassId, token_id: T::TokenId) -> T::Hash {

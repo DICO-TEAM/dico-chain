@@ -1295,6 +1295,7 @@ impl pallet_currencies::Config for Runtime {
 
 	type CreateConsume = CreateConsume;
 	type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
+	type USDCurrencyId = USDCurrencyId;
 }
 
 // price data
@@ -1457,6 +1458,7 @@ impl pallet_nft::Config for Runtime {
 	type MaxTokenMetadata = MaxTokenMetadata;
 	type MaxTokenAttribute = MaxTokenAttribute;
 	type PowerHandler = Ico;
+	type USDCurrencyId = USDCurrencyId;
 	type WeightInfo = pallet_nft::weights::DicoWeight<Runtime>;
 }
 

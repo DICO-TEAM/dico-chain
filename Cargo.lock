@@ -6040,12 +6040,15 @@ dependencies = [
 name = "pallet-nft"
 version = "1.0.0"
 dependencies = [
+ "daos-create-dao",
  "dico-primitives",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "orml-traits",
  "pallet-balances",
  "pallet-ico",
+ "pallet-vc",
  "parity-scale-codec",
  "scale-info",
  "serde",
