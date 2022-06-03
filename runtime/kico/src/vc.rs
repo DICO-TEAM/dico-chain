@@ -261,7 +261,7 @@ impl daos_collective::Config for Runtime {
 	type DefaultVote = daos_collective::PrimeDefaultVote;
 	type GetCollectiveMembers = Vault;
 	type MaxMembersForSystem = MaxMembersForSystem;
-	type WeightInfo = ();
+	// type WeightInfo = ();
 }
 
 
