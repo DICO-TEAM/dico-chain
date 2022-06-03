@@ -395,6 +395,13 @@ impl Contains<Call> for BaseCallFilter {
 			Call::Currencies(_) |
 			Call::DicoOracle(_) |
 
+			// vc
+			Call::CreateDao(_) |
+			Call::DaoSudo(_) |
+			Call::DaoCollective(_) |
+			Call::DoAS(_) |
+			Call::Vault(_) |
+			Call::DaoDemocracy(_) |
 
 			// temp
 			Call::Sudo(_)

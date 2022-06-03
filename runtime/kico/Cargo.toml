@@ -20,7 +20,13 @@ scale-info        = { version = "1.0", default-features       = false, features 
 smallvec          = { version = "1.6.1"}
 static_assertions = { version = "1.1.0" }
 
-
+# daos
+daos-collective = {path = '../../pallets/daos/collective',default-features = false}
+daos-create-dao = {path = '../../pallets/daos/create-dao',default-features = false}
+daos-doas = {path = '../../pallets/daos/doas',default-features = false}
+daos-sudo = {path = '../../pallets/daos/sudo',default-features = false}
+daos-primitives = {path = '../../pallets/daos/primitives',default-features = false}
+daos-democracy = {path = '../../pallets/daos/democracy',default-features = false}
 
 # Local primitives
 dico-primitives = { package = "dico-primitives", default-features = false, path = "../../primitives" }
@@ -41,6 +47,8 @@ pallet-ico-rpc-runtime-api  = { package = "pallet-ico-rpc-runtime-api", default-
 pallet-farm-rpc-runtime-api = { package = "pallet-farm-rpc-runtime-api", default-features = false, path = "../../pallets/farm/rpc/runtime-api" }
 pallet-nft                  = { package = "pallet-nft", default-features                  = false, path = "../../pallets/nft" }
 pallet-farm-extend          = { package = "pallet-farm-extend", default-features          = false, path = "../../pallets/farm-extend" }
+pallet-vc= { package = "pallet-vc", default-features = false, path = "../../pallets/vc" }
+
 
 # orml
 orml-tokens         = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "master" }
@@ -174,6 +182,14 @@ std = [
     "serde",
     "scale-info/std",
 
+	# daos
+	"daos-collective/std",
+	"daos-create-dao/std",
+	"daos-doas/std",
+	"daos-sudo/std",
+	"daos-primitives/std",
+	"daos-democracy/std",
+
     "cumulus-pallet-aura-ext/std",
     "cumulus-primitives-core/std",
     "cumulus-primitives-utility/std",
@@ -243,6 +259,7 @@ std = [
     "pallet-farm-rpc-runtime-api/std",
     "pallet-nft/std",
     "pallet-farm-extend/std",
+	"pallet-vc/std",
     # orml
     "orml-tokens/std",
     "orml-traits/std",
