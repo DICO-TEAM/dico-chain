@@ -22,14 +22,15 @@ impl TryFrom<Call> for CallId {
 						daos_collective::Call::set_motion_duration{..} |
 						daos_collective::Call::set_max_proposals{..} |
 						daos_collective::Call::set_max_members{..} |
-						daos_collective::Call::set_ensure_for_every_call{..} => Ok(1 as CallId),
+						daos_collective::Call::set_ensure_for_every_call{..} => Ok(100 as CallId),
 					_ => Err(()),
 				}
 			},
-			Call::Vault(func) => Ok(2 as CallId),
-			Call::Nft(_) => Ok(3 as CallId),
-			Call::AMM(_) => Ok(4 as CallId),
-			Call::Currencies(_) => Ok(5 as CallId),
+			Call::Vault(func) => Ok(200 as CallId),
+			Call::Nft(_) => Ok(300 as CallId),
+			Call::AMM(_) => Ok(400 as CallId),
+			Call::Currencies(_) => Ok(500 as CallId),
+			Call::DaoDemocracy(_) => Ok(600 as CallId),
 			_ => Err(()),
 		}
 	}
@@ -208,6 +209,7 @@ impl BaseDaoCallFilter<Call> for SecondId<u32, CurrencyId> {
 				)
 			},
 			Call::Vault(_) => true,
+			Call::DaoDemocracy(_) => true,
 			Call::Currencies(func) => {
 				matches!(func, pallet_currencies::Call::burn{..})
 			},
