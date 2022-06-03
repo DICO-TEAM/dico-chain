@@ -181,14 +181,11 @@ impl ConvertInto<BlockNumber> for Conviction {
 	}
 }
 
-impl Checked<AccountId, DispatchError> for SecondId<u32, CurrencyId>{
-	fn is_can_create(&self, who: AccountId) -> Result<(), DispatchError> {
+impl Checked<AccountId, DaoId, DispatchError> for SecondId<u32, CurrencyId>{
+	fn is_can_create(&self, who: AccountId, dao_id: DaoId) -> Result<(), DispatchError> {
 		match &self {
 			SecondId::FungibleTokenId(token_id) => {
-				if !Currencies::is_owner(*token_id, &who) {
-					return Err(pallet_currencies::Error::<Runtime>::NotOwner)?;
-				}
-
+				Currencies::try_create_dao(&who, *token_id, dao_id)?;
 			},
 			SecondId::NftClassId(class_id) => {
 				if !Nft::is_issuer(&who, *class_id) {

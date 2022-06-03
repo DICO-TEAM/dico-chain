@@ -39,6 +39,9 @@ pallet-pricedao = { path = "../pricedao", default-features = false}
 pallet-amm      = { path = "../amm", default-features = false }
 pallet-oracle   = { path = "../oracle", default-features = false }
 
+# daos
+daos-create-dao = {path = "../daos/create-dao", default-features = false}
+
 
 [features]
 default = ['std']
@@ -68,6 +71,8 @@ std = [
 
     "pallet-balances/std",
 	"pallet-randomness-collective-flip/std",
+
+	"daos-create-dao/std",
 
 ]
 

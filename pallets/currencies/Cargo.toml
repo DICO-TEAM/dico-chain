@@ -30,6 +30,11 @@ orml-tokens = { default-features = false, git = "https://github.com/open-web3-st
 # local
 dico-primitives = { path = "../../primitives", default-features = false }
 
+
+# vc
+daos-create-dao = {path = "../daos/create-dao", default-features = false}
+pallet-vc = {path = "../vc", default-features = false}
+
 [dev-dependencies]
 pallet-balances = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.17"}
 sp-core         = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.17"}
@@ -55,6 +60,8 @@ std = [
 	"pallet-balances/std",
 	"sp-core/std",
 	"sp-io/std",
+	"daos-create-dao/std",
+	"pallet-vc/std",
 ]
 
 runtime-benchmarks = [

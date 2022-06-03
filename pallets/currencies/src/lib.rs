@@ -18,6 +18,8 @@
 
 use codec::{Codec, Decode, Encode, MaxEncodedLen};
 use frame_system::pallet_prelude::*;
+use pallet_vc::{self, Fee};
+use pallet_vc::AccountIdConversion;
 use frame_support::{
     pallet_prelude::*,
     dispatch::{DispatchError, DispatchResult},
@@ -29,7 +31,7 @@ use frame_support::{
 };
 use scale_info::TypeInfo;
 use sp_std::vec;
-
+use daos_create_dao::{self as dao};
 use frame_system::{ensure_root, ensure_signed};
 use orml_traits::{
     arithmetic::{Signed, SimpleArithmetic},
@@ -47,10 +49,7 @@ use orml_traits::{
 };
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_runtime::{
-    RuntimeDebug,
-    traits::{CheckedSub, MaybeSerializeDeserialize, StaticLookup, Zero},
-};
+use sp_runtime::{Permill, RuntimeDebug, traits::{CheckedSub, MaybeSerializeDeserialize, StaticLookup, Zero}};
 use sp_std::vec::Vec;
 use sp_std::{
     convert::{TryFrom, TryInto},
@@ -98,6 +97,8 @@ pub mod module {
 
     pub(crate) type BalanceOf<T> =
     <<T as Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::Balance;
+	pub(crate) type VcBalanceOf<T> =
+    <<T as pallet_vc::Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::Balance;
     // pub(crate) type AssetId =
     // <<T as Config>::MultiCurrency as MultiCurrency<<T as
     // frame_system::Config>::AccountId>>::CurrencyId;
@@ -105,7 +106,7 @@ pub mod module {
     <<T as Config>::MultiCurrency as MultiCurrencyExtended<<T as frame_system::Config>::AccountId>>::Amount;
 
     #[pallet::config]
-    pub trait Config: frame_system::Config {
+    pub trait Config: frame_system::Config + dao::Config + pallet_vc::Config {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
         type MultiCurrency: MultiCurrency<Self::AccountId, CurrencyId=AssetId>
@@ -146,6 +147,8 @@ pub mod module {
         NativeCurrency,
         CurrencyIdTooLarge,
         CurrencyIdTooLow,
+		DaoExists,
+		CexTransferClosed,
     }
 
     #[pallet::event]
@@ -169,6 +172,10 @@ pub mod module {
     /// Metadata of an asset.
     pub type DicoAssetsInfo<T: Config> =
     StorageMap<_, Blake2_128Concat, AssetId, DicoAssetInfo<T::AccountId, DicoAssetMetadata>>;
+
+	#[pallet::storage]
+    #[pallet::getter(fn daos)]
+	pub type Daos<T: Config> = StorageMap<_, Identity, AssetId, T::DaoId>;
 
     #[pallet::pallet]
     #[pallet::without_storage_info]
@@ -261,7 +268,7 @@ pub mod module {
 
             ensure!(Self::is_exists_metadata(currency_id), Error::<T>::MetadataNotExists);
 
-            T::MultiCurrency::withdraw(currency_id, &user, amount)?;
+            <T as module::Config>::MultiCurrency::withdraw(currency_id, &user, amount)?;
             Self::deposit_event(Event::Burn(user, currency_id, amount));
             Ok(().into())
         }
@@ -279,7 +286,9 @@ pub mod module {
         ) -> DispatchResultWithPostInfo {
             let from = ensure_signed(origin)?;
             let to = T::Lookup::lookup(dest)?;
-
+			if let Some(dao_id) = Daos::<T>::get(currency_id) {
+				ensure!(pallet_vc::Pallet::<T>::is_open_cex_transfer(dao_id), Error::<T>::CexTransferClosed);
+			};
             ensure!(Self::is_exists_metadata(currency_id), Error::<T>::MetadataNotExists);
 
             <Self as MultiCurrency<T::AccountId>>::transfer(currency_id, &from, &to, amount)?;
@@ -298,6 +307,9 @@ pub mod module {
         ) -> DispatchResultWithPostInfo {
             let from = ensure_signed(origin)?;
             let to = T::Lookup::lookup(dest)?;
+			if let Some(dao_id) = Daos::<T>::get(T::GetNativeCurrencyId::get()) {
+				ensure!(pallet_vc::Pallet::<T>::is_open_cex_transfer(dao_id), Error::<T>::CexTransferClosed);
+			};
             T::NativeCurrency::transfer(&from, &to, amount)?;
 
             Self::deposit_event(Event::Transferred(T::GetNativeCurrencyId::get(), from, to, amount));
@@ -358,7 +370,7 @@ for Pallet<T>
     ) -> DispatchResult {
         ensure!(
 			!Self::is_exists_metadata(currency_id)
-				&& T::MultiCurrency::total_issuance(currency_id) == BalanceOf::<T>::from(0u32),
+				&& <T as module::Config>::MultiCurrency::total_issuance(currency_id) == BalanceOf::<T>::from(0u32),
 			Error::<T>::AssetAlreadyExists
 		);
         if is_swap_deposit {
@@ -381,7 +393,7 @@ for Pallet<T>
 
             Self::withdraw(T::GetNativeCurrencyId::get(), &user, T::CreateConsume::get())?;
         }
-        T::MultiCurrency::deposit(currency_id, &user, amount)?;
+        <T as module::Config>::MultiCurrency::deposit(currency_id, &user, amount)?;
         DicoAssetsInfo::<T>::insert(
             currency_id,
             DicoAssetInfo {
@@ -393,9 +405,18 @@ for Pallet<T>
 
         Ok(())
     }
+
 }
 
 impl<T: Config> Pallet<T> {
+
+	pub fn try_create_dao(who: &T::AccountId, asset_id: AssetId, dao_id: T::DaoId) -> DispatchResult {
+		ensure!(Self::is_owner(asset_id, &who), Error::<T>::NotOwner);
+		ensure!(Daos::<T>::contains_key(asset_id), Error::<T>::DaoExists);
+		Daos::<T>::insert(asset_id, dao_id);
+		Ok(())
+	}
+
     fn is_exists_metadata(currency_id: AssetId) -> bool {
         // if currency_id == T::GetNativeCurrencyId::get() {
         // 	return true;
@@ -432,9 +453,9 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
 
     fn minimum_balance(currency_id: Self::CurrencyId) -> Self::Balance {
         if currency_id == T::GetNativeCurrencyId::get() {
-            T::NativeCurrency::minimum_balance()
+            <T as module::Config>::NativeCurrency::minimum_balance()
         } else {
-            T::MultiCurrency::minimum_balance(currency_id)
+            <T as module::Config>::MultiCurrency::minimum_balance(currency_id)
         }
     }
 
@@ -442,7 +463,7 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::total_issuance()
         } else {
-            T::MultiCurrency::total_issuance(currency_id)
+            <T as module::Config>::MultiCurrency::total_issuance(currency_id)
         }
     }
 
@@ -450,7 +471,7 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::total_balance(who)
         } else {
-            T::MultiCurrency::total_balance(currency_id, who)
+            <T as module::Config>::MultiCurrency::total_balance(currency_id, who)
         }
     }
 
@@ -458,7 +479,7 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::free_balance(who)
         } else {
-            T::MultiCurrency::free_balance(currency_id, who)
+            <T as module::Config>::MultiCurrency::free_balance(currency_id, who)
         }
     }
 
@@ -466,7 +487,7 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::ensure_can_withdraw(who, amount)
         } else {
-            T::MultiCurrency::ensure_can_withdraw(currency_id, who, amount)
+            <T as module::Config>::MultiCurrency::ensure_can_withdraw(currency_id, who, amount)
         }
     }
 
@@ -479,10 +500,26 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         if amount.is_zero() || from == to {
             return Ok(());
         }
+		match Daos::<T>::get(currency_id) {
+			Some(dao_id) => {
+				let dao_account = dao::Pallet::<T>::get_second_id(dao_id)?.into_account();
+				let fee: Fee<VcBalanceOf<T>, Permill> = pallet_vc::Pallet::<T>::fees(dao_id);
+				match fee {
+					Fee::Permill(x) => {
+						<T as module::Config>::MultiCurrency::deposit(currency_id, &dao_account, x * amount);
+					},
+					Fee::Amount(x) => {
+						<T as pallet_vc::Config>::MultiCurrency::deposit(currency_id, &dao_account, x);
+					},
+				}
+			},
+			_ => {},
+		};
+
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::transfer(from, to, amount)?;
         } else {
-            T::MultiCurrency::transfer(currency_id, from, to, amount)?;
+            <T as module::Config>::MultiCurrency::transfer(currency_id, from, to, amount)?;
         }
         Self::deposit_event(Event::Transferred(currency_id, from.clone(), to.clone(), amount));
         Ok(())
@@ -495,7 +532,7 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::deposit(who, amount)?;
         } else {
-            T::MultiCurrency::deposit(currency_id, who, amount)?;
+            <T as module::Config>::MultiCurrency::deposit(currency_id, who, amount)?;
         }
         Self::deposit_event(Event::Deposited(currency_id, who.clone(), amount));
         Ok(())
@@ -508,7 +545,7 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::withdraw(who, amount)?;
         } else {
-            T::MultiCurrency::withdraw(currency_id, who, amount)?;
+            <T as module::Config>::MultiCurrency::withdraw(currency_id, who, amount)?;
         }
         Self::deposit_event(Event::Withdrawn(currency_id, who.clone(), amount));
         Ok(())
@@ -518,7 +555,7 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::can_slash(who, amount)
         } else {
-            T::MultiCurrency::can_slash(currency_id, who, amount)
+            <T as module::Config>::MultiCurrency::can_slash(currency_id, who, amount)
         }
     }
 
@@ -526,7 +563,7 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::slash(who, amount)
         } else {
-            T::MultiCurrency::slash(currency_id, who, amount)
+            <T as module::Config>::MultiCurrency::slash(currency_id, who, amount)
         }
     }
 }
@@ -538,7 +575,7 @@ impl<T: Config> MultiCurrencyExtended<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::update_balance(who, by_amount)?;
         } else {
-            T::MultiCurrency::update_balance(currency_id, who, by_amount)?;
+            <T as module::Config>::MultiCurrency::update_balance(currency_id, who, by_amount)?;
         }
         Self::deposit_event(Event::BalanceUpdated(currency_id, who.clone(), by_amount));
         Ok(())
@@ -557,7 +594,7 @@ impl<T: Config> MultiLockableCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::set_lock(lock_id, who, amount)
         } else {
-            T::MultiCurrency::set_lock(lock_id, currency_id, who, amount)
+            <T as module::Config>::MultiCurrency::set_lock(lock_id, currency_id, who, amount)
         }
     }
 
@@ -570,7 +607,7 @@ impl<T: Config> MultiLockableCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::extend_lock(lock_id, who, amount)
         } else {
-            T::MultiCurrency::extend_lock(lock_id, currency_id, who, amount)
+            <T as module::Config>::MultiCurrency::extend_lock(lock_id, currency_id, who, amount)
         }
     }
 
@@ -578,7 +615,7 @@ impl<T: Config> MultiLockableCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::remove_lock(lock_id, who)
         } else {
-            T::MultiCurrency::remove_lock(lock_id, currency_id, who)
+            <T as module::Config>::MultiCurrency::remove_lock(lock_id, currency_id, who)
         }
     }
 }
@@ -588,7 +625,7 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::can_reserve(who, value)
         } else {
-            T::MultiCurrency::can_reserve(currency_id, who, value)
+            <T as module::Config>::MultiCurrency::can_reserve(currency_id, who, value)
         }
     }
 
@@ -596,7 +633,7 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::slash_reserved(who, value)
         } else {
-            T::MultiCurrency::slash_reserved(currency_id, who, value)
+            <T as module::Config>::MultiCurrency::slash_reserved(currency_id, who, value)
         }
     }
 
@@ -604,7 +641,7 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::reserved_balance(who)
         } else {
-            T::MultiCurrency::reserved_balance(currency_id, who)
+            <T as module::Config>::MultiCurrency::reserved_balance(currency_id, who)
         }
     }
 
@@ -612,7 +649,7 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::reserve(who, value)
         } else {
-            T::MultiCurrency::reserve(currency_id, who, value)
+            <T as module::Config>::MultiCurrency::reserve(currency_id, who, value)
         }
     }
 
@@ -620,7 +657,7 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::unreserve(who, value)
         } else {
-            T::MultiCurrency::unreserve(currency_id, who, value)
+            <T as module::Config>::MultiCurrency::unreserve(currency_id, who, value)
         }
     }
 
@@ -634,7 +671,7 @@ impl<T: Config> MultiReservableCurrency<T::AccountId> for Pallet<T> {
         if currency_id == T::GetNativeCurrencyId::get() {
             T::NativeCurrency::repatriate_reserved(slashed, beneficiary, value, status)
         } else {
-            T::MultiCurrency::repatriate_reserved(currency_id, slashed, beneficiary, value, status)
+            <T as module::Config>::MultiCurrency::repatriate_reserved(currency_id, slashed, beneficiary, value, status)
         }
     }
 }
