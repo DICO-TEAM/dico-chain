@@ -17,7 +17,7 @@ fn get_alice<T: Config>() -> T::AccountId {
 	T::NativeCurrency::deposit(&caller, (10000 * DOLLARS).saturated_into::<BalanceOf<T>>());
 	runtime_print!(
 		"amount: {:?}",
-		T::MultiCurrency::free_balance(T::GetNativeCurrencyId::get(), &caller)
+		<T as module::Config>::MultiCurrency::free_balance(T::GetNativeCurrencyId::get(), &caller)
 	);
 	caller
 }
@@ -66,7 +66,7 @@ benchmarks! {
 		let currency_id = 50;
 	}:_(RawOrigin::Signed(Alice.clone()), currency_id, (100000 * DOLLARS).saturated_into::<BalanceOf<T>>(), None)
 	verify {
-		assert!(!T::MultiCurrency::total_issuance(currency_id).is_zero())
+		assert!(!<T as module::Config>::MultiCurrency::total_issuance(currency_id).is_zero())
 	}
 
 	set_metadata {
