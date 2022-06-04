@@ -1759,6 +1759,9 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_dico_treasury, DicoTreasury);
 			list_benchmark!(list, extra, pallet_currencies, Currencies);
 
+			list_benchmark!(list, extra, daos_create_dao, CreateDao);
+			list_benchmark!(list, extra, daos_collective, DaoCollective);
+
 			let storage_info = AllPalletsWithSystem::storage_info();
 
 			return (list, storage_info)

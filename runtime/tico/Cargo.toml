@@ -178,6 +178,9 @@ runtime-benchmarks = [
     "pallet-pricedao/runtime-benchmarks",
     "pallet-oracle/runtime-benchmarks",
 
+	"daos-create-dao/runtime-benchmarks",
+	"daos-collective/runtime-benchmarks",
+
 ]
 std = [
     "codec/std",
