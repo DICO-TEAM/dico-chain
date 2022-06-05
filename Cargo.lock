@@ -1837,7 +1837,6 @@ dependencies = [
  "frame-support",
  "frame-system",
  "orml-traits",
- "pallet-currencies",
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
