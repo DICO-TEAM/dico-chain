@@ -1761,6 +1761,8 @@ impl_runtime_apis! {
 
 			list_benchmark!(list, extra, daos_create_dao, CreateDao);
 			list_benchmark!(list, extra, daos_collective, DaoCollective);
+			list_benchmark!(list, extra, daos_sudo, DaoSudo);
+			list_benchmark!(list, extra, daos_democracy, DaoDemocracy);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 

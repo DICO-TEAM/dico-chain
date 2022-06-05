@@ -1833,9 +1833,11 @@ version = "1.0.0"
 dependencies = [
  "daos-create-dao",
  "daos-primitives",
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "orml-traits",
+ "pallet-currencies",
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
