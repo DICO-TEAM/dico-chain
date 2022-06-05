@@ -20,5 +20,5 @@ jobs:
       - name: Check Code
         run: git submodule update --init --recursive && cargo check
 
-      - name: Test Code
-        run: cargo test
+#      - name: Test Code
+#        run: cargo test
