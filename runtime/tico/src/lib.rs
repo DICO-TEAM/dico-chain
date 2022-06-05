@@ -1812,6 +1812,11 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_oracle, DicoOracle);
 			add_benchmark!(params, batches, pallet_currencies, Currencies);
 
+			add_benchmark!(params, batches, daos_create_dao, CreateDao);
+			add_benchmark!(params, batches, daos_collective, DaoCollective);
+			add_benchmark!(params, batches, daos_sudo, DaoSudo);
+			add_benchmark!(params, batches, daos_democracy, DaoDemocracy);
+
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
 		}
