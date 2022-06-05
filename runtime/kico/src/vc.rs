@@ -31,6 +31,7 @@ impl TryFrom<Call> for CallId {
 			Call::AMM(_) => Ok(400 as CallId),
 			Call::Currencies(_) => Ok(500 as CallId),
 			Call::DaoDemocracy(_) => Ok(600 as CallId),
+			Call::CreateDao(_) => Ok(700 as CallId),
 			_ => Err(()),
 		}
 	}
@@ -209,6 +210,7 @@ impl BaseDaoCallFilter<Call> for SecondId<u32, CurrencyId> {
 				)
 			},
 			Call::Vault(_) => true,
+			Call::CreateDao(_) => true,
 			Call::DaoDemocracy(_) => true,
 			Call::Currencies(func) => {
 				matches!(func, pallet_currencies::Call::burn{..})
@@ -246,7 +248,7 @@ pub struct CollectiveBaseCallFilter;
 
 impl Contains<Call> for CollectiveBaseCallFilter  {
 	fn contains(call: &Call) -> bool {
-		if let Call::DoAS(func) = call {
+		if let Call::DoAs(func) = call {
 			matches!(func, daos_doas::Call::do_as_collective{..})
 		}
 		else { false }

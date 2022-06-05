@@ -399,7 +399,7 @@ impl Contains<Call> for BaseCallFilter {
 			Call::CreateDao(_) |
 			Call::DaoSudo(_) |
 			Call::DaoCollective(_) |
-			Call::DoAS(_) |
+			Call::DoAs(_) |
 			Call::Vault(_) |
 			Call::DaoDemocracy(_) |
 
@@ -1565,7 +1565,7 @@ construct_runtime!(
 		CreateDao: daos_create_dao::{Pallet, Storage, Call, Event<T>} = 60,
 		DaoSudo: daos_sudo::{Pallet, Storage, Call, Event<T>} = 61,
 		DaoCollective: daos_collective::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
-		DoAS: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
+		DoAs: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
 		Vault: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
 		DaoDemocracy: daos_democracy::{Pallet, Storage, Call, Event<T>} = 65,
 
@@ -1763,6 +1763,7 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, daos_collective, DaoCollective);
 			list_benchmark!(list, extra, daos_sudo, DaoSudo);
 			list_benchmark!(list, extra, daos_democracy, DaoDemocracy);
+			list_benchmark!(list, extra, daos_doas, DoAs);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -1816,6 +1817,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, daos_collective, DaoCollective);
 			add_benchmark!(params, batches, daos_sudo, DaoSudo);
 			add_benchmark!(params, batches, daos_democracy, DaoDemocracy);
+			add_benchmark!(params, batches, daos_doas, DoAs);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)

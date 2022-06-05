@@ -182,6 +182,7 @@ runtime-benchmarks = [
 	"daos-collective/runtime-benchmarks",
 	"daos-sudo/runtime-benchmarks",
 	"daos-democracy/runtime-benchmarks",
+	"daos-doas/runtime-benchmarks",
 
 ]
 std = [

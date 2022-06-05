@@ -248,7 +248,7 @@ pub struct CollectiveBaseCallFilter;
 
 impl Contains<Call> for CollectiveBaseCallFilter  {
 	fn contains(call: &Call) -> bool {
-		if let Call::DoAS(func) = call {
+		if let Call::DoAs(func) = call {
 			matches!(func, daos_doas::Call::do_as_collective{..})
 		}
 		else { false }

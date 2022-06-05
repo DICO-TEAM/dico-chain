@@ -1530,7 +1530,7 @@ construct_runtime!(
 		CreateDao: daos_create_dao::{Pallet, Storage, Call, Event<T>} = 60,
 		DaoSudo: daos_sudo::{Pallet, Storage, Call, Event<T>} = 61,
 		DaoCollective: daos_collective::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
-		DoAS: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
+		DoAs: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
 		Vault: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
 		DaoDemocracy: daos_democracy::{Pallet, Storage, Call, Event<T>} = 65,
 
