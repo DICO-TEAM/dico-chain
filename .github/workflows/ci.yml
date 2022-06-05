@@ -13,14 +13,12 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - name: Init Submodule
-        run: git submodule update --init --recursive
 
       - name: Checkout Code
         uses: actions/checkout@v2
 
       - name: Check Code
-        run: cargo check
+        run: git submodule update --init --recursive && cargo check
 
       - name: Test Code
         run: cargo test
