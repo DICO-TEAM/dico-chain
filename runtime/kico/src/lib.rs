@@ -81,6 +81,8 @@ use pallet_farm_rpc_runtime_api as farm_rpc;
 
 pub mod constants;
 mod weights;
+mod vc;
+
 
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
@@ -1262,7 +1264,7 @@ impl pallet_currencies::Config for Runtime {
 	type GetNativeCurrencyId = DICOAssetId;
 
 	type WeightInfo = pallet_currencies::weights::DicoWeight<Runtime>;
-
+	type USDCurrencyId = USDCurrencyId;
 	type CreateConsume = CreateConsume;
 	type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
 }
@@ -1428,6 +1430,7 @@ impl pallet_nft::Config for Runtime {
 	type MaxTokenMetadata = MaxTokenMetadata;
 	type MaxTokenAttribute = MaxTokenAttribute;
 	type PowerHandler = Ico;
+	type USDCurrencyId = USDCurrencyId;
 	type WeightInfo = pallet_nft::weights::DicoWeight<Runtime>;
 }
 
@@ -1522,6 +1525,15 @@ construct_runtime!(
 
 		ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>} = 54,
 		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 55,
+
+		// vc
+		CreateDao: daos_create_dao::{Pallet, Storage, Call, Event<T>} = 60,
+		DaoSudo: daos_sudo::{Pallet, Storage, Call, Event<T>} = 61,
+		DaoCollective: daos_collective::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
+		DoAs: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
+		Vault: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
+		DaoDemocracy: daos_democracy::{Pallet, Storage, Call, Event<T>} = 65,
+
 		//local pallet
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>} = 70,
 

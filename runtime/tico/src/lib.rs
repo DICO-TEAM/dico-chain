@@ -12,7 +12,7 @@ use dico_primitives::{
 	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
 	Signature,
 };
-
+use daos_democracy;
 use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, MultiCurrency};
 pub use orml_xcm_support::{DepositToAlternative, IsNativeConcrete, MultiCurrencyAdapter, MultiNativeAsset};
 use pallet_currencies::BasicCurrencyAdapter;
@@ -76,12 +76,15 @@ pub use pallet_farm_extend;
 pub use pallet_kyc;
 pub use pallet_lbp;
 pub use pallet_pricedao;
+pub use vc::*;
+pub use pallet_vc;
 
 use crate::constants::*;
 use pallet_farm_rpc_runtime_api as farm_rpc;
 
 mod constants;
 mod weights;
+mod vc;
 
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
@@ -392,6 +395,13 @@ impl Contains<Call> for BaseCallFilter {
 			Call::Currencies(_) |
 			Call::DicoOracle(_) |
 
+			// vc
+			Call::CreateDao(_) |
+			Call::DaoSudo(_) |
+			Call::DaoCollective(_) |
+			Call::DoAs(_) |
+			Call::Vault(_) |
+			Call::DaoDemocracy(_) |
 
 			// temp
 			Call::Sudo(_)
@@ -1292,6 +1302,7 @@ impl pallet_currencies::Config for Runtime {
 
 	type CreateConsume = CreateConsume;
 	type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
+	type USDCurrencyId = USDCurrencyId;
 }
 
 // price data
@@ -1454,6 +1465,7 @@ impl pallet_nft::Config for Runtime {
 	type MaxTokenMetadata = MaxTokenMetadata;
 	type MaxTokenAttribute = MaxTokenAttribute;
 	type PowerHandler = Ico;
+	type USDCurrencyId = USDCurrencyId;
 	type WeightInfo = pallet_nft::weights::DicoWeight<Runtime>;
 }
 
@@ -1497,6 +1509,7 @@ impl orml_xtokens::Config for Runtime {
 	type LocationInverter = LocationInverter<Ancestry>;
 	type MinXcmFee = ParachainMinFee;
 }
+
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -1545,9 +1558,17 @@ construct_runtime!(
 		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 51,
 		CumulusXcm: cumulus_pallet_xcm::{Pallet, Call, Event<T>, Origin} = 52,
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 53,
-
 		ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>} = 54,
 		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 55,
+
+		// vc
+		CreateDao: daos_create_dao::{Pallet, Storage, Call, Event<T>} = 60,
+		DaoSudo: daos_sudo::{Pallet, Storage, Call, Event<T>} = 61,
+		DaoCollective: daos_collective::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
+		DoAs: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
+		Vault: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
+		DaoDemocracy: daos_democracy::{Pallet, Storage, Call, Event<T>} = 65,
+
 		//local pallet
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>} = 70,
 
@@ -1738,6 +1759,12 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_dico_treasury, DicoTreasury);
 			list_benchmark!(list, extra, pallet_currencies, Currencies);
 
+			list_benchmark!(list, extra, daos_create_dao, CreateDao);
+			list_benchmark!(list, extra, daos_collective, DaoCollective);
+			list_benchmark!(list, extra, daos_sudo, DaoSudo);
+			list_benchmark!(list, extra, daos_democracy, DaoDemocracy);
+			list_benchmark!(list, extra, daos_doas, DoAs);
+
 			let storage_info = AllPalletsWithSystem::storage_info();
 
 			return (list, storage_info)
@@ -1785,6 +1812,12 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_pricedao, PriceDao);
 			add_benchmark!(params, batches, pallet_oracle, DicoOracle);
 			add_benchmark!(params, batches, pallet_currencies, Currencies);
+
+			add_benchmark!(params, batches, daos_create_dao, CreateDao);
+			add_benchmark!(params, batches, daos_collective, DaoCollective);
+			add_benchmark!(params, batches, daos_sudo, DaoSudo);
+			add_benchmark!(params, batches, daos_democracy, DaoDemocracy);
+			add_benchmark!(params, batches, daos_doas, DoAs);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)

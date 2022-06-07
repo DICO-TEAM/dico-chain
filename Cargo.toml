@@ -5,6 +5,10 @@ panic = 'unwind'
 members = [
     'node/*',
     'pallets/*',
+	'pallets/daos/*',
     'runtime/*',
     'primitives',
+]
+exclude = [
+	'pallets/daos'
 ]

@@ -9,6 +9,9 @@ purge:
 
 
 # -------------------------------------development-------------------------------------
+.PHONY: submodule
+submodule:
+	git submodule update --init --recursive
 .PHONY: install
 install:
 	cargo install --force --path .
