@@ -7,6 +7,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use dico_primitives::{
+	parachains,
 	constants::{currency::*, time::*},
 	tokens::{DICO, KAR, KICO, KSM, KUSD, LKSM},
 	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
@@ -145,7 +146,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("TICO"),
 	impl_name: create_runtime_str!("TICO"),
 	authoring_version: 1,
-	spec_version: 1310,
+	spec_version: 2022062601,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -219,6 +220,23 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 					GeneralKey(paras::karura::LKSM_KEY.to_vec()),
 				),
 			)),
+
+			parachains::listen::lt::ASSET_ID => Some(MultiLocation::new(
+				1,
+				X2(
+					Parachain(parachains::listen::PARA_ID),
+					GeneralKey(parachains::listen::lt::TOKEN_SYMBOL.to_vec()),
+				),
+			)),
+
+			parachains::listen::like::ASSET_ID => Some(MultiLocation::new(
+				1,
+				X2(
+					Parachain(parachains::listen::PARA_ID),
+					GeneralKey(parachains::listen::like::TOKEN_SYMBOL.to_vec()),
+				),
+			)),
+
 			_ => None,
 		}
 	}
@@ -239,6 +257,7 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 				parents: 0,
 				interior: X1(GeneralKey(key)),
 			} if key == b"KICO".to_vec() => Some(KICO),
+
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
@@ -247,6 +266,7 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 				parents: 0,
 				interior: X1(GeneralKey(key)),
 			} if key == b"DICO".to_vec() => Some(DICO),
+
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
@@ -259,6 +279,17 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
 			} if id == paras::karura::ID && key == paras::karura::LKSM_KEY.to_vec() => Some(LKSM),
+
+			MultiLocation {
+				parents: 1,
+				interior: X2(Parachain(id), GeneralKey(key)),
+			} if id == parachains::listen::PARA_ID && key == parachains::listen::lt::TOKEN_SYMBOL.to_vec() => Some(parachains::listen::lt::ASSET_ID),
+
+			MultiLocation {
+				parents: 1,
+				interior: X2(Parachain(id), GeneralKey(key)),
+			} if id == parachains::listen::PARA_ID && key == parachains::listen::like::TOKEN_SYMBOL.to_vec() => Some(parachains::listen::like::ASSET_ID),
+
 			_ => None,
 		}
 	}
@@ -1018,6 +1049,23 @@ parameter_types! {
 		).into(),
 		ksm_per_second() * 50
 	);
+
+	pub LIKEPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(parachains::listen::PARA_ID), GeneralKey(parachains::listen::like::TOKEN_SYMBOL.to_vec())),
+		).into(),
+		ksm_per_second() * 50
+	);
+
+	pub LTPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(parachains::listen::PARA_ID), GeneralKey(parachains::listen::lt::TOKEN_SYMBOL.to_vec())),
+		).into(),
+		ksm_per_second() * 50
+	);
+
 	pub LKSMPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
@@ -1037,6 +1085,8 @@ pub type Trader = (
 	FixedRateOfFungible<AusdPerSecond, ToTreasury>,
 	FixedRateOfFungible<KarPerSecond, ToTreasury>,
 	FixedRateOfFungible<LKSMPerSecond, ToTreasury>,
+	FixedRateOfFungible<LTPerSecond, ToTreasury>,
+	FixedRateOfFungible<LIKEPerSecond, ToTreasury>,
 );
 
 pub struct XcmConfig;

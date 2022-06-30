@@ -67,31 +67,16 @@ pub mod time {
 
 pub mod parachains {
 
-	/// native
-	pub mod native {
-		pub mod KICO {
-			pub const AssetId: u32 = 0;
-			pub const TokenSymbol: &[u8] = "KICO".as_bytes();
-		}
-		pub mod LT {
-			pub const AssetId: u32 = 6;
-			pub const TokenSymbol: &[u8] = "LT".as_bytes();
-		}
-	}
-
-	/// kusama
-	pub mod kusama {
-		pub mod KSM {
-			pub const AssetId: u32 = 4;
-		}
-	}
-
 	/// listen
 	pub mod listen {
-		pub const PARA_ID: u32 = 1002;
-		pub mod LTP {
-			pub const AssetId: u32 = 101;
-			pub const TokenSymbol: &[u8] = "LTP".as_bytes();
+		pub const PARA_ID: u32 = 2000;
+		pub mod like {
+			pub const ASSET_ID: u32 = 5;
+			pub const TOKEN_SYMBOL: &[u8] = "LIKE".as_bytes();
+		}
+		pub mod lt {
+			pub const ASSET_ID: u32 = 6;
+			pub const TOKEN_SYMBOL: &[u8] = "LT".as_bytes();
 		}
 	}
 }
