@@ -1570,7 +1570,6 @@ dependencies = [
  "frame-support",
  "frame-system",
  "hex-literal",
- "log",
  "orml-tokens",
  "orml-traits",
  "pallet-amm",
