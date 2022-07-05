@@ -15,6 +15,9 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::unused_unit)]
+#![allow(unused_mut)]
+#![allow(unused_must_use)]
+#![allow(unused_variables)]
 
 use codec::{Codec, Decode, Encode, MaxEncodedLen};
 use frame_system::pallet_prelude::*;

@@ -14,7 +14,11 @@
 // limitations under the License.
 
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(unused_imports)]
 #![allow(clippy::unused_unit)]
+#![allow(unused_variables)]
+#![allow(dead_code)]
+#![allow(unused_must_use)]
 
 #[cfg(test)]
 mod mock;

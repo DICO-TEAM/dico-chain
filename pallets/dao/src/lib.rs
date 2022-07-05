@@ -16,7 +16,11 @@
 // limitations under the License.
 
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(unused_imports)]
+#![allow(unused_variables)]
 #![recursion_limit = "128"]
+#![allow(unused_mut)]
+#![allow(dead_code)]
 
 // use codec::{Codec, Encode, Decode, MaxEncodedLen};
 pub use frame_support::{

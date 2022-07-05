@@ -3,12 +3,13 @@ panic = 'unwind'
 
 [workspace]
 members = [
-    'node/*',
+#    'node/*',
     'pallets/*',
-	'pallets/daos/*',
-    'runtime/*',
+#	'pallets/daos/*',
+#    'runtime/*',
     'primitives',
 ]
 exclude = [
-	'pallets/daos'
+	'pallets/daos',
+	'pallets/daos/*',
 ]

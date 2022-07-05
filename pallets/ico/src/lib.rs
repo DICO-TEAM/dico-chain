@@ -13,6 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(unused_imports)]
+#![allow(unused_parens)]
+#![allow(unused_doc_comments)]
+#![allow(unused_mut)]
+#![allow(dead_code)]
+#![allow(non_upper_case_globals)]
+#![allow(unused_must_use)]
+#![allow(unused_variables)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::pallet::*;

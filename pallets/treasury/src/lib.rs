@@ -15,7 +15,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #![cfg_attr(not(feature = "std"), no_std)]
-
+#![allow(unused_imports)]
+#![allow(deprecated)]
+#![allow(unused_variables)]
 mod benchmarking;
 pub mod traits;
 // pub mod weights;

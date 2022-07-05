@@ -1,5 +1,5 @@
 //! A set of macro used in pallets.
-#![warn(missing_docs)]
+#![allow(missing_docs)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[macro_export]

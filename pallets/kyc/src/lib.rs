@@ -48,7 +48,8 @@
 //! * `kill_sword_holder` - Forcibly remove the associated sword holder; the deposit is lost.
 //! * `remove_kyc` - Forcibly remove kyc from kyc list and add to black list.
 #![cfg_attr(not(feature = "std"), no_std)]
-
+#![allow(dead_code)]
+#![allow(unused_assignments)]
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 #[cfg(test)]

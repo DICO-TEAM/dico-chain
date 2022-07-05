@@ -1,4 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(missing_docs)]
 
 use codec::{Decode, Encode};
 use sp_runtime::{
