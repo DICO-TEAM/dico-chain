@@ -21,6 +21,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(unused_must_use)]
 #![allow(unused_variables)]
+#![allow(deprecated)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::pallet::*;

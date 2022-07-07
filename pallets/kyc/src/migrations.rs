@@ -1,3 +1,6 @@
+
+#![allow(deprecated)]
+
 use super::*;
 use crate::{Config, Weight};
 use frame_support::{log, traits::Get};

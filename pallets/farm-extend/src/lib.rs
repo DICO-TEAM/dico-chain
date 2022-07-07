@@ -5,6 +5,7 @@
 //! Farm extend pallet provides functionality for managing liquidity mint.
 
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(deprecated)]
 #![allow(clippy::unused_unit)]
 #![allow(clippy::upper_case_acronyms)]
 

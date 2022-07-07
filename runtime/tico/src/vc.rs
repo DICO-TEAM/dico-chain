@@ -1,3 +1,5 @@
+#![allow(unused_assignments)]
+#![allow(unreachable_patterns)]
 
 use super::*;
 use daos_create_dao;
