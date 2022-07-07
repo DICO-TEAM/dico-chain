@@ -292,6 +292,6 @@ pub mod pallet {
 
 impl<T: Config> DicoTreasuryHandler<T::AccountId> for Module<T> {
 	fn get_treasury_account_id() -> T::AccountId {
-		T::PalletId::get().into_account()
+		T::PalletId::get().into_account_truncating()
 	}
 }

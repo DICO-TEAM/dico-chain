@@ -50,7 +50,6 @@ use orml_traits::{BalanceStatus, MultiCurrency, MultiReservableCurrency};
 use pallet_kyc::{traits::KycHandler, types::AreaCode};
 use pallet_pricedao::traits::PriceData;
 pub use primitive_types::U256;
-use sp_runtime::app_crypto::sp_core::sandbox::ERR_EXECUTION;
 use sp_runtime::traits::{CheckedAdd, CheckedSub, StaticLookup};
 pub use sp_runtime::{
 	traits::CheckedMul,

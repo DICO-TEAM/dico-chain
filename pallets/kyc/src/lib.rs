@@ -803,11 +803,11 @@ pub mod pallet {
 
 	impl<T: Config> Pallet<T> {
 		fn account_id() -> T::AccountId {
-			T::PalletId::get().into_account()
+			T::PalletId::get().into_account_truncating()
 		}
 
 		fn curve_public_key() -> CurvePubicKey {
-			T::PalletId::get().into_account()
+			T::PalletId::get().into_account_truncating()
 		}
 
 		/// Safely increment the nonce, with error on overflow

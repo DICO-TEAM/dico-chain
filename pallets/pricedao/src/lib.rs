@@ -34,13 +34,13 @@ pub mod weights;
 
 pub use weights::WeightInfo;
 
-pub use module::*;
+pub use pallet::*;
 use sp_core::U256;
 use sp_runtime::traits::CheckedConversion;
 pub use traits::{PriceData, PriceProvider};
 
 #[frame_support::pallet]
-pub mod module {
+pub mod pallet {
 	use super::*;
 
 	pub(crate) type BalanceOf<T> =
@@ -115,6 +115,7 @@ pub mod module {
 	// }
 
 	#[pallet::pallet]
+	#[pallet::generate_store(pub(super) trait Store)]
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
@@ -222,7 +223,7 @@ pub mod module {
 
 impl<T: Config> Pallet<T> {
 	fn account_id() -> T::AccountId {
-		T::DicoTreasuryModuleId::get().into_account()
+		T::DicoTreasuryModuleId::get().into_account_truncating()
 	}
 
 	fn deposit(who: T::AccountId, deposit_balance: BalanceOf<T>) -> bool {

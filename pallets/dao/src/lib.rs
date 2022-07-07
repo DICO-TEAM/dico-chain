@@ -36,7 +36,6 @@ use ico::traits::IcoHandler;
 use orml_traits::{BalanceStatus, MultiCurrency, MultiReservableCurrency};
 use pallet_timestamp;
 use scale_info::TypeInfo;
-use sp_core::u32_trait::Value as U32;
 use sp_io;
 use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Member, SaturatedConversion, Saturating};
 use sp_runtime::{traits::Hash, Percent, RuntimeDebug};
@@ -516,16 +515,16 @@ pub mod pallet {
 	#[pallet::origin]
 	pub type Origin<T> = IcoRawOrigin<<T as frame_system::Config>::AccountId, MultiBalanceOf<T>>;
 
-	pub struct EnsureProportionAtLeast<T: Config, N: U32, D: U32, AccountId>(
-		sp_std::marker::PhantomData<(T, N, D, AccountId)>,
+	pub struct EnsureProportionAtLeast<T: Config, const N: u32, const D: u32, AccountId>(
+		sp_std::marker::PhantomData<(T, AccountId)>,
 	);
 
 	impl<
 			T: Config,
 			O: Into<Result<IcoRawOrigin<AccountId, MultiBalanceOf<T>>, O>>
 				+ From<IcoRawOrigin<AccountId, MultiBalanceOf<T>>>,
-			N: U32,
-			D: U32,
+			const N: u32,
+			const D: u32,
 			AccountId,
 		> EnsureOrigin<O> for EnsureProportionAtLeast<T, N, D, AccountId>
 	{
@@ -533,8 +532,8 @@ pub mod pallet {
 		fn try_origin(o: O) -> Result<Self::Success, O> {
 			o.into().and_then(|o| match o {
 				IcoRawOrigin::Members(n, m)
-					if n * D::VALUE.saturated_into::<MultiBalanceOf<T>>()
-						>= N::VALUE.saturated_into::<MultiBalanceOf<T>>() * m =>
+					if n * D.saturated_into::<MultiBalanceOf<T>>()
+						>= N.saturated_into::<MultiBalanceOf<T>>() * m =>
 				{
 					Ok(())
 				}

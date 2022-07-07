@@ -12,4 +12,6 @@ members = [
 exclude = [
 	'pallets/daos',
 	'pallets/daos/*',
+	'pallets/ico/rpc/*',
+	'pallets/farm/rpc/*',
 ]
