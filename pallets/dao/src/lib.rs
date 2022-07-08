@@ -515,7 +515,7 @@ pub mod pallet {
 	#[pallet::origin]
 	pub type Origin<T> = IcoRawOrigin<<T as frame_system::Config>::AccountId, MultiBalanceOf<T>>;
 
-	pub struct EnsureProportionAtLeast<T: Config, const N: u32, const D: u32, AccountId>(
+	pub struct EnsureProportionAtLeast<T: Config, AccountId, const N: u32, const D: u32>(
 		sp_std::marker::PhantomData<(T, AccountId)>,
 	);
 
@@ -523,10 +523,10 @@ pub mod pallet {
 			T: Config,
 			O: Into<Result<IcoRawOrigin<AccountId, MultiBalanceOf<T>>, O>>
 				+ From<IcoRawOrigin<AccountId, MultiBalanceOf<T>>>,
+			AccountId,
 			const N: u32,
 			const D: u32,
-			AccountId,
-		> EnsureOrigin<O> for EnsureProportionAtLeast<T, N, D, AccountId>
+		> EnsureOrigin<O> for EnsureProportionAtLeast<T, AccountId, N, D>
 	{
 		type Success = ();
 		fn try_origin(o: O) -> Result<Self::Success, O> {

@@ -1458,8 +1458,8 @@ impl pallet_ico::Config for Runtime {
 	type Event = Event;
 	type PermitIcoOrigin = pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>;
 	type RejectIcoOrigin = pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>;
-	type PermitReleaseOrigin = pallet_dao::EnsureProportionAtLeast<Runtime, 1u32, 2u32, AccountId>;
-	type TerminateIcoOrigin = pallet_dao::EnsureProportionAtLeast<Runtime, 1u32, 2u32, AccountId>;
+	type PermitReleaseOrigin = pallet_dao::EnsureProportionAtLeast<Runtime, AccountId, 1, 2>;
+	type TerminateIcoOrigin = pallet_dao::EnsureProportionAtLeast<Runtime, AccountId, 1, 2>;
 	type OnSlash = ();
 	type MultiCurrency = Currencies;
 	type NativeCurrency = Balances;
