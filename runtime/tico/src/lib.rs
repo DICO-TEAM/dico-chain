@@ -10,7 +10,6 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use dico_primitives::{
-	parachains,
 	constants::{currency::*, time::*},
 	tokens::{DICO, KAR, KICO, KSM, KUSD, LKSM},
 	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
@@ -85,10 +84,13 @@ pub use pallet_vc;
 
 use crate::constants::*;
 use pallet_farm_rpc_runtime_api as farm_rpc;
+use crate::parachains::*;
 
 mod constants;
 mod weights;
 mod vc;
+mod parachains;
+
 
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
