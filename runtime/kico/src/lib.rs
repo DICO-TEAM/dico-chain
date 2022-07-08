@@ -13,6 +13,7 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use dico_primitives::{
+	parachains,
 	constants::{currency::*, time::*},
 	tokens::{KAR, KICO, KSM, KUSD, LKSM},
 	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
@@ -49,6 +50,7 @@ use frame_support::{
 	},
 	PalletId,
 };
+
 use frame_system::limits::{BlockLength, BlockWeights};
 use frame_system::EnsureRoot;
 
@@ -216,6 +218,23 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 					GeneralKey(paras::karura::LKSM_KEY.to_vec()),
 				),
 			)),
+
+			parachains::listen::lt::ASSET_ID => Some(MultiLocation::new(
+				1,
+				X2(
+					Parachain(parachains::listen::PARA_ID),
+					GeneralKey(parachains::listen::lt::TOKEN_SYMBOL.to_vec()),
+				),
+			)),
+
+			parachains::listen::like::ASSET_ID => Some(MultiLocation::new(
+				1,
+				X2(
+					Parachain(parachains::listen::PARA_ID),
+					GeneralKey(parachains::listen::like::TOKEN_SYMBOL.to_vec()),
+				),
+			)),
+
 			_ => None,
 		}
 	}
@@ -248,6 +267,17 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
 			} if id == paras::karura::ID && key == paras::karura::LKSM_KEY.to_vec() => Some(LKSM),
+
+			MultiLocation {
+				parents: 1,
+				interior: X2(Parachain(id), GeneralKey(key)),
+			} if id == parachains::listen::PARA_ID && key == parachains::listen::lt::TOKEN_SYMBOL.to_vec() => Some(parachains::listen::lt::ASSET_ID),
+
+			MultiLocation {
+				parents: 1,
+				interior: X2(Parachain(id), GeneralKey(key)),
+			} if id == parachains::listen::PARA_ID && key == parachains::listen::like::TOKEN_SYMBOL.to_vec() => Some(parachains::listen::like::ASSET_ID),
+
 			_ => None,
 		}
 	}
@@ -568,11 +598,11 @@ impl pallet_democracy::Config for Runtime {
 	/// be tabled immediately and with a shorter voting/enactment period.
 	type FastTrackOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 2u32, 3u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 1u32, 2u32>
 	>;
 	type InstantOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 1u32, 1u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 3u32, 4u32>
 	>;
 	type InstantAllowed = InstantAllowed;
 	type FastTrackVotingPeriod = FastTrackVotingPeriod;
@@ -999,6 +1029,23 @@ parameter_types! {
 		).into(),
 		ksm_per_second()
 	);
+
+	pub LIKEPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(parachains::listen::PARA_ID), GeneralKey(parachains::listen::like::TOKEN_SYMBOL.to_vec())),
+		).into(),
+		ksm_per_second() * 50
+	);
+
+	pub LTPerSecond: (AssetId, u128) = (
+		MultiLocation::new(
+			1,
+			X2(Parachain(parachains::listen::PARA_ID), GeneralKey(parachains::listen::lt::TOKEN_SYMBOL.to_vec())),
+		).into(),
+		ksm_per_second() * 50
+	);
+
 }
 
 pub type Trader = (
@@ -1010,6 +1057,9 @@ pub type Trader = (
 	FixedRateOfFungible<AusdPerSecond, ToTreasury>,
 	FixedRateOfFungible<KarPerSecond, ToTreasury>,
 	FixedRateOfFungible<LKSMPerSecond, ToTreasury>,
+	// listen
+	FixedRateOfFungible<LTPerSecond, ToTreasury>,
+	FixedRateOfFungible<LIKEPerSecond, ToTreasury>,
 );
 
 pub struct XcmConfig;
