@@ -1513,7 +1513,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "daos-collective"
+name = "daos-agency"
 version = "1.0.0"
 dependencies = [
  "daos-create-dao",
@@ -1532,28 +1532,12 @@ dependencies = [
 
 [[package]]
 name = "daos-create-dao"
-version = "0.1.0"
-dependencies = [
- "daos-primitives",
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "parity-scale-codec 3.1.5",
- "scale-info",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
-name = "daos-democracy"
 version = "1.0.0"
 dependencies = [
- "daos-create-dao",
  "daos-primitives",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "orml-traits",
  "parity-scale-codec 3.1.5",
  "scale-info",
  "sp-runtime",
@@ -1577,9 +1561,25 @@ dependencies = [
 
 [[package]]
 name = "daos-primitives"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "frame-support",
+ "parity-scale-codec 3.1.5",
+ "scale-info",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "daos-square"
+version = "1.0.0"
+dependencies = [
+ "daos-create-dao",
+ "daos-primitives",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "orml-traits",
  "parity-scale-codec 3.1.5",
  "scale-info",
  "sp-runtime",
@@ -3257,11 +3257,11 @@ dependencies = [
  "cumulus-primitives-core",
  "cumulus-primitives-timestamp",
  "cumulus-primitives-utility",
- "daos-collective",
+ "daos-agency",
  "daos-create-dao",
- "daos-democracy",
  "daos-doas",
  "daos-primitives",
+ "daos-square",
  "daos-sudo",
  "dico-primitives",
  "frame-benchmarking",
@@ -10595,11 +10595,11 @@ dependencies = [
  "cumulus-primitives-core",
  "cumulus-primitives-timestamp",
  "cumulus-primitives-utility",
- "daos-collective",
+ "daos-agency",
  "daos-create-dao",
- "daos-democracy",
  "daos-doas",
  "daos-primitives",
+ "daos-square",
  "daos-sudo",
  "dico-primitives",
  "frame-benchmarking",
