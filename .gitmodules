@@ -1,3 +1,3 @@
 [submodule "pallets/daos"]
 	path = pallets/daos
-	url = https://github.com/DAOS-TEAM/daos.git
+	url = https://github.com/daos-org/daos.git
