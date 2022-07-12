@@ -2,6 +2,14 @@
 use super::*;
 pub struct CurrencyIdConvert;
 
+pub fn ksm_per_second() -> u128 {
+	let base_weight = Balance::from(ExtrinsicBaseWeight::get());
+	let base_tx_fee = DOLLARS / 1000;
+	let base_tx_per_second = (WEIGHT_PER_SECOND as u128) / base_weight;
+	let fee_per_second = base_tx_per_second * base_tx_fee;
+	fee_per_second / 100
+}
+
 impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 	fn convert(id: CurrencyId) -> Option<MultiLocation> {
 		match id {
