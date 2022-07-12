@@ -5,9 +5,7 @@ pub const KICO: CurrencyId = 0;
 pub const DICO: CurrencyId = 1;
 
 
-pub const KUSD: CurrencyId = 10;
-pub const AUSD: CurrencyId = 11;
-
+pub const AUSD: CurrencyId = 10;
 
 // substrate ecosystem
 pub const KSM: CurrencyId = 100;

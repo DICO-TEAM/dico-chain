@@ -14,7 +14,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use dico_primitives::{
 	constants::{currency::*, time::*},
-	tokens::{KAR, KICO, KSM, KUSD, LKSM},
+	tokens::{KAR, KICO, KSM, AUSD, LKSM},
 	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
 	Signature,
 };
@@ -205,11 +205,11 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 					GeneralKey(paras::karura::KAR_KEY.to_vec()),
 				),
 			)),
-			KUSD => Some(MultiLocation::new(
+			AUSD => Some(MultiLocation::new(
 				1,
 				X2(
 					Parachain(paras::karura::ID),
-					GeneralKey(paras::karura::KUSD_KEY.to_vec()),
+					GeneralKey(paras::karura::AUSD_KEY.to_vec()),
 				),
 			)),
 			LKSM => Some(MultiLocation::new(
@@ -259,7 +259,7 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == paras::karura::ID && key == paras::karura::KUSD_KEY.to_vec() => Some(KUSD),
+			} if id == paras::karura::ID && key == paras::karura::AUSD_KEY.to_vec() => Some(AUSD),
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
@@ -1005,17 +1005,11 @@ parameter_types! {
 	pub KusdPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
-			X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::KUSD_KEY.to_vec())),
-		).into(),
-		ksm_per_second() * 100
-	);
-	pub AusdPerSecond: (AssetId, u128) = (
-		MultiLocation::new(
-			1,
 			X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::AUSD_KEY.to_vec())),
 		).into(),
 		ksm_per_second() * 100
 	);
+
 	pub KarPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
@@ -1055,7 +1049,7 @@ pub type Trader = (
 	FixedRateOfFungible<KicoPerSecond, ToTreasury>,
 	// Karura
 	FixedRateOfFungible<KusdPerSecond, ToTreasury>,
-	FixedRateOfFungible<AusdPerSecond, ToTreasury>,
+	// FixedRateOfFungible<AusdPerSecond, ToTreasury>,
 	FixedRateOfFungible<KarPerSecond, ToTreasury>,
 	FixedRateOfFungible<LKSMPerSecond, ToTreasury>,
 	// listen
@@ -1434,7 +1428,7 @@ parameter_types! {
 	pub const ChillDuration: BlockNumber = 10 * MINUTES;
 	pub const InviterRewardProportion: Percent = Percent::from_percent(10u8);
 	pub const InviteeRewardProportion: Percent = Percent::from_percent(5u8);
-	pub const USDCurrencyId: CurrencyId = KUSD;
+	pub const USDCurrencyId: CurrencyId = AUSD;
 
 }
 
