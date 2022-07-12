@@ -1,5 +1,8 @@
 
 use super::*;
+use crate::xcm_impls::FixedRateOfAsset;
+use pallet_currencies::currencies_trait::AssetIdMapping;
+
 pub fn ksm_per_second() -> u128 {
 	let base_weight = Balance::from(ExtrinsicBaseWeight::get());
 	let base_tx_fee = DOLLARS / 1000;
@@ -12,6 +15,9 @@ pub struct CurrencyIdConvert;
 
 impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 	fn convert(id: CurrencyId) -> Option<MultiLocation> {
+		if let Some(i) = pallet_currencies::AssetIdMaps::<Runtime>::get_multi_location(id) {
+			return Some(i)
+		}
 		match id {
 			KSM => Some(MultiLocation::parent()),
 			KICO => Some(MultiLocation::new(
@@ -73,6 +79,12 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 
 impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 	fn convert(location: MultiLocation) -> Option<CurrencyId> {
+		if let Some(l) =
+			pallet_currencies::AssetIdMaps::<Runtime>::get_currency_id(location.clone())
+		{
+			return Some(l)
+		}
+
 		match location {
 			MultiLocation {
 				parents: 1,
@@ -317,6 +329,9 @@ parameter_types! {
 		).into(),
 		ksm_per_second()
 	);
+
+	pub BaseRate: u128 = ksm_per_second();
+
 }
 
 pub type Trader = (
@@ -330,6 +345,7 @@ pub type Trader = (
 	FixedRateOfFungible<LKSMPerSecond, ToTreasury>,
 	FixedRateOfFungible<LTPerSecond, ToTreasury>,
 	FixedRateOfFungible<LIKEPerSecond, ToTreasury>,
+	FixedRateOfAsset<BaseRate, ToTreasury, pallet_currencies::AssetIdMaps<Runtime>>,
 );
 
 pub struct XcmConfig;

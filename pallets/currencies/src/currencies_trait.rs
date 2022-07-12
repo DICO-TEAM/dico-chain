@@ -12,3 +12,9 @@ pub trait CurrenciesHandler<CurrencyId, DicoAssetMetadata, DispatchErr, AccountI
 		is_swap_deposit: bool,
 	) -> DispatchResult;
 }
+
+pub trait AssetIdMapping<CurrencyId, MultiLocation> {
+	fn get_multi_location(asset_id: CurrencyId) -> Option<MultiLocation>;
+	fn get_currency_id(multi_location: MultiLocation) -> Option<CurrencyId>;
+	fn get_weight_rate_multiple(location: MultiLocation) -> Option<u128>;
+}

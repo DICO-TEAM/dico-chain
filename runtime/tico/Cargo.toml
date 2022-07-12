@@ -19,7 +19,7 @@ hex-literal       = { version = "0.3.4", optional = true, default-features = fal
 scale-info        = { version = "2.1.1", default-features = false, features = ["derive"] }
 smallvec          = { version = "1.6.1"}
 static_assertions = { version = "1.1.0" }
-
+log = { version = "0.4.14", default-features = false }
 
 
 # https://docs.rs/getrandom/0.2.3/getrandom/#indirect-dependencies
@@ -189,6 +189,7 @@ std = [
     "codec/std",
     "serde",
     "scale-info/std",
+	"log/std",
 
     "cumulus-pallet-aura-ext/std",
     "cumulus-primitives-core/std",

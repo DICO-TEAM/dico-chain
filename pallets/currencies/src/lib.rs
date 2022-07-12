@@ -21,6 +21,7 @@
 
 use codec::{Codec, Decode, Encode, MaxEncodedLen};
 use frame_system::pallet_prelude::*;
+use sp_std::boxed::Box;
 use pallet_vc::{self, Fee};
 use pallet_vc::AccountIdConversion;
 use frame_support::{
@@ -32,6 +33,7 @@ use frame_support::{
         ReservableCurrency as PalletReservableCurrency, WithdrawReasons,
     },
 };
+use xcm::{v1::MultiLocation, VersionedMultiLocation};
 use scale_info::TypeInfo;
 use sp_std::vec;
 use daos_create_dao::{self as dao};
@@ -70,7 +72,7 @@ pub mod weights;
 
 pub use weights::WeightInfo;
 
-use currencies_trait::CurrenciesHandler;
+use currencies_trait::{CurrenciesHandler, AssetIdMapping};
 pub use dico_primitives::{
     constants::{currency::*, time::*},
     AssetId,
@@ -121,6 +123,10 @@ pub mod module {
         + BasicLockableCurrency<Self::AccountId, Balance=BalanceOf<Self>>
         + BasicReservableCurrency<Self::AccountId, Balance=BalanceOf<Self>>;
 
+		type SetLocationOrigin: EnsureOrigin<Self::Origin>;
+
+		type ForceSetLocationOrigin: EnsureOrigin<Self::Origin>;
+
         #[pallet::constant]
         type GetNativeCurrencyId: Get<AssetId>;
 
@@ -154,7 +160,11 @@ pub mod module {
         CurrencyIdTooLow,
 		DaoExists,
 		CexTransferClosed,
-    }
+		AssetIdExisted,
+		BadLocation,
+		MultiLocationExisted,
+		CrossTransferNotOpen,
+	}
 
     #[pallet::event]
     #[pallet::generate_deposit(pub (crate) fn deposit_event)]
@@ -170,6 +180,22 @@ pub mod module {
         CreateAsset(T::AccountId, AssetId, BalanceOf<T>),
         SetMetadata(T::AccountId, AssetId, DicoAssetMetadata),
         Burn(T::AccountId, AssetId, BalanceOf<T>),
+		SetLocation {
+			currency_id: AssetId,
+			location: MultiLocation,
+		},
+		ForceSetLocation {
+			currency_id: AssetId,
+			location: MultiLocation,
+		},
+		SetWeightRateMultiple {
+			currency_id: AssetId,
+			multiple: u128,
+		},
+		SetExistenialDepposit {
+			currency_id: AssetId,
+			existenial_deposit: BalanceOf<T>,
+		},
     }
 
     #[pallet::storage]
@@ -181,6 +207,30 @@ pub mod module {
 	#[pallet::storage]
     #[pallet::getter(fn daos)]
 	pub type Daos<T: Config> = StorageMap<_, Identity, AssetId, T::DaoId>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn existenial_deposits)]
+	pub type ExistentialDeposits<T: Config> =
+		StorageMap<_, Identity, AssetId, BalanceOf<T>, ValueQuery>;
+
+	#[pallet::type_value]
+	pub fn WeightRateMultipleOnEmpty<T: Config>() -> u128 {
+		1000u128
+	}
+
+	#[pallet::storage]
+	#[pallet::getter(fn weight_rate_multiple)]
+	pub type WeightRateMultiple<T: Config> = StorageMap<_, Identity, AssetId, u128, ValueQuery, WeightRateMultipleOnEmpty<T>>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn asset_locations)]
+	pub type AssetLocations<T: Config> =
+		StorageMap<_, Twox64Concat, AssetId, MultiLocation, OptionQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn location_to_currency_ids)]
+	pub type LocationToCurrencyIds<T: Config> =
+		StorageMap<_, Twox64Concat, MultiLocation, AssetId, OptionQuery>;
 
     #[pallet::pallet]
     #[pallet::without_storage_info]
@@ -227,6 +277,88 @@ pub mod module {
 
             Ok(().into())
         }
+
+		/// After setting location, cross-chain transfers can be made
+		#[pallet::weight(1500_000_000)]
+		pub fn set_location(
+			origin: OriginFor<T>,
+			currency_id: AssetId,
+			location: Box<VersionedMultiLocation>,
+		) -> DispatchResultWithPostInfo {
+			T::SetLocationOrigin::ensure_origin(origin)?;
+			let location: MultiLocation =
+				(*location).try_into().map_err(|()| Error::<T>::BadLocation)?;
+			ensure!(DicoAssetsInfo::<T>::contains_key(currency_id), Error::<T>::AssetNotExists);
+
+			ensure!(
+				!AssetLocations::<T>::contains_key(currency_id),
+				Error::<T>::MultiLocationExisted
+			);
+			ensure!(
+				!LocationToCurrencyIds::<T>::contains_key(location.clone()),
+				Error::<T>::AssetIdExisted
+			);
+
+			AssetLocations::<T>::insert(currency_id, location.clone());
+			LocationToCurrencyIds::<T>::insert(location.clone(), currency_id);
+			Self::deposit_event(Event::SetLocation { currency_id, location });
+			Ok(().into())
+		}
+
+		#[pallet::weight(1500_000_000)]
+		pub fn set_weight_rate_multiple(
+			origin: OriginFor<T>,
+			currency_id: AssetId,
+			multiple: u128,
+		) -> DispatchResultWithPostInfo {
+			let who = ensure_signed(origin)?;
+			let info = DicoAssetsInfo::<T>::get(currency_id).ok_or(Error::<T>::AssetNotExists)?;
+			ensure!(who == info.owner, Error::<T>::NotOwner);
+			ensure!(
+				AssetLocations::<T>::contains_key(currency_id),
+				Error::<T>::CrossTransferNotOpen
+			);
+			WeightRateMultiple::<T>::insert(currency_id, multiple);
+			Self::deposit_event(Event::SetWeightRateMultiple { currency_id, multiple });
+
+			Ok(().into())
+		}
+
+		/// After setting location, cross-chain transfers can be made
+		#[pallet::weight(1500_000_000)]
+		pub fn force_set_location(
+			origin: OriginFor<T>,
+			currency_id: AssetId,
+			location: Box<VersionedMultiLocation>,
+		) -> DispatchResultWithPostInfo {
+			T::ForceSetLocationOrigin::ensure_origin(origin)?;
+			let location: MultiLocation =
+				(*location).try_into().map_err(|()| Error::<T>::BadLocation)?;
+			ensure!(DicoAssetsInfo::<T>::contains_key(currency_id), Error::<T>::AssetNotExists);
+			if let Some(l) = AssetLocations::<T>::get(currency_id) {
+				LocationToCurrencyIds::<T>::take(l);
+			}
+			AssetLocations::<T>::insert(currency_id, location.clone());
+			LocationToCurrencyIds::<T>::insert(location.clone(), currency_id);
+			Self::deposit_event(Event::ForceSetLocation { currency_id, location });
+			Ok(().into())
+		}
+
+		#[pallet::weight(1500_000_000)]
+		pub fn set_existenial_deposit(
+			origin: OriginFor<T>,
+			currency_id: AssetId,
+			existenial_deposit: BalanceOf<T>,
+		) -> DispatchResultWithPostInfo {
+			let who = ensure_signed(origin)?;
+			let info = DicoAssetsInfo::<T>::get(currency_id).ok_or(Error::<T>::AssetNotExists)?;
+			ensure!(who == info.owner, Error::<T>::NotOwner);
+
+			ExistentialDeposits::<T>::insert(currency_id, existenial_deposit);
+			Self::deposit_event(Event::SetExistenialDepposit{ currency_id, existenial_deposit });
+
+			Ok(().into())
+		}
 
         /// Users set the asset metadata.
         ///
@@ -963,4 +1095,23 @@ for BasicCurrencyAdapter<T, Currency, Amount, Moment>
     ) -> result::Result<Self::Balance, DispatchError> {
         Currency::repatriate_reserved(slashed, beneficiary, value, status)
     }
+}
+
+pub struct AssetIdMaps<T>(sp_std::marker::PhantomData<T>);
+impl<T: Config> AssetIdMapping<AssetId, MultiLocation> for AssetIdMaps<T> {
+	fn get_multi_location(asset_id: AssetId) -> Option<MultiLocation> {
+		Pallet::<T>::asset_locations(asset_id)
+	}
+
+	fn get_currency_id(multi_location: MultiLocation) -> Option<AssetId> {
+		Pallet::<T>::location_to_currency_ids(multi_location)
+	}
+
+	fn get_weight_rate_multiple(location: MultiLocation) -> Option<u128> {
+		if let Some(id) = Self::get_currency_id(location.clone()) {
+			Some(WeightRateMultiple::<T>::get(id))
+		} else {
+			None
+		}
+	}
 }

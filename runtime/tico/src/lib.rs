@@ -92,6 +92,7 @@ mod vc;
 mod parachains;
 mod xcm_config;
 mod migrations;
+mod xcm_impls;
 
 
 /// Block type as expected by this runtime.
@@ -859,6 +860,8 @@ impl pallet_currencies::Config for Runtime {
 	type MultiCurrency = Tokens;
 
 	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+	type SetLocationOrigin = pallet_collective::EnsureMember<AccountId, CouncilCollective>;
+	type ForceSetLocationOrigin = EnsureRootOrHalfCouncil;
 
 	type GetNativeCurrencyId = DICOAssetId;
 

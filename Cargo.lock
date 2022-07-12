@@ -3272,6 +3272,7 @@ dependencies = [
  "frame-system-rpc-runtime-api",
  "frame-try-runtime",
  "hex-literal",
+ "log",
  "orml-tokens",
  "orml-traits",
  "orml-unknown-tokens",
@@ -5124,6 +5125,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-std",
+ "xcm",
 ]
 
 [[package]]
@@ -10610,6 +10612,7 @@ dependencies = [
  "frame-system-rpc-runtime-api",
  "frame-try-runtime",
  "hex-literal",
+ "log",
  "orml-tokens",
  "orml-traits",
  "orml-unknown-tokens",
