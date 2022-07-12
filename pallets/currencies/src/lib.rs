@@ -209,6 +209,10 @@ pub mod module {
 	pub type Daos<T: Config> = StorageMap<_, Identity, AssetId, T::DaoId>;
 
 	#[pallet::storage]
+	#[pallet::getter(fn users_number)]
+	pub type UsersNumber<T: Config> = StorageMap<_, Identity, AssetId, u32, ValueQuery>;
+
+	#[pallet::storage]
 	#[pallet::getter(fn existenial_deposits)]
 	pub type ExistentialDeposits<T: Config> =
 		StorageMap<_, Identity, AssetId, BalanceOf<T>, ValueQuery>;

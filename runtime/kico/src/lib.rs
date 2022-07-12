@@ -18,7 +18,7 @@ use dico_primitives::{
 	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
 	Signature,
 };
-use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, MultiCurrency, location::AbsoluteReserveProvider};
+use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, MultiCurrency, Happened, location::AbsoluteReserveProvider};
 pub use orml_xcm_support::{DepositToAlternative, IsNativeConcrete, MultiCurrencyAdapter, MultiNativeAsset};
 use pallet_currencies::BasicCurrencyAdapter;
 use sp_api::impl_runtime_apis;
@@ -39,6 +39,7 @@ use static_assertions::const_assert;
 use frame_support::{
 	construct_runtime, match_type, parameter_types,
 	traits::{
+		OnKilledAccount, OnNewAccount,
 		Contains, EnsureOneOf, EqualPrivilegeOnly, Everything, LockIdentifier, Nothing, OnRuntimeUpgrade,
 		U128CurrencyToVote,
 	},
@@ -342,6 +343,23 @@ impl Contains<Call> for CallFilterRouter {
 	}
 }
 
+pub struct NewAccount;
+impl OnNewAccount<AccountId> for NewAccount {
+	fn on_new_account(_who: &AccountId) {
+		pallet_currencies::UsersNumber::<Runtime>::mutate(0 as CurrencyId, |i| {
+			*i = i.saturating_add(1u32)
+		});
+	}
+}
+
+pub struct KilledAccount;
+impl OnKilledAccount<AccountId> for KilledAccount {
+	fn on_killed_account(_who: &AccountId) {
+		pallet_currencies::UsersNumber::<Runtime>::mutate(0 as CurrencyId, |i| {
+			*i = i.saturating_sub(1u32)
+		});
+	}
+}
 
 impl frame_system::Config for Runtime {
 	/// The identifier used to distinguish between accounts.
@@ -372,9 +390,9 @@ impl frame_system::Config for Runtime {
 	type PalletInfo = PalletInfo;
 	type AccountData = pallet_balances::AccountData<Balance>;
 	/// What to do if a new account is created.
-	type OnNewAccount = ();
+	type OnNewAccount = NewAccount;
 	/// What to do if an account is fully reaped from the system.
-	type OnKilledAccount = ();
+	type OnKilledAccount = KilledAccount;
 	/// The weight of database operations that the runtime can invoke.
 	type DbWeight = RocksDbWeight;
 	/// The basic call filter to use in dispatchable.
@@ -896,6 +914,25 @@ pub fn get_all_module_accounts() -> Vec<AccountId> {
 	]
 }
 
+pub struct OnNewTokenAccount;
+impl Happened<(AccountId, CurrencyId)> for OnNewTokenAccount {
+	fn happened(t: &(AccountId, CurrencyId)) {
+			pallet_currencies::UsersNumber::<Runtime>::mutate(&t.1.clone(), |i| {
+				*i = i.saturating_add(1u32);
+
+		});
+	}
+}
+
+pub struct OnKilledTokenAccount;
+impl Happened<(AccountId, CurrencyId)> for OnKilledTokenAccount {
+	fn happened(t: &(AccountId, CurrencyId)) {
+		pallet_currencies::UsersNumber::<Runtime>::mutate(&t.1.clone(), |i| {
+			*i = i.saturating_sub(1u32)
+		});
+	}
+}
+
 impl orml_tokens::Config for Runtime {
 	type Event = Event;
 	type Balance = Balance;
@@ -904,8 +941,8 @@ impl orml_tokens::Config for Runtime {
 	type WeightInfo = ();
 	type ExistentialDeposits = ExistentialDeposits;
 	type OnDust = orml_tokens::TransferDust<Runtime, TreasuryAccount>;
-	type OnNewTokenAccount = ();
-	type OnKilledTokenAccount = ();
+	type OnNewTokenAccount = OnNewTokenAccount;
+	type OnKilledTokenAccount = OnKilledTokenAccount;
 	type MaxLocks = MaxLocks;
 	type MaxReserves = TokensMaxReserves;
 	type ReserveIdentifier = [u8; 8];
