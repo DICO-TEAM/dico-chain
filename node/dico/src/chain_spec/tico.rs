@@ -12,7 +12,7 @@ use tico_runtime::{
 
 use crate::chain_spec::{get_account_id_from_seed, get_authority_keys_from_seed, Extensions, STAGING_TELEMETRY_URL};
 
-pub const PARA_ID: u32 = 2000;
+pub const PARA_ID: u32 = 2107;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
@@ -125,7 +125,7 @@ pub fn tico_config() -> ChainSpec {
 		TelemetryEndpoints::new(vec![(STAGING_TELEMETRY_URL.into(), 0)]).ok(),
 		Some("tico"),
 		None,
-		Some(get_properties(NetworkType::DICO)),
+		Some(get_properties(NetworkType::KICO)),
 		Extensions {
 			relay_chain: "rococo-local".into(),
 			para_id: PARA_ID,
@@ -204,8 +204,8 @@ fn tico_genesis(
 				DicoAssetInfo {
 					owner: "5EKzRRVjvBvZfcRJPaHJCw2yecP9uQXcm6vqNcnMh6bCjpPe".parse().unwrap(),
 					metadata: Some(DicoAssetMetadata {
-						name: "DICO".into(),
-						symbol: "DICO".into(),
+						name: "KICO".into(),
+						symbol: "KICO".into(),
 						decimals: 14u8,
 					}),
 				},
