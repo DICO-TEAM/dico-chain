@@ -86,6 +86,7 @@ pub use pallet_vc;
 use crate::constants::*;
 use pallet_farm_rpc_runtime_api as farm_rpc;
 use crate::parachains::*;
+use crate::migrations::*;
 
 mod constants;
 mod weights;
@@ -122,7 +123,7 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	(),
+	DepositAssetsTokens,
 >;
 
 impl_opaque_keys! {
@@ -137,7 +138,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("TICO"),
 	impl_name: create_runtime_str!("TICO"),
 	authoring_version: 1,
-	spec_version: 2022063001,
+	spec_version: 2022071402,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
