@@ -5347,6 +5347,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-ico-rpc"
+version = "1.0.0"
+dependencies = [
+ "jsonrpsee",
+ "pallet-ico-rpc-runtime-api",
+ "parity-scale-codec 3.1.5",
+ "sc-rpc-api",
+ "sp-api",
+ "sp-blockchain",
+ "sp-rpc",
+ "sp-runtime",
+]
+
+[[package]]
 name = "pallet-ico-rpc-runtime-api"
 version = "1.0.0"
 dependencies = [

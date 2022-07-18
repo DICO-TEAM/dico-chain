@@ -5,12 +5,13 @@ panic = 'unwind'
 members = [
 #    'node/*',
     'pallets/*',
+	'pallets/ico/rpc/rpc',
 	'pallets/daos/*',
     'runtime/*',
     'primitives',
 ]
 exclude = [
 	'pallets/daos',
-	'pallets/ico/rpc/*',
+#	'pallets/ico/rpc/*',
 	'pallets/farm/rpc/*',
 ]
