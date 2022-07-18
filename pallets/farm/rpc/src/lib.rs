@@ -1,8 +1,14 @@
 #![allow(clippy::upper_case_acronyms)]
+#![allow(dead_code)]
 
 use codec::Codec;
-use jsonrpc_core::{Error as RpcError, ErrorCode, Result as RpcResult};
-use jsonrpc_derive::rpc;
+// use jsonrpc_core::{Error as RpcError, ErrorCode, Result as RpcResult};
+// use jsonrpc_derive::rpc;
+use jsonrpsee::{
+	core::{async_trait, Error as JsonRpseeError, RpcResult},
+	proc_macros::rpc,
+	types::error::{CallError, ErrorCode, ErrorObject},
+};
 use sc_rpc_api::DenyUnsafe;
 use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;
@@ -16,9 +22,9 @@ use std::sync::Arc;
 
 pub use pallet_farm_rpc_runtime_api::FarmApi as FarmRuntimeApi;
 
-#[rpc]
+#[rpc(client, server)]
 pub trait FarmApi<AccountId, PoolId, Balance> {
-	#[rpc(name = "farm_getParticipantReward")]
+	#[method(name = "farm_getParticipantReward")]
 	fn get_participant_reward(&self, account: AccountId, pid: PoolId) -> RpcResult<NumberOrHex>;
 }
 
@@ -47,8 +53,8 @@ pub enum Error {
 	DecodeError,
 }
 
-impl From<Error> for i64 {
-	fn from(e: Error) -> i64 {
+impl From<Error> for i32 {
+	fn from(e: Error) -> i32 {
 		match e {
 			Error::RuntimeError => 1,
 			Error::DecodeError => 2,
@@ -56,7 +62,8 @@ impl From<Error> for i64 {
 	}
 }
 
-impl<C, Block, AccountId, PoolId, Balance> FarmApi<AccountId, PoolId, Balance> for Farm<C, Block>
+#[async_trait]
+impl<C, Block, AccountId, PoolId, Balance> FarmApiServer<AccountId, PoolId, Balance> for Farm<C, Block>
 where
 	Block: BlockT,
 	C: Send + Sync + 'static + ProvideRuntimeApi<Block> + HeaderBackend<Block>,
@@ -67,23 +74,24 @@ where
 {
 	fn get_participant_reward(&self, account: AccountId, pid: PoolId) -> RpcResult<NumberOrHex> {
 		let api = self.client.runtime_api();
-		// let at = BlockId::hash(at.unwrap_or_else(||
-		// 	// If the block hash is not supplied assume the best block.
-		// 	self.client.info().best_hash)
-		// );
 		let best = self.client.info().best_hash;
 		let at = BlockId::hash(best);
 
-		let reward = api.get_participant_reward(&at, account, pid).map_err(|e| RpcError {
-			code: ErrorCode::ServerError(Error::RuntimeError.into()),
-			message: "Unable to retrieve participant reward.".into(),
-			data: Some(format!("{:?}", e).into()),
-		})?;
+		let reward = api.get_participant_reward(&at, account, pid).map_err(|e| {
+					CallError::Custom(ErrorObject::owned(
+					Error::RuntimeError.into(),
+					"Unable to query participant reward.",
+					Some(format!("{:?}", e)),
+				))})?;
 
-		reward.try_into().map_err(|_| RpcError {
-			code: ErrorCode::ServerError(Error::DecodeError.into()),
-			message: "Unable to decode participant reward.".into(),
-			data: None,
-		})
+		reward.try_into().map_err(|_| {
+					JsonRpseeError::Call(
+						CallError::Custom(ErrorObject::owned(
+							ErrorCode::InvalidParams.code(),
+							format!("doesn't fit in NumberOrHex representation"),
+							None::<()>,
+						))
+					)
+				})
 	}
 }
