@@ -6,12 +6,11 @@ members = [
 #    'node/*',
     'pallets/*',
 	'pallets/ico/rpc/rpc',
+	'pallets/farm/rpc',
 	'pallets/daos/*',
     'runtime/*',
     'primitives',
 ]
 exclude = [
 	'pallets/daos',
-#	'pallets/ico/rpc/*',
-	'pallets/farm/rpc/*',
 ]
