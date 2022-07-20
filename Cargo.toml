@@ -13,5 +13,4 @@ members = [
 ]
 exclude = [
 	'pallets/daos',
-	'node/dico',
 ]

@@ -17,6 +17,8 @@ pub use macros::*;
 pub mod constants;
 pub mod tokens;
 pub use constants::*;
+pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+pub use cumulus_primitives_core::ParaId;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -76,82 +78,8 @@ pub type Block = generic::Block<Header, OpaqueExtrinsic>;
 /// Block ID.
 pub type BlockId = generic::BlockId<Block>;
 
-pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-
-pub use cumulus_primitives_core::ParaId;
-
-#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub enum TokenSymbol {
-	BTC = 0,
-	ETH = 1,
-	DOT = 2,
-}
-
 pub type CurrencyId = u32;
-// pub type Price = FixedU128;
 pub type Price = Balance;
 pub type ExchangeRate = FixedU128;
 pub type Ratio = FixedU128;
 pub type Rate = FixedU128;
-
-///Network
-#[cfg(feature = "std")]
-pub mod network {
-	#[cfg(feature = "std")]
-	use serde_json::{map::Map, value::Value};
-	// https://github.com/paritytech/ss58-registry/blob/main/ss58-registry.json
-	pub const KICO_PREFIX: u16 = 42;
-	pub const DICO_PREFIX: u16 = 42;
-
-	// 	pub const DICO_REGISTRY: Properties = json!({
-	// 		  "prefix": DICO_PREFIX,
-	// 		  "network": "DICO",
-	// 		  "displayName": "DICO",
-	// 		  "symbols": ["DICO"],
-	// 		  "decimals": [14],
-	// 		  "standardAccount": "*25519",
-	// 		  "website": "https://dico.io/"
-	// 		})
-	// 		.as_object()
-	// 		.expect("Network properties are valid; qed")
-	// 		.to_owned();
-	//
-	// 	pub const KICO_REGISTRY: Properties = json!({
-	// 		  "prefix": KICO_PREFIX,
-	// 		  "network": "KICO",
-	// 		  "displayName": "KICO",
-	// 		  "symbols": ["KICO"],
-	// 		  "decimals": [14],
-	// 		  "standardAccount": "*25519",
-	// 		  "website": "https://dico.io/"
-	// 		})
-	// 		.as_object()
-	// 		.expect("Network properties are valid; qed")
-	// 		.to_owned();
-	//
-
-	pub fn get_properties(network_type: NetworkType) -> Map<String, Value> {
-		let mut properties = Map::new();
-
-		match network_type {
-			NetworkType::KICO => {
-				properties.insert("ss58Format".into(), Value::from(KICO_PREFIX));
-				properties.insert("tokenSymbol".into(), "KICO".into());
-			}
-			NetworkType::DICO => {
-				properties.insert("ss58Format".into(), Value::from(DICO_PREFIX));
-				properties.insert("tokenSymbol".into(), "DICO".into());
-			}
-		}
-
-		properties.insert("tokenDecimals".into(), 14.into());
-		properties
-	}
-
-	#[derive(Clone, Copy)]
-	pub enum NetworkType {
-		KICO,
-		DICO,
-	}
-}
