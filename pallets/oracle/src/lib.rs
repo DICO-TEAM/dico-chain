@@ -31,7 +31,7 @@ use frame_support::{
 	ensure,
 	pallet_prelude::*,
 	traits::{Get, Time},
-	weights::{Pays},
+	weights::Pays,
 	Parameter,
 };
 use frame_system::{ensure_root, ensure_signed, pallet_prelude::*};

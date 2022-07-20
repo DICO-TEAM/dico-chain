@@ -17,7 +17,7 @@ use frame_support::{
 	ensure,
 	pallet_prelude::*,
 	sp_runtime::traits::{AtLeast32Bit, CheckedAdd, One, Zero},
-	traits::{Get},
+	traits::Get,
 	transactional, PalletId,
 };
 use frame_system::pallet_prelude::*;

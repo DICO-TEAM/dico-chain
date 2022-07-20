@@ -22,10 +22,10 @@ use sp_runtime::{
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 use crate as ico;
+use currencies::{self as dico_currencies, BasicCurrencyAdapter};
 use frame_system;
 use pallet_balances;
 use std::cell::RefCell;
-use currencies::{self as dico_currencies, BasicCurrencyAdapter};
 use USD;
 type Key = u32;
 type Value = u128;

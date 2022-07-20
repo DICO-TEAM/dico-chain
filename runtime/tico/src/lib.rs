@@ -9,14 +9,17 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+use daos_democracy;
 pub use dico_primitives::{
 	constants::{currency::*, time::*},
-	tokens::{DICO, KAR, KICO, KSM, AUSD, LKSM},
+	tokens::{AUSD, DICO, KAR, KICO, KSM, LKSM},
 	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
 	Signature,
 };
-use daos_democracy;
-use orml_traits::{create_median_value_data_provider, parameter_type_with_key, Happened, DataFeeder, MultiCurrency, location::AbsoluteReserveProvider};
+use orml_traits::{
+	create_median_value_data_provider, location::AbsoluteReserveProvider, parameter_type_with_key, DataFeeder,
+	Happened, MultiCurrency,
+};
 pub use orml_xcm_support::{DepositToAlternative, IsNativeConcrete, MultiCurrencyAdapter, MultiNativeAsset};
 use pallet_currencies::BasicCurrencyAdapter;
 use sp_api::impl_runtime_apis;
@@ -37,14 +40,12 @@ use static_assertions::const_assert;
 use frame_support::{
 	construct_runtime, match_type, parameter_types,
 	traits::{
-		OnKilledAccount, OnNewAccount,
-		Contains, EnsureOneOf, EqualPrivilegeOnly, Everything, LockIdentifier, Nothing, OnRuntimeUpgrade,
-		U128CurrencyToVote,
+		Contains, EnsureOneOf, EqualPrivilegeOnly, Everything, LockIdentifier, Nothing, OnKilledAccount, OnNewAccount,
+		OnRuntimeUpgrade, U128CurrencyToVote,
 	},
 	weights::{
-		ConstantMultiplier,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-		DispatchClass, IdentityFee, Weight,
+		ConstantMultiplier, DispatchClass, IdentityFee, Weight,
 	},
 	PalletId,
 };
@@ -68,9 +69,9 @@ use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
 use xcm::latest::prelude::*;
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
-	EnsureXcmOrigin, FixedRateOfFungible, FixedWeightBounds, LocationInverter,
-	ParentAsSuperuser, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
-	SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation, TakeRevenue, TakeWeightCredit,
+	EnsureXcmOrigin, FixedRateOfFungible, FixedWeightBounds, LocationInverter, ParentAsSuperuser, ParentIsPreset,
+	RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
+	SignedToAccountId32, SovereignSignedViaLocation, TakeRevenue, TakeWeightCredit,
 };
 use xcm_executor::{Config, XcmExecutor};
 
@@ -80,22 +81,21 @@ pub use pallet_farm_extend;
 pub use pallet_kyc;
 pub use pallet_lbp;
 pub use pallet_pricedao;
-pub use vc::*;
 pub use pallet_vc;
+pub use vc::*;
 
 use crate::constants::*;
-use pallet_farm_rpc_runtime_api as farm_rpc;
-use crate::parachains::*;
 use crate::migrations::*;
+use crate::parachains::*;
+use pallet_farm_rpc_runtime_api as farm_rpc;
 
 mod constants;
-mod weights;
-mod vc;
-mod parachains;
-mod xcm_config;
 mod migrations;
+mod parachains;
+mod vc;
+mod weights;
+mod xcm_config;
 mod xcm_impls;
-
 
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
@@ -181,7 +181,6 @@ const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 /// We allow for 0.5 of a second of compute with a 12 second average block time.
 const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND / 2;
-
 
 parameter_types! {
 	pub const Version: RuntimeVersion = VERSION;
@@ -460,35 +459,35 @@ impl pallet_democracy::Config for Runtime {
 	/// A straight majority of the council can decide what their next motion is.
 	type ExternalOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>,
 	>;
 	/// A super-majority can have the next scheduled referendum be a straight majority-carries vote.
 	type ExternalMajorityOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3u32, 4u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3u32, 4u32>,
 	>;
 	/// A unanimous council can have the next scheduled referendum be a straight default-carries
 	/// (NTB) vote.
 	type ExternalDefaultOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 1u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 1u32>,
 	>;
 	/// Two thirds of the technical committee can have an ExternalMajority/ExternalDefault vote
 	/// be tabled immediately and with a shorter voting/enactment period.
 	type FastTrackOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 2u32, 3u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 2u32, 3u32>,
 	>;
 	type InstantOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 1u32, 1u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 1u32, 1u32>,
 	>;
 	type InstantAllowed = InstantAllowed;
 	type FastTrackVotingPeriod = FastTrackVotingPeriod;
 	// To cancel a proposal which has been passed, 2/3 of the council must agree to it.
 	type CancellationOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2u32, 3u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2u32, 3u32>,
 	>;
 	// To cancel a proposal before it has been passed, the technical committee must be unanimous or
 	// Root must agree.
@@ -543,7 +542,6 @@ parameter_types! {
 	pub const ElectionsPhragmenPalletId: LockIdentifier = *b"phrelect";
 }
 
-
 parameter_types! {
 	pub const TechnicalMotionDuration: BlockNumber = 1 * DAYS;
 	pub const TechnicalMaxProposals: u32 = 100;
@@ -567,7 +565,6 @@ type EnsureRootOrHalfCouncil = EnsureOneOf<
 	EnsureRoot<AccountId>,
 	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1u32, 2u32>,
 >;
-
 
 parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);
@@ -729,8 +726,6 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
 	type CheckAssociatedRelayNumber = cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 }
 
-
-
 impl pallet_aura::Config for Runtime {
 	type AuthorityId = AuraId;
 	type DisabledValidators = ();
@@ -859,9 +854,8 @@ pub fn get_all_module_accounts() -> Vec<AccountId> {
 pub struct OnNewTokenAccount;
 impl Happened<(AccountId, CurrencyId)> for OnNewTokenAccount {
 	fn happened(t: &(AccountId, CurrencyId)) {
-			pallet_currencies::UsersNumber::<Runtime>::mutate(&t.1.clone(), |i| {
-				*i = i.saturating_add(1u32);
-
+		pallet_currencies::UsersNumber::<Runtime>::mutate(&t.1.clone(), |i| {
+			*i = i.saturating_add(1u32);
 		})
 	}
 }
@@ -895,7 +889,6 @@ parameter_types! {
 	pub MinVestedTransfer: Balance = 0;
 	pub const MaxVestingSchedules: u32 = 200;
 }
-
 
 impl orml_vesting::Config for Runtime {
 	type Event = Event;
@@ -1093,7 +1086,6 @@ impl pallet_nft::Config for Runtime {
 	type USDCurrencyId = USDCurrencyId;
 	type WeightInfo = pallet_nft::weights::DicoWeight<Runtime>;
 }
-
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(

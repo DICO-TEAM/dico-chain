@@ -4,26 +4,21 @@ use codec::{Decode, Encode};
 use dico_currencies;
 use frame_support::{log, pallet_prelude::*, traits::Get, PalletId};
 use frame_support::{
-	sp_runtime::{
-		traits::{AccountIdConversion, Zero},
-	},
-	traits::{
-		Currency, EnsureOrigin, ExistenceRequirement,
-		ReservableCurrency,
-	},
+	sp_runtime::traits::{AccountIdConversion, Zero},
+	traits::{Currency, EnsureOrigin, ExistenceRequirement, ReservableCurrency},
 };
 use frame_system::{self as system, ensure_signed, pallet_prelude::*};
 use orml_traits::{DataFeeder, DataProvider};
 use pallet_amm::Pair;
 use pallet_oracle::UpdateOraclesStorgage;
-use sp_runtime::{RuntimeDebug};
+use sp_runtime::RuntimeDebug;
 use sp_std::prelude::*;
 // use frame_support::log;
 // use serde::{Deserialize, Serialize};
 
-use scale_info::TypeInfo;
-use sp_runtime::{DispatchResult};
 pub use primitives::{currency::DOLLARS, Balance, CurrencyId, Moment, Price, CORE_ASSET_ID};
+use scale_info::TypeInfo;
+use sp_runtime::DispatchResult;
 // use frame_support::traits::Instance;
 
 mod benchmarking;

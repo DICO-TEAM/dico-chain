@@ -3,10 +3,7 @@
 use super::*;
 use crate as pallet_kyc;
 
-use frame_support::{
-	ord_parameter_types, parameter_types,
-	traits::{EnsureOneOf},
-};
+use frame_support::{ord_parameter_types, parameter_types, traits::EnsureOneOf};
 use frame_support_test::TestRandomness;
 use frame_system::{EnsureRoot, EnsureSignedBy};
 
@@ -135,7 +132,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 			(EVE, 10000),
 		],
 	}
-		.assimilate_storage(&mut t)
-		.unwrap();
+	.assimilate_storage(&mut t)
+	.unwrap();
 	t.into()
 }

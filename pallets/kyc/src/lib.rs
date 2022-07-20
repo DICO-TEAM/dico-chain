@@ -57,10 +57,10 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+pub mod migrations;
 pub mod traits;
 pub mod types;
 pub mod weights;
-pub mod migrations;
 
 use crate::traits::KycHandler;
 use crate::types::*;
@@ -78,15 +78,13 @@ use frame_support::{
 };
 use frame_system::pallet_prelude::*;
 pub use pallet::*;
-use sp_runtime::traits::{
-	AccountIdConversion, CheckedAdd, SaturatedConversion, Zero,
-};
+use sp_runtime::traits::{AccountIdConversion, CheckedAdd, SaturatedConversion, Zero};
 use sp_std::prelude::*;
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 type NegativeImbalanceOf<T> =
-<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
+	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -157,31 +155,31 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn kyc)]
 	pub(super) type KYCOf<T: Config> =
-	StorageMap<_, Blake2_128Concat, T::AccountId, Registration<BalanceOf<T>>, OptionQuery>;
+		StorageMap<_, Blake2_128Concat, T::AccountId, Registration<BalanceOf<T>>, OptionQuery>;
 
 	/// the black list of kyc user
 	#[pallet::storage]
 	#[pallet::getter(fn blacklist)]
 	pub(super) type BlackListOf<T: Config> =
-	StorageMap<_, Blake2_128Concat, T::AccountId, BlackInfo<BalanceOf<T>>, OptionQuery>;
+		StorageMap<_, Blake2_128Concat, T::AccountId, BlackInfo<BalanceOf<T>>, OptionQuery>;
 
 	/// List of identity authentication service(IAS) in a  kyc field
 	#[pallet::storage]
 	#[pallet::getter(fn ias_list)]
 	pub(super) type IASListOf<T: Config> =
-	StorageMap<_, Blake2_128Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
+		StorageMap<_, Blake2_128Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
 
 	/// List of SwordHolder in a  kyc field
 	#[pallet::storage]
 	#[pallet::getter(fn sword_holder)]
 	pub(super) type SwordHolderOf<T: Config> =
-	StorageMap<_, Blake2_128Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
+		StorageMap<_, Blake2_128Concat, KYCFields, Vec<Option<IASInfo<BalanceOf<T>, T::AccountId>>>, ValueQuery>;
 
 	/// Records Of IAS/SwordHolder
 	#[pallet::storage]
 	#[pallet::getter(fn records)]
 	pub(super) type RecordsOf<T: Config> =
-	StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Record<T::AccountId>>, ValueQuery>;
+		StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Record<T::AccountId>>, ValueQuery>;
 
 	/// Unique information storage filtering
 	#[pallet::storage]
@@ -192,7 +190,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn message)]
 	pub(super) type MessageList<T: Config> =
-	StorageDoubleMap<_, Blake2_128Concat, T::AccountId, Blake2_128Concat, T::AccountId, Vec<Message>, ValueQuery>;
+		StorageDoubleMap<_, Blake2_128Concat, T::AccountId, Blake2_128Concat, T::AccountId, Vec<Message>, ValueQuery>;
 
 	///ApplicationFormList: AccountId -> Vec<ApplicationForm>
 	#[pallet::storage]
@@ -466,7 +464,7 @@ pub mod pallet {
 			Ok(Some(T::WeightInfo::remove_kyc(
 				T::MaxSwordHolder::get().into(), // R
 			))
-				.into())
+			.into())
 		}
 
 		/// User setting KYC
@@ -547,10 +545,10 @@ pub mod pallet {
 
 			app_list.into_iter().try_for_each(|app| -> DispatchResult {
 				if let Some(ApplicationForm {
-								ias,
-								sword_holder,
-								progress,
-							}) = app
+					ias,
+					sword_holder,
+					progress,
+				}) = app
 				{
 					match progress {
 						Progress::Success | Progress::Failure => {
@@ -797,7 +795,7 @@ pub mod pallet {
 			Ok(Some(T::WeightInfo::sword_holder_provide_judgement(
 				T::MaxSwordHolder::get().into(), // R
 			))
-				.into())
+			.into())
 		}
 	}
 
@@ -987,10 +985,10 @@ pub mod pallet {
 											a
 										});
 										if let Some(ApplicationForm {
-														ias,
-														sword_holder,
-														progress:_,
-													}) = app
+											ias,
+											sword_holder,
+											progress: _,
+										}) = app
 										{
 											Self::update_record_list(
 												&ias.1.account,
@@ -1037,8 +1035,7 @@ pub mod pallet {
 			kyc_index: KYCIndex,
 			message: Message,
 		) -> sp_std::result::Result<(), DispatchError> {
-			let app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> =
-				<ApplicationFormList<T>>::get(who);
+			let app_list: Vec<Option<ApplicationForm<BalanceOf<T>, T::AccountId>>> = <ApplicationFormList<T>>::get(who);
 
 			if let Some(ApplicationForm { ias, sword_holder, progress:_ }) = app_list
 				.iter()

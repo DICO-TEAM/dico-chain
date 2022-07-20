@@ -19,7 +19,8 @@ fn funded_account<T: Config>(name: &'static str, index: u32) -> T::AccountId {
 	// {free:DEFAULT_BALANCE, ..Default::default() }).unwrap(); T::Currency::update_balance(1, &caller,
 	// 1_000_000_000_000_000).unwrap();
 	let pledge_deposit = T::PledgedBalance::get();
-	// let _ = T::BaseCurrency::make_free_balance_be(&caller, pledge_deposit.saturating_add(2000_000_000u32.into()));
+	// let _ = T::BaseCurrency::make_free_balance_be(&caller,
+	// pledge_deposit.saturating_add(2000_000_000u32.into()));
 	let _ = T::BaseCurrency::make_free_balance_be(&caller, pledge_deposit);
 	caller
 }

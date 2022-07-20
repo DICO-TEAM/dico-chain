@@ -6,7 +6,7 @@ use crate as amm;
 use crate::Config;
 use dico_currencies::BasicCurrencyAdapter;
 use dico_primitives::{AssetId, Balance, BlockNumber};
-use frame_support::traits::{ConstU32,Contains, GenesisBuild};
+use frame_support::traits::{ConstU32, Contains, GenesisBuild};
 use frame_support::{parameter_types, PalletId};
 use frame_system as system;
 use orml_traits::parameter_type_with_key;

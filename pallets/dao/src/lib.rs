@@ -532,8 +532,7 @@ pub mod pallet {
 		fn try_origin(o: O) -> Result<Self::Success, O> {
 			o.into().and_then(|o| match o {
 				IcoRawOrigin::Members(n, m)
-					if n * D.saturated_into::<MultiBalanceOf<T>>()
-						>= N.saturated_into::<MultiBalanceOf<T>>() * m =>
+					if n * D.saturated_into::<MultiBalanceOf<T>>() >= N.saturated_into::<MultiBalanceOf<T>>() * m =>
 				{
 					Ok(())
 				}

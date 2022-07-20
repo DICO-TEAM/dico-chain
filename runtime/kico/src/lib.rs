@@ -14,11 +14,14 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub use dico_primitives::{
 	constants::{currency::*, time::*},
-	tokens::{KAR, KICO, KSM, AUSD, LKSM},
+	tokens::{AUSD, KAR, KICO, KSM, LKSM},
 	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
 	Signature,
 };
-use orml_traits::{create_median_value_data_provider, parameter_type_with_key, DataFeeder, MultiCurrency, Happened, location::AbsoluteReserveProvider};
+use orml_traits::{
+	create_median_value_data_provider, location::AbsoluteReserveProvider, parameter_type_with_key, DataFeeder,
+	Happened, MultiCurrency,
+};
 pub use orml_xcm_support::{DepositToAlternative, IsNativeConcrete, MultiCurrencyAdapter, MultiNativeAsset};
 use pallet_currencies::BasicCurrencyAdapter;
 use sp_api::impl_runtime_apis;
@@ -39,14 +42,12 @@ use static_assertions::const_assert;
 use frame_support::{
 	construct_runtime, match_type, parameter_types,
 	traits::{
-		OnKilledAccount, OnNewAccount,
-		Contains, EnsureOneOf, EqualPrivilegeOnly, Everything, LockIdentifier, Nothing, OnRuntimeUpgrade,
-		U128CurrencyToVote,
+		Contains, EnsureOneOf, EqualPrivilegeOnly, Everything, LockIdentifier, Nothing, OnKilledAccount, OnNewAccount,
+		OnRuntimeUpgrade, U128CurrencyToVote,
 	},
 	weights::{
-		ConstantMultiplier,
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-		DispatchClass, IdentityFee, Weight,
+		ConstantMultiplier, DispatchClass, IdentityFee, Weight,
 	},
 	PalletId,
 };
@@ -85,19 +86,18 @@ pub use pallet_lbp;
 pub use pallet_pricedao;
 
 use crate::constants::*;
+use migrations::*;
 use pallet_farm_rpc_runtime_api as farm_rpc;
 use parachains::*;
 use xcm_config::*;
-use migrations::*;
 
 pub mod constants;
-mod weights;
-mod vc;
-mod parachains;
-mod xcm_config;
 mod migrations;
+mod parachains;
+mod vc;
+mod weights;
+mod xcm_config;
 mod xcm_impls;
-
 
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
@@ -141,14 +141,8 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signatu
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<
-	Runtime,
-	Block,
-	frame_system::ChainContext<Runtime>,
-	Runtime,
-	AllPalletsWithSystem,
-	(),
->;
+pub type Executive =
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem, ()>;
 
 impl_opaque_keys! {
 	pub struct SessionKeys {
@@ -262,7 +256,6 @@ construct_runtime!(
 	}
 );
 
-
 parameter_types! {
 	pub const Version: RuntimeVersion = VERSION;
 
@@ -349,12 +342,9 @@ impl Contains<Call> for BaseCallFilter {
 			Call::FarmExtend(_) |
 			Call::PriceDao(_) |
 			Call::Currencies(_) |
-			Call::DicoOracle(_)
-
-			// temp
-			// Call::Sudo(_)
-         )
-
+			Call::DicoOracle(_) /* temp
+			                     * Call::Sudo(_) */
+		)
 	}
 }
 
@@ -368,18 +358,14 @@ impl Contains<Call> for CallFilterRouter {
 pub struct NewAccount;
 impl OnNewAccount<AccountId> for NewAccount {
 	fn on_new_account(_who: &AccountId) {
-		pallet_currencies::UsersNumber::<Runtime>::mutate(0 as CurrencyId, |i| {
-			*i = i.saturating_add(1u32)
-		});
+		pallet_currencies::UsersNumber::<Runtime>::mutate(0 as CurrencyId, |i| *i = i.saturating_add(1u32));
 	}
 }
 
 pub struct KilledAccount;
 impl OnKilledAccount<AccountId> for KilledAccount {
 	fn on_killed_account(_who: &AccountId) {
-		pallet_currencies::UsersNumber::<Runtime>::mutate(0 as CurrencyId, |i| {
-			*i = i.saturating_sub(1u32)
-		});
+		pallet_currencies::UsersNumber::<Runtime>::mutate(0 as CurrencyId, |i| *i = i.saturating_sub(1u32));
 	}
 }
 
@@ -534,35 +520,35 @@ impl pallet_democracy::Config for Runtime {
 	/// A straight majority of the council can decide what their next motion is.
 	type ExternalOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>,
 	>;
 	/// A super-majority can have the next scheduled referendum be a straight majority-carries vote.
 	type ExternalMajorityOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3u32, 4u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3u32, 4u32>,
 	>;
 	/// A unanimous council can have the next scheduled referendum be a straight default-carries
 	/// (NTB) vote.
 	type ExternalDefaultOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 1u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 1u32>,
 	>;
 	/// Two thirds of the technical committee can have an ExternalMajority/ExternalDefault vote
 	/// be tabled immediately and with a shorter voting/enactment period.
 	type FastTrackOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 1u32, 2u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 1u32, 2u32>,
 	>;
 	type InstantOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 3u32, 4u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 3u32, 4u32>,
 	>;
 	type InstantAllowed = InstantAllowed;
 	type FastTrackVotingPeriod = FastTrackVotingPeriod;
 	// To cancel a proposal which has been passed, 2/3 of the council must agree to it.
 	type CancellationOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2u32, 3u32>
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2u32, 3u32>,
 	>;
 	// To cancel a proposal before it has been passed, the technical committee must be unanimous or
 	// Root must agree.
@@ -617,7 +603,6 @@ parameter_types! {
 	pub const ElectionsPhragmenPalletId: LockIdentifier = *b"phrelect";
 }
 
-
 parameter_types! {
 	pub const TechnicalMotionDuration: BlockNumber = 3 * DAYS;
 	pub const TechnicalMaxProposals: u32 = 100;
@@ -641,7 +626,6 @@ type EnsureRootOrHalfCouncil = EnsureOneOf<
 	EnsureRoot<AccountId>,
 	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1u32, 2u32>,
 >;
-
 
 parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);
@@ -807,9 +791,6 @@ parameter_types! {
 	pub DicoTreasuryAccount: AccountId = TreasuryPalletId::get().into_account_truncating();
 }
 
-
-
-
 impl pallet_aura::Config for Runtime {
 	type AuthorityId = AuraId;
 	type DisabledValidators = ();
@@ -939,9 +920,8 @@ pub fn get_all_module_accounts() -> Vec<AccountId> {
 pub struct OnNewTokenAccount;
 impl Happened<(AccountId, CurrencyId)> for OnNewTokenAccount {
 	fn happened(t: &(AccountId, CurrencyId)) {
-			pallet_currencies::UsersNumber::<Runtime>::mutate(&t.1.clone(), |i| {
-				*i = i.saturating_add(1u32);
-
+		pallet_currencies::UsersNumber::<Runtime>::mutate(&t.1.clone(), |i| {
+			*i = i.saturating_add(1u32);
 		});
 	}
 }
@@ -949,9 +929,7 @@ impl Happened<(AccountId, CurrencyId)> for OnNewTokenAccount {
 pub struct OnKilledTokenAccount;
 impl Happened<(AccountId, CurrencyId)> for OnKilledTokenAccount {
 	fn happened(t: &(AccountId, CurrencyId)) {
-		pallet_currencies::UsersNumber::<Runtime>::mutate(&t.1.clone(), |i| {
-			*i = i.saturating_sub(1u32)
-		});
+		pallet_currencies::UsersNumber::<Runtime>::mutate(&t.1.clone(), |i| *i = i.saturating_sub(1u32));
 	}
 }
 

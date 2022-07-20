@@ -10,8 +10,8 @@ use frame_benchmarking::{
 use frame_support::assert_ok;
 use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
-use sp_std::vec;
 use pallet_kyc::types::AreaCode;
+use sp_std::vec;
 
 const SEED: u32 = 0;
 
@@ -21,8 +21,8 @@ fn create_asset<T: Config>() {
 		alice.clone(),
 		T::GetNativeCurrencyId::get(),
 		Some(DicoAssetMetadata {
-			name: vec![1;4],
-			symbol: vec![1;4],
+			name: vec![1; 4],
+			symbol: vec![1; 4],
 			decimals: 12
 		}),
 		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
@@ -32,8 +32,8 @@ fn create_asset<T: Config>() {
 		alice.clone(),
 		T::USDCurrencyId::get(),
 		Some(DicoAssetMetadata {
-			name: vec![1;4],
-			symbol: vec![1;4],
+			name: vec![1; 4],
+			symbol: vec![1; 4],
 			decimals: 12
 		}),
 		(10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),
@@ -118,9 +118,9 @@ fn set_ico<T: Config>() -> CurrencyId {
 	let bob: T::AccountId = get_bob::<T>();
 	T::MultiCurrency::deposit(currency_id, &bob, 10000u128.saturated_into::<MultiBalanceOf<T>>());
 	let ico_info = IcoParameters {
-		desc: vec![1;100],
+		desc: vec![1; 100],
 		currency_id: T::GetNativeCurrencyId::get(),
-		official_website: vec![1;20],
+		official_website: vec![1; 20],
 		is_must_kyc: false,
 		user_ico_max_times: 2,
 		total_issuance: (10000 * DOLLARS).saturated_into::<MultiBalanceOf<T>>(),

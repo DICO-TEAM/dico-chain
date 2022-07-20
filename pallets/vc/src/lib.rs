@@ -19,9 +19,9 @@
 
 use codec::{Decode, Encode};
 pub use daos_create_dao::{self as dao, AccountIdConversion, Vec};
+use daos_primitives::traits::GetCollectiveMembers;
 use dico_primitives::AssetId;
 use frame_support::dispatch::UnfilteredDispatchable;
-use daos_primitives::traits::GetCollectiveMembers;
 use orml_traits::{MultiCurrency, MultiCurrencyExtended, MultiReservableCurrency};
 /// Edit this file to define custom logic or remove it if it is not needed.
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
@@ -206,11 +206,10 @@ pub mod pallet {
 			Self::deposit_event(Event::<T>::OpenCexTransfer(dao_id, is_open));
 			Ok(().into())
 		}
-
 	}
 }
 
-impl<T: Config> GetCollectiveMembers<T::AccountId, T::DaoId> for Pallet<T>{
+impl<T: Config> GetCollectiveMembers<T::AccountId, T::DaoId> for Pallet<T> {
 	fn get_members(dao_id: T::DaoId) -> Vec<T::AccountId> {
 		Guarders::<T>::get(dao_id)
 	}

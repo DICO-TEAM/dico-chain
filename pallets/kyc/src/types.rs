@@ -295,7 +295,7 @@ impl<
 		match self {
 			Self {
 				ias,
-				sword_holder:_,
+				sword_holder: _,
 				progress,
 			} => {
 				// When Progress is Failure, can apply again.

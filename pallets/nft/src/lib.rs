@@ -27,18 +27,17 @@ mod mock;
 mod benchmarking;
 use daos_create_dao::AccountIdConversion;
 pub mod weights;
-use orml_traits::{MultiCurrency, MultiReservableCurrency};
-use weights::WeightInfo;
-use daos_create_dao::{self as dao};
-use pallet_vc::{self, Fee};
 use codec::{Decode, Encode};
+use daos_create_dao::{self as dao};
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
 	traits::{Currency, ExistenceRequirement, Get, WithdrawReasons},
 	BoundedVec, Parameter,
 };
+use orml_traits::{MultiCurrency, MultiReservableCurrency};
 use pallet_ico::traits::PowerHandler;
+use pallet_vc::{self, Fee};
 use scale_info::TypeInfo;
 use sp_runtime::{
 	traits::{AtLeast32BitUnsigned, CheckedAdd, CheckedSub, Hash, MaybeSerializeDeserialize, Member, One, Zero},
@@ -50,12 +49,13 @@ use sp_std::{
 	convert::TryInto,
 	vec::Vec,
 };
+use weights::WeightInfo;
 // mod mock;
 
 pub type Attributes = BTreeMap<Vec<u8>, Vec<u8>>;
 
 pub(crate) type VcBalanceOf<T> =
-    <<T as pallet_vc::Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::Balance;
+	<<T as pallet_vc::Config>::MultiCurrency as MultiCurrency<<T as frame_system::Config>::AccountId>>::Balance;
 
 /// Class info
 #[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo)]
@@ -151,13 +151,13 @@ use sp_runtime::RuntimeString::Owned;
 
 #[frame_support::pallet]
 pub mod module {
-	use dico_primitives::AssetId;
 	use super::*;
+	use dico_primitives::AssetId;
 	use pallet_ico::ensure_signed;
 	use pallet_ico::system::pallet_prelude::OriginFor;
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config + dao::Config + pallet_vc::Config{
+	pub trait Config: frame_system::Config + dao::Config + pallet_vc::Config {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 		/// The class ID type
 		type ClassId: Parameter + Member + AtLeast32BitUnsigned + Default + Copy;
@@ -743,8 +743,12 @@ impl<T: Config> Pallet<T> {
 		false
 	}
 
-	fn transfer_ownership(who: &T::AccountId, des: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) -> DispatchResult{
-
+	fn transfer_ownership(
+		who: &T::AccountId,
+		des: &T::AccountId,
+		class_id: T::ClassId,
+		token_id: T::TokenId,
+	) -> DispatchResult {
 		Self::remove_token_ownership(&who, class_id, token_id)?;
 		Self::get_token_ownership(&des, class_id, token_id);
 		Ok(())
@@ -758,7 +762,7 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
-	fn remove_token_ownership(who: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) -> DispatchResult{
+	fn remove_token_ownership(who: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) -> DispatchResult {
 		let mut tokens = TokensOf::<T>::get(who);
 		if let Some(dao_id) = Daos::<T>::get(class_id) {
 			match pallet_vc::Pallet::<T>::fees(dao_id) {
@@ -766,12 +770,11 @@ impl<T: Config> Pallet<T> {
 					let dao_account = dao::Pallet::<T>::get_second_id(dao_id)?.into_account();
 					T::MultiCurrency::transfer(T::USDCurrencyId::get(), &who, &dao_account, x)?;
 					T::MultiCurrency::reserve(T::USDCurrencyId::get(), &dao_account, x);
-				},
+				}
 				_ => {
 					return Err(Error::<T>::FeeErr)?;
-				},
+				}
 			}
-
 		}
 		if let Some(pos) = tokens.iter().position(|h| h.0 == class_id && h.1 == token_id) {
 			tokens.swap_remove(pos);
@@ -840,7 +843,10 @@ impl<T: Config> Pallet<T> {
 		let info = Tokens::<T>::get(token.0, token.1).ok_or(Error::<T>::TokenNotFound)?;
 		ensure!(!Self::is_in_locking(token), Error::<T>::Locked);
 		ensure!(info.owner == Some(who.clone()), Error::<T>::NotOwner);
-		ensure!(!info.data.status.is_active_image && !info.data.status.is_in_sale, Error::<T>::InUse);
+		ensure!(
+			!info.data.status.is_active_image && !info.data.status.is_in_sale,
+			Error::<T>::InUse
+		);
 		ensure!(info.data.status.is_claimed, Error::<T>::NotClaim);
 		Locks::<T>::mutate(|h| h.insert(token));
 		Ok(())
@@ -852,6 +858,5 @@ impl<T: Config> Pallet<T> {
 		ensure!(Self::is_in_locking(token), Error::<T>::NoLocked);
 		Locks::<T>::mutate(|h| h.remove(&token));
 		Ok(())
-
 	}
 }

@@ -15,6 +15,7 @@
 // #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(unused_imports)]
 #![allow(unused_variables)]
+#![allow(dead_code)]
 
 use codec::{self, Codec, Decode, Encode};
 use jsonrpsee::{
@@ -96,35 +97,32 @@ where
 	AccountId: Clone + std::fmt::Display + Codec,
 	Index: Clone + std::fmt::Display + Codec + Send + traits::AtLeast32Bit + 'static,
 	CurrencyId: Clone + std::fmt::Display + Codec,
-	Balance: Codec + traits::MaybeDisplay + Copy + TryInto<NumberOrHex> + std::marker::Send + 'static +  std::fmt::Debug,
+	Balance: Codec + traits::MaybeDisplay + Copy + TryInto<NumberOrHex> + std::marker::Send + 'static + std::fmt::Debug,
 {
 	fn can_release_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> RpcResult<NumberOrHex> {
 		// let get_release_amount = || {
-			let api = self.client.runtime_api();
-			let best = self.client.info().best_hash;
-			let at = BlockId::hash(best);
+		let api = self.client.runtime_api();
+		let best = self.client.info().best_hash;
+		let at = BlockId::hash(best);
 
-			let amount = api
-				.can_release_amount(&at, account, currency_id, index)
-				.map_err(|e| {
-					CallError::Custom(ErrorObject::owned(
-					Error::RuntimeError.into(),
-					"Unable to query release amount.",
-					Some(format!("{:?}", e)),
-				))})?;
+		let amount = api.can_release_amount(&at, account, currency_id, index).map_err(|e| {
+			CallError::Custom(ErrorObject::owned(
+				Error::RuntimeError.into(),
+				"Unable to query release amount.",
+				Some(format!("{:?}", e)),
+			))
+		})?;
 
-			let try_into_rpc_balance = |value: Balance| {
-				value.try_into().map_err(|_| {
-					JsonRpseeError::Call(
-						CallError::Custom(ErrorObject::owned(
-							ErrorCode::InvalidParams.code(),
-							format!("{} doesn't fit in NumberOrHex representation", value),
-							None::<()>,
-						))
-					)
-				})
-			};
-			Ok(try_into_rpc_balance(amount)?)
+		let try_into_rpc_balance = |value: Balance| {
+			value.try_into().map_err(|_| {
+				JsonRpseeError::Call(CallError::Custom(ErrorObject::owned(
+					ErrorCode::InvalidParams.code(),
+					format!("{} doesn't fit in NumberOrHex representation", value),
+					None::<()>,
+				)))
+			})
+		};
+		Ok(try_into_rpc_balance(amount)?)
 		// };
 		//
 		// get_release_amount()
@@ -132,11 +130,11 @@ where
 
 	fn get_token_price(&self, currency_id: CurrencyId) -> RpcResult<NumberOrHex> {
 		// let get_token_price = || {
-			let api = self.client.runtime_api();
-			let best = self.client.info().best_hash;
-			let at = BlockId::hash(best);
+		let api = self.client.runtime_api();
+		let best = self.client.info().best_hash;
+		let at = BlockId::hash(best);
 
-			let amount = api.get_token_price(&at, currency_id).map_err(|e| {
+		let amount = api.get_token_price(&at, currency_id).map_err(|e| {
 			CallError::Custom(ErrorObject::owned(
 				Error::RuntimeError.into(),
 				"Unable to query dispatch info.",
@@ -144,16 +142,16 @@ where
 			))
 		})?;
 
-			let try_into_rpc_balance = |value: Balance| {
-				value.try_into().map_err(|_| {
+		let try_into_rpc_balance = |value: Balance| {
+			value.try_into().map_err(|_| {
 				JsonRpseeError::Call(CallError::Custom(ErrorObject::owned(
 					ErrorCode::InvalidParams.code(),
 					format!("{} doesn't fit in NumberOrHex representation", value),
 					None::<()>,
 				)))
 			})
-			};
-			Ok(try_into_rpc_balance(amount)?)
+		};
+		Ok(try_into_rpc_balance(amount)?)
 		// };
 
 		// get_token_price()
@@ -166,45 +164,43 @@ where
 		index: Index,
 	) -> RpcResult<(NumberOrHex, NumberOrHex)> {
 		// let can_join_amount = || {
-			let api = self.client.runtime_api();
-			let best = self.client.info().best_hash;
-			let at = BlockId::hash(best);
+		let api = self.client.runtime_api();
+		let best = self.client.info().best_hash;
+		let at = BlockId::hash(best);
 
-			let amount = api
-				.can_join_amount(&at, account, currency_id, index)
-				.map_err(|e| {
-					CallError::Custom(ErrorObject::owned(
+		let amount = api.can_join_amount(&at, account, currency_id, index).map_err(|e| {
+			CallError::Custom(ErrorObject::owned(
 				Error::DecodeError.into(),
 				"Unable to query join amount.",
 				Some(format!("{:?}", e)),
 			))
-				})?;
+		})?;
 
-			let try_into_rpc_balance = |value: Vec<Balance>| {
-				let mut new_value = vec![];
-				for i in value.clone() {
-					let j = i.try_into().ok();
-					match j {
-						Some(x) => new_value.push(x),
-						_ => {}
-					}
+		let try_into_rpc_balance = |value: Vec<Balance>| {
+			let mut new_value = vec![];
+			for i in value.clone() {
+				let j = i.try_into().ok();
+				match j {
+					Some(x) => new_value.push(x),
+					_ => {}
 				}
-				if new_value.len() == 2 {
-					let mut new_value_iter = new_value.iter();
-					let res = (
-						new_value_iter.next().unwrap().clone(),
-						new_value_iter.next().unwrap().clone(),
-					);
-					Ok(res)
-				} else {
-					Err(JsonRpseeError::Call(CallError::Custom(ErrorObject::owned(
+			}
+			if new_value.len() == 2 {
+				let mut new_value_iter = new_value.iter();
+				let res = (
+					new_value_iter.next().unwrap().clone(),
+					new_value_iter.next().unwrap().clone(),
+				);
+				Ok(res)
+			} else {
+				Err(JsonRpseeError::Call(CallError::Custom(ErrorObject::owned(
 					ErrorCode::InvalidParams.code(),
 					format!("{:?} doesn't fit in NumberOrHex representation", value),
 					None::<()>,
 				))))
-				}
-			};
-			try_into_rpc_balance(vec![amount.0, amount.1])
+			}
+		};
+		try_into_rpc_balance(vec![amount.0, amount.1])
 		// };
 
 		// can_join_amount()
@@ -212,13 +208,11 @@ where
 
 	fn get_reward_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> RpcResult<NumberOrHex> {
 		// let get_reward_amount = || {
-			let api = self.client.runtime_api();
-			let best = self.client.info().best_hash;
-			let at = BlockId::hash(best);
+		let api = self.client.runtime_api();
+		let best = self.client.info().best_hash;
+		let at = BlockId::hash(best);
 
-			let amount = api
-				.get_reward_amount(&at, account, currency_id, index)
-				.map_err(|e| {
+		let amount = api.get_reward_amount(&at, account, currency_id, index).map_err(|e| {
 			CallError::Custom(ErrorObject::owned(
 				Error::RuntimeError.into(),
 				"Unable to query dispatch info.",
@@ -226,16 +220,16 @@ where
 			))
 		})?;
 
-			let try_into_rpc_balance = |value: Balance| {
-				value.try_into().map_err(|e| {
+		let try_into_rpc_balance = |value: Balance| {
+			value.try_into().map_err(|e| {
 				JsonRpseeError::Call(CallError::Custom(ErrorObject::owned(
 					ErrorCode::InvalidParams.code(),
 					format!("{} doesn't fit in NumberOrHex representation", value),
 					None::<()>,
 				)))
 			})
-			};
-			try_into_rpc_balance(amount)
+		};
+		try_into_rpc_balance(amount)
 		// };
 
 		// get_reward_amount()
@@ -243,29 +237,27 @@ where
 
 	fn can_unlock_amount(&self, account: AccountId, currency_id: CurrencyId, index: Index) -> RpcResult<NumberOrHex> {
 		// let get_unlock_amount = || {
-			let api = self.client.runtime_api();
-			let best = self.client.info().best_hash;
-			let at = BlockId::hash(best);
+		let api = self.client.runtime_api();
+		let best = self.client.info().best_hash;
+		let at = BlockId::hash(best);
 
-			let amount = api
-				.can_unlock_amount(&at, account, currency_id, index)
-				.map_err(|e| {
-					CallError::Custom(ErrorObject::owned(
+		let amount = api.can_unlock_amount(&at, account, currency_id, index).map_err(|e| {
+			CallError::Custom(ErrorObject::owned(
 				Error::RuntimeError.into(),
 				"Unable to query unlock amount.",
 				Some(e.to_string()),
 			))
-				})?;
-			let try_into_rpc_balance = |value: Balance| {
-				value.try_into().map_err(|_| {
-					JsonRpseeError::Call(CallError::Custom(ErrorObject::owned(
+		})?;
+		let try_into_rpc_balance = |value: Balance| {
+			value.try_into().map_err(|_| {
+				JsonRpseeError::Call(CallError::Custom(ErrorObject::owned(
 					ErrorCode::InvalidParams.code(),
 					format!("{} doesn't fit in NumberOrHex representation", value),
 					None::<()>,
 				)))
-				})
-			};
-			Ok(try_into_rpc_balance(amount)?)
+			})
+		};
+		Ok(try_into_rpc_balance(amount)?)
 		// };
 
 		// get_unlock_amount()

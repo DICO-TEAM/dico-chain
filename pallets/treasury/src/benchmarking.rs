@@ -20,11 +20,11 @@
 #![cfg(feature = "runtime-benchmarks")]
 
 use super::*;
-use sp_runtime::SaturatedConversion;
 use crate::Pallet as Treasury;
 use frame_benchmarking::{account, benchmarks, benchmarks_instance, impl_benchmark_test_suite, whitelisted_caller};
 use frame_support::traits::OnInitialize;
 use frame_system::RawOrigin;
+use sp_runtime::SaturatedConversion;
 
 const SEED: u32 = 0;
 

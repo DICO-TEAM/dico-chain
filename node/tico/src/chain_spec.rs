@@ -1,19 +1,18 @@
 // local
-use parachain_template_runtime::{AccountId, AuraId, Signature};
 use pallet_currencies::{DicoAssetInfo, DicoAssetMetadata};
+use parachain_template_runtime::{AccountId, AuraId, Signature};
 
 use cumulus_primitives_core::ParaId;
+use dico_primitives::currency::DOLLARS;
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
+use sc_telemetry::TelemetryEndpoints;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use sc_telemetry::TelemetryEndpoints;
-use dico_primitives::currency::DOLLARS;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
-pub type ChainSpec =
-	sc_service::GenericChainSpec<parachain_template_runtime::GenesisConfig, Extensions>;
+pub type ChainSpec = sc_service::GenericChainSpec<parachain_template_runtime::GenesisConfig, Extensions>;
 
 /// The default XCM version to set in genesis config.
 const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
@@ -192,9 +191,7 @@ fn testnet_genesis(
 			)],
 		},
 		technical_committee: Default::default(),
-		sudo: parachain_template_runtime::SudoConfig {
-			key: Some(get_root()),
-		},
+		sudo: parachain_template_runtime::SudoConfig { key: Some(get_root()) },
 		council: Default::default(),
 		aura: Default::default(),
 		aura_ext: Default::default(),
@@ -204,4 +201,3 @@ fn testnet_genesis(
 		},
 	}
 }
-

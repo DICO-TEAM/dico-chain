@@ -1,4 +1,3 @@
-
 use super::*;
 use crate::xcm_impls::FixedRateOfAsset;
 use pallet_currencies::currencies_trait::AssetIdMapping;
@@ -16,7 +15,7 @@ pub struct CurrencyIdConvert;
 impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 	fn convert(id: CurrencyId) -> Option<MultiLocation> {
 		if let Some(i) = pallet_currencies::AssetIdMaps::<Runtime>::get_multi_location(id) {
-			return Some(i)
+			return Some(i);
 		}
 		match id {
 			KSM => Some(MultiLocation::parent()),
@@ -79,10 +78,8 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 
 impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 	fn convert(location: MultiLocation) -> Option<CurrencyId> {
-		if let Some(l) =
-			pallet_currencies::AssetIdMaps::<Runtime>::get_currency_id(location.clone())
-		{
-			return Some(l)
+		if let Some(l) = pallet_currencies::AssetIdMaps::<Runtime>::get_currency_id(location.clone()) {
+			return Some(l);
 		}
 
 		match location {
@@ -124,12 +121,16 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == parachains::listen::PARA_ID && key == parachains::listen::lt::TOKEN_SYMBOL.to_vec() => Some(parachains::listen::lt::ASSET_ID),
+			} if id == parachains::listen::PARA_ID && key == parachains::listen::lt::TOKEN_SYMBOL.to_vec() => {
+				Some(parachains::listen::lt::ASSET_ID)
+			}
 
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == parachains::listen::PARA_ID && key == parachains::listen::like::TOKEN_SYMBOL.to_vec() => Some(parachains::listen::like::ASSET_ID),
+			} if id == parachains::listen::PARA_ID && key == parachains::listen::like::TOKEN_SYMBOL.to_vec() => {
+				Some(parachains::listen::like::ASSET_ID)
+			}
 
 			_ => None,
 		}

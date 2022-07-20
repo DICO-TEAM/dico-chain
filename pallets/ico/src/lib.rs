@@ -51,6 +51,7 @@ use orml_traits::{BalanceStatus, MultiCurrency, MultiReservableCurrency};
 use pallet_kyc::{traits::KycHandler, types::AreaCode};
 use pallet_pricedao::traits::PriceData;
 pub use primitive_types::U256;
+use scale_info::TypeInfo;
 use sp_runtime::traits::{CheckedAdd, CheckedSub, StaticLookup};
 pub use sp_runtime::{
 	traits::CheckedMul,
@@ -61,7 +62,6 @@ pub use sp_std::convert::{Into, TryFrom, TryInto};
 use sp_std::vec::Vec;
 use sp_std::{collections::btree_map::BTreeMap, prelude::*, result};
 use traits::{IcoHandler, PowerHandler};
-use scale_info::TypeInfo;
 use weights::WeightInfo;
 
 pub mod mock;
@@ -1344,7 +1344,11 @@ pub mod pallet {
 							total_amount: user_keep_lock_amount,
 							unlock_amount: 0u32.saturated_into::<MultiBalanceOf<T>>(),
 							unlock_duration: ico.unlock_duration,
-							per_duration_unlock_amount: Self::u256_convert_to_balance((Self::balance_convert_to_u256(thistime_release_amount) * Self::balance_convert_to_u256(ico.per_duration_unlock_amount)) / Self::balance_convert_to_u256(ico.total_ico_amount)),
+							per_duration_unlock_amount: Self::u256_convert_to_balance(
+								(Self::balance_convert_to_u256(thistime_release_amount)
+									* Self::balance_convert_to_u256(ico.per_duration_unlock_amount))
+									/ Self::balance_convert_to_u256(ico.total_ico_amount),
+							),
 						})
 					});
 				}

@@ -78,20 +78,19 @@ where
 		let at = BlockId::hash(best);
 
 		let reward = api.get_participant_reward(&at, account, pid).map_err(|e| {
-					CallError::Custom(ErrorObject::owned(
-					Error::RuntimeError.into(),
-					"Unable to query participant reward.",
-					Some(format!("{:?}", e)),
-				))})?;
+			CallError::Custom(ErrorObject::owned(
+				Error::RuntimeError.into(),
+				"Unable to query participant reward.",
+				Some(format!("{:?}", e)),
+			))
+		})?;
 
 		reward.try_into().map_err(|_| {
-					JsonRpseeError::Call(
-						CallError::Custom(ErrorObject::owned(
-							ErrorCode::InvalidParams.code(),
-							format!("doesn't fit in NumberOrHex representation"),
-							None::<()>,
-						))
-					)
-				})
+			JsonRpseeError::Call(CallError::Custom(ErrorObject::owned(
+				ErrorCode::InvalidParams.code(),
+				format!("doesn't fit in NumberOrHex representation"),
+				None::<()>,
+			)))
+		})
 	}
 }

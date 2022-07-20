@@ -1,4 +1,3 @@
-
 #![allow(unused_must_use)]
 use super::*;
 
@@ -46,8 +45,4 @@ impl OnRuntimeUpgrade for DepositAssetsTokens {
 	fn post_upgrade() -> Result<(), &'static str> {
 		Ok(())
 	}
-
 }
-
-
-
