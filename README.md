@@ -28,10 +28,12 @@ Click [here](./.github/DEVELOPMENT.md) to jump to development guide.
 Contributors are welcomed to join this project. Please check [CONTRIBUTING](./.github/CONTRIBUTING.md) about how to contribute
 to this project.
 
-## Community
+## Node
 
-[Join as a validator](docs/COLLATOR.md)
+```angular2html
+./kico --collator  -- --execution wasm --chain kusama
+```
 
 ## License
 
-The project is made available under the [Apache2.0](./LICENSE-APACHE)/[MIT](./LICENSE-MIT) license. 
+The project is made available under the [Apache2.0](./LICENSE-APACHE)/[MIT](./LICENSE-MIT) license.

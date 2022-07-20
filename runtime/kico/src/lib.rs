@@ -12,7 +12,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use dico_primitives::{
+pub use dico_primitives::{
 	constants::{currency::*, time::*},
 	tokens::{KAR, KICO, KSM, AUSD, LKSM},
 	AccountId, Address, Amount, Balance, BlockNumber, CurrencyId, Hash, Header, Index, Moment, ParaId, PoolId, Price,
@@ -101,19 +101,41 @@ mod xcm_impls;
 
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
+
 /// A Block signed with a Justification
 pub type SignedBlock = generic::SignedBlock<Block>;
+
 /// BlockId type as expected by this runtime.
 pub type BlockId = generic::BlockId<Block>;
+
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
+	frame_system::CheckNonZeroSender<Runtime>,
 	frame_system::CheckSpecVersion<Runtime>,
+	frame_system::CheckTxVersion<Runtime>,
 	frame_system::CheckGenesis<Runtime>,
 	frame_system::CheckEra<Runtime>,
 	frame_system::CheckNonce<Runtime>,
 	frame_system::CheckWeight<Runtime>,
 	pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
 );
+
+/// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
+/// the specifics of the runtime. They can then be made to be agnostic over specific formats
+/// of data like extrinsics, allowing for them to continue syncing the network through upgrades
+/// to even the core data structures.
+pub mod opaque {
+	use super::*;
+	use sp_runtime::{generic, traits::BlakeTwo256};
+
+	pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
+	/// Opaque block header type.
+	pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+	/// Opaque block type.
+	pub type Block = generic::Block<Header, UncheckedExtrinsic>;
+	/// Opaque block identifier type.
+	pub type BlockId = generic::BlockId<Block>;
+}
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
 /// Extrinsic type that has already been checked.
@@ -1152,6 +1174,46 @@ impl pallet_nft::Config for Runtime {
 }
 
 impl_runtime_apis! {
+	// local
+	impl pallet_ico_rpc_runtime_api::IcoAmountApi<Block, AccountId, CurrencyId, Index, Balance> for Runtime {
+		fn can_release_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
+			Ico::can_release_amount(account, currency_id, index)
+		}
+		fn get_reward_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
+			Ico::get_reward_amount(account, currency_id, index)
+		}
+		fn can_unlock_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
+			Ico::can_unlock_amount(account, currency_id, index)
+		}
+		fn can_join_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> (Balance, Balance) {
+			Ico::can_join_amount(account, currency_id, index)
+		}
+
+		fn get_token_price(currency_id: CurrencyId) -> Balance {
+			Ico::get_token_price(currency_id)
+		}
+	}
+
+
+	impl farm_rpc::FarmApi<Block, AccountId, PoolId, Balance> for Runtime {
+		fn get_participant_reward(account: AccountId, pid: PoolId) -> Balance {
+			let reward = Farm::get_participant_reward(account, pid);
+
+			reward
+		}
+	}
+
+	// ************************************************************************
+	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
+		fn slot_duration() -> sp_consensus_aura::SlotDuration {
+			sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
+		}
+
+		fn authorities() -> Vec<AuraId> {
+			Aura::authorities().into_inner()
+		}
+	}
+
 	impl sp_api::Core<Block> for Runtime {
 		fn version() -> RuntimeVersion {
 			VERSION
@@ -1173,9 +1235,7 @@ impl_runtime_apis! {
 	}
 
 	impl sp_block_builder::BlockBuilder<Block> for Runtime {
-		fn apply_extrinsic(
-			extrinsic: <Block as BlockT>::Extrinsic,
-		) -> ApplyExtrinsicResult {
+		fn apply_extrinsic(extrinsic: <Block as BlockT>::Extrinsic) -> ApplyExtrinsicResult {
 			Executive::apply_extrinsic(extrinsic)
 		}
 
@@ -1211,59 +1271,15 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl farm_rpc::FarmApi<Block, AccountId, PoolId, Balance> for Runtime {
-		fn get_participant_reward(account: AccountId, pid: PoolId) -> Balance {
-			let reward = Farm::get_participant_reward(account, pid);
-
-			reward
-		}
-	}
-
 	impl sp_session::SessionKeys<Block> for Runtime {
+		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
+			SessionKeys::generate(seed)
+		}
+
 		fn decode_session_keys(
 			encoded: Vec<u8>,
 		) -> Option<Vec<(Vec<u8>, KeyTypeId)>> {
 			SessionKeys::decode_into_raw_public_keys(&encoded)
-		}
-
-		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
-			SessionKeys::generate(seed)
-		}
-	}
-
-	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
-		fn slot_duration() -> sp_consensus_aura::SlotDuration {
-			sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
-		}
-
-		fn authorities() -> Vec<AuraId> {
-			Aura::authorities().into_inner()
-		}
-	}
-
-
-	impl cumulus_primitives_core::CollectCollationInfo<Block> for Runtime {
-		fn collect_collation_info(header: &<Block as BlockT>::Header) -> cumulus_primitives_core::CollationInfo {
-			ParachainSystem::collect_collation_info(header)
-		}
-	}
-
-	impl pallet_ico_rpc_runtime_api::IcoAmountApi<Block, AccountId, CurrencyId, Index, Balance> for Runtime {
-		fn can_release_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
-			Ico::can_release_amount(account, currency_id, index)
-		}
-		fn get_reward_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
-			Ico::get_reward_amount(account, currency_id, index)
-		}
-		fn can_unlock_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> Balance {
-			Ico::can_unlock_amount(account, currency_id, index)
-		}
-		fn can_join_amount(account: AccountId, currency_id: CurrencyId, index: Index) -> (Balance, Balance) {
-			Ico::can_join_amount(account, currency_id, index)
-		}
-
-		fn get_token_price(currency_id: CurrencyId) -> Balance {
-			Ico::get_token_price(currency_id)
 		}
 	}
 
@@ -1285,6 +1301,25 @@ impl_runtime_apis! {
 			len: u32,
 		) -> pallet_transaction_payment::FeeDetails<Balance> {
 			TransactionPayment::query_fee_details(uxt, len)
+		}
+	}
+
+	impl cumulus_primitives_core::CollectCollationInfo<Block> for Runtime {
+		fn collect_collation_info(header: &<Block as BlockT>::Header) -> cumulus_primitives_core::CollationInfo {
+			ParachainSystem::collect_collation_info(header)
+		}
+	}
+
+	#[cfg(feature = "try-runtime")]
+	impl frame_try_runtime::TryRuntime<Block> for Runtime {
+		fn on_runtime_upgrade() -> (Weight, Weight) {
+			log::info!("try-runtime::on_runtime_upgrade parachain-template.");
+			let weight = Executive::try_runtime_upgrade().unwrap();
+			(weight, RuntimeBlockWeights::get().max_block)
+		}
+
+		fn execute_block_no_check(block: Block) -> Weight {
+			Executive::execute_block_no_check(block)
 		}
 	}
 

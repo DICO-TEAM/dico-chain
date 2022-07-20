@@ -54,6 +54,7 @@ pub trait IcoApi<AccountId, CurrencyId, Index, Balance> {
 
 pub struct FullIco<C, B> {
 	client: Arc<C>,
+	deny_unsafe: DenyUnsafe,
 	_marker: std::marker::PhantomData<B>,
 }
 
@@ -61,6 +62,7 @@ impl<C, B> FullIco<C, B> {
 	pub fn new(client: Arc<C>, deny_unsafe: DenyUnsafe) -> Self {
 		FullIco {
 			client,
+			deny_unsafe,
 			_marker: Default::default(),
 		}
 	}
