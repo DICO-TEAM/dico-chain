@@ -191,14 +191,14 @@ construct_runtime!(
 		// System, Utility
 		System: frame_system::{Pallet, Call, Storage, Config, Event<T>} = 0,
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 1,
-		Utility: pallet_utility::{Pallet, Call, Event} = 2,
+		// Utility: pallet_utility::{Pallet, Call, Event} = 2,
 		Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 3,
 		Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 4,
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 5,
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 6,
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 7,
 		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 9,
-		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 10,
+		// Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 10,
 
 		// Council,Membership
 		Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>} = 11,
@@ -381,12 +381,7 @@ impl pallet_timestamp::Config for Runtime {
 	type WeightInfo = ();
 }
 
-impl pallet_utility::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
-	type PalletsOrigin = OriginCaller;
-	type WeightInfo = pallet_utility::weights::SubstrateWeight<Runtime>;
-}
+
 
 parameter_types! {
 	pub MultisigDepositBase: Balance = deposit(1, 88);
@@ -623,20 +618,6 @@ impl pallet_treasury::Config for Runtime {
 	type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
 }
 
-parameter_types! {
-	pub const PreimageMaxSize: u32 = 4096 * 1024;
-	pub const PreimageBaseDeposit: Balance = 1 * DOLLARS;
-}
-
-impl pallet_preimage::Config for Runtime {
-	type WeightInfo = pallet_preimage::weights::SubstrateWeight<Runtime>;
-	type Event = Event;
-	type Currency = Balances;
-	type ManagerOrigin = EnsureRoot<AccountId>;
-	type MaxSize = PreimageMaxSize;
-	type BaseDeposit = PreimageBaseDeposit;
-	type ByteDeposit = PreimageByteDeposit;
-}
 
 parameter_types! {
 	pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
@@ -655,7 +636,7 @@ impl pallet_scheduler::Config for Runtime {
 	type MaxScheduledPerBlock = MaxScheduledPerBlock;
 	type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
 	type OriginPrivilegeCmp = EqualPrivilegeOnly;
-	type PreimageProvider = Preimage;
+	type PreimageProvider = ();
 	type NoPreimagePostponement = NoPreimagePostponement;
 }
 

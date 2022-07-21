@@ -182,6 +182,83 @@ const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 /// We allow for 0.5 of a second of compute with a 12 second average block time.
 const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND / 2;
 
+
+// Create the runtime by composing the FRAME pallets that were previously configured.
+construct_runtime!(
+	pub enum Runtime where
+		Block = Block,
+		NodeBlock = generic::Block<Header, sp_runtime::OpaqueExtrinsic>,
+		UncheckedExtrinsic = UncheckedExtrinsic,
+	{
+		// System, Utility
+		System: frame_system::{Pallet, Call, Storage, Config, Event<T>} = 0,
+		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 1,
+		// Utility: pallet_utility::{Pallet, Call, Event} = 2,
+		Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 3,
+		Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 4,
+		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 5,
+		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 6,
+		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 7,
+		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 9,
+		// Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 10,
+		// Council,Membership
+		Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>} = 11,
+		Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 12,
+		TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 13,
+		// Elections: pallet_elections_phragmen::{Pallet, Call, Storage, Event<T>, Config<T>} = 14,
+		// TechnicalMembership: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 15,
+		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>} = 16,
+
+		// Governance
+		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>} = 21,
+		// Consensus
+		Authorship: pallet_authorship::{Pallet, Call, Storage} = 30,
+		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>} = 31,
+		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 32,
+		Aura: pallet_aura::{Pallet, Config<T>, Storage} = 33,
+		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 34,
+		//  3rd Party
+		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 40,
+		Vesting: orml_vesting::{Pallet, Storage, Call, Event<T>, Config<T>} = 41,
+		UnknownTokens: orml_unknown_tokens::{Pallet, Storage, Event} = 42,
+		OrmlXcm: orml_xcm::{Pallet, Call, Event<T>} = 43,
+		XTokens: orml_xtokens::{Pallet, Storage, Call, Event<T>} = 44,
+
+		// XCM helpers.
+		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,
+		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 51,
+		CumulusXcm: cumulus_pallet_xcm::{Pallet, Call, Event<T>, Origin} = 52,
+		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 53,
+		ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>} = 54,
+		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 55,
+
+		// vc
+		CreateDao: daos_create_dao::{Pallet, Storage, Call, Event<T>} = 60,
+		DaoSudo: daos_sudo::{Pallet, Storage, Call, Event<T>} = 61,
+		DaoCollective: daos_collective::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
+		DoAs: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
+		Vault: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
+		DaoDemocracy: daos_democracy::{Pallet, Storage, Call, Event<T>} = 65,
+
+		//local pallet
+		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>} = 70,
+
+		DicoTreasury: pallet_dico_treasury::{Pallet, Call, Storage, Event<T>} = 71,
+		Dao: pallet_dao::{Pallet, Origin<T>, Event<T>, Call, Storage}  = 72,
+		Ico: pallet_ico::{Pallet, Event<T>, Call, Storage} = 73,
+
+		AMM: pallet_amm::{Pallet, Call, Storage, Event<T>} = 80,
+
+		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>} = 81,
+		LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>} = 82,
+		Farm: pallet_farm::{Pallet, Call, Storage, Event<T>} = 83,
+		FarmExtend: pallet_farm_extend::{Pallet, Call, Storage, Event<T>}= 84,
+		PriceDao: pallet_pricedao::{Pallet, Call, Storage, Event<T>} = 85,
+		Currencies: pallet_currencies::{Pallet, Event<T>, Call, Storage, Config<T>} = 86,
+		DicoOracle: pallet_oracle::<Instance1>::{Pallet, Storage, Call, Event<T>}= 87,
+	}
+);
+
 parameter_types! {
 	pub const Version: RuntimeVersion = VERSION;
 
@@ -292,12 +369,6 @@ impl pallet_timestamp::Config for Runtime {
 	type WeightInfo = ();
 }
 
-impl pallet_utility::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
-	type PalletsOrigin = OriginCaller;
-	type WeightInfo = pallet_utility::weights::SubstrateWeight<Runtime>;
-}
 
 parameter_types! {
 	pub MultisigDepositBase: Balance = deposit(1, 88);
@@ -534,20 +605,6 @@ impl pallet_treasury::Config for Runtime {
 	type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
 }
 
-parameter_types! {
-	pub const PreimageMaxSize: u32 = 4096 * 1024;
-	pub const PreimageBaseDeposit: Balance = 1 * DOLLARS;
-}
-
-impl pallet_preimage::Config for Runtime {
-	type WeightInfo = pallet_preimage::weights::SubstrateWeight<Runtime>;
-	type Event = Event;
-	type Currency = Balances;
-	type ManagerOrigin = EnsureRoot<AccountId>;
-	type MaxSize = PreimageMaxSize;
-	type BaseDeposit = PreimageBaseDeposit;
-	type ByteDeposit = PreimageByteDeposit;
-}
 
 parameter_types! {
 	pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
@@ -566,7 +623,7 @@ impl pallet_scheduler::Config for Runtime {
 	type MaxScheduledPerBlock = MaxScheduledPerBlock;
 	type WeightInfo = ();
 	type OriginPrivilegeCmp = EqualPrivilegeOnly;
-	type PreimageProvider = Preimage;
+	type PreimageProvider = ();
 	type NoPreimagePostponement = NoPreimagePostponement;
 }
 
@@ -1010,81 +1067,7 @@ impl pallet_nft::Config for Runtime {
 	type WeightInfo = pallet_nft::weights::DicoWeight<Runtime>;
 }
 
-// Create the runtime by composing the FRAME pallets that were previously configured.
-construct_runtime!(
-	pub enum Runtime where
-		Block = Block,
-		NodeBlock = generic::Block<Header, sp_runtime::OpaqueExtrinsic>,
-		UncheckedExtrinsic = UncheckedExtrinsic,
-	{
-		// System, Utility
-		System: frame_system::{Pallet, Call, Storage, Config, Event<T>} = 0,
-		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 1,
-		Utility: pallet_utility::{Pallet, Call, Event} = 2,
-		Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 3,
-		Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 4,
-		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 5,
-		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 6,
-		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 7,
-		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 9,
-		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 10,
-		// Council,Membership
-		Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>} = 11,
-		Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 12,
-		TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 13,
-		// Elections: pallet_elections_phragmen::{Pallet, Call, Storage, Event<T>, Config<T>} = 14,
-		// TechnicalMembership: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 15,
-		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>} = 16,
 
-		// Governance
-		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>} = 21,
-		// Consensus
-		Authorship: pallet_authorship::{Pallet, Call, Storage} = 30,
-		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>} = 31,
-		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 32,
-		Aura: pallet_aura::{Pallet, Config<T>, Storage} = 33,
-		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 34,
-		//  3rd Party
-		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 40,
-		Vesting: orml_vesting::{Pallet, Storage, Call, Event<T>, Config<T>} = 41,
-		UnknownTokens: orml_unknown_tokens::{Pallet, Storage, Event} = 42,
-		OrmlXcm: orml_xcm::{Pallet, Call, Event<T>} = 43,
-		XTokens: orml_xtokens::{Pallet, Storage, Call, Event<T>} = 44,
-
-		// XCM helpers.
-		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,
-		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 51,
-		CumulusXcm: cumulus_pallet_xcm::{Pallet, Call, Event<T>, Origin} = 52,
-		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 53,
-		ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>} = 54,
-		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 55,
-
-		// vc
-		CreateDao: daos_create_dao::{Pallet, Storage, Call, Event<T>} = 60,
-		DaoSudo: daos_sudo::{Pallet, Storage, Call, Event<T>} = 61,
-		DaoCollective: daos_collective::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
-		DoAs: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
-		Vault: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
-		DaoDemocracy: daos_democracy::{Pallet, Storage, Call, Event<T>} = 65,
-
-		//local pallet
-		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>} = 70,
-
-		DicoTreasury: pallet_dico_treasury::{Pallet, Call, Storage, Event<T>} = 71,
-		Dao: pallet_dao::{Pallet, Origin<T>, Event<T>, Call, Storage}  = 72,
-		Ico: pallet_ico::{Pallet, Event<T>, Call, Storage} = 73,
-
-		AMM: pallet_amm::{Pallet, Call, Storage, Event<T>} = 80,
-
-		Nft: pallet_nft::{Pallet, Call, Storage, Event<T>} = 81,
-		LBP: pallet_lbp::{Pallet, Call, Storage, Event<T>} = 82,
-		Farm: pallet_farm::{Pallet, Call, Storage, Event<T>} = 83,
-		FarmExtend: pallet_farm_extend::{Pallet, Call, Storage, Event<T>}= 84,
-		PriceDao: pallet_pricedao::{Pallet, Call, Storage, Event<T>} = 85,
-		Currencies: pallet_currencies::{Pallet, Event<T>, Call, Storage, Config<T>} = 86,
-		DicoOracle: pallet_oracle::<Instance1>::{Pallet, Storage, Call, Event<T>}= 87,
-	}
-);
 
 impl_runtime_apis! {
 	impl sp_api::Core<Block> for Runtime {
