@@ -139,6 +139,15 @@ pub fn get_root() -> AccountId {
 	get_account_id_from_seed::<sr25519::Public>("Alice")
 }
 
+pub fn get_collective_members() -> Vec<AccountId> {
+	vec![
+		get_account_id_from_seed::<sr25519::Public>("Alice"),
+		get_account_id_from_seed::<sr25519::Public>("Bob"),
+		get_account_id_from_seed::<sr25519::Public>("Charlie"),
+		get_account_id_from_seed::<sr25519::Public>("Dave"),
+	]
+}
+
 fn testnet_genesis(
 	invulnerables: Vec<(AccountId, AuraId)>,
 	endowed_accounts: Vec<AccountId>,
@@ -190,9 +199,15 @@ fn testnet_genesis(
 				},
 			)],
 		},
-		technical_committee: Default::default(),
+		technical_committee: parachain_template_runtime::TechnicalCommitteeConfig {
+			members: get_collective_members(),
+			..Default::default()
+		},
+		council: parachain_template_runtime::CouncilConfig {
+			members: get_collective_members(),
+			..Default::default()
+		},
 		sudo: parachain_template_runtime::SudoConfig { key: Some(get_root()) },
-		council: Default::default(),
 		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
