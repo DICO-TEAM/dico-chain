@@ -212,26 +212,6 @@ parameter_types! {
 	pub const SS58Prefix: u16 = 42;
 }
 
-pub struct BaseCallFilter;
-impl Contains<Call> for BaseCallFilter {
-	fn contains(call: &Call) -> bool {
-		!matches!(
-			call,
-
-			// vc
-			Call::CreateDao(_) |
-			Call::DaoSudo(_) |
-			Call::DaoCollective(_) |
-			Call::DoAs(_) |
-			Call::Vault(_) |
-			Call::DaoDemocracy(_) |
-
-			// temp
-			Call::Sudo(_)
-		)
-	}
-}
-
 
 pub struct NewAccount;
 impl OnNewAccount<AccountId> for NewAccount {
@@ -286,7 +266,7 @@ impl frame_system::Config for Runtime {
 	/// The weight of database operations that the runtime can invoke.
 	type DbWeight = RocksDbWeight;
 	/// The basic call filter to use in dispatchable.
-	type BaseCallFilter = BaseCallFilter;
+	type BaseCallFilter = Everything;
 	/// Weight information for the extrinsics of this pallet.
 	type SystemWeightInfo = ();
 	/// Block & extrinsics weights: base values and limits.
@@ -1240,6 +1220,19 @@ impl_runtime_apis! {
 			len: u32,
 		) -> pallet_transaction_payment::FeeDetails<Balance> {
 			TransactionPayment::query_fee_details(uxt, len)
+		}
+	}
+
+	#[cfg(feature = "try-runtime")]
+	impl frame_try_runtime::TryRuntime<Block> for Runtime {
+		fn on_runtime_upgrade() -> (Weight, Weight) {
+			log::info!("try-runtime::on_runtime_upgrade parachain-template.");
+			let weight = Executive::try_runtime_upgrade().unwrap();
+			(weight, RuntimeBlockWeights::get().max_block)
+		}
+
+		fn execute_block_no_check(block: Block) -> Weight {
+			Executive::execute_block_no_check(block)
 		}
 	}
 

@@ -156,7 +156,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("KICO"),
 	impl_name: create_runtime_str!("KICO"),
 	authoring_version: 1,
-	spec_version: 2022070801,
+	spec_version: 2022072101,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -289,69 +289,20 @@ parameter_types! {
 pub struct BaseCallFilter;
 impl Contains<Call> for BaseCallFilter {
 	fn contains(call: &Call) -> bool {
-		matches!(
+		!matches!(
 			call,
-			// System
-			Call::System(_) |
-			Call::Timestamp(_) |
-			Call::Multisig(_) |
-			Call::Balances(_) |
-			Call::Scheduler(_) |
-			Call::Preimage(_) |
-			Call::Utility(_) |
 
-			// Council,Membership
-			Call::Democracy(_) |
-			Call::Council(_) |
-			Call::TechnicalCommittee(_) |
-			// Call::Elections(_) |
-			// Call::TechnicalMembership(_) |
-			Call::Identity(_) |
+			// vc
+			Call::CreateDao(_) |
+			Call::DaoSudo(_) |
+			Call::DaoCollective(_) |
+			Call::DoAs(_) |
+			Call::Vault(_) |
+			Call::DaoDemocracy(_) |
 
-			// treasury
-			// Call::Bounties(_) |
-			Call::Treasury(_) |
-
-			// Consensus
-			Call::Authorship(_) |
-			Call::CollatorSelection(_) |
-			Call::Session(_) |
-
-			// 3rd Party
-			Call::Vesting(_) |
-			Call::OrmlXcm(_) |
-			Call::XTokens(_) |
-
-
-			// Parachain
-			Call::XcmpQueue(_) |
-			Call::PolkadotXcm(_) |
-			Call::CumulusXcm(_) |
-			Call::DmpQueue(_) |
-			Call::ParachainSystem(_) |
-
-			// local pallet
-			Call::Kyc(_) |
-			Call::DicoTreasury(_) |
-			Call::Dao(_) |
-			Call::Ico(_) |
-			Call::AMM(_) |
-			Call::Nft(_) |
-			Call::LBP(_) |
-			Call::Farm(_) |
-			Call::FarmExtend(_) |
-			Call::PriceDao(_) |
-			Call::Currencies(_) |
-			Call::DicoOracle(_) /* temp
-			                     * Call::Sudo(_) */
+			// sudo
+			Call::Sudo(_)
 		)
-	}
-}
-
-pub struct CallFilterRouter;
-impl Contains<Call> for CallFilterRouter {
-	fn contains(call: &Call) -> bool {
-		BaseCallFilter::contains(call)
 	}
 }
 
@@ -404,7 +355,7 @@ impl frame_system::Config for Runtime {
 	/// The weight of database operations that the runtime can invoke.
 	type DbWeight = RocksDbWeight;
 	/// The basic call filter to use in dispatchable.
-	type BaseCallFilter = CallFilterRouter;
+	type BaseCallFilter = BaseCallFilter;
 	/// Weight information for the extrinsics of this pallet.
 	type SystemWeightInfo = weights::frame_system::WeightInfo<Runtime>;
 	/// Block & extrinsics weights: base values and limits.
