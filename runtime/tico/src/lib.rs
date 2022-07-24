@@ -142,7 +142,7 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	DepositAssetsTokens,
+	(),
 >;
 
 impl_opaque_keys! {

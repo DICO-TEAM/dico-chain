@@ -142,7 +142,7 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signatu
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
 pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem, ()>;
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem, (ResetTechnicalCommitteeMember, MigrationOPVesting)>;
 
 impl_opaque_keys! {
 	pub struct SessionKeys {
@@ -156,7 +156,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("KICO"),
 	impl_name: create_runtime_str!("KICO"),
 	authoring_version: 1,
-	spec_version: 2022072102,
+	spec_version: 2022072402,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -444,7 +444,7 @@ impl pallet_sudo::Config for Runtime {
 parameter_types! {
 	pub const LaunchPeriod: BlockNumber = 5 * 24 * 60 * MINUTES;
 	pub const VotingPeriod: BlockNumber = 5 * 24 * 60 * MINUTES;
-	pub const FastTrackVotingPeriod: BlockNumber = 3 * 60 * MINUTES;
+	pub const FastTrackVotingPeriod: BlockNumber = 1 * 60 * MINUTES;
 	pub const InstantAllowed: bool = true;
 	pub const MinimumDeposit: Balance = 100 * DOLLARS;
 	pub const EnactmentPeriod: BlockNumber = 2 * 24 * 60 * MINUTES;
@@ -471,13 +471,13 @@ impl pallet_democracy::Config for Runtime {
 	/// A super-majority can have the next scheduled referendum be a straight majority-carries vote.
 	type ExternalMajorityOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3u32, 4u32>,
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2u32, 3u32>,
 	>;
 	/// A unanimous council can have the next scheduled referendum be a straight default-carries
 	/// (NTB) vote.
 	type ExternalDefaultOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 1u32>,
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3u32, 4u32>,
 	>;
 	/// Two thirds of the technical committee can have an ExternalMajority/ExternalDefault vote
 	/// be tabled immediately and with a shorter voting/enactment period.
