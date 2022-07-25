@@ -136,14 +136,8 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signatu
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<
-	Runtime,
-	Block,
-	frame_system::ChainContext<Runtime>,
-	Runtime,
-	AllPalletsWithSystem,
-	(),
->;
+pub type Executive =
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem, ()>;
 
 impl_opaque_keys! {
 	pub struct SessionKeys {
@@ -181,7 +175,6 @@ const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 /// We allow for 0.5 of a second of compute with a 12 second average block time.
 const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND / 2;
-
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -289,7 +282,6 @@ parameter_types! {
 	pub const SS58Prefix: u16 = 42;
 }
 
-
 pub struct NewAccount;
 impl OnNewAccount<AccountId> for NewAccount {
 	fn on_new_account(_who: &AccountId) {
@@ -368,7 +360,6 @@ impl pallet_timestamp::Config for Runtime {
 	type MinimumPeriod = MinimumPeriod;
 	type WeightInfo = ();
 }
-
 
 parameter_types! {
 	pub MultisigDepositBase: Balance = deposit(1, 88);
@@ -604,7 +595,6 @@ impl pallet_treasury::Config for Runtime {
 	type ProposalBondMaximum = ProposalBondMaximum;
 	type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
 }
-
 
 parameter_types! {
 	pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
@@ -1066,8 +1056,6 @@ impl pallet_nft::Config for Runtime {
 	type USDCurrencyId = USDCurrencyId;
 	type WeightInfo = pallet_nft::weights::DicoWeight<Runtime>;
 }
-
-
 
 impl_runtime_apis! {
 	impl sp_api::Core<Block> for Runtime {

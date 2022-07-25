@@ -1,6 +1,5 @@
 #![allow(unused_braces)]
 
-use std::net::SocketAddr;
 use codec::Encode;
 use cumulus_client_cli::generate_genesis_block;
 use cumulus_primitives_core::ParaId;
@@ -17,6 +16,7 @@ use sc_service::{
 };
 use sp_core::hexdisplay::HexDisplay;
 use sp_runtime::traits::{AccountIdConversion, Block as BlockT};
+use std::net::SocketAddr;
 
 use crate::{
 	chain_spec,

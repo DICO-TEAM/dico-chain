@@ -291,17 +291,16 @@ impl Contains<Call> for BaseCallFilter {
 	fn contains(call: &Call) -> bool {
 		!matches!(
 			call,
-
 			// vc
-			Call::CreateDao(_) |
-			Call::DaoSudo(_) |
-			Call::DaoCollective(_) |
-			Call::DoAs(_) |
-			Call::Vault(_) |
-			Call::DaoDemocracy(_) |
-
+			Call::Vault(_)
+			// daos
+			| Call::DaoSudo(_)
+			| Call::DaoCollective(_)
+			| Call::DoAs(_)
+			| Call::CreateDao(_)
+			| Call::DaoDemocracy(_)
 			// sudo
-			Call::Sudo(_)
+			| Call::Sudo(_)
 		)
 	}
 }
@@ -380,8 +379,6 @@ impl pallet_timestamp::Config for Runtime {
 	type MinimumPeriod = MinimumPeriod;
 	type WeightInfo = ();
 }
-
-
 
 parameter_types! {
 	pub MultisigDepositBase: Balance = deposit(1, 88);
@@ -617,7 +614,6 @@ impl pallet_treasury::Config for Runtime {
 	type MaxApprovals = MaxApprovals;
 	type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
 }
-
 
 parameter_types! {
 	pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
