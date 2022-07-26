@@ -10,7 +10,7 @@ use daos_democracy::{
 };
 use daos_primitives::{
 	ids::{DaoId, Fungible, Nft as NFT},
-	traits::{BaseDaoCallFilter, Checked},
+	traits::{BaseDaoCallFilter, TryCreate},
 	types::MemberCount,
 	AccountIdConversion, TrailingZeroInput,
 };
@@ -49,20 +49,20 @@ impl TryFrom<Call> for CallId {
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, Clone, TypeInfo, Copy, MaxEncodedLen)]
-pub enum SecondId<ClassId, TokenId> {
+pub enum ConcreteId<ClassId, TokenId> {
 	NftClassId(ClassId),
 	FungibleTokenId(TokenId),
 }
 
 impl<T: Encode + Decode, ClassId: Encode + Decode, TokenId: Encode + Decode> AccountIdConversion<T>
-	for SecondId<ClassId, TokenId>
+	for ConcreteId<ClassId, TokenId>
 {
 	fn into_account(&self) -> T {
 		match self {
-			SecondId::NftClassId(x) => (b"nft ", NFT(x))
+			ConcreteId::NftClassId(x) => (b"nft ", NFT(x))
 				.using_encoded(|b| T::decode(&mut TrailingZeroInput(b)))
 				.unwrap(),
-			SecondId::FungibleTokenId(x) => (b"fung", Fungible(x))
+			ConcreteId::FungibleTokenId(x) => (b"fung", Fungible(x))
 				.using_encoded(|b| T::decode(&mut TrailingZeroInput(b)))
 				.unwrap(),
 		}
@@ -84,9 +84,9 @@ impl<T: Encode + Decode, ClassId: Encode + Decode, TokenId: Encode + Decode> Acc
 	}
 }
 
-impl<NftId: Default, TokenId: Default> Default for SecondId<NftId, TokenId> {
+impl<NftId: Default, TokenId: Default> Default for ConcreteId<NftId, TokenId> {
 	fn default() -> Self {
-		SecondId::NftClassId(NftId::default())
+		ConcreteId::NftClassId(NftId::default())
 	}
 }
 
@@ -101,17 +101,17 @@ impl Default for Vote<u32, Balance> {
 		Vote::FungibleAmount(0 as u128)
 	}
 }
-impl VoteTrait<Balance, AccountId, SecondId<u32, u32>, Conviction, BlockNumber, DispatchError> for Vote<u32, Balance> {
+impl VoteTrait<Balance, AccountId, ConcreteId<u32, u32>, Conviction, BlockNumber, DispatchError> for Vote<u32, Balance> {
 	fn try_vote(
 		&self,
 		who: &AccountId,
-		second_id: &SecondId<u32, u32>,
+		second_id: &ConcreteId<u32, u32>,
 		conviction: &Conviction,
 	) -> Result<(Balance, BlockNumber), DispatchError> {
 		let mut amount = 0 as Balance;
 		match self {
 			Vote::FungibleAmount(x) => {
-				if let SecondId::FungibleTokenId(id) = second_id {
+				if let ConcreteId::FungibleTokenId(id) = second_id {
 					Currencies::reserve(*id, &who, *x)?;
 					amount = *x;
 					return Ok((
@@ -123,7 +123,7 @@ impl VoteTrait<Balance, AccountId, SecondId<u32, u32>, Conviction, BlockNumber, 
 				}
 			}
 			Vote::NftTokenId(x) => {
-				if let SecondId::NftClassId(class_id) = second_id {
+				if let ConcreteId::NftClassId(class_id) = second_id {
 					Nft::try_lock(&who, (*class_id, *x))?;
 					amount = DOLLARS;
 					return Ok((
@@ -138,16 +138,16 @@ impl VoteTrait<Balance, AccountId, SecondId<u32, u32>, Conviction, BlockNumber, 
 		Err(daos_democracy::Error::<Runtime>::VoteNotEnough)?
 	}
 
-	fn vote_end_do(&self, who: &AccountId, second_id: &SecondId<u32, u32>) -> Result<(), DispatchError> {
+	fn vote_end_do(&self, who: &AccountId, second_id: &ConcreteId<u32, u32>) -> Result<(), DispatchError> {
 		match self {
 			Vote::FungibleAmount(x) => {
-				if let SecondId::FungibleTokenId(id) = second_id {
+				if let ConcreteId::FungibleTokenId(id) = second_id {
 					Currencies::reserve(*id, &who, *x)?;
 					return Ok(());
 				}
 			}
 			Vote::NftTokenId(x) => {
-				if let SecondId::NftClassId(class_id) = second_id {
+				if let ConcreteId::NftClassId(class_id) = second_id {
 					Nft::try_unlock(&who, (*class_id, *x))?;
 					return Ok(());
 				}
@@ -157,16 +157,16 @@ impl VoteTrait<Balance, AccountId, SecondId<u32, u32>, Conviction, BlockNumber, 
 	}
 }
 
-impl CheckedVote<SecondId<u32, u32>, DispatchError> for Vote<u32, Balance> {
-	fn is_can_vote(&self, second_id: SecondId<u32, u32>) -> Result<bool, DispatchError> {
+impl CheckedVote<ConcreteId<u32, u32>, DispatchError> for Vote<u32, Balance> {
+	fn is_can_vote(&self, second_id: ConcreteId<u32, u32>) -> Result<bool, DispatchError> {
 		match self {
 			Vote::FungibleAmount(x) => {
-				if let SecondId::FungibleTokenId(_) = second_id {
+				if let ConcreteId::FungibleTokenId(_) = second_id {
 					return Ok(true);
 				}
 			}
 			Vote::NftTokenId(x) => {
-				if let SecondId::NftClassId(_) = second_id {
+				if let ConcreteId::NftClassId(_) = second_id {
 					return Ok(true);
 				}
 			}
@@ -213,13 +213,13 @@ impl ConvertInto<BlockNumber> for Conviction {
 	}
 }
 
-impl Checked<AccountId, DaoId, DispatchError> for SecondId<u32, CurrencyId> {
-	fn is_can_create(&self, who: AccountId, dao_id: DaoId) -> Result<(), DispatchError> {
+impl TryCreate<AccountId, DaoId, DispatchError> for ConcreteId<u32, CurrencyId> {
+	fn try_create(&self, who: AccountId, dao_id: DaoId) -> Result<(), DispatchError> {
 		match &self {
-			SecondId::FungibleTokenId(token_id) => {
+			ConcreteId::FungibleTokenId(token_id) => {
 				Currencies::try_create_dao(&who, *token_id, dao_id)?;
 			}
-			SecondId::NftClassId(class_id) => {
+			ConcreteId::NftClassId(class_id) => {
 				Nft::try_create_dao(&who, *class_id, dao_id)?;
 			}
 		}
@@ -227,7 +227,7 @@ impl Checked<AccountId, DaoId, DispatchError> for SecondId<u32, CurrencyId> {
 	}
 }
 
-impl BaseDaoCallFilter<Call> for SecondId<u32, CurrencyId> {
+impl BaseDaoCallFilter<Call> for ConcreteId<u32, CurrencyId> {
 	fn contains(&self, call: Call) -> bool {
 		match call {
 			Call::DaoCollective(func) => {
@@ -261,7 +261,7 @@ impl daos_create_dao::Config for Runtime {
 	type Call = Call;
 	type CallId = CallId;
 	type DaoId = DaoId;
-	type SecondId = SecondId<u32, CurrencyId>;
+	type ConcreteId = ConcreteId<u32, CurrencyId>;
 }
 
 impl daos_sudo::Config for Runtime {

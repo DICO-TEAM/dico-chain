@@ -767,7 +767,7 @@ impl<T: Config> Pallet<T> {
 		if let Some(dao_id) = Daos::<T>::get(class_id) {
 			match pallet_vc::Pallet::<T>::fees(dao_id) {
 				Fee::Amount(x) => {
-					let dao_account = dao::Pallet::<T>::get_second_id(dao_id)?.into_account();
+					let dao_account = dao::Pallet::<T>::try_get_concrete_id(dao_id)?.into_account();
 					T::MultiCurrency::transfer(T::USDCurrencyId::get(), &who, &dao_account, x)?;
 					T::MultiCurrency::reserve(T::USDCurrencyId::get(), &dao_account, x);
 				}

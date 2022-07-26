@@ -655,7 +655,7 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
 		}
 		match Daos::<T>::get(currency_id) {
 			Some(dao_id) => {
-				let dao_account = dao::Pallet::<T>::get_second_id(dao_id)?.into_account();
+				let dao_account = dao::Pallet::<T>::try_get_concrete_id(dao_id)?.into_account();
 				let fee: Fee<VcBalanceOf<T>, Permill> = pallet_vc::Pallet::<T>::fees(dao_id);
 				match fee {
 					Fee::Permill(x) => {
