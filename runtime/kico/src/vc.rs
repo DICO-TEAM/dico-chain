@@ -21,6 +21,7 @@ use sp_runtime::DispatchError;
 pub use sp_runtime::{traits::Hash, RuntimeDebug};
 
 type CallId = u32;
+
 impl TryFrom<Call> for CallId {
 	type Error = ();
 
@@ -31,7 +32,7 @@ impl TryFrom<Call> for CallId {
 				| daos_collective::Call::set_motion_duration { .. }
 				| daos_collective::Call::set_max_proposals { .. }
 				| daos_collective::Call::set_max_members { .. }
-				| daos_collective::Call::set_ensure_for_every_call { .. } => Ok(100 as CallId),
+				| daos_collective::Call::set_ensure_origin_for_every_call { .. } => Ok(100 as CallId),
 				_ => Err(()),
 			},
 			Call::Vault(func) => Ok(200 as CallId),
@@ -234,7 +235,7 @@ impl BaseDaoCallFilter<Call> for ConcreteId<u32, CurrencyId> {
 						| daos_collective::Call::set_motion_duration { .. }
 						| daos_collective::Call::set_max_proposals { .. }
 						| daos_collective::Call::set_max_members { .. }
-						| daos_collective::Call::set_ensure_for_every_call { .. }
+						| daos_collective::Call::set_ensure_origin_for_every_call { .. }
 				)
 			}
 			Call::Vault(_) => true,
