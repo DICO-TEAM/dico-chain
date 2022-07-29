@@ -306,12 +306,6 @@ impl pallet_vc::Config for Runtime {
 }
 
 parameter_types! {
-	pub const MaxPublicProps: u32 = 20;
-	pub const LaunchPeriod: BlockNumber = 2 * HOURS;
-	pub const MinimumDeposit: Balance = 10 * DOLLARS;
-	pub const VotingPeriod: BlockNumber = 1 * HOURS;
-	pub const ReservePeriod: BlockNumber = 1 * DAYS;
-	pub const EnactmentPeriod: BlockNumber = HOURS / 2;
 	pub const GetNativeCurrencyId: CurrencyId = 0;
 }
 
@@ -321,10 +315,4 @@ impl daos_democracy::Config for Runtime {
 	type Conviction = Conviction;
 	type MultiCurrency = Currencies;
 	type GetNativeCurrencyId = GetNativeCurrencyId;
-	type MaxPublicProps = MaxPublicProps;
-	type LaunchPeriod = LaunchPeriod;
-	type MinimumDeposit = MinimumDeposit;
-	type VotingPeriod = VotingPeriod;
-	type ReservePeriod = ReservePeriod;
-	type EnactmentPeriod = EnactmentPeriod;
 }
