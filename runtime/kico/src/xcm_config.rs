@@ -407,14 +407,14 @@ impl orml_unknown_tokens::Config for Runtime {
 	type Event = Event;
 }
 
-pub type EnsureRootOrThreeFourthsCouncil = EnsureOneOf<
+pub type EnsureRootOrHalfCouncil = EnsureOneOf<
 	EnsureRoot<AccountId>,
-	pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3u32, 4u32>,
+	pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>,
 >;
 
 impl orml_xcm::Config for Runtime {
 	type Event = Event;
-	type SovereignOrigin = EnsureRootOrThreeFourthsCouncil;
+	type SovereignOrigin = EnsureRootOrHalfCouncil;
 }
 
 parameter_types! {
