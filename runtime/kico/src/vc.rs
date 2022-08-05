@@ -69,8 +69,10 @@ impl TryFrom<Call> for CallId {
 				_ => Err(()),
 			},
 			Call::AMM(func) => match func {
-				pallet_amm::Call::swap_exact_assets_for_assets { .. } => Ok(601 as CallId),
-				pallet_amm::Call::swap_assets_for_exact_assets { .. } => Ok(602 as CallId),
+				pallet_amm::Call::add_liquidity{..} => Ok(601 as CallId),
+				pallet_amm::Call::remove_liquidity{..} => Ok(602 as CallId),
+				pallet_amm::Call::swap_exact_assets_for_assets { .. } => Ok(603 as CallId),
+				pallet_amm::Call::swap_assets_for_exact_assets { .. } => Ok(604 as CallId),
 				_ => Err(()),
 			},
 

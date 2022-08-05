@@ -163,9 +163,10 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// Add liquidity to previously created asset pair pool.
+
+		/// (daos support. call name: add_liquidity, call id:601)
 		///
-		/// Emits `LiquidityAdded` event when successful.
+		/// Add liquidity to previously created asset pair pool.
 		#[pallet::weight(< T as Config >::WeightInfo::add_liquidity())]
 		#[transactional]
 		pub fn add_liquidity(
@@ -267,9 +268,8 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// (daos support. call name: remove_liquidity, call id:602)
 		/// Remove liquidity from specific liquidity pool in the form of burning shares.
-		///
-		/// Emits 'LiquidityRemoved' when successful.
 		#[pallet::weight(< T as Config >::WeightInfo::remove_liquidity())]
 		#[transactional]
 		pub fn remove_liquidity(
@@ -343,7 +343,7 @@ pub mod pallet {
 			})
 		}
 
-		/// (daos support. call name: swap_exact_assets_for_assets, call id:601)
+		/// (daos support. call name: swap_exact_assets_for_assets, call id:603)
 		///
 		/// Use a fixed amount of supply assets to exchange for target assets not less than
 		/// `amount_out_min`.
@@ -372,7 +372,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		/// (daos support. call name: swap_assets_for_exact_assets, call id:602)
+		/// (daos support. call name: swap_assets_for_exact_assets, call id:604)
 		///
 		/// Use no more than `amount_in_max` supply assets to exchange for a fixed amount of target
 		/// assets.
