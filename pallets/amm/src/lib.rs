@@ -343,10 +343,9 @@ pub mod pallet {
 			})
 		}
 
-		/// Use a fixed amount of supply assets to exchange for target assets not less than
-		/// `amount_out_min`.
+		/// (daos support. call name: swap_exact_assets_for_assets, call id:601)
 		///
-		/// Emits 'Swapped' when successful.
+		/// Use a fixed amount of supply assets to exchange for target assets not less than `amount_out_min`.
 		#[pallet::weight(< T as Config >::WeightInfo::swap_exact_assets_for_assets())]
 		#[transactional]
 		pub fn swap_exact_assets_for_assets(
@@ -372,10 +371,9 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		/// Use no more than `amount_in_max` supply assets to exchange for a fixed amount of target
-		/// assets.
+		/// (daos support. call name: swap_assets_for_exact_assets, call id:602)
 		///
-		/// Emits 'Swapped' when successful.
+		/// Use no more than `amount_in_max` supply assets to exchange for a fixed amount of target assets.
 		#[pallet::weight(< T as Config >::WeightInfo::swap_assets_for_exact_assets())]
 		#[transactional]
 		pub fn swap_assets_for_exact_assets(

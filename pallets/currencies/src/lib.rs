@@ -410,6 +410,8 @@ pub mod module {
 			Ok(().into())
 		}
 
+		/// (daos support. call name: burn, call id:401)
+		///
 		/// Users destroy their own assets.
 		#[pallet::weight(T::WeightInfo::burn())]
 		pub fn burn(origin: OriginFor<T>, currency_id: AssetId, amount: BalanceOf<T>) -> DispatchResultWithPostInfo {
@@ -422,10 +424,9 @@ pub mod module {
 			Ok(().into())
 		}
 
-		/// Transfer some balance to another account under `currency_id`.
+		/// (daos support. call name: transfer, call id:402)
 		///
-		/// The dispatch origin for this call must be `Signed` by the
-		/// transactor.
+		/// Transfer some balance to another account under `currency_id`.
 		#[pallet::weight(T::WeightInfo::transfer())]
 		pub fn transfer(
 			origin: OriginFor<T>,
@@ -447,10 +448,9 @@ pub mod module {
 			Ok(().into())
 		}
 
-		/// Transfer some native currency to another account.
+		/// (daos support. call name: transfer_native_currency, call id:403)
 		///
-		/// The dispatch origin for this call must be `Signed` by the
-		/// transactor.
+		/// Transfer some native currency to another account.
 		#[pallet::weight(T::WeightInfo::transfer_native_currency())]
 		pub fn transfer_native_currency(
 			origin: OriginFor<T>,

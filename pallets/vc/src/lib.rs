@@ -55,7 +55,7 @@ impl<Amount: Default> Default for Fee<Amount, Permill> {
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use daos_create_dao::BaseDaoCallFilter;
+	use daos_create_dao::BaseCallFilter;
 	use frame_support::traits::Contains;
 	use frame_support::{dispatch::DispatchResultWithPostInfo, pallet_prelude::*};
 	use frame_system::pallet_prelude::*;
@@ -129,6 +129,8 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
+
+		/// (daos support. call name: set_guarders, call id:701)
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn set_guarders(
 			origin: OriginFor<T>,
@@ -143,6 +145,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// (daos support. call name: remove_guarder, call id:702)
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn remove_guarder(
 			origin: OriginFor<T>,
@@ -159,6 +162,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// (daos support. call name: add_guarder, call id:703)
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn add_guarder(
 			origin: OriginFor<T>,
@@ -174,6 +178,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// (daos support. call name: unreserve, call id:704)
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn unreserve(
 			origin: OriginFor<T>,
@@ -187,6 +192,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// (daos support. call name: set_fee, call id:705)
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn set_fee(
 			origin: OriginFor<T>,
@@ -199,6 +205,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// (daos support. call name: open_cex_transfer, call id:706)
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn open_cex_transfer(origin: OriginFor<T>, dao_id: T::DaoId, is_open: bool) -> DispatchResultWithPostInfo {
 			dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
