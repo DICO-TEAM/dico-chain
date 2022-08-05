@@ -129,7 +129,6 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-
 		/// (daos support. call name: set_guarders, call id:701)
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn set_guarders(

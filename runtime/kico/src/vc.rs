@@ -28,8 +28,8 @@ impl TryFrom<Call> for CallId {
 		match call {
 			// daos
 			Call::CreateDao(func) => match func {
-				daos_create_dao::Call::dao_remark{..} => Ok(101 as CallId),
-				_ => Err(())
+				daos_create_dao::Call::dao_remark { .. } => Ok(101 as CallId),
+				_ => Err(()),
 			},
 			Call::DaoCollective(func) => match func {
 				daos_collective::Call::disapprove_proposal { .. } => Ok(201 as CallId),
@@ -40,48 +40,48 @@ impl TryFrom<Call> for CallId {
 				_ => Err(()),
 			},
 			Call::DaoDemocracy(func) => match func {
-				daos_democracy::Call::set_min_vote_weight_for_every_call{..} => Ok(301 as CallId),
-				daos_democracy::Call::set_max_public_props{..} => Ok(302 as CallId),
-				daos_democracy::Call::set_launch_period{..} => Ok(303 as CallId),
-				daos_democracy::Call::set_minimum_deposit{..} => Ok(304 as CallId),
-				daos_democracy::Call::set_voting_period{..} => Ok(305 as CallId),
-				daos_democracy::Call::set_rerserve_period{..} => Ok(306 as CallId),
-				daos_democracy::Call::set_enactment_period{..} => Ok(307 as CallId),
+				daos_democracy::Call::set_min_vote_weight_for_every_call { .. } => Ok(301 as CallId),
+				daos_democracy::Call::set_max_public_props { .. } => Ok(302 as CallId),
+				daos_democracy::Call::set_launch_period { .. } => Ok(303 as CallId),
+				daos_democracy::Call::set_minimum_deposit { .. } => Ok(304 as CallId),
+				daos_democracy::Call::set_voting_period { .. } => Ok(305 as CallId),
+				daos_democracy::Call::set_rerserve_period { .. } => Ok(306 as CallId),
+				daos_democracy::Call::set_enactment_period { .. } => Ok(307 as CallId),
 				_ => Err(()),
 			},
 
 			// about assets
 			Call::Currencies(func) => match func {
-				pallet_currencies::Call::burn{..} => Ok(401 as CallId),
-				pallet_currencies::Call::transfer{..} => Ok(402 as CallId),
-				pallet_currencies::Call::transfer_native_currency{..} => Ok(403 as CallId),
+				pallet_currencies::Call::burn { .. } => Ok(401 as CallId),
+				pallet_currencies::Call::transfer { .. } => Ok(402 as CallId),
+				pallet_currencies::Call::transfer_native_currency { .. } => Ok(403 as CallId),
 				_ => Err(()),
 			},
 			Call::Nft(func) => match func {
-				pallet_nft::Call::transfer{..} => Ok(501 as CallId),
-				pallet_nft::Call::claim{..} => Ok(502 as CallId),
-				pallet_nft::Call::burn{..} => Ok(503 as CallId),
-				pallet_nft::Call::offer_token_for_sale{..} => Ok(504 as CallId),
-				pallet_nft::Call::withdraw_sale{..} => Ok(505 as CallId),
-				pallet_nft::Call::buy_token{..} => Ok(506 as CallId),
-				pallet_nft::Call::active{..} => Ok(507 as CallId),
-				pallet_nft::Call::inactive{..} => Ok(508 as CallId),
+				pallet_nft::Call::transfer { .. } => Ok(501 as CallId),
+				pallet_nft::Call::claim { .. } => Ok(502 as CallId),
+				pallet_nft::Call::burn { .. } => Ok(503 as CallId),
+				pallet_nft::Call::offer_token_for_sale { .. } => Ok(504 as CallId),
+				pallet_nft::Call::withdraw_sale { .. } => Ok(505 as CallId),
+				pallet_nft::Call::buy_token { .. } => Ok(506 as CallId),
+				pallet_nft::Call::active { .. } => Ok(507 as CallId),
+				pallet_nft::Call::inactive { .. } => Ok(508 as CallId),
 				_ => Err(()),
 			},
 			Call::AMM(func) => match func {
-				pallet_amm::Call::swap_exact_assets_for_assets{..} => Ok(601 as CallId),
-				pallet_amm::Call::swap_assets_for_exact_assets{..} => Ok(602 as CallId),
+				pallet_amm::Call::swap_exact_assets_for_assets { .. } => Ok(601 as CallId),
+				pallet_amm::Call::swap_assets_for_exact_assets { .. } => Ok(602 as CallId),
 				_ => Err(()),
 			},
 
 			// vc
 			Call::Vault(func) => match func {
-				pallet_vc::Call::set_guarders{..} => Ok(701 as CallId),
-				pallet_vc::Call::remove_guarder{..} => Ok(702 as CallId),
-				pallet_vc::Call::add_guarder{..} => Ok(703 as CallId),
-				pallet_vc::Call::unreserve{..} => Ok(704 as CallId),
-				pallet_vc::Call::set_fee{..} => Ok(705 as CallId),
-				pallet_vc::Call::open_cex_transfer{..} => Ok(706 as CallId),
+				pallet_vc::Call::set_guarders { .. } => Ok(701 as CallId),
+				pallet_vc::Call::remove_guarder { .. } => Ok(702 as CallId),
+				pallet_vc::Call::add_guarder { .. } => Ok(703 as CallId),
+				pallet_vc::Call::unreserve { .. } => Ok(704 as CallId),
+				pallet_vc::Call::set_fee { .. } => Ok(705 as CallId),
+				pallet_vc::Call::open_cex_transfer { .. } => Ok(706 as CallId),
 				_ => Err(()),
 			},
 
@@ -89,7 +89,6 @@ impl TryFrom<Call> for CallId {
 		}
 	}
 }
-
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, Clone, TypeInfo, Copy, MaxEncodedLen)]
 pub enum ConcreteId<ClassId, TokenId> {
@@ -144,7 +143,9 @@ impl Default for Vote<u32, Balance> {
 		Vote::FungibleAmount(0 as u128)
 	}
 }
-impl VoteTrait<Balance, AccountId, ConcreteId<u32, u32>, Conviction, BlockNumber, DispatchError> for Vote<u32, Balance> {
+impl VoteTrait<Balance, AccountId, ConcreteId<u32, u32>, Conviction, BlockNumber, DispatchError>
+	for Vote<u32, Balance>
+{
 	fn try_vote(
 		&self,
 		who: &AccountId,
