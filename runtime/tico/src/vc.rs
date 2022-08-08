@@ -89,6 +89,14 @@ impl TryFrom<Call> for CallId {
 				pallet_vc::Call::open_cex_transfer { .. } => Ok(706 as CallId),
 				_ => Err(()),
 			},
+			// ico
+			Call::Ico(func) => match func {
+				pallet_ico::Call::join{..} => Ok(801 as CallId),
+				pallet_ico::Call::user_release_ico_amount{..} => Ok(802 as CallId),
+				pallet_ico::Call::unlock{..} => Ok(803 as CallId),
+				pallet_ico::Call::get_reward{..} => Ok(804 as CallId),
+				_ => Err(()),
+			},
 
 			_ => Err(()),
 		}
