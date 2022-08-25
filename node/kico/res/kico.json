@@ -3,9 +3,8 @@
   "id": "KICO",
   "chainType": "Live",
   "bootNodes": [
-    "/dns/kico-bootnode-1.kico.dico.io/tcp/30333/p2p/12D3KooWSxFrqBtPfUBS45pJJzEpfBWZQLLHeyZvR4X4rw2aXGdk",
-    "/dns/kico-bootnode-2.kico.dico.io/tcp/30333/p2p/12D3KooWC42e93zX9dnNXnDSAj5FWsacJE9yNJrYs8Z4CP4LArko",
-    "/dns/kico-bootnode-3.kico.dico.io/tcp/30333/p2p/12D3KooWNkuhSrUpqkRW7822WEPkdL4mv2ZZMw5LvPQgjXExqPrM"
+	  "/dns/rpc.kico.dico.io/tcp/30333/p2p/12D3KooWT2qvDPmcAfxf3E2bKfhSPMePrPojmtFNZfpuqEv6DH9R",
+	  "/dns/rpc.api.kico.dico.io/tcp/30333/p2p/12D3KooWHPYWvkPNg8SUWKtc6Xz57ZSVEqnNF3tnDbiuF3PGGoy4"
   ],
   "telemetryEndpoints": [
     [
