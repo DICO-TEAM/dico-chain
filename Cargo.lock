@@ -3671,7 +3671,7 @@ checksum = "f9b7d56ba4a8344d6be9729995e6b06f928af29998cdf79fe390cbf6b1fee838"
 
 [[package]]
 name = "kico"
-version = "1.3.1"
+version = "2.0.0"
 dependencies = [
  "clap",
  "cumulus-client-cli",
@@ -3742,7 +3742,7 @@ dependencies = [
 
 [[package]]
 name = "kico-runtime"
-version = "1.3.1"
+version = "2.0.0"
 dependencies = [
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",
@@ -11642,7 +11642,7 @@ dependencies = [
 
 [[package]]
 name = "tico"
-version = "1.3.1"
+version = "2.0.0"
 dependencies = [
  "clap",
  "cumulus-client-cli",
@@ -11713,7 +11713,7 @@ dependencies = [
 
 [[package]]
 name = "tico-runtime"
-version = "1.3.1"
+version = "2.0.0"
 dependencies = [
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",
