@@ -468,7 +468,7 @@ impl<T: Config> Pallet<T> {
 
 	pub fn try_create_dao(who: &T::AccountId, class_id: T::ClassId, dao_id: T::DaoId) -> DispatchResult {
 		ensure!(Self::is_issuer(&who, class_id), Error::<T>::NotIssuer);
-		ensure!(Daos::<T>::contains_key(class_id), Error::<T>::DaoExists);
+		ensure!(!Daos::<T>::contains_key(class_id), Error::<T>::DaoExists);
 		Daos::<T>::insert(class_id, dao_id);
 		Ok(())
 	}

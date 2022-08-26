@@ -565,7 +565,7 @@ impl<T: Config> CurrenciesHandler<AssetId, DicoAssetMetadata, DispatchError, T::
 impl<T: Config> Pallet<T> {
 	pub fn try_create_dao(who: &T::AccountId, asset_id: AssetId, dao_id: T::DaoId) -> DispatchResult {
 		ensure!(Self::is_owner(asset_id, &who), Error::<T>::NotOwner);
-		ensure!(Daos::<T>::contains_key(asset_id), Error::<T>::DaoExists);
+		ensure!(!Daos::<T>::contains_key(asset_id), Error::<T>::DaoExists);
 		Daos::<T>::insert(asset_id, dao_id);
 		Ok(())
 	}
