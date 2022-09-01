@@ -19,7 +19,7 @@
 
 use codec::{Decode, Encode};
 pub use daos_create_dao::{self as dao, AccountIdConversion, Vec};
-use daos_primitives::traits::GetCollectiveMembers;
+use daos_primitives::traits::SetCollectiveMembers;
 use dico_primitives::AssetId;
 use frame_support::dispatch::UnfilteredDispatchable;
 use orml_traits::{MultiCurrency, MultiCurrencyExtended, MultiReservableCurrency};
@@ -68,6 +68,8 @@ pub mod pallet {
 	pub trait Config: frame_system::Config + dao::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
+		type SetCollectiveMembers: SetCollectiveMembers<Self::AccountId, Self::DaoId, DispatchError>;
 
 		type MultiCurrency: MultiCurrency<Self::AccountId, CurrencyId = AssetId>
 			+ MultiReservableCurrency<Self::AccountId>
@@ -140,6 +142,8 @@ pub mod pallet {
 			ensure!(guarders.len() > 0, Error::<T>::HaveNoGurarder);
 			guarders.sort();
 			Guarders::<T>::insert(dao_id, guarders);
+			T::SetCollectiveMembers::set_members_sorted(dao_id, &Self::guarders(dao_id), None)?;
+
 			Self::deposit_event(Event::<T>::SetGuarders(dao_id));
 			Ok(().into())
 		}
@@ -157,6 +161,8 @@ pub mod pallet {
 					h.remove(pos);
 				}
 			});
+			T::SetCollectiveMembers::set_members_sorted(dao_id, &Self::guarders(dao_id), None)?;
+
 			Self::deposit_event(Event::<T>::RemoveGuard(dao_id, guarder));
 			Ok(().into())
 		}
@@ -173,6 +179,8 @@ pub mod pallet {
 			ensure!(!guarders.contains(&guarder), Error::<T>::GuarderIsExists);
 			guarders.push(guarder.clone());
 			Guarders::<T>::insert(dao_id, guarders);
+			T::SetCollectiveMembers::set_members_sorted(dao_id, &Self::guarders(dao_id), None)?;
+
 			Self::deposit_event(Event::<T>::AddGuarder(dao_id, guarder));
 			Ok(().into())
 		}
@@ -212,15 +220,5 @@ pub mod pallet {
 			Self::deposit_event(Event::<T>::OpenCexTransfer(dao_id, is_open));
 			Ok(().into())
 		}
-	}
-}
-
-impl<T: Config> GetCollectiveMembers<T::AccountId, T::DaoId> for Pallet<T> {
-	fn get_members(dao_id: T::DaoId) -> Vec<T::AccountId> {
-		Guarders::<T>::get(dao_id)
-	}
-
-	fn get_prime(dao_id: T::DaoId) -> Option<T::AccountId> {
-		None
 	}
 }

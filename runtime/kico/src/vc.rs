@@ -321,7 +321,6 @@ impl daos_collective::Config for Runtime {
 	type CollectiveBaseCallFilter = CollectiveBaseCallFilter;
 	type Event = Event;
 	type DefaultVote = daos_collective::PrimeDefaultVote;
-	type GetCollectiveMembers = Vault;
 	type MaxMembersForSystem = MaxMembersForSystem;
 	// type WeightInfo = ();
 }
@@ -333,6 +332,7 @@ impl daos_doas::Config for Runtime {
 
 impl pallet_vc::Config for Runtime {
 	type Event = Event;
+	type SetCollectiveMembers = DaoCollective;
 	type MultiCurrency = Currencies;
 }
 
