@@ -175,7 +175,7 @@ impl VoteTrait<Balance, AccountId, ConcreteId<u32, u32>, Conviction, BlockNumber
 						conviction.convert_into(),
 					));
 				}
-			}
+			},
 			Vote::NftTokenId(x) => {
 				if let ConcreteId::NftClassId(class_id) = second_id {
 					Nft::try_lock(&who, (*class_id, *x))?;
