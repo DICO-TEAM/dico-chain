@@ -7,7 +7,7 @@ use daos_democracy::{
 };
 use daos_primitives::{
 	ids::{DaoId, Fungible, Nft as NFT},
-	traits::{BaseCallFilter, TryCreate},
+	traits::{BaseCallFilter, TryCreate, AfterCreate},
 	types::MemberCount,
 	AccountIdConversion, TrailingZeroInput,
 };
@@ -287,12 +287,22 @@ impl BaseCallFilter<Call> for ConcreteId<u32, CurrencyId> {
 	}
 }
 
+
+// Set root account for sudo module.
+pub struct CreatedDo;
+impl AfterCreate<AccountId, DaoId> for CreatedDo {
+	fn do_something(a: AccountId, b: DaoId) {
+		daos_sudo::Account::<Runtime>::insert(b, a);
+	}
+}
+
 impl daos_create_dao::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
 	type CallId = CallId;
 	type DaoId = DaoId;
 	type ConcreteId = ConcreteId<u32, CurrencyId>;
+	type AfterCreate = CreatedDo;
 }
 
 impl daos_sudo::Config for Runtime {
