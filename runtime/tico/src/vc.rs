@@ -156,20 +156,21 @@ impl Default for Vote<u32, Balance> {
 		Vote::FungibleAmount(0 as u128)
 	}
 }
-impl VoteTrait<Balance, AccountId, ConcreteId<u32, u32>, Conviction, BlockNumber, DispatchError>
+impl VoteTrait<Balance, AccountId, DaoId, Conviction, BlockNumber, DispatchError>
 	for Vote<u32, Balance>
 {
 	fn try_vote(
 		&self,
 		who: &AccountId,
-		second_id: &ConcreteId<u32, u32>,
+		dao_id: &DaoId,
 		conviction: &Conviction,
 	) -> Result<(Balance, BlockNumber), DispatchError> {
 		let mut amount = 0 as Balance;
+		let concrete_id = daos_create_dao::Pallet::<Runtime>::try_get_concrete_id(*dao_id)?;
 		match self {
 			Vote::FungibleAmount(x) => {
-				if let ConcreteId::FungibleTokenId(id) = second_id {
-					Currencies::reserve(*id, &who, *x)?;
+				if let ConcreteId::FungibleTokenId(id) = concrete_id {
+					Currencies::reserve(id, &who, *x)?;
 					amount = *x;
 					return Ok((
 						amount
@@ -180,8 +181,8 @@ impl VoteTrait<Balance, AccountId, ConcreteId<u32, u32>, Conviction, BlockNumber
 				}
 			},
 			Vote::NftTokenId(x) => {
-				if let ConcreteId::NftClassId(class_id) = second_id {
-					Nft::try_lock(&who, (*class_id, *x))?;
+				if let ConcreteId::NftClassId(class_id) = concrete_id {
+					Nft::try_lock(&who, (class_id, *x))?;
 					amount = DOLLARS;
 					return Ok((
 						DOLLARS
@@ -195,17 +196,19 @@ impl VoteTrait<Balance, AccountId, ConcreteId<u32, u32>, Conviction, BlockNumber
 		Err(daos_democracy::Error::<Runtime>::VoteNotEnough)?
 	}
 
-	fn vote_end_do(&self, who: &AccountId, second_id: &ConcreteId<u32, u32>) -> Result<(), DispatchError> {
+	// fixme 应该是解锁
+	fn vote_end_do(&self, who: &AccountId, dao_id: &DaoId) -> Result<(), DispatchError> {
+		let concrete_id = daos_create_dao::Pallet::<Runtime>::try_get_concrete_id(*dao_id)?;
 		match self {
 			Vote::FungibleAmount(x) => {
-				if let ConcreteId::FungibleTokenId(id) = second_id {
-					Currencies::reserve(*id, &who, *x)?;
+				if let ConcreteId::FungibleTokenId(id) = concrete_id {
+					Currencies::reserve(id, &who, *x)?;
 					return Ok(());
 				}
 			}
 			Vote::NftTokenId(x) => {
-				if let ConcreteId::NftClassId(class_id) = second_id {
-					Nft::try_unlock(&who, (*class_id, *x))?;
+				if let ConcreteId::NftClassId(class_id) = concrete_id {
+					Nft::try_unlock(&who, (class_id, *x))?;
 					return Ok(());
 				}
 			}
@@ -214,23 +217,6 @@ impl VoteTrait<Balance, AccountId, ConcreteId<u32, u32>, Conviction, BlockNumber
 	}
 }
 
-impl CheckedVote<ConcreteId<u32, u32>, DispatchError> for Vote<u32, Balance> {
-	fn is_can_vote(&self, second_id: ConcreteId<u32, u32>) -> Result<bool, DispatchError> {
-		match self {
-			Vote::FungibleAmount(x) => {
-				if let ConcreteId::FungibleTokenId(_) = second_id {
-					return Ok(true);
-				}
-			}
-			Vote::NftTokenId(x) => {
-				if let ConcreteId::NftClassId(_) = second_id {
-					return Ok(true);
-				}
-			}
-		}
-		Err(daos_democracy::Error::<Runtime>::VoteError)?
-	}
-}
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, Clone, TypeInfo, Copy, MaxEncodedLen)]
 pub enum Conviction {
@@ -356,6 +342,5 @@ impl daos_democracy::Config for Runtime {
 	type Event = Event;
 	type Vote = Vote<u32, Balance>;
 	type Conviction = Conviction;
-	type MultiCurrency = Currencies;
-	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type Currency = Balances;
 }
