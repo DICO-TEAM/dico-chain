@@ -194,7 +194,6 @@ impl VoteTrait<Balance, AccountId, DaoId, Conviction, BlockNumber, DispatchError
 		Err(daos_democracy::Error::<Runtime>::VoteNotEnough)?
 	}
 
-	// fixme 应该是解锁
 	fn vote_end_do(&self, who: &AccountId, dao_id: &DaoId) -> Result<(), DispatchError> {
 		let concrete_id = daos_create_dao::Pallet::<Runtime>::try_get_concrete_id(*dao_id)?;
 		match self {
