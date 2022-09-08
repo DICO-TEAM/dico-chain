@@ -115,6 +115,7 @@ pub mod pallet {
 		},
 		SetFee(T::DaoId, Fee<BalanceOf<T>, Permill>),
 		OpenCexTransfer(T::DaoId, bool),
+		CloseCexTransfer(T::DaoId, bool),
 	}
 
 	// Errors inform users that something went wrong.
@@ -214,11 +215,21 @@ pub mod pallet {
 
 		/// (daos support. call name: open_cex_transfer, call id:706)
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn open_cex_transfer(origin: OriginFor<T>, dao_id: T::DaoId, is_open: bool) -> DispatchResultWithPostInfo {
+		pub fn open_cex_transfer(origin: OriginFor<T>, dao_id: T::DaoId) -> DispatchResultWithPostInfo {
 			dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
-			IsOpenCexTransfer::<T>::insert(dao_id, is_open);
-			Self::deposit_event(Event::<T>::OpenCexTransfer(dao_id, is_open));
+			IsOpenCexTransfer::<T>::insert(dao_id, true);
+			Self::deposit_event(Event::<T>::OpenCexTransfer(dao_id, true));
 			Ok(().into())
 		}
+
+		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		pub fn close_cex_transfer(origin: OriginFor<T>, dao_id: T::DaoId) -> DispatchResultWithPostInfo {
+			dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
+			IsOpenCexTransfer::<T>::insert(dao_id, false);
+			Self::deposit_event(Event::<T>::CloseCexTransfer(dao_id, false));
+			Ok(().into())
+		}
+
+
 	}
 }

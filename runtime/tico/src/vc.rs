@@ -87,6 +87,7 @@ impl TryFrom<Call> for CallId {
 				pallet_vc::Call::unreserve { .. } => Ok(704 as CallId),
 				pallet_vc::Call::set_fee { .. } => Ok(705 as CallId),
 				pallet_vc::Call::open_cex_transfer { .. } => Ok(706 as CallId),
+				pallet_vc::Call::close_cex_transfer { .. } => Ok(707 as CallId),
 				_ => Err(()),
 			},
 			// ico
