@@ -99,32 +99,31 @@ pub mod pallet {
 		/// Event documentation should end with an array that provides descriptive names for event
 		/// parameters. [something, who]
 		SomethingStored(u32, T::AccountId),
+		/// Set members to collective.
 		SetGuarders(T::DaoId),
+		/// Delete a collective member.
 		RemoveGuard(T::DaoId, T::AccountId),
+		/// Add a collective member.
 		AddGuarder(T::DaoId, T::AccountId),
+		/// Unreserved locked amount.
 		Unreserved(T::DaoId, AssetId, BalanceOf<T>),
-		IcoOperate {
-			dao_id: T::DaoId,
-			call: <T as dao::Config>::Call,
-			result: DispatchResult,
-		},
-		BurnOperate {
-			dao_id: T::DaoId,
-			call: <T as dao::Config>::Call,
-			result: DispatchResult,
-		},
+		/// Set fees for DAO's asset.
 		SetFee(T::DaoId, Fee<BalanceOf<T>, Permill>),
+		/// Open cex transfer.
 		OpenCexTransfer(T::DaoId, bool),
+		/// Close cex transfer.
 		CloseCexTransfer(T::DaoId, bool),
 	}
 
 	// Errors inform users that something went wrong.
 	#[pallet::error]
 	pub enum Error<T> {
+		/// Wrong origin
 		BadOrigin,
-		HaveNoGurarder,
-		GuarderIsExists,
-		NotSupprtCall,
+		/// No members exist
+		HaveNoGurarders,
+		/// This member already exists
+		GuarderAlreadyExists,
 	}
 
 	#[pallet::hooks]
@@ -133,6 +132,8 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// (daos support. call name: set_guarders, call id:701)
+		///
+		/// Set council members for VC DAO.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn set_guarders(
 			origin: OriginFor<T>,
@@ -150,6 +151,8 @@ pub mod pallet {
 		}
 
 		/// (daos support. call name: remove_guarder, call id:702)
+		///
+		/// Delete a council member for VC DAO.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn remove_guarder(
 			origin: OriginFor<T>,
@@ -169,6 +172,8 @@ pub mod pallet {
 		}
 
 		/// (daos support. call name: add_guarder, call id:703)
+		///
+		/// Add a council member for VC DAO.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn add_guarder(
 			origin: OriginFor<T>,
@@ -177,7 +182,7 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
 			let mut guarders = Guarders::<T>::get(dao_id);
-			ensure!(!guarders.contains(&guarder), Error::<T>::GuarderIsExists);
+			ensure!(!guarders.contains(&guarder), Error::<T>::GuarderAlreadyExists);
 			guarders.push(guarder.clone());
 			Guarders::<T>::insert(dao_id, guarders);
 			T::SetCollectiveMembers::set_members_sorted(dao_id, &Self::guarders(dao_id), None)?;
@@ -187,6 +192,8 @@ pub mod pallet {
 		}
 
 		/// (daos support. call name: unreserve, call id:704)
+		///
+		/// DAO gets free money.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn unreserve(
 			origin: OriginFor<T>,
@@ -200,7 +207,10 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+
 		/// (daos support. call name: set_fee, call id:705)
+		///
+		/// Set transfer fee for assets in DAO.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn set_fee(
 			origin: OriginFor<T>,
@@ -214,6 +224,8 @@ pub mod pallet {
 		}
 
 		/// (daos support. call name: open_cex_transfer, call id:706)
+		///
+		/// Open cex transfer.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn open_cex_transfer(origin: OriginFor<T>, dao_id: T::DaoId) -> DispatchResultWithPostInfo {
 			dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
@@ -222,6 +234,9 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// (daos support. call name: open_cex_transfer, call id:707)
+		///
+		/// Close cex transfer.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
 		pub fn close_cex_transfer(origin: OriginFor<T>, dao_id: T::DaoId) -> DispatchResultWithPostInfo {
 			dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
