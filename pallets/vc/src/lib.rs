@@ -141,7 +141,7 @@ pub mod pallet {
 			mut guarders: Vec<T::AccountId>,
 		) -> DispatchResultWithPostInfo {
 			dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
-			ensure!(guarders.len() > 0, Error::<T>::HaveNoGurarder);
+			ensure!(guarders.len() > 0, Error::<T>::HaveNoGurarders);
 			guarders.sort();
 			Guarders::<T>::insert(dao_id, guarders);
 			T::SetCollectiveMembers::set_members_sorted(dao_id, &Self::guarders(dao_id), None)?;
