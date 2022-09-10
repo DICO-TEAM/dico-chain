@@ -207,7 +207,6 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-
 		/// (daos support. call name: set_fee, call id:705)
 		///
 		/// Set transfer fee for assets in DAO.
@@ -244,7 +243,5 @@ pub mod pallet {
 			Self::deposit_event(Event::<T>::CloseCexTransfer(dao_id, false));
 			Ok(().into())
 		}
-
-
 	}
 }

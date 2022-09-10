@@ -10,7 +10,7 @@ use daos_democracy::{
 };
 use daos_primitives::{
 	ids::{DaoId, Fungible, Nft as NFT},
-	traits::{BaseCallFilter, TryCreate, AfterCreate},
+	traits::{AfterCreate, BaseCallFilter, TryCreate},
 	types::MemberCount,
 	AccountIdConversion, TrailingZeroInput,
 };
@@ -72,8 +72,8 @@ impl TryFrom<Call> for CallId {
 				_ => Err(()),
 			},
 			Call::AMM(func) => match func {
-				pallet_amm::Call::add_liquidity{..} => Ok(601 as CallId),
-				pallet_amm::Call::remove_liquidity{..} => Ok(602 as CallId),
+				pallet_amm::Call::add_liquidity { .. } => Ok(601 as CallId),
+				pallet_amm::Call::remove_liquidity { .. } => Ok(602 as CallId),
 				pallet_amm::Call::swap_exact_assets_for_assets { .. } => Ok(603 as CallId),
 				pallet_amm::Call::swap_assets_for_exact_assets { .. } => Ok(604 as CallId),
 				_ => Err(()),
@@ -92,10 +92,10 @@ impl TryFrom<Call> for CallId {
 			},
 			// ico
 			Call::Ico(func) => match func {
-				pallet_ico::Call::join{..} => Ok(801 as CallId),
-				pallet_ico::Call::user_release_ico_amount{..} => Ok(802 as CallId),
-				pallet_ico::Call::unlock{..} => Ok(803 as CallId),
-				pallet_ico::Call::get_reward{..} => Ok(804 as CallId),
+				pallet_ico::Call::join { .. } => Ok(801 as CallId),
+				pallet_ico::Call::user_release_ico_amount { .. } => Ok(802 as CallId),
+				pallet_ico::Call::unlock { .. } => Ok(803 as CallId),
+				pallet_ico::Call::get_reward { .. } => Ok(804 as CallId),
 				_ => Err(()),
 			},
 
@@ -157,9 +157,7 @@ impl Default for Pledge<u32, Balance> {
 		Pledge::FungibleAmount(0 as u128)
 	}
 }
-impl PledgeTrait<Balance, AccountId, DaoId, Conviction, BlockNumber, DispatchError>
-	for Pledge<u32, Balance>
-{
+impl PledgeTrait<Balance, AccountId, DaoId, Conviction, BlockNumber, DispatchError> for Pledge<u32, Balance> {
 	fn try_vote(
 		&self,
 		who: &AccountId,
@@ -180,7 +178,7 @@ impl PledgeTrait<Balance, AccountId, DaoId, Conviction, BlockNumber, DispatchErr
 						conviction.convert_into(),
 					));
 				}
-			},
+			}
 			Pledge::NftTokenId(x) => {
 				if let ConcreteId::NftClassId(class_id) = concrete_id {
 					Nft::try_lock(&who, (class_id, *x))?;
@@ -216,7 +214,6 @@ impl PledgeTrait<Balance, AccountId, DaoId, Conviction, BlockNumber, DispatchErr
 		Err(daos_democracy::Error::<Runtime>::PledgeNotEnough)?
 	}
 }
-
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, Clone, TypeInfo, Copy, MaxEncodedLen)]
 pub enum Conviction {

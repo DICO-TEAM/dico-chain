@@ -163,7 +163,6 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-
 		/// (daos support. call name: add_liquidity, call id:601)
 		///
 		/// Add liquidity to previously created asset pair pool.
