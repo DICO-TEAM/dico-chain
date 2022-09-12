@@ -410,7 +410,7 @@ pub mod module {
 			Ok(().into())
 		}
 
-		/// (daos support. call name: burn, call id:401)
+		/// call id:901
 		///
 		/// Users destroy their own assets.
 		#[pallet::weight(T::WeightInfo::burn())]
@@ -424,7 +424,7 @@ pub mod module {
 			Ok(().into())
 		}
 
-		/// (daos support. call name: transfer, call id:402)
+		/// call id:902
 		///
 		/// Transfer some balance to another account under `currency_id`.
 		#[pallet::weight(T::WeightInfo::transfer())]
@@ -448,7 +448,7 @@ pub mod module {
 			Ok(().into())
 		}
 
-		/// (daos support. call name: transfer_native_currency, call id:403)
+		/// call id:903
 		///
 		/// Transfer some native currency to another account.
 		#[pallet::weight(T::WeightInfo::transfer_native_currency())]

@@ -131,7 +131,7 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// (daos support. call name: set_guarders, call id:701)
+		/// call id:701
 		///
 		/// Set council members for VC DAO.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
@@ -150,7 +150,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		/// (daos support. call name: remove_guarder, call id:702)
+		/// call id:702
 		///
 		/// Delete a council member for VC DAO.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
@@ -171,7 +171,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		/// (daos support. call name: add_guarder, call id:703)
+		/// call id:703
 		///
 		/// Add a council member for VC DAO.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
@@ -191,7 +191,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		/// (daos support. call name: unreserve, call id:704)
+		/// call id:704
 		///
 		/// DAO gets free money.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
@@ -207,7 +207,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		/// (daos support. call name: set_fee, call id:705)
+		/// call id:705
 		///
 		/// Set transfer fee for assets in DAO.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
@@ -222,7 +222,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		/// (daos support. call name: open_cex_transfer, call id:706)
+		/// call id:706
 		///
 		/// Open cex transfer.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
@@ -233,7 +233,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		/// (daos support. call name: open_cex_transfer, call id:707)
+		/// call id:707
 		///
 		/// Close cex transfer.
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]

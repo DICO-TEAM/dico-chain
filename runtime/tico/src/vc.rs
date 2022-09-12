@@ -52,12 +52,17 @@ impl TryFrom<Call> for CallId {
 				daos_democracy::Call::set_enactment_period { .. } => Ok(307 as CallId),
 				_ => Err(()),
 			},
+			Call::DaoSudo(func) => match func {
+				daos_sudo::Call::set_sudo_account { .. } => Ok(401 as CallId),
+				daos_sudo::Call::close_sudo { .. } => Ok(402 as CallId),
+				_ => Err(()),
+			},
 
 			// about assets
 			Call::Currencies(func) => match func {
-				pallet_currencies::Call::burn { .. } => Ok(401 as CallId),
-				pallet_currencies::Call::transfer { .. } => Ok(402 as CallId),
-				pallet_currencies::Call::transfer_native_currency { .. } => Ok(403 as CallId),
+				pallet_currencies::Call::burn { .. } => Ok(901 as CallId),
+				pallet_currencies::Call::transfer { .. } => Ok(902 as CallId),
+				pallet_currencies::Call::transfer_native_currency { .. } => Ok(903 as CallId),
 				_ => Err(()),
 			},
 			Call::Nft(func) => match func {

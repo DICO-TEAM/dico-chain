@@ -327,7 +327,7 @@ pub mod module {
 			Ok(())
 		}
 
-		/// (daos support. call name: transfer, call id:501)
+		/// call id:501
 		#[pallet::weight(T::WeightInfo::transfer())]
 		pub fn transfer(origin: OriginFor<T>, to: T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let who = ensure_signed(origin)?;
@@ -351,7 +351,7 @@ pub mod module {
 			Ok(())
 		}
 
-		/// (daos support. call name: claim, call id:502)
+		/// call id:502
 		#[pallet::weight(T::WeightInfo::claim())]
 		pub fn claim(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
@@ -360,7 +360,7 @@ pub mod module {
 			Ok(())
 		}
 
-		/// (daos support. call name: burn, call id:503)
+		/// call id:503
 		#[pallet::weight(T::WeightInfo::burn())]
 		pub fn burn(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
@@ -370,7 +370,7 @@ pub mod module {
 			Ok(())
 		}
 
-		/// (daos support. call name: offer_token_for_sale, call id:504)
+		/// call id:504
 		#[pallet::weight(T::WeightInfo::offer_token_for_sale())]
 		pub fn offer_token_for_sale(
 			origin: OriginFor<T>,
@@ -384,7 +384,7 @@ pub mod module {
 			Ok(())
 		}
 
-		/// (daos support. call name: withdraw_sale, call id:505)
+		/// call id:505
 		#[pallet::weight(T::WeightInfo::withdraw_sale())]
 		pub fn withdraw_sale(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
@@ -393,7 +393,7 @@ pub mod module {
 			Ok(())
 		}
 
-		/// (daos support. call name: buy_token, call id:506)
+		/// call id:506
 		#[pallet::weight(T::WeightInfo::buy_token())]
 		pub fn buy_token(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let buyer = ensure_signed(origin)?;
@@ -401,7 +401,7 @@ pub mod module {
 			Ok(())
 		}
 
-		/// (daos support. call name: active, call id:507)
+		/// call id:507
 		#[pallet::weight(T::WeightInfo::active())]
 		pub fn active(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
@@ -418,7 +418,7 @@ pub mod module {
 			Ok(())
 		}
 
-		/// (daos support. call name: inactive, call id:508)
+		/// call id:508
 		#[pallet::weight(T::WeightInfo::inactive())]
 		pub fn inactive(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;

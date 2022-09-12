@@ -622,7 +622,7 @@ pub mod pallet {
 			}
 			Ok(())
 		}
-		/// (daos support. call name: join, call id:801)
+		/// call id:801
 		///
 		/// User participation in ICO
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::join())]
@@ -810,7 +810,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// (daos support. call name: user_release_ico_amount, call id:802)
+		/// call id:802
 		///
 		/// Users release their own asset.
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::user_release_ico_amount())]
@@ -821,7 +821,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// (daos support. call name: unlock, call id:803)
+		/// call id:803
 		///
 		/// Users unlock their funds.
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::unlock())]
@@ -922,7 +922,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// (daos support. call name: get_reward, call id:804)
+		/// call id:804
 		///
 		/// When the end of the ico, users get the reward.
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::get_reward())]
