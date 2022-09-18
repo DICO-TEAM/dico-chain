@@ -74,7 +74,7 @@ pub fn template_session_keys(keys: AuraId) -> parachain_template_runtime::Sessio
 pub fn get_properties() -> sc_chain_spec::Properties {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "KICO".into());
-	properties.insert("tokenDecimals".into(), 12.into());
+	properties.insert("tokenDecimals".into(), 14.into());
 	properties.insert("ss58Format".into(), 42.into());
 	properties
 }
