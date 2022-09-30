@@ -253,6 +253,7 @@ pub mod module {
 		NoLocked,
 		DaoExists,
 		FeeErr,
+		ConvertErr,
 	}
 
 	/// Next available class ID.
@@ -330,10 +331,24 @@ pub mod module {
 		/// call id:501
 		#[pallet::weight(T::WeightInfo::transfer())]
 		pub fn transfer(origin: OriginFor<T>, to: T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
-			let who = ensure_signed(origin)?;
+			let from = ensure_signed(origin)?;
 			ensure!(!Self::is_in_locking(token), Error::<T>::Locked);
-			Self::do_transfer(&who, &to, token)?;
-			Self::deposit_event(Event::<T>::Transfer(who, to, token));
+
+			if let Some(dao_id) = Daos::<T>::get(token.0) {
+				match pallet_vc::Pallet::<T>::fees(dao_id) {
+					Fee::Amount(x) => {
+						let dao_account = dao::Pallet::<T>::try_get_concrete_id(dao_id)?.into_account();
+						T::MultiCurrency::transfer(T::USDCurrencyId::get(), &from, &dao_account, x)?;
+						T::MultiCurrency::reserve(T::USDCurrencyId::get(), &dao_account, x);
+					}
+					_ => {
+						return Err(Error::<T>::FeeErr)?;
+					}
+				}
+			}
+
+			Self::do_transfer(&from, &to, token)?;
+			Self::deposit_event(Event::<T>::Transfer(from, to, token));
 			Ok(())
 		}
 
@@ -752,13 +767,14 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn transfer_ownership(
-		who: &T::AccountId,
+		from: &T::AccountId,
 		des: &T::AccountId,
 		class_id: T::ClassId,
 		token_id: T::TokenId,
 	) -> DispatchResult {
-		Self::remove_token_ownership(&who, class_id, token_id)?;
+		Self::remove_token_ownership(&from, class_id, token_id)?;
 		Self::get_token_ownership(&des, class_id, token_id);
+
 		Ok(())
 	}
 
@@ -772,18 +788,6 @@ impl<T: Config> Pallet<T> {
 
 	fn remove_token_ownership(who: &T::AccountId, class_id: T::ClassId, token_id: T::TokenId) -> DispatchResult {
 		let mut tokens = TokensOf::<T>::get(who);
-		if let Some(dao_id) = Daos::<T>::get(class_id) {
-			match pallet_vc::Pallet::<T>::fees(dao_id) {
-				Fee::Amount(x) => {
-					let dao_account = dao::Pallet::<T>::try_get_concrete_id(dao_id)?.into_account();
-					T::MultiCurrency::transfer(T::USDCurrencyId::get(), &who, &dao_account, x)?;
-					T::MultiCurrency::reserve(T::USDCurrencyId::get(), &dao_account, x);
-				}
-				_ => {
-					return Err(Error::<T>::FeeErr)?;
-				}
-			}
-		}
 		if let Some(pos) = tokens.iter().position(|h| h.0 == class_id && h.1 == token_id) {
 			tokens.swap_remove(pos);
 			TokensOf::<T>::insert(who, tokens);

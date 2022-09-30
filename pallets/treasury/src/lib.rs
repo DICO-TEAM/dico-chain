@@ -18,6 +18,7 @@
 #![allow(unused_imports)]
 #![allow(deprecated)]
 #![allow(unused_variables)]
+#![allow(unused_attributes)]
 mod benchmarking;
 pub mod traits;
 // pub mod weights;

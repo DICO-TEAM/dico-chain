@@ -62,7 +62,6 @@ impl TryFrom<Call> for CallId {
 			Call::Currencies(func) => match func {
 				pallet_currencies::Call::burn { .. } => Ok(901 as CallId),
 				pallet_currencies::Call::transfer { .. } => Ok(902 as CallId),
-				pallet_currencies::Call::transfer_native_currency { .. } => Ok(903 as CallId),
 				_ => Err(()),
 			},
 			Call::Nft(func) => match func {

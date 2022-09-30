@@ -46,7 +46,6 @@ use orml_traits::{
 	MultiLockableCurrency,
 	MultiReservableCurrency,
 };
-use pallet_vc::AccountIdConversion;
 use pallet_vc::{self, Fee};
 use scale_info::TypeInfo;
 #[cfg(feature = "std")]
@@ -442,34 +441,37 @@ pub mod module {
 					Error::<T>::CexTransferClosed
 				);
 			};
+
+			match Daos::<T>::get(currency_id) {
+				Some(dao_id) => {
+					let dao_account = dao::Pallet::<T>::try_get_dao_account_id(dao_id)?;
+					let fee: Fee<VcBalanceOf<T>, Permill> = pallet_vc::Pallet::<T>::fees(dao_id);
+					match fee {
+						Fee::Permill(x) => {
+							let real_fee = x * amount;
+							<T as module::Config>::MultiCurrency::transfer(currency_id, &from, &dao_account, real_fee)?;
+							<T as module::Config>::MultiCurrency::reserve(currency_id, &dao_account, real_fee);
+						}
+						Fee::Amount(x) => {
+							<T as pallet_vc::Config>::MultiCurrency::transfer(
+								T::USDCurrencyId::get(),
+								&from,
+								&dao_account,
+								x,
+							)?;
+							<T as pallet_vc::Config>::MultiCurrency::reserve(T::USDCurrencyId::get(), &dao_account, x);
+						}
+					}
+				}
+				_ => {}
+			};
+
 			ensure!(Self::is_exists_metadata(currency_id), Error::<T>::MetadataNotExists);
 
 			<Self as MultiCurrency<T::AccountId>>::transfer(currency_id, &from, &to, amount)?;
 			Ok(().into())
 		}
 
-		/// call id:903
-		///
-		/// Transfer some native currency to another account.
-		#[pallet::weight(T::WeightInfo::transfer_native_currency())]
-		pub fn transfer_native_currency(
-			origin: OriginFor<T>,
-			dest: <T::Lookup as StaticLookup>::Source,
-			#[pallet::compact] amount: BalanceOf<T>,
-		) -> DispatchResultWithPostInfo {
-			let from = ensure_signed(origin)?;
-			let to = T::Lookup::lookup(dest)?;
-			if let Some(dao_id) = Daos::<T>::get(T::GetNativeCurrencyId::get()) {
-				ensure!(
-					pallet_vc::Pallet::<T>::is_open_cex_transfer(dao_id),
-					Error::<T>::CexTransferClosed
-				);
-			};
-			T::NativeCurrency::transfer(&from, &to, amount)?;
-
-			Self::deposit_event(Event::Transferred(T::GetNativeCurrencyId::get(), from, to, amount));
-			Ok(().into())
-		}
 
 		/// update amount of account `who` under `currency_id`.
 		///
@@ -648,34 +650,11 @@ impl<T: Config> MultiCurrency<T::AccountId> for Pallet<T> {
 		currency_id: Self::CurrencyId,
 		from: &T::AccountId,
 		to: &T::AccountId,
-		amount: Self::Balance,
+		mut amount: Self::Balance,
 	) -> DispatchResult {
 		if amount.is_zero() || from == to {
 			return Ok(());
 		}
-		match Daos::<T>::get(currency_id) {
-			Some(dao_id) => {
-				let dao_account = dao::Pallet::<T>::try_get_concrete_id(dao_id)?.into_account();
-				let fee: Fee<VcBalanceOf<T>, Permill> = pallet_vc::Pallet::<T>::fees(dao_id);
-				match fee {
-					Fee::Permill(x) => {
-						let real_fee = x * amount;
-						<T as module::Config>::MultiCurrency::transfer(currency_id, &to, &dao_account, real_fee)?;
-						<T as module::Config>::MultiCurrency::reserve(currency_id, &dao_account, real_fee);
-					}
-					Fee::Amount(x) => {
-						<T as pallet_vc::Config>::MultiCurrency::transfer(
-							T::USDCurrencyId::get(),
-							&to,
-							&dao_account,
-							x,
-						)?;
-						<T as pallet_vc::Config>::MultiCurrency::reserve(T::USDCurrencyId::get(), &dao_account, x);
-					}
-				}
-			}
-			_ => {}
-		};
 
 		if currency_id == T::GetNativeCurrencyId::get() {
 			T::NativeCurrency::transfer(from, to, amount)?;
