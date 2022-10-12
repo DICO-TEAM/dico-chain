@@ -269,7 +269,7 @@ pub mod module {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Users create the asset.
-		#[pallet::weight(T::WeightInfo::create_asset())]
+		#[pallet::weight(<T as module::Config>::WeightInfo::create_asset())]
 		pub fn create_asset(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -374,7 +374,7 @@ pub mod module {
 		/// Users set the asset metadata.
 		///
 		/// You should have created the asset first.
-		#[pallet::weight(T::WeightInfo::set_metadata())]
+		#[pallet::weight(<T as module::Config>::WeightInfo::set_metadata())]
 		pub fn set_metadata(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -412,7 +412,7 @@ pub mod module {
 		/// call id:901
 		///
 		/// Users destroy their own assets.
-		#[pallet::weight(T::WeightInfo::burn())]
+		#[pallet::weight(<T as module::Config>::WeightInfo::burn())]
 		pub fn burn(origin: OriginFor<T>, currency_id: AssetId, amount: BalanceOf<T>) -> DispatchResultWithPostInfo {
 			let user = ensure_signed(origin)?;
 
@@ -426,7 +426,7 @@ pub mod module {
 		/// call id:902
 		///
 		/// Transfer some balance to another account under `currency_id`.
-		#[pallet::weight(T::WeightInfo::transfer())]
+		#[pallet::weight(<T as module::Config>::WeightInfo::transfer())]
 		pub fn transfer(
 			origin: OriginFor<T>,
 			dest: <T::Lookup as StaticLookup>::Source,
@@ -476,7 +476,7 @@ pub mod module {
 		/// update amount of account `who` under `currency_id`.
 		///
 		/// The dispatch origin of this call must be _Root_.
-		#[pallet::weight(T::WeightInfo::update_balance())]
+		#[pallet::weight(<T as module::Config>::WeightInfo::update_balance())]
 		pub fn update_balance(
 			origin: OriginFor<T>,
 			who: <T::Lookup as StaticLookup>::Source,

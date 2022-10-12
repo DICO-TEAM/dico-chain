@@ -292,10 +292,12 @@ impl daos_create_dao::Config for Runtime {
 	type DaoId = DaoId;
 	type ConcreteId = ConcreteId<u32, CurrencyId>;
 	type AfterCreate = CreatedDo;
+	type WeightInfo = ();
 }
 
 impl daos_sudo::Config for Runtime {
 	type Event = Event;
+	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -321,12 +323,14 @@ impl daos_collective::Config for Runtime {
 	type Event = Event;
 	type DefaultVote = daos_collective::PrimeDefaultVote;
 	type MaxMembersForSystem = MaxMembersForSystem;
+	type WeightInfo = ();
 	// type WeightInfo = ();
 }
 
 impl daos_doas::Config for Runtime {
 	type Event = Event;
 	type DoAsOrigin = DaoCollective;
+	type WeightInfo = ();
 }
 
 impl pallet_vc::Config for Runtime {

@@ -48,8 +48,8 @@ use sp_std::{
 // pub use weights::WeightInfo;
 pub use crate::pallet::*;
 
-#[cfg(feature = "runtime-benchmarks")]
-mod benchmarking;
+// #[cfg(feature = "runtime-benchmarks")]
+// mod benchmarking;
 
 // pub mod weights;
 #[cfg(test)]

@@ -168,6 +168,9 @@ impl PledgeTrait<Balance, AccountId, DaoId, Conviction, BlockNumber, DispatchErr
 		dao_id: &DaoId,
 		conviction: &Conviction,
 	) -> Result<(Balance, BlockNumber), DispatchError> {
+		if cfg!(any(feature = "std", feature = "runtime-benchmarks", test)) {
+			return Ok((Default::default(), Default::default()));
+		}
 		let mut amount = 0 as Balance;
 		let concrete_id = daos_create_dao::Pallet::<Runtime>::try_get_concrete_id(*dao_id)?;
 		match self {
@@ -200,6 +203,9 @@ impl PledgeTrait<Balance, AccountId, DaoId, Conviction, BlockNumber, DispatchErr
 	}
 
 	fn vote_end_do(&self, who: &AccountId, dao_id: &DaoId) -> Result<(), DispatchError> {
+		if cfg!(any(feature = "std", feature = "runtime-benchmarks", test)) {
+			return Ok(());
+		}
 		let concrete_id = daos_create_dao::Pallet::<Runtime>::try_get_concrete_id(*dao_id)?;
 		match self {
 			Pledge::FungibleAmount(x) => {
@@ -292,10 +298,12 @@ impl daos_create_dao::Config for Runtime {
 	type DaoId = DaoId;
 	type ConcreteId = ConcreteId<u32, CurrencyId>;
 	type AfterCreate = CreatedDo;
+	type WeightInfo = ();
 }
 
 impl daos_sudo::Config for Runtime {
 	type Event = Event;
+	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -321,12 +329,14 @@ impl daos_collective::Config for Runtime {
 	type Event = Event;
 	type DefaultVote = daos_collective::PrimeDefaultVote;
 	type MaxMembersForSystem = MaxMembersForSystem;
+	type WeightInfo = ();
 	// type WeightInfo = ();
 }
 
 impl daos_doas::Config for Runtime {
 	type Event = Event;
 	type DoAsOrigin = DaoCollective;
+	type WeightInfo = ();
 }
 
 impl pallet_vc::Config for Runtime {
@@ -344,4 +354,5 @@ impl daos_democracy::Config for Runtime {
 	type Pledge = Pledge<u32, Balance>;
 	type Conviction = Conviction;
 	type Currency = Balances;
+	type WeightInfo = ();
 }

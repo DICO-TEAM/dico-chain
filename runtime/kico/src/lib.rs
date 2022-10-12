@@ -1249,20 +1249,20 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_multisig, Multisig);
 			list_benchmark!(list, extra, pallet_membership, TechnicalMembership);
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
-			list_benchmark!(list, extra, pallet_amm, AMM);
-			list_benchmark!(list, extra, pallet_farm, Farm);
-			list_benchmark!(list, extra, pallet_lbp, LBP);
-			list_benchmark!(list, extra, pallet_farm_extend, FarmExtend);
-			list_benchmark!(list, extra, pallet_pricedao, PriceDao);
-			list_benchmark!(list, extra, pallet_oracle, DicoOracle);
-
-
-			list_benchmark!(list, extra, pallet_nft, Nft);
-			list_benchmark!(list, extra, pallet_kyc, Kyc);
-			list_benchmark!(list, extra, pallet_dao, Dao);
-			list_benchmark!(list, extra, pallet_ico, Ico);
-			list_benchmark!(list, extra, pallet_dico_treasury, DicoTreasury);
-			list_benchmark!(list, extra, pallet_currencies, Currencies);
+			// list_benchmark!(list, extra, pallet_amm, AMM);
+			// list_benchmark!(list, extra, pallet_farm, Farm);
+			// list_benchmark!(list, extra, pallet_lbp, LBP);
+			// list_benchmark!(list, extra, pallet_farm_extend, FarmExtend);
+			// list_benchmark!(list, extra, pallet_pricedao, PriceDao);
+			// list_benchmark!(list, extra, pallet_oracle, DicoOracle);
+			//
+			//
+			// list_benchmark!(list, extra, pallet_nft, Nft);
+			// list_benchmark!(list, extra, pallet_kyc, Kyc);
+			// list_benchmark!(list, extra, pallet_dao, Dao);
+			// list_benchmark!(list, extra, pallet_ico, Ico);
+			// list_benchmark!(list, extra, pallet_dico_treasury, DicoTreasury);
+			// list_benchmark!(list, extra, pallet_currencies, Currencies);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -1298,19 +1298,19 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
 			add_benchmark!(params, batches, pallet_multisig, Multisig);
 			add_benchmark!(params, batches, pallet_membership, TechnicalMembership);
-			add_benchmark!(params, batches, pallet_amm, AMM);
-			add_benchmark!(params, batches, pallet_farm, Farm);
-			add_benchmark!(params, batches, pallet_lbp, LBP);
-			add_benchmark!(params, batches, pallet_farm_extend, FarmExtend);
-
-			add_benchmark!(params, batches, pallet_kyc, Kyc);
-			add_benchmark!(params, batches, pallet_nft, Nft);
-			add_benchmark!(params, batches, pallet_dao, Dao);
-			add_benchmark!(params, batches, pallet_dico_treasury, DicoTreasury);
-			add_benchmark!(params, batches, pallet_ico, Ico);
-			add_benchmark!(params, batches, pallet_pricedao, PriceDao);
-			add_benchmark!(params, batches, pallet_oracle, DicoOracle);
-			add_benchmark!(params, batches, pallet_currencies, Currencies);
+			// add_benchmark!(params, batches, pallet_amm, AMM);
+			// add_benchmark!(params, batches, pallet_farm, Farm);
+			// add_benchmark!(params, batches, pallet_lbp, LBP);
+			// add_benchmark!(params, batches, pallet_farm_extend, FarmExtend);
+			//
+			// add_benchmark!(params, batches, pallet_kyc, Kyc);
+			// add_benchmark!(params, batches, pallet_nft, Nft);
+			// add_benchmark!(params, batches, pallet_dao, Dao);
+			// add_benchmark!(params, batches, pallet_dico_treasury, DicoTreasury);
+			// add_benchmark!(params, batches, pallet_ico, Ico);
+			// add_benchmark!(params, batches, pallet_pricedao, PriceDao);
+			// add_benchmark!(params, batches, pallet_oracle, DicoOracle);
+			// add_benchmark!(params, batches, pallet_currencies, Currencies);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)

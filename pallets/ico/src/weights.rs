@@ -5,22 +5,11 @@
 //! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("kico"), DB CACHE: 1024
 
 // Executed Command:
-// target/release/dico
-// benchmark
-// --chain=kico
-// --execution=wasm
-// --wasm-execution=compiled
-// --pallet=pallet_ico
-// --extrinsic=*
-// --steps=50
-// --repeat=20
-// --template=./.maintain/pallet-weight-template.hbs
-// --output
-// ./pallets/ico/src/weights.rs
-
-#![cfg_attr(rustfmt, rustfmt_skip)]
-#![allow(unused_parens)]
-#![allow(unused_imports)]
+// target/release/dico benchmark --chain=kico --execution=wasm --wasm-execution=compiled --pallet=pallet_ico --extrinsic=*  --steps=50 --repeat=20 --template=./.maintain/pallet-weight-template.hbs --output ./pallets/ico/src/weights.rs
+//
+// #![cfg_attr(rustfmt, rustfmt_skip)]
+// #![allow(unused_parens)]
+// #![allow(unused_imports)]
 
 use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
 use sp_std::marker::PhantomData;
