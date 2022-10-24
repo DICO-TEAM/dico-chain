@@ -13,7 +13,7 @@ edition     = '2021'
 targets = ['x86_64-unknown-linux-gnu']
 
 [build-dependencies]
-substrate-wasm-builder = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.25', default-features = false }
+substrate-wasm-builder = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.29', default-features = false }
 
 [dependencies]
 codec                 = { package = 'parity-scale-codec', version = '3.0.0', default-features = false }
@@ -23,8 +23,8 @@ scale-info 		      = { version = "2.1.1", default-features = false, features = [
 
 
 # orml
-orml-tokens   = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false, branch = 'polkadot-v0.9.25'}
-orml-traits   = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false, branch = 'polkadot-v0.9.25'}
+orml-tokens   = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false, branch = 'polkadot-v0.9.29'}
+orml-traits   = { git = 'https://github.com/open-web3-stack/open-runtime-module-library.git', default-features = false, branch = 'polkadot-v0.9.29'}
 
 # local
 dico-primitives      = { package = "dico-primitives", default-features = false, path = "../../primitives" }
@@ -32,18 +32,18 @@ pallet-dico-treasury = { package = "pallet-dico-treasury", default-features = fa
 
 
 # frame dependencies
-frame-benchmarking        = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.25', default-features = false, optional = true }
-frame-support             = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.25', default-features = false }
-frame-system              = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.25', default-features = false }
-frame-system-benchmarking = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.25', default-features = false, optional = true }
+frame-benchmarking        = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.29', default-features = false, optional = true }
+frame-support             = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.29', default-features = false }
+frame-system              = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.29', default-features = false }
+frame-system-benchmarking = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.29', default-features = false, optional = true }
 
 # dependencies primitives
-sp-core    = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.25', default-features = false }
-sp-std     = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.25', default-features = false }
-sp-runtime = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.25', default-features = false }
+sp-core    = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.29', default-features = false }
+sp-std     = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.29', default-features = false }
+sp-runtime = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.29', default-features = false }
 
 [dev-dependencies]
-sp-io = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.25', default-features = false }
+sp-io = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.29', default-features = false }
 
 
 [features]

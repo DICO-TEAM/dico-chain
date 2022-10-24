@@ -31,10 +31,13 @@ use sp_runtime::{
 
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
+use frame_support::weights::Weight;
 
-mod benchmarking;
-pub mod weights;
-use weights::WeightInfo;
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
+
+// mod benchmarking;
+// pub mod weights;
+// use weights::WeightInfo;
 
 #[cfg(test)]
 mod mock;
@@ -124,8 +127,8 @@ pub mod pallet {
 		#[pallet::constant]
 		type PalletId: Get<PalletId>;
 
-		/// Weight information for the extrinsics in this module.
-		type WeightInfo: WeightInfo;
+		// /// Weight information for the extrinsics in this module.
+		// type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::error]
@@ -173,7 +176,7 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight(< T as Config >::WeightInfo::create_pool())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn create_pool(
 			origin: OriginFor<T>,
@@ -227,7 +230,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(< T as Config >::WeightInfo::deposit_asset())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn deposit_asset(
 			origin: OriginFor<T>,
@@ -280,7 +283,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(< T as Config >::WeightInfo::withdraw_asset())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn withdraw_asset(
 			origin: OriginFor<T>,

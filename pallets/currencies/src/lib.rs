@@ -63,16 +63,20 @@ use sp_std::{
 	marker, result,
 };
 use xcm::{v1::MultiLocation, VersionedMultiLocation};
+use frame_support::weights::Weight;
+
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
 
 mod mock;
 
 pub use module::*;
 
-mod benchmarking;
-pub mod currencies_trait;
-pub mod weights;
+// mod benchmarking;
+// pub mod weights;
 
-pub use weights::WeightInfo;
+pub mod currencies_trait;
+
+// pub use weights::WeightInfo;
 
 use currencies_trait::{AssetIdMapping, CurrenciesHandler};
 pub use dico_primitives::{
@@ -132,8 +136,8 @@ pub mod module {
 		#[pallet::constant]
 		type GetNativeCurrencyId: Get<AssetId>;
 
-		/// Weight information for extrinsics in this module.
-		type WeightInfo: WeightInfo;
+		// /// Weight information for extrinsics in this module.
+		// type WeightInfo: WeightInfo;
 
 		type CreateConsume: Get<BalanceOf<Self>>;
 
@@ -269,7 +273,7 @@ pub mod module {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Users create the asset.
-		#[pallet::weight(<T as module::Config>::WeightInfo::create_asset())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn create_asset(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -283,7 +287,7 @@ pub mod module {
 		}
 
 		/// After setting location, cross-chain transfers can be made
-		#[pallet::weight(1500_000_000)]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn set_location(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -311,7 +315,7 @@ pub mod module {
 			Ok(().into())
 		}
 
-		#[pallet::weight(1500_000_000)]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn set_weight_rate_multiple(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -331,7 +335,7 @@ pub mod module {
 		}
 
 		/// After setting location, cross-chain transfers can be made
-		#[pallet::weight(1500_000_000)]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn force_set_location(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -352,7 +356,7 @@ pub mod module {
 			Ok(().into())
 		}
 
-		#[pallet::weight(1500_000_000)]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn set_existenial_deposit(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -374,7 +378,7 @@ pub mod module {
 		/// Users set the asset metadata.
 		///
 		/// You should have created the asset first.
-		#[pallet::weight(<T as module::Config>::WeightInfo::set_metadata())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn set_metadata(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -412,7 +416,7 @@ pub mod module {
 		/// call id:901
 		///
 		/// Users destroy their own assets.
-		#[pallet::weight(<T as module::Config>::WeightInfo::burn())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn burn(origin: OriginFor<T>, currency_id: AssetId, amount: BalanceOf<T>) -> DispatchResultWithPostInfo {
 			let user = ensure_signed(origin)?;
 
@@ -426,7 +430,7 @@ pub mod module {
 		/// call id:902
 		///
 		/// Transfer some balance to another account under `currency_id`.
-		#[pallet::weight(<T as module::Config>::WeightInfo::transfer())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn transfer(
 			origin: OriginFor<T>,
 			dest: <T::Lookup as StaticLookup>::Source,
@@ -476,7 +480,7 @@ pub mod module {
 		/// update amount of account `who` under `currency_id`.
 		///
 		/// The dispatch origin of this call must be _Root_.
-		#[pallet::weight(<T as module::Config>::WeightInfo::update_balance())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn update_balance(
 			origin: OriginFor<T>,
 			who: <T::Lookup as StaticLookup>::Source,

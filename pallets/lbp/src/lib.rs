@@ -35,12 +35,15 @@ use sp_std::{vec, vec::Vec};
 use orml_traits::{MultiCurrency, MultiCurrencyExtended};
 
 use pallet_dico_treasury::traits::DicoTreasuryHandler;
+use frame_support::weights::Weight;
 
-mod benchmarking;
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
 
-pub mod weights;
-
-use weights::WeightInfo;
+// mod benchmarking;
+//
+// pub mod weights;
+//
+// use weights::WeightInfo;
 
 mod math;
 
@@ -175,8 +178,8 @@ pub mod pallet {
 		/// The mining pool id
 		type LbpId: Parameter + Member + Into<u32> + AtLeast32Bit + Default + Copy + MaybeSerializeDeserialize;
 
-		/// Weight information for the extrinsics in this module.
-		type WeightInfo: WeightInfo;
+		// /// Weight information for the extrinsics in this module.
+		// type WeightInfo: WeightInfo;
 
 		type TreasuryHandler: DicoTreasuryHandler<Self::AccountId>;
 
@@ -244,7 +247,7 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight(< T as Config >::WeightInfo::add_fundraising_asset())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn add_fundraising_asset(
 			origin: OriginFor<T>,
@@ -257,7 +260,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(< T as Config >::WeightInfo::remove_fundraising_asset())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn remove_fundraising_asset(origin: OriginFor<T>, fundraising: AssetId) -> DispatchResultWithPostInfo {
 			T::FounderSetOrigin::ensure_origin(origin)?;
@@ -266,7 +269,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(< T as Config >::WeightInfo::create_lbp())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn create_lbp(
 			origin: OriginFor<T>,
@@ -352,7 +355,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(< T as Config >::WeightInfo::exit_lbp())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn exit_lbp(origin: OriginFor<T>, lbp_id: T::LbpId) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
@@ -396,7 +399,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(< T as Config >::WeightInfo::swap_exact_amount_supply())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn swap_exact_amount_supply(
 			origin: OriginFor<T>,
@@ -486,7 +489,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight(< T as Config >::WeightInfo::swap_exact_amount_target())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn swap_exact_amount_target(
 			origin: OriginFor<T>,

@@ -31,6 +31,10 @@ use scale_info::prelude::boxed::Box;
 use scale_info::TypeInfo;
 use sp_runtime::{Permill, RuntimeDebug};
 use sp_std::result::Result;
+use frame_support::weights::Weight;
+
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
+
 // #[cfg(test)]
 // mod mock;
 //
@@ -134,7 +138,7 @@ pub mod pallet {
 		/// call id:701
 		///
 		/// Set council members for VC DAO.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn set_guarders(
 			origin: OriginFor<T>,
 			dao_id: T::DaoId,
@@ -153,7 +157,7 @@ pub mod pallet {
 		/// call id:702
 		///
 		/// Delete a council member for VC DAO.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn remove_guarder(
 			origin: OriginFor<T>,
 			dao_id: T::DaoId,
@@ -174,7 +178,7 @@ pub mod pallet {
 		/// call id:703
 		///
 		/// Add a council member for VC DAO.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn add_guarder(
 			origin: OriginFor<T>,
 			dao_id: T::DaoId,
@@ -194,7 +198,7 @@ pub mod pallet {
 		/// call id:704
 		///
 		/// DAO gets free money.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn unreserve(
 			origin: OriginFor<T>,
 			dao_id: T::DaoId,
@@ -210,7 +214,7 @@ pub mod pallet {
 		/// call id:705
 		///
 		/// Set transfer fee for assets in DAO.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn set_fee(
 			origin: OriginFor<T>,
 			dao_id: T::DaoId,
@@ -225,7 +229,7 @@ pub mod pallet {
 		/// call id:706
 		///
 		/// Open cex transfer.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn open_cex_transfer(origin: OriginFor<T>, dao_id: T::DaoId) -> DispatchResultWithPostInfo {
 			dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
 			IsOpenCexTransfer::<T>::insert(dao_id, true);
@@ -236,7 +240,7 @@ pub mod pallet {
 		/// call id:707
 		///
 		/// Close cex transfer.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn close_cex_transfer(origin: OriginFor<T>, dao_id: T::DaoId) -> DispatchResultWithPostInfo {
 			dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
 			IsOpenCexTransfer::<T>::insert(dao_id, false);

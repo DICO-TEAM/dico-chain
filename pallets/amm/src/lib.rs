@@ -26,17 +26,19 @@ use scale_info::TypeInfo;
 use sp_core::U256;
 use sp_runtime::{traits::AccountIdConversion, ArithmeticError, RuntimeDebug};
 use sp_std::vec::Vec;
-
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-
 use orml_traits::{MultiCurrency, MultiCurrencyExtended};
+use frame_support::weights::Weight;
 
-mod benchmarking;
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
+
+
 pub mod math;
-pub mod weights;
-
-use weights::WeightInfo;
+// mod benchmarking;
+// pub mod weights;
+//
+// use weights::WeightInfo;
 
 #[cfg(test)]
 mod mock;
@@ -101,8 +103,8 @@ pub mod pallet {
 		#[pallet::constant]
 		type PalletId: Get<PalletId>;
 
-		/// Weight information for the extrinsics in this module.
-		type WeightInfo: WeightInfo;
+		// /// Weight information for the extrinsics in this module.
+		// type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::error]
@@ -166,7 +168,7 @@ pub mod pallet {
 		/// call id:601
 		///
 		/// Add liquidity to previously created asset pair pool.
-		#[pallet::weight(< T as Config >::WeightInfo::add_liquidity())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn add_liquidity(
 			origin: OriginFor<T>,
@@ -270,7 +272,7 @@ pub mod pallet {
 		/// call id:602
 		///
 		/// Remove liquidity from specific liquidity pool in the form of burning shares.
-		#[pallet::weight(< T as Config >::WeightInfo::remove_liquidity())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn remove_liquidity(
 			origin: OriginFor<T>,
@@ -347,7 +349,7 @@ pub mod pallet {
 		///
 		/// Use a fixed amount of supply assets to exchange for target assets not less than
 		/// `amount_out_min`.
-		#[pallet::weight(< T as Config >::WeightInfo::swap_exact_assets_for_assets())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn swap_exact_assets_for_assets(
 			origin: OriginFor<T>,
@@ -376,7 +378,7 @@ pub mod pallet {
 		///
 		/// Use no more than `amount_in_max` supply assets to exchange for a fixed amount of target
 		/// assets.
-		#[pallet::weight(< T as Config >::WeightInfo::swap_assets_for_exact_assets())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn swap_assets_for_exact_assets(
 			origin: OriginFor<T>,

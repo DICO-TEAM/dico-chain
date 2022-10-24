@@ -50,8 +50,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(dead_code)]
 #![allow(unused_assignments)]
-#[cfg(feature = "runtime-benchmarks")]
-mod benchmarking;
+// #[cfg(feature = "runtime-benchmarks")]
+// mod benchmarking;
 #[cfg(test)]
 mod mock;
 #[cfg(test)]
@@ -60,11 +60,11 @@ mod tests;
 pub mod migrations;
 pub mod traits;
 pub mod types;
-pub mod weights;
+// pub mod weights;
 
 use crate::traits::KycHandler;
 use crate::types::*;
-use crate::weights::WeightInfo;
+// use crate::weights::WeightInfo;
 
 use frame_support::{
 	dispatch::DispatchResultWithPostInfo,
@@ -80,6 +80,9 @@ use frame_system::pallet_prelude::*;
 pub use pallet::*;
 use sp_runtime::traits::{AccountIdConversion, CheckedAdd, SaturatedConversion, Zero};
 use sp_std::prelude::*;
+use frame_support::weights::Weight;
+
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
@@ -132,8 +135,8 @@ pub mod pallet {
 		/// The origin  Root can always do this.
 		type SwordHolderOrigin: EnsureOrigin<Self::Origin>;
 
-		/// Weight information for extrinsics in this pallet.
-		type WeightInfo: WeightInfo;
+		// /// Weight information for extrinsics in this pallet.
+		// type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::pallet]
@@ -328,9 +331,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::add_ias(
-		T::MaxIAS::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn add_ias(
 			origin: OriginFor<T>,
 			ias_index: KYCIndex,
@@ -352,9 +353,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::kill_ias(
-		T::MaxIAS::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn kill_ias(
 			origin: OriginFor<T>,
 			ias_index: KYCIndex,
@@ -376,9 +375,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::add_sword_holder(
-		T::MaxSwordHolder::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn add_sword_holder(
 			origin: OriginFor<T>,
 			sword_index: KYCIndex,
@@ -400,9 +397,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::kill_sword_holder(
-		T::MaxSwordHolder::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn kill_sword_holder(
 			origin: OriginFor<T>,
 			sword_holder_index: KYCIndex,
@@ -426,9 +421,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::remove_kyc(
-		T::MaxIAS::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn remove_kyc(
 			origin: OriginFor<T>,
 			target: T::AccountId,
@@ -461,10 +454,11 @@ pub mod pallet {
 
 			Self::deposit_event(Event::<T>::KYCRemove(target));
 
-			Ok(Some(T::WeightInfo::remove_kyc(
-				T::MaxSwordHolder::get().into(), // R
-			))
-			.into())
+			// Ok(Some(T::WeightInfo::remove_kyc(
+			// 	T::MaxSwordHolder::get().into(), // R
+			// ))
+			// .into())
+			Ok(().into())
 		}
 
 		/// User setting KYC
@@ -478,9 +472,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::set_kyc(
-		T::MaxIAS::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn set_kyc(origin: OriginFor<T>, info: KYCInfo) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
 			ensure!(!<BlackListOf<T>>::contains_key(&sender), Error::<T>::Blacklisted);
@@ -511,7 +503,7 @@ pub mod pallet {
 			<KYCOf<T>>::insert(&sender, reg);
 			Self::deposit_event(Event::<T>::KYCSet(sender));
 
-			Ok(Some(T::WeightInfo::set_kyc(T::MaxIAS::get().into())).into())
+			Ok(().into())
 		}
 
 		/// Users clean up their own KYC
@@ -523,9 +515,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::clear_kyc(
-		T::MaxIAS::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn clear_kyc(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
 
@@ -580,7 +570,7 @@ pub mod pallet {
 
 			Self::deposit_event(Event::<T>::KYCCleared(sender));
 
-			Ok(Some(T::WeightInfo::clear_kyc(T::MaxIAS::get().into())).into())
+			Ok(().into())
 		}
 
 		/// The user applies for verification by ias
@@ -595,9 +585,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::apply_certification(
-		T::MaxIAS::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn apply_certification(
 			origin: OriginFor<T>,
 			kyc_fields: KYCFields,
@@ -651,9 +639,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::request_judgement(
-		T::MaxIAS::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn request_judgement(
 			origin: OriginFor<T>,
 			kyc_fields: KYCFields,
@@ -663,7 +649,7 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 			Self::do_request_judgement(&sender, kyc_fields, ias_index.clone(), message)?;
 			Self::deposit_event(Event::<T>::JudgementRequested(sender, ias_index));
-			Ok(Some(T::WeightInfo::request_judgement(T::MaxIAS::get().into())).into())
+			Ok(().into())
 		}
 
 		/// IAS sets its own service fees
@@ -676,9 +662,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::ias_set_fee(
-		T::MaxIAS::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn ias_set_fee(
 			origin: OriginFor<T>,
 			kyc_fields: KYCFields,
@@ -689,7 +673,7 @@ pub mod pallet {
 			Self::do_set_fee(&sender, &kyc_fields, &fee, true)?;
 			Self::deposit_event(Event::<T>::SetFee(fee));
 
-			Ok(Some(T::WeightInfo::ias_set_fee(T::MaxIAS::get().into())).into()) // R
+			Ok(().into())
 		}
 
 		/// IAS provide judgement
@@ -709,9 +693,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::ias_provide_judgement(
-		T::MaxIAS::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn ias_provide_judgement(
 			origin: OriginFor<T>,
 			kyc_fields: KYCFields,
@@ -735,7 +717,7 @@ pub mod pallet {
 			)?;
 
 			Self::deposit_event(Event::<T>::JudgementGiven(target, kyc_index));
-			Ok(Some(T::WeightInfo::ias_provide_judgement(T::MaxIAS::get().into())).into())
+			Ok(().into())
 		}
 
 		/// sword holder set fee
@@ -748,9 +730,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::sword_holder_set_fee(
-		T::MaxSwordHolder::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn sword_holder_set_fee(
 			origin: OriginFor<T>,
 			kyc_fields: KYCFields,
@@ -760,7 +740,7 @@ pub mod pallet {
 			Self::verify_permissions(&sender, &kyc_fields, false)?;
 			Self::do_set_fee(&sender, &kyc_fields, &fee, false)?;
 			Self::deposit_event(Event::<T>::SetFee(fee));
-			Ok(Some(T::WeightInfo::sword_holder_set_fee(T::MaxSwordHolder::get().into())).into()) // R
+			Ok(().into())
 		}
 
 		/// sword_holder make review  on the information provided by IAS
@@ -776,9 +756,7 @@ pub mod pallet {
 		/// # <weight>
 		/// - TODO
 		/// # </weight>
-		#[pallet::weight(T::WeightInfo::sword_holder_provide_judgement(
-		T::MaxSwordHolder::get().into()
-		))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn sword_holder_provide_judgement(
 			origin: OriginFor<T>,
 			kyc_fields: KYCFields,
@@ -792,10 +770,7 @@ pub mod pallet {
 			ensure!(!auth.is_pending(), Error::<T>::PendingAuthentication);
 			Self::sword_do_provide_judgement(&sender, kyc_fields, kyc_index.clone(), &target, &auth, &id)?;
 			Self::deposit_event(Event::<T>::AuthenticationGiven(target, kyc_index));
-			Ok(Some(T::WeightInfo::sword_holder_provide_judgement(
-				T::MaxSwordHolder::get().into(), // R
-			))
-			.into())
+			Ok(().into())
 		}
 	}
 

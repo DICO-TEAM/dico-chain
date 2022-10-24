@@ -20,14 +20,17 @@ pub use primitives::{currency::DOLLARS, Balance, CurrencyId, Moment, Price, CORE
 use scale_info::TypeInfo;
 use sp_runtime::DispatchResult;
 // use frame_support::traits::Instance;
+use frame_support::weights::Weight;
 
-mod benchmarking;
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
+
+// mod benchmarking;
 pub mod mock;
 pub mod tests;
 pub mod traits;
-pub mod weights;
+// pub mod weights;
 
-pub use weights::WeightInfo;
+// pub use weights::WeightInfo;
 
 pub use pallet::*;
 use sp_core::U256;
@@ -66,7 +69,7 @@ pub mod pallet {
 		#[pallet::constant]
 		type WithdrawExpirationPeriod: Get<Self::BlockNumber>;
 
-		type WeightInfo: WeightInfo;
+		// type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::storage]
@@ -152,7 +155,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Council slash accounts
-		#[pallet::weight((<T as Config>::WeightInfo::del_feed_account(), DispatchClass::Operational))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn del_feed_account(origin: OriginFor<T>, accounts: Vec<T::AccountId>) -> DispatchResultWithPostInfo {
 			T::FeedOrigin::ensure_origin(origin)?;
 			let new_account = accounts
@@ -164,7 +167,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight((<T as Config>::WeightInfo::insert_feed_account(), DispatchClass::Operational))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn insert_feed_account(origin: OriginFor<T>, accounts: Vec<T::AccountId>) -> DispatchResultWithPostInfo {
 			T::FeedOrigin::ensure_origin(origin)?;
 			// pledge
@@ -181,7 +184,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight((<T as Config>::WeightInfo::unlock_price(), DispatchClass::Operational))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn unlock_price(origin: OriginFor<T>, currency_id: CurrencyId) -> DispatchResultWithPostInfo {
 			T::FeedOrigin::ensure_origin(origin)?;
 			T::UpdateOraclesStorgage::unlock_price(currency_id);
@@ -189,7 +192,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight((<T as Config>::WeightInfo::exit_feed(), DispatchClass::Operational))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn exit_feed(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			// only set expiration time
 			let feeder = ensure_signed(origin.clone())?;
@@ -198,7 +201,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
-		#[pallet::weight((<T as Config>::WeightInfo::withdraw(), DispatchClass::Operational))]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn withdraw(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			// withdraw owner ledge
 			let feeder = ensure_signed(origin.clone())?;

@@ -62,15 +62,17 @@ pub use sp_std::convert::{Into, TryFrom, TryInto};
 use sp_std::vec::Vec;
 use sp_std::{collections::btree_map::BTreeMap, prelude::*, result};
 use traits::{IcoHandler, PowerHandler};
-use weights::WeightInfo;
+// use weights::WeightInfo;
+
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
 
 pub mod mock;
 pub mod tests;
 pub mod traits;
 
-#[cfg(feature = "runtime-benchmarks")]
-mod benchmarking;
-pub mod weights;
+// #[cfg(feature = "runtime-benchmarks")]
+// mod benchmarking;
+// pub mod weights;
 const ICO_ID: LockIdentifier = *b"ico     ";
 const HalfDuration: u128 = 200_000_000u128 * USD;
 
@@ -309,7 +311,7 @@ pub mod pallet {
 
 		type KycHandler: KycHandler<Self::AccountId, AreaCode>;
 
-		type WeightInfo: WeightInfo;
+		// type WeightInfo: WeightInfo;
 
 		type GetNativeCurrencyId: Get<AssetId>;
 		#[pallet::constant]
@@ -450,7 +452,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// The project party initiates an ICO
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::initiate_ico())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn initiate_ico(
 			origin: OriginFor<T>,
 			info: IcoParameters<T::BlockNumber, MultiBalanceOf<T>, AssetId, AreaCode>,
@@ -527,7 +529,7 @@ pub mod pallet {
 		}
 
 		/// The foundation agrees to the ICO of the project party
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::permit_ico())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn permit_ico(origin: OriginFor<T>, currency_id: AssetId) -> DispatchResult {
 			T::PermitIcoOrigin::try_origin(origin).map_err(|_| Error::<T>::BadOrigin)?;
 
@@ -581,7 +583,7 @@ pub mod pallet {
 		}
 
 		/// The foundation opposes the ICO of the project party
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::reject_ico())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn reject_ico(origin: OriginFor<T>, currency_id: AssetId) -> DispatchResult {
 			T::RejectIcoOrigin::try_origin(origin).map_err(|_| Error::<T>::BadOrigin)?;
 
@@ -625,7 +627,7 @@ pub mod pallet {
 		/// call id:801
 		///
 		/// User participation in ICO
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::join())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn join(
 			origin: OriginFor<T>,
@@ -673,7 +675,7 @@ pub mod pallet {
 		}
 
 		/// DAO terminate the ico
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::terminate_ico())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn terminate_ico(origin: OriginFor<T>, currency_id: AssetId, index: u32) -> DispatchResult {
 			T::TerminateIcoOrigin::try_origin(origin).map_err(|_| Error::<T>::BadOrigin)?;
 
@@ -705,7 +707,7 @@ pub mod pallet {
 		}
 
 		/// The project party requests the release of the funds
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::request_release())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn request_release(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -757,7 +759,7 @@ pub mod pallet {
 		}
 
 		/// The project party cancels the request for release of funds.
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::cancel_request())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn cancel_request(origin: OriginFor<T>, currency_id: AssetId, index: u32) -> DispatchResult {
 			let initiator = ensure_signed(origin)?;
 
@@ -782,7 +784,7 @@ pub mod pallet {
 		}
 
 		/// DAO allow asset release
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::permit_release())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn permit_release(origin: OriginFor<T>, currency_id: AssetId, index: u32) -> DispatchResult {
 			T::PermitReleaseOrigin::try_origin(origin).map_err(|_| Error::<T>::BadOrigin)?;
 
@@ -813,7 +815,7 @@ pub mod pallet {
 		/// call id:802
 		///
 		/// Users release their own asset.
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::user_release_ico_amount())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn user_release_ico_amount(origin: OriginFor<T>, currency_id: AssetId, index: u32) -> DispatchResult {
 			let user = ensure_signed(origin)?;
 
@@ -824,7 +826,7 @@ pub mod pallet {
 		/// call id:803
 		///
 		/// Users unlock their funds.
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::unlock())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn unlock(origin: OriginFor<T>, currency_id: AssetId, index: u32) -> DispatchResult {
 			let user = ensure_signed(origin)?;
 
@@ -852,7 +854,7 @@ pub mod pallet {
 		/// The root sets the maximum and minimum ico amount.
 		///
 		/// This two values applies to all ICOs.
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::set_system_ico_amount_bound())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn set_system_ico_amount_bound(
 			origin: OriginFor<T>,
 			min_amount: MultiBalanceOf<T>,
@@ -870,7 +872,7 @@ pub mod pallet {
 		}
 
 		/// The initiator set the maximum and minimum ico amount.
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::initiator_set_ico_amount_bound())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn initiator_set_ico_amount_bound(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -900,7 +902,7 @@ pub mod pallet {
 		}
 
 		/// The initiator sets per user ico max times of him project.
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::initiator_set_ico_max_times())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn initiator_set_ico_max_times(
 			origin: OriginFor<T>,
 			currency_id: AssetId,
@@ -925,7 +927,7 @@ pub mod pallet {
 		/// call id:804
 		///
 		/// When the end of the ico, users get the reward.
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::get_reward())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn get_reward(origin: OriginFor<T>, currency_id: AssetId, index: u32) -> DispatchResult {
 			let user = ensure_signed(origin)?;
 
@@ -935,7 +937,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::set_asset_power_multiple())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn set_asset_power_multiple(
 			origin: OriginFor<T>,
 			currency_id: AssetId,

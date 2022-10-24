@@ -19,11 +19,11 @@
 #![allow(deprecated)]
 #![allow(unused_variables)]
 #![allow(unused_attributes)]
-mod benchmarking;
+// mod benchmarking;
+// pub mod weights;
 pub mod traits;
 // pub mod weights;
 mod tests;
-pub mod weights;
 
 pub use dico_primitives::constants::currency::DOLLARS;
 
@@ -46,8 +46,8 @@ use sp_runtime::{
 use sp_std::prelude::*;
 use traits::DicoTreasuryHandler;
 
-pub use weights::WeightInfo;
-// use frame_system::WeightInfo;
+// pub use weights::WeightInfo;
+
 use orml_traits::{
 	arithmetic::{Signed, SimpleArithmetic},
 	// currency::TransferAll,
@@ -63,6 +63,8 @@ use orml_traits::{
 	MultiReservableCurrency,
 };
 use scale_info::TypeInfo;
+
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
 
 pub type ProposalIndex = u32;
 
@@ -108,8 +110,8 @@ pub mod pallet {
 		type Event: From<Event<Self>>
 			+ Into<<Self as frame_system::Config>::Event>
 			+ IsType<<Self as frame_system::Config>::Event>;
-		/// Weight information for extrinsics in this pallet.
-		type WeightInfo: WeightInfo;
+		// /// Weight information for extrinsics in this pallet.
+		// type WeightInfo: WeightInfo;
 
 		#[pallet::constant]
 		type PalletId: Get<PalletId>;
@@ -147,7 +149,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// The user makes a proposal about funding
-		#[pallet::weight(T::WeightInfo::propose_spend())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn propose_spend(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
@@ -182,7 +184,7 @@ pub mod pallet {
 		}
 
 		/// The council rejected the proposal.
-		#[pallet::weight(T::WeightInfo::reject_proposal())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn reject_proposal(origin: OriginFor<T>, #[pallet::compact] proposal_id: ProposalIndex) -> DispatchResult {
 			T::RejectOrigin::ensure_origin(origin)?;
 
@@ -195,7 +197,7 @@ pub mod pallet {
 		}
 
 		/// The council approve the proposal.
-		#[pallet::weight(T::WeightInfo::approve_proposal())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn approve_proposal(origin: OriginFor<T>, #[pallet::compact] proposal_id: ProposalIndex) -> DispatchResult {
 			T::ApproveOrigin::ensure_origin(origin)?;
 
@@ -213,7 +215,7 @@ pub mod pallet {
 		}
 
 		/// Users get their fund.
-		#[pallet::weight(T::WeightInfo::spend_fund())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn spend_fund(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			let mut proposal_ids = <Approvals<T>>::get();

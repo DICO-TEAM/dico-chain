@@ -31,12 +31,15 @@ use sp_runtime::{
 
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
+use frame_support::weights::Weight;
 
-mod benchmarking;
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
 
-pub mod weights;
-
-use weights::WeightInfo;
+// mod benchmarking;
+//
+// pub mod weights;
+//
+// use weights::WeightInfo;
 
 #[cfg(test)]
 mod mock;
@@ -114,8 +117,8 @@ pub mod pallet {
 		#[pallet::constant]
 		type NativeAssetId: Get<AssetId>;
 
-		/// Weight information for the extrinsics in this module.
-		type WeightInfo: WeightInfo;
+		// /// Weight information for the extrinsics in this module.
+		// type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::error]
@@ -192,7 +195,7 @@ pub mod pallet {
 		/// Once mining starts, do not call this method again, otherwise it may
 		///  cause an error in the reward calculation.
 		/// Emits `HalvingPeriodIsSet` event when successful.
-		#[pallet::weight(< T as Config >::WeightInfo::set_halving_period())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn set_halving_period(origin: OriginFor<T>, block_number: T::BlockNumber) -> DispatchResultWithPostInfo {
 			T::FounderSetOrigin::ensure_origin(origin)?;
@@ -211,7 +214,7 @@ pub mod pallet {
 		///  cause an error in the reward calculation.
 		///
 		/// Emits `DicoPerBlockIsSet` event when successful.
-		#[pallet::weight(< T as Config >::WeightInfo::set_dico_per_block())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn set_dico_per_block(origin: OriginFor<T>, new_per_block: Balance) -> DispatchResultWithPostInfo {
 			T::FounderSetOrigin::ensure_origin(origin)?;
@@ -228,7 +231,7 @@ pub mod pallet {
 		/// cause an error in the reward calculation.
 		///
 		/// Emits `StartBlockIsSet` event when successful.
-		#[pallet::weight(< T as Config >::WeightInfo::set_start_block())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn set_start_block(origin: OriginFor<T>, block_number: T::BlockNumber) -> DispatchResultWithPostInfo {
 			T::FounderSetOrigin::ensure_origin(origin)?;
@@ -243,7 +246,7 @@ pub mod pallet {
 		/// This method can be called multiple times without causing a reward calculation error.
 		///
 		/// Emits `PoolAllocPointUpdated` event when successful.
-		#[pallet::weight(< T as Config >::WeightInfo::update_pool_alloc_point())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn update_pool_alloc_point(
 			origin: OriginFor<T>,
@@ -277,7 +280,7 @@ pub mod pallet {
 		/// The liquidity id can be the lp id or the asset id of a single currency.
 		///
 		/// Emits `PoolCreated` event when successful.
-		#[pallet::weight(< T as Config >::WeightInfo::create_pool())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn create_pool(
 			origin: OriginFor<T>,
@@ -323,7 +326,7 @@ pub mod pallet {
 		/// Deposit liquid assets to designated mining pools to participate in mining.
 		///
 		/// Emits `LpDeposited` event when successful.
-		#[pallet::weight(< T as Config >::WeightInfo::deposit_lp())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn deposit_lp(origin: OriginFor<T>, pool_id: T::PoolId, amount: Balance) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
@@ -382,7 +385,7 @@ pub mod pallet {
 		/// will also be withdrawn.
 		///
 		/// Emits `LpWithdrawn` event when successful.
-		#[pallet::weight(< T as Config >::WeightInfo::withdraw_lp())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		#[transactional]
 		pub fn withdraw_lp(origin: OriginFor<T>, pool_id: T::PoolId, amount: Balance) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;

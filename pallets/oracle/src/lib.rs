@@ -41,8 +41,11 @@ use sp_runtime::{traits::Member, DispatchResult, RuntimeDebug};
 use sp_std::{convert::TryInto, prelude::*, vec};
 
 pub use crate::default_combine_data::DefaultCombineData;
+use frame_support::weights::Weight;
 
-mod benchmarking;
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
+
+// mod benchmarking;
 mod default_combine_data;
 mod mock;
 mod tests;
@@ -51,8 +54,8 @@ pub use traits::UpdateOraclesStorgage;
 
 pub use module::*;
 
-pub mod weights;
-use weights::WeightInfo;
+// pub mod weights;
+// use weights::WeightInfo;
 
 #[frame_support::pallet]
 pub mod module {
@@ -93,8 +96,8 @@ pub mod module {
 
 		type MaxOracleSize: Get<u32>;
 
-		/// Weight information for extrinsics in this module.
-		type WeightInfo: WeightInfo;
+		// /// Weight information for extrinsics in this module.
+		// type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::error]
@@ -223,7 +226,7 @@ pub mod module {
 		/// Feed the external value.
 		///
 		/// Require authorized operator.
-		#[pallet::weight(T::WeightInfo::feed_values())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn feed_values(
 			origin: OriginFor<T>,
 			values: Vec<(T::OracleKey, T::OracleValue)>,

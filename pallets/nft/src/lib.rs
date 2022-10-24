@@ -26,7 +26,7 @@ mod mock;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 use daos_create_dao::AccountIdConversion;
-pub mod weights;
+// pub mod weights;
 use codec::{Decode, Encode};
 use daos_create_dao::{self as dao};
 use frame_support::{
@@ -49,7 +49,11 @@ use sp_std::{
 	convert::TryInto,
 	vec::Vec,
 };
-use weights::WeightInfo;
+use frame_support::weights::Weight;
+
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
+
+// use weights::WeightInfo;
 // mod mock;
 
 pub type Attributes = BTreeMap<Vec<u8>, Vec<u8>>;
@@ -171,7 +175,7 @@ pub mod module {
 		/// The maximum size of a token's attribute.
 		type MaxTokenAttribute: Get<u32>;
 		type USDCurrencyId: Get<AssetId>;
-		type WeightInfo: WeightInfo;
+		// type WeightInfo: WeightInfo;
 		type PowerHandler: pallet_ico::traits::PowerHandler<Self::AccountId, DispatchResult, BalanceOf<Self>>;
 	}
 
@@ -320,7 +324,7 @@ pub mod module {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		#[pallet::weight(<T as module::Config>::WeightInfo::create_class())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn create_class(origin: OriginFor<T>, metadata: Vec<u8>, data: ClassDataOf<T>) -> DispatchResult {
 			let issuer = ensure_signed(origin)?;
 			let class_id = Self::do_create_class(&issuer, metadata, data)?;
@@ -329,7 +333,7 @@ pub mod module {
 		}
 
 		/// call id:501
-		#[pallet::weight(<T as module::Config>::WeightInfo::transfer())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn transfer(origin: OriginFor<T>, to: T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let from = ensure_signed(origin)?;
 			ensure!(!Self::is_in_locking(token), Error::<T>::Locked);
@@ -352,7 +356,7 @@ pub mod module {
 			Ok(())
 		}
 
-		#[pallet::weight(<T as module::Config>::WeightInfo::mint())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn mint(
 			origin: OriginFor<T>,
 			class_id: T::ClassId,
@@ -367,7 +371,7 @@ pub mod module {
 		}
 
 		/// call id:502
-		#[pallet::weight(<T as module::Config>::WeightInfo::claim())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn claim(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::do_claim(&owner, token.0, token.1)?;
@@ -376,7 +380,7 @@ pub mod module {
 		}
 
 		/// call id:503
-		#[pallet::weight(<T as module::Config>::WeightInfo::burn())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn burn(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			ensure!(!Self::is_in_locking(token), Error::<T>::Locked);
@@ -386,7 +390,7 @@ pub mod module {
 		}
 
 		/// call id:504
-		#[pallet::weight(<T as module::Config>::WeightInfo::offer_token_for_sale())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn offer_token_for_sale(
 			origin: OriginFor<T>,
 			token: (T::ClassId, T::TokenId),
@@ -400,7 +404,7 @@ pub mod module {
 		}
 
 		/// call id:505
-		#[pallet::weight(<T as module::Config>::WeightInfo::withdraw_sale())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn withdraw_sale(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			Self::do_withdraw_sale(&owner, token)?;
@@ -409,7 +413,7 @@ pub mod module {
 		}
 
 		/// call id:506
-		#[pallet::weight(<T as module::Config>::WeightInfo::buy_token())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn buy_token(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let buyer = ensure_signed(origin)?;
 			Self::do_buy_token(&buyer, token)?;
@@ -417,7 +421,7 @@ pub mod module {
 		}
 
 		/// call id:507
-		#[pallet::weight(<T as module::Config>::WeightInfo::active())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn active(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			ensure!(!Self::is_in_locking(token), Error::<T>::Locked);
@@ -434,7 +438,7 @@ pub mod module {
 		}
 
 		/// call id:508
-		#[pallet::weight(<T as module::Config>::WeightInfo::inactive())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn inactive(origin: OriginFor<T>, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 			let owner = ensure_signed(origin)?;
 			ensure!(!Self::is_in_locking(token), Error::<T>::Locked);

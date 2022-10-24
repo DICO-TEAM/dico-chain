@@ -48,6 +48,8 @@ use sp_std::{
 // pub use weights::WeightInfo;
 pub use crate::pallet::*;
 
+const KICO_BASE_WEIGHT: Weight = Weight::from_ref_time(20_0000_0000);
+
 // #[cfg(feature = "runtime-benchmarks")]
 // mod benchmarking;
 
@@ -56,8 +58,8 @@ pub use crate::pallet::*;
 pub mod mock;
 #[cfg(test)]
 pub mod tests;
-pub mod weights;
-pub use weights::WeightInfo;
+// pub mod weights;
+// pub use weights::WeightInfo;
 
 /// Simple index type for proposal counting.
 pub type ProposalIndex = u32;
@@ -124,8 +126,8 @@ pub mod pallet {
 		type Event: From<Event<Self>>
 			+ Into<<Self as frame_system::Config>::Event>
 			+ IsType<<Self as frame_system::Config>::Event>;
-		/// Weight information for extrinsics in this pallet.
-		type WeightInfo: WeightInfo;
+		// /// Weight information for extrinsics in this pallet.
+		// type WeightInfo: WeightInfo;
 
 		type IcoHandler: IcoHandler<
 			CurrencyIdOf<Self>,
@@ -175,7 +177,7 @@ pub mod pallet {
 		/// The user makes a proposal.
 		///
 		/// Must be a member of the project ICO.
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::propose())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn propose(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
@@ -237,7 +239,7 @@ pub mod pallet {
 		/// Users vote on proposals.
 		///
 		/// Must be a member of the project ICO
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::vote())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn vote(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
@@ -317,7 +319,7 @@ pub mod pallet {
 		/// The user close the proposal.
 		///
 		/// Everyone can do it
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::close())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn close(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
@@ -374,7 +376,7 @@ pub mod pallet {
 		/// The root user disapprove the proposal.
 		///
 		/// Referendum
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::disapprove_proposal())]
+		#[pallet::weight(KICO_BASE_WEIGHT)]
 		pub fn disapprove_proposal(
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
