@@ -324,7 +324,6 @@ impl daos_collective::Config for Runtime {
 	type DefaultVote = daos_collective::PrimeDefaultVote;
 	type MaxMembersForSystem = MaxMembersForSystem;
 	type WeightInfo = ();
-	// type WeightInfo = ();
 }
 
 impl daos_doas::Config for Runtime {
@@ -348,4 +347,5 @@ impl daos_democracy::Config for Runtime {
 	type Pledge = Pledge<u32, Balance>;
 	type Conviction = Conviction;
 	type Currency = Balances;
+	type WeightInfo = ();
 }
