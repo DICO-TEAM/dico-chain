@@ -26,12 +26,12 @@ log = { version = "0.4.14", default-features = false }
 #getrandom = { version = "0.2", features = ["js", "std"], default-features = false }
 
 # daos
-daos-collective = {path = '../../pallets/daos/agency', package = "daos-agency", default-features = false}
+daos-agency = {path = '../../pallets/daos/agency', package = "daos-agency", default-features = false}
 daos-create-dao = {path = '../../pallets/daos/create-dao',default-features = false}
 daos-doas = {path = '../../pallets/daos/doas',default-features = false}
 daos-sudo = {path = '../../pallets/daos/sudo',default-features = false}
 daos-primitives = {path = '../../pallets/daos/primitives',default-features = false}
-daos-democracy = {path = '../../pallets/daos/square', package = "daos-square", default-features = false}
+daos-square = {path = '../../pallets/daos/square', package = "daos-square", default-features = false}
 
 # Local primitives
 dico-primitives = { package = "dico-primitives", default-features = false, path = "../../primitives" }
@@ -178,9 +178,9 @@ runtime-benchmarks = [
     "pallet-oracle/runtime-benchmarks",
 
 	"daos-create-dao/runtime-benchmarks",
-	"daos-collective/runtime-benchmarks",
+	"daos-agency/runtime-benchmarks",
 	"daos-sudo/runtime-benchmarks",
-	"daos-democracy/runtime-benchmarks",
+	"daos-square/runtime-benchmarks",
 	"daos-doas/runtime-benchmarks",
 
 ]
@@ -261,12 +261,12 @@ std = [
     "pallet-farm-extend/std",
 	"pallet-vc/std",
 	# daos
-	"daos-collective/std",
+	"daos-agency/std",
 	"daos-create-dao/std",
 	"daos-doas/std",
 	"daos-sudo/std",
 	"daos-primitives/std",
-	"daos-democracy/std",
+	"daos-square/std",
     # orml
     "orml-tokens/std",
     "orml-traits/std",

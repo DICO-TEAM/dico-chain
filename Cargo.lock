@@ -1909,6 +1909,7 @@ dependencies = [
  "daos-create-dao",
  "daos-doas",
  "daos-primitives",
+ "daos-sudo",
  "frame-benchmarking",
  "frame-support",
  "frame-system",

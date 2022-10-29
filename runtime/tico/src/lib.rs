@@ -9,7 +9,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use daos_democracy;
+use daos_square;
 pub use dico_primitives::{
 	constants::{currency::*, time::*},
 	tokens::{AUSD, DICO, KAR, KICO, KSM, LKSM},
@@ -228,10 +228,10 @@ construct_runtime!(
 		// vc
 		CreateDao: daos_create_dao::{Pallet, Storage, Call, Event<T>} = 60,
 		DaoSudo: daos_sudo::{Pallet, Storage, Call, Event<T>} = 61,
-		DaoCollective: daos_collective::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
+		DaoAgency: daos_agency::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
 		DoAs: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
 		Vault: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
-		DaoDemocracy: daos_democracy::{Pallet, Storage, Call, Event<T>} = 65,
+		DaoSquare: daos_square::{Pallet, Storage, Call, Event<T>} = 65,
 
 		//local pallet
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>} = 70,
@@ -1242,9 +1242,9 @@ impl_runtime_apis! {
 			// list_benchmark!(list, extra, pallet_currencies, Currencies);
 
 			list_benchmark!(list, extra, daos_create_dao, CreateDao);
-			list_benchmark!(list, extra, daos_collective, DaoCollective);
+			list_benchmark!(list, extra, daos_agency, DaoAgency);
 			list_benchmark!(list, extra, daos_sudo, DaoSudo);
-			list_benchmark!(list, extra, daos_democracy, DaoDemocracy);
+			list_benchmark!(list, extra, daos_square, DaoSquare);
 			list_benchmark!(list, extra, daos_doas, DoAs);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
@@ -1296,9 +1296,9 @@ impl_runtime_apis! {
 			// add_benchmark!(params, batches, pallet_currencies, Currencies);
 
 			add_benchmark!(params, batches, daos_create_dao, CreateDao);
-			add_benchmark!(params, batches, daos_collective, DaoCollective);
+			add_benchmark!(params, batches, daos_agency, DaoAgency);
 			add_benchmark!(params, batches, daos_sudo, DaoSudo);
-			add_benchmark!(params, batches, daos_democracy, DaoDemocracy);
+			add_benchmark!(params, batches, daos_square, DaoSquare);
 			add_benchmark!(params, batches, daos_doas, DoAs);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }

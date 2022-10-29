@@ -4,7 +4,7 @@
 use super::*;
 pub use codec::MaxEncodedLen;
 use daos_create_dao;
-use daos_democracy::{
+use daos_square::{
 	traits::{ConvertInto, Pledge as PledgeTrait},
 	Error,
 };
@@ -34,22 +34,22 @@ impl TryFrom<Call> for CallId {
 				daos_create_dao::Call::dao_remark { .. } => Ok(101 as CallId),
 				_ => Err(()),
 			},
-			Call::DaoCollective(func) => match func {
-				daos_collective::Call::disapprove_proposal { .. } => Ok(201 as CallId),
-				daos_collective::Call::set_motion_duration { .. } => Ok(202 as CallId),
-				daos_collective::Call::set_max_proposals { .. } => Ok(203 as CallId),
-				daos_collective::Call::set_max_members { .. } => Ok(204 as CallId),
-				daos_collective::Call::set_ensure_origin_for_every_call { .. } => Ok(205 as CallId),
+			Call::DaoAgency(func) => match func {
+				daos_agency::Call::disapprove_proposal { .. } => Ok(201 as CallId),
+				daos_agency::Call::set_motion_duration { .. } => Ok(202 as CallId),
+				daos_agency::Call::set_max_proposals { .. } => Ok(203 as CallId),
+				daos_agency::Call::set_max_members { .. } => Ok(204 as CallId),
+				daos_agency::Call::set_ensure_origin_for_every_call { .. } => Ok(205 as CallId),
 				_ => Err(()),
 			},
-			Call::DaoDemocracy(func) => match func {
-				daos_democracy::Call::set_min_vote_weight_for_every_call { .. } => Ok(301 as CallId),
-				daos_democracy::Call::set_max_public_props { .. } => Ok(302 as CallId),
-				daos_democracy::Call::set_launch_period { .. } => Ok(303 as CallId),
-				daos_democracy::Call::set_minimum_deposit { .. } => Ok(304 as CallId),
-				daos_democracy::Call::set_voting_period { .. } => Ok(305 as CallId),
-				daos_democracy::Call::set_rerserve_period { .. } => Ok(306 as CallId),
-				daos_democracy::Call::set_enactment_period { .. } => Ok(307 as CallId),
+			Call::DaoSquare(func) => match func {
+				daos_square::Call::set_min_vote_weight_for_every_call { .. } => Ok(301 as CallId),
+				daos_square::Call::set_max_public_props { .. } => Ok(302 as CallId),
+				daos_square::Call::set_launch_period { .. } => Ok(303 as CallId),
+				daos_square::Call::set_minimum_deposit { .. } => Ok(304 as CallId),
+				daos_square::Call::set_voting_period { .. } => Ok(305 as CallId),
+				daos_square::Call::set_rerserve_period { .. } => Ok(306 as CallId),
+				daos_square::Call::set_enactment_period { .. } => Ok(307 as CallId),
 				_ => Err(()),
 			},
 			Call::DaoSudo(func) => match func {
@@ -181,7 +181,7 @@ impl PledgeTrait<Balance, AccountId, DaoId, Conviction, BlockNumber, DispatchErr
 					return Ok((
 						amount
 							.checked_mul(conviction.convert_into())
-							.ok_or(daos_democracy::Error::<Runtime>::Overflow)?,
+							.ok_or(daos_square::Error::<Runtime>::Overflow)?,
 						conviction.convert_into(),
 					));
 				}
@@ -193,13 +193,13 @@ impl PledgeTrait<Balance, AccountId, DaoId, Conviction, BlockNumber, DispatchErr
 					return Ok((
 						DOLLARS
 							.checked_mul(conviction.convert_into())
-							.ok_or(daos_democracy::Error::<Runtime>::Overflow)?,
+							.ok_or(daos_square::Error::<Runtime>::Overflow)?,
 						conviction.convert_into(),
 					));
 				}
 			}
 		}
-		Err(daos_democracy::Error::<Runtime>::PledgeNotEnough)?
+		Err(daos_square::Error::<Runtime>::PledgeNotEnough)?
 	}
 
 	fn vote_end_do(&self, who: &AccountId, dao_id: &DaoId) -> Result<(), DispatchError> {
@@ -221,7 +221,7 @@ impl PledgeTrait<Balance, AccountId, DaoId, Conviction, BlockNumber, DispatchErr
 				}
 			}
 		}
-		Err(daos_democracy::Error::<Runtime>::PledgeNotEnough)?
+		Err(daos_square::Error::<Runtime>::PledgeNotEnough)?
 	}
 }
 
@@ -322,12 +322,12 @@ impl Contains<Call> for CollectiveBaseCallFilter {
 	}
 }
 
-impl daos_collective::Config for Runtime {
+impl daos_agency::Config for Runtime {
 	type Origin = Origin;
 	type Proposal = Call;
 	type CollectiveBaseCallFilter = CollectiveBaseCallFilter;
 	type Event = Event;
-	type DefaultVote = daos_collective::PrimeDefaultVote;
+	type DefaultVote = daos_agency::PrimeDefaultVote;
 	type MaxMembersForSystem = MaxMembersForSystem;
 	type WeightInfo = ();
 	// type WeightInfo = ();
@@ -335,13 +335,13 @@ impl daos_collective::Config for Runtime {
 
 impl daos_doas::Config for Runtime {
 	type Event = Event;
-	type DoAsOrigin = DaoCollective;
+	type DoAsOrigin = DaoAgency;
 	type WeightInfo = ();
 }
 
 impl pallet_vc::Config for Runtime {
 	type Event = Event;
-	type SetCollectiveMembers = DaoCollective;
+	type SetCollectiveMembers = DaoAgency;
 	type MultiCurrency = Currencies;
 }
 
@@ -349,7 +349,7 @@ parameter_types! {
 	pub const GetNativeCurrencyId: CurrencyId = 0;
 }
 
-impl daos_democracy::Config for Runtime {
+impl daos_square::Config for Runtime {
 	type Event = Event;
 	type Pledge = Pledge<u32, Balance>;
 	type Conviction = Conviction;

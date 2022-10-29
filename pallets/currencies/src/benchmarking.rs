@@ -89,10 +89,10 @@ benchmarks! {
 
 	}:_(RawOrigin::Signed(alice.clone()), look_up::<T>(bob.clone()), id, (100 * DOLLARS).saturated_into::<BalanceOf<T>>())
 
-	transfer_native_currency {
-		let alice = get_alice::<T>();
-		let bob = get_bob::<T>();
-	}:_(RawOrigin::Signed(alice.clone()), look_up::<T>(bob.clone()),  (10 * DOLLARS).saturated_into::<BalanceOf<T>>())
+	// transfer_native_currency {
+	// 	let alice = get_alice::<T>();
+	// 	let bob = get_bob::<T>();
+	// }:_(RawOrigin::Signed(alice.clone()), look_up::<T>(bob.clone()),  (10 * DOLLARS).saturated_into::<BalanceOf<T>>())
 
 	update_balance {
 		let (alice, id) = get_asset::<T>();
