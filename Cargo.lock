@@ -1974,6 +1974,7 @@ version = "1.0.0"
 dependencies = [
  "daos-create-dao",
  "daos-primitives",
+ "daos-sudo",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
