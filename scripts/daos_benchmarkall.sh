@@ -27,6 +27,6 @@ do
 		--extrinsic='*' \
 		--steps=$steps \
 		--repeat=$repeat \
-		--template=./.maintain/pallet-weight-template.hbs \
+		--template=./.maintain/daos-weight-template.hbs \
 		--output ./pallets/daos/$p/src/weights.rs
 done
