@@ -23,9 +23,13 @@
 ### setup
 ```asm
 curl https://sh.rustup.rs -sSf | sh
+sudo apt install build-essential git clang libclang-dev pkg-config libssl-dev
 ```
 ```asm
-sudo apt install build-essential git clang libclang-dev pkg-config libssl-dev
+sudo apt update
+sudo apt install nodejs npm
+npm install -g yarn
+npm i polkadot-launch -g
 ```
 ### clone projects
 ```asm
