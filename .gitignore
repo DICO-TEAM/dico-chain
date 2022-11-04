@@ -18,7 +18,8 @@
 .local/
 .idea/
 **/expand.rs
-
+**/launch/*.log
+**/launch/rococo-local*
 *.wasm
 *.state
 /dico-dev
