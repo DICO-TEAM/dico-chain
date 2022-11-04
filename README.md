@@ -35,7 +35,10 @@ cd dico-chain
 make submodule
 ```
 ### build 
-Execute `cargo build --release` in dico-chain and polkadot files.
+Execute the following command in dico-chain and polkadot files.
+```asm
+cargo build --release
+```
 ### run testnet
 Execute the following command in the dico-chain file
 ```asm
