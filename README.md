@@ -20,15 +20,35 @@
 [paritytech/substrate](https://github.com/paritytech/substrate)
 
 ## Development
-
-Click [here](./.github/DEVELOPMENT.md) to jump to development guide.
-
+### setup
+```asm
+curl https://sh.rustup.rs -sSf | sh
+```
+```asm
+sudo apt install build-essential git clang libclang-dev pkg-config libssl-dev
+```
+### clone projects
+```asm
+git clone https://github.com/paritytech/polkadot.git 
+git clone https://github.com/DICO-TEAM/dico-chain.git
+cd dico-chain
+make submodule
+```
+### build 
+Execute `cargo build --release` in dico-chain and polkadot files.
+### run testnet
+Execute the following command in the dico-chain file
+```asm
+cd launch
+polkadot-launch config.json
+```
+### 
 ## Contributions
 
 Contributors are welcomed to join this project. Please check [CONTRIBUTING](./.github/CONTRIBUTING.md) about how to contribute
 to this project.
 
-## Node
+## Connect to mainnet
 
 ```angular2html
 ./kico --collator  -- --execution wasm --chain kusama

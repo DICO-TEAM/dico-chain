@@ -1,0 +1,50 @@
+{
+  "relaychain": {
+    "bin": "../../polkadot/target/release/polkadot",
+    "chain": "rococo-local",
+    "nodes": [
+      {
+        "name": "alice",
+        "wsPort": 9944,
+        "port": 30333
+      },
+      {
+        "name": "bob",
+        "wsPort": 9945,
+        "port": 30334
+      }
+    ],
+    "genesis": {
+      "runtime": {
+        "runtime_genesis_config": {
+          "configuration": {
+            "config": {
+              "validation_upgrade_frequency": 10,
+              "validation_upgrade_delay": 10
+            }
+          }
+        }
+      }
+    }
+  },
+  "parachains": [
+    {
+      "bin": "../target/release/tico",
+      "id": "2107",
+      "chain": "local",
+      "balance": "1000000000000000000000",
+      "nodes": [
+        {
+          "wsPort": 9946,
+          "port": 30335,
+          "name": "alice",
+          "flags": ["--", "--execution=wasm"]
+        }
+      ]
+    }
+  ],
+
+  "types": {},
+  "finalization": false
+}
+
