@@ -7,7 +7,7 @@ It also includes all transactions that ordinary users can perform. Regardless of
 > Here are just a few examples to teach you about the create-dao, sudo, agency, square, and doas modules in daos. Although different DAOs may be somewhat different depending on the DAO template, they are generally the same.
 In fact, the transactions that daos creates DAOS can perform are virtually unlimited and cannot be enumerated. The point here is to teach you how to use sudo, agency, or square to execute external transactions. 
 If you want to learn more about the external transactions supported by the VC DAO and the corresponding call ids, 
-Please look here code [https://github.com/DICO-TEAM/dico-chain/blob/main/runtime/tico/src/vc.rs#L30] (HTTP: / / https://github.com/DICO-TEAM/dico- chain/blob/main/runtime/tico/src/vc.rs#L30)
+Please look here code [https://github.com/DICO-TEAM/dico-chain/blob/main/runtime/tico/src/vc.rs#L30](HTTP: / / https://github.com/DICO-TEAM/dico- chain/blob/main/runtime/tico/src/vc.rs#L30)
 ## 2. Run testnet
 If you want to test daos, you should first run a test network locally.
 Follow [these steps](https://github.com/DICO-TEAM/dico-chain#development) to launch your test net
