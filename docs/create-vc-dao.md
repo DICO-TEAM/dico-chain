@@ -8,8 +8,10 @@ It also includes all transactions that ordinary users can perform. Regardless of
 In fact, the transactions that daos creates DAOS can perform are virtually unlimited and cannot be enumerated. The point here is to teach you how to use sudo, agency, or square to execute external transactions. 
 If you want to learn more about the external transactions supported by the VC DAO and the corresponding call ids, 
 Please look here code [https://github.com/DICO-TEAM/dico-chain/blob/main/runtime/tico/src/vc.rs#L30] (HTTP: / / https://github.com/DICO-TEAM/dico- chain/blob/main/runtime/tico/src/vc.rs#L30)
-
-## 2. Create VC DAO
+## 2. Run testnet
+If you want to test daos, you should first run a test network locally.
+Follow [these steps](https://github.com/DICO-TEAM/dico-chain#development) to launch your test net
+## 3. Create VC DAO
 As a developer, you can create your DAO template for people who have something in common.
 In the VC DAO, we create DAO templates for groups of people with the same assets, hoping that they can decide together to do something. So, if you want to create a VC DAO, you must first create an asset.
 Here Alice creates an asset with id 100 and the amount is 10000000000000000. Note that according to the requirements of the kico network, you must set metadata for your asset here, otherwise the transfer cannot be made.
@@ -44,7 +46,7 @@ Dave asset info.
 The balance of Alice's remaining asset.
 ![Alice asset info_1](./vc-dao-pic/Alice%20asset%20info_1.png)
 Above, we successfully created a VC DAO based on asset 100 according to the requirements of the VC DAO template.
-## 3. sudo completes the initialization of the VC DAO
+## 4. sudo completes the initialization of the VC DAO
 > It is possible to perform all external transactions that the DAO template allows, and the following are just examples.
 * Set all agency members in the VC DAO
 We know that each agency has its own members in daos. daos does not provide members selection rules. As a developer, you are free to give your Agency whatever members selection rules it wants. In the VC DAO,
@@ -75,12 +77,12 @@ The default value is 0, which is set for each external transaction as needed. Ag
 ![sudo set square origin for transfer](./vc-dao-pic/sudo%20set%20square%20origin%20for%20transfer.png)
 Origin of the transfer in the square module.
 ![transfer func square origin](./vc-dao-pic/transfer%20func%20square%20origin.png)
-## 4. Close sudo to complete the decentralization of DAO
+## 5. Close sudo to complete the decentralization of DAO
 close sudo
 ![close sudo](./vc-dao-pic/close%20sudo.png)
 We find that the sudo account is None, completing decentralization.
 ![sudo account info](./vc-dao-pic/sudo%20account%20info.png)
-## 5.Agency executes external transactions
+## 6.Agency executes external transactions
 In the above steps, we have set up agency Origin for the external transaction of transfer. Next, we transfer the tokens in DAO to Eve through agency.
 Any external transaction executed by the agency is carried out by DAO account. Therefore, to transfer the assets in DAO to other accounts, 
 the balance of such assets must be ensured in DAO account. Here we transfer 1000000000000000 from Alice's account to DAO's account.
@@ -110,8 +112,8 @@ DAO account asset info
 ![DAO account asset info_1](./vc-dao-pic/DAO%20account%20asset%20info_1.png)
 Eve asset info
 ![Eve asset info](./vc-dao-pic/Eve%20asset%20info.png)
-agency成功执行一个transfer交易
-## 6. square executes external transactions
+agency successfully executed a transfer transaction.
+## 7. square executes external transactions
 > It is possible to perform all external transactions that the DAO template allows, and the following are just examples
 
 Let's transfer the asset in the DAO to Ferdie 200000000000000.
