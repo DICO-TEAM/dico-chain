@@ -6,7 +6,12 @@
       {
         "name": "alice",
         "wsPort": 9944,
-        "port": 30333
+        "port": 30333,
+        "flags": [
+          "--rpc-external",
+          "--rpc-methods=Unsafe",
+          "--rpc-cors=all"
+        ]
       },
       {
         "name": "bob",
@@ -38,7 +43,13 @@
           "wsPort": 9946,
           "port": 30335,
           "name": "alice",
-          "flags": ["--", "--execution=wasm"]
+          "flags": [
+            "--rpc-external",
+            "--rpc-methods=Unsafe",
+            "--rpc-cors=all",
+            "--",
+            "--execution=wasm"
+          ]
         }
       ]
     }
