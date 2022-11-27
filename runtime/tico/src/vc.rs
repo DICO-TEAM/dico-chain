@@ -369,4 +369,5 @@ impl daos_emergency::Config for Runtime {
 	type Currency = Balances;
 	type MinPledge = MinPledge;
 	type TrackPeriod = TrackPeriod;
+	type WeightInfo = ();
 }

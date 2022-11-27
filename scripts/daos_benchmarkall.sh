@@ -14,7 +14,7 @@ pallets=(
   create-dao
   agency
   square
-  square
+  emergency
 )
 
 for p in ${pallets[@]}

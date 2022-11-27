@@ -1247,6 +1247,7 @@ impl_runtime_apis! {
 			list_benchmark!(list, extra, daos_sudo, DaoSudo);
 			list_benchmark!(list, extra, daos_square, DaoSquare);
 			list_benchmark!(list, extra, daos_doas, DoAs);
+			list_benchmark!(list, extra, daos_emergency, DaoEmergency);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -1299,6 +1300,7 @@ impl_runtime_apis! {
 			add_benchmark!(params, batches, daos_create_dao, CreateDao);
 			add_benchmark!(params, batches, daos_agency, DaoAgency);
 			add_benchmark!(params, batches, daos_sudo, DaoSudo);
+			add_benchmark!(params, batches, daos_emergency, DaoEmergency);
 			add_benchmark!(params, batches, daos_square, DaoSquare);
 			add_benchmark!(params, batches, daos_doas, DoAs);
 

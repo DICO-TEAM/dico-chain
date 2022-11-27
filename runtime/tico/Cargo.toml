@@ -53,7 +53,7 @@ pallet-ico-rpc-runtime-api  = { package = "pallet-ico-rpc-runtime-api", default-
 pallet-farm-rpc-runtime-api = { package = "pallet-farm-rpc-runtime-api", default-features = false, path = "../../pallets/farm/rpc/runtime-api" }
 pallet-nft                  = { package = "pallet-nft", default-features = false, path = "../../pallets/nft" }
 pallet-farm-extend          = { package = "pallet-farm-extend", default-features = false, path = "../../pallets/farm-extend" }
-pallet-vc= { package = "pallet-vc", default-features = false, path = "../../pallets/vc" }
+pallet-vc = { package = "pallet-vc", default-features = false, path = "../../pallets/vc" }
 
 # orml
 orml-tokens         = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "polkadot-v0.9.25" }
@@ -183,6 +183,7 @@ runtime-benchmarks = [
 	"daos-sudo/runtime-benchmarks",
 	"daos-square/runtime-benchmarks",
 	"daos-doas/runtime-benchmarks",
+	"daos-emergency/runtime-benchmarks",
 
 ]
 std = [
