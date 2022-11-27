@@ -1958,6 +1958,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "daos-emergency"
+version = "3.0.0"
+dependencies = [
+ "daos-create-dao",
+ "daos-primitives",
+ "daos-sudo",
+ "frame-support",
+ "frame-system",
+ "pallet-balances",
+ "parity-scale-codec 3.1.5",
+ "scale-info",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "daos-primitives"
 version = "1.0.0"
 dependencies = [
@@ -11739,6 +11755,7 @@ dependencies = [
  "daos-agency",
  "daos-create-dao",
  "daos-doas",
+ "daos-emergency",
  "daos-primitives",
  "daos-square",
  "daos-sudo",

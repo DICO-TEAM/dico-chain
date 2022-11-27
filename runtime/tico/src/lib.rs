@@ -232,6 +232,7 @@ construct_runtime!(
 		DoAs: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
 		Vault: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
 		DaoSquare: daos_square::{Pallet, Storage, Call, Event<T>} = 65,
+		DaoEmergency: daos_emergency::{Pallet, Storage, Call, Event<T>} = 66,
 
 		//local pallet
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>} = 70,

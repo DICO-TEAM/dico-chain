@@ -4,6 +4,7 @@
 use super::*;
 pub use codec::MaxEncodedLen;
 use daos_create_dao;
+use daos_emergency;
 use daos_square::{
 	traits::{ConvertInto, Pledge as PledgeTrait},
 	Error,
@@ -355,4 +356,17 @@ impl daos_square::Config for Runtime {
 	type Conviction = Conviction;
 	type Currency = Balances;
 	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub const MinPledge: Balance = 100*DOLLARS;
+	pub const TrackPeriod: BlockNumber = 2 * DAYS;
+}
+
+impl daos_emergency::Config for Runtime {
+	type Event = Event;
+	type ExternalOrigin = EnsureRoot<AccountId>;
+	type Currency = Balances;
+	type MinPledge = MinPledge;
+	type TrackPeriod = TrackPeriod;
 }

@@ -32,6 +32,7 @@ daos-doas = {path = '../../pallets/daos/doas',default-features = false}
 daos-sudo = {path = '../../pallets/daos/sudo',default-features = false}
 daos-primitives = {path = '../../pallets/daos/primitives',default-features = false}
 daos-square = {path = '../../pallets/daos/square', package = "daos-square", default-features = false}
+daos-emergency = {path = '../../pallets/daos/emergency', package = "daos-emergency", default-features = false}
 
 # Local primitives
 dico-primitives = { package = "dico-primitives", default-features = false, path = "../../primitives" }
@@ -267,6 +268,7 @@ std = [
 	"daos-sudo/std",
 	"daos-primitives/std",
 	"daos-square/std",
+	"daos-emergency/std",
     # orml
     "orml-tokens/std",
     "orml-traits/std",
