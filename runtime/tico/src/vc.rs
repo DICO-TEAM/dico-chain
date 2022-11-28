@@ -360,7 +360,7 @@ impl daos_square::Config for Runtime {
 
 parameter_types! {
 	pub const MinPledge: Balance = 100*DOLLARS;
-	pub const TrackPeriod: BlockNumber = 2 * DAYS;
+	pub const TrackPeriod: BlockNumber = 30 *MINUTES;
 }
 
 impl daos_emergency::Config for Runtime {
