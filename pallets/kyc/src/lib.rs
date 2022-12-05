@@ -92,7 +92,7 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		/// The currency trait.
 		type Currency: ReservableCurrency<Self::AccountId>;
 
@@ -123,14 +123,14 @@ pub mod pallet {
 
 		/// The origin which may forcibly set or remove a ias/sword holder. Root can always do
 		/// this.
-		type ForceOrigin: EnsureOrigin<Self::Origin>;
+		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
 		/// The IAS origin。
 		/// Root can always do this.
-		type IASOrigin: EnsureOrigin<Self::Origin>;
+		type IASOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
 		/// The origin  Root can always do this.
-		type SwordHolderOrigin: EnsureOrigin<Self::Origin>;
+		type SwordHolderOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;

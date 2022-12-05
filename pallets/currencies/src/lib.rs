@@ -114,7 +114,7 @@ pub mod module {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config + dao::Config + pallet_vc::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
 		type MultiCurrency: MultiCurrency<Self::AccountId, CurrencyId = AssetId>
 			+ MultiCurrencyExtended<Self::AccountId>
@@ -125,9 +125,9 @@ pub mod module {
 			+ BasicLockableCurrency<Self::AccountId, Balance = BalanceOf<Self>>
 			+ BasicReservableCurrency<Self::AccountId, Balance = BalanceOf<Self>>;
 
-		type SetLocationOrigin: EnsureOrigin<Self::Origin>;
+		type SetLocationOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
-		type ForceSetLocationOrigin: EnsureOrigin<Self::Origin>;
+		type ForceSetLocationOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
 		#[pallet::constant]
 		type GetNativeCurrencyId: Get<AssetId>;

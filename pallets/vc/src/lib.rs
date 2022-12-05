@@ -67,7 +67,7 @@ pub mod pallet {
 	#[pallet::config]
 	pub trait Config: frame_system::Config + dao::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
 		type SetCollectiveMembers: SetCollectiveMembers<Self::AccountId, Self::DaoId, DispatchError>;
 
@@ -139,7 +139,7 @@ pub mod pallet {
 		/// call id:701
 		///
 		/// Set council members for VC DAO.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::DbWeight::get().writes(1))]
 		pub fn set_guarders(
 			origin: OriginFor<T>,
 			dao_id: T::DaoId,
@@ -158,7 +158,7 @@ pub mod pallet {
 		/// call id:702
 		///
 		/// Delete a council member for VC DAO.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::DbWeight::get().writes(1))]
 		pub fn remove_guarder(
 			origin: OriginFor<T>,
 			dao_id: T::DaoId,
@@ -179,7 +179,7 @@ pub mod pallet {
 		/// call id:703
 		///
 		/// Add a council member for VC DAO.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::DbWeight::get().writes(1))]
 		pub fn add_guarder(
 			origin: OriginFor<T>,
 			dao_id: T::DaoId,
@@ -199,7 +199,7 @@ pub mod pallet {
 		/// call id:704
 		///
 		/// DAO gets free money.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::DbWeight::get().writes(1))]
 		pub fn unreserve(
 			origin: OriginFor<T>,
 			dao_id: T::DaoId,
@@ -215,7 +215,7 @@ pub mod pallet {
 		/// call id:705
 		///
 		/// Set transfer fee for assets in DAO.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::DbWeight::get().writes(1))]
 		pub fn set_fee(
 			origin: OriginFor<T>,
 			dao_id: T::DaoId,
@@ -230,7 +230,7 @@ pub mod pallet {
 		/// call id:706
 		///
 		/// Open cex transfer.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::DbWeight::get().writes(1))]
 		pub fn open_cex_transfer(origin: OriginFor<T>, dao_id: T::DaoId) -> DispatchResultWithPostInfo {
 			dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
 			IsOpenCexTransfer::<T>::insert(dao_id, true);
@@ -241,7 +241,7 @@ pub mod pallet {
 		/// call id:707
 		///
 		/// Close cex transfer.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::DbWeight::get().writes(1))]
 		pub fn close_cex_transfer(origin: OriginFor<T>, dao_id: T::DaoId) -> DispatchResultWithPostInfo {
 			dao::Pallet::<T>::ensrue_dao_root(origin, dao_id)?;
 			IsOpenCexTransfer::<T>::insert(dao_id, false);

@@ -40,9 +40,7 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: DicoOracle RawValues (r:0 w:1)
 	// Storage: DicoOracle IsUpdated (r:0 w:1)
 	fn feed_values() -> Weight {
-		(37_642_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(4 as Weight))
-			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }
 
@@ -55,8 +53,6 @@ impl WeightInfo for () {
 	// Storage: DicoOracle RawValues (r:0 w:1)
 	// Storage: DicoOracle IsUpdated (r:0 w:1)
 	fn feed_values() -> Weight {
-		(37_642_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(4 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }

@@ -41,18 +41,15 @@ pub struct DicoWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: Farm HalvingPeriod (r:0 w:1)
 	fn set_halving_period() -> Weight {
-		(17_020_000 as Weight)
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Farm DicoPerBlock (r:0 w:1)
 	fn set_dico_per_block() -> Weight {
-		(17_271_000 as Weight)
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Farm StartBlock (r:0 w:1)
 	fn set_start_block() -> Weight {
-		(17_051_000 as Weight)
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Tokens TotalIssuance (r:1 w:0)
 	// Storage: Farm Pools (r:1 w:1)
@@ -60,26 +57,20 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: Farm NextPoolId (r:1 w:1)
 	// Storage: Farm TotalAllocPoint (r:1 w:1)
 	fn create_pool() -> Weight {
-		(44_750_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(5 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Farm Pools (r:2 w:1)
 	// Storage: Tokens Accounts (r:1 w:0)
 	// Storage: Farm TotalAllocPoint (r:1 w:1)
 	fn update_pool_alloc_point() -> Weight {
-		(50_830_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(4 as Weight))
-			.saturating_add(T::DbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Farm Pools (r:1 w:1)
 	// Storage: Farm Participants (r:1 w:1)
 	// Storage: Tokens Accounts (r:2 w:2)
 	// Storage: System Account (r:2 w:1)
 	fn deposit_lp() -> Weight {
-		(88_363_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(6 as Weight))
-			.saturating_add(T::DbWeight::get().writes(5 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Farm Participants (r:1 w:1)
 	// Storage: Farm Pools (r:1 w:1)
@@ -90,9 +81,7 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: Farm TotalAllocPoint (r:1 w:0)
 	// Storage: System Account (r:2 w:2)
 	fn withdraw_lp() -> Weight {
-		(165_555_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(9 as Weight))
-			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }
 
@@ -100,18 +89,15 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 impl WeightInfo for () {
 	// Storage: Farm HalvingPeriod (r:0 w:1)
 	fn set_halving_period() -> Weight {
-		(17_020_000 as Weight)
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Farm DicoPerBlock (r:0 w:1)
 	fn set_dico_per_block() -> Weight {
-		(17_271_000 as Weight)
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Farm StartBlock (r:0 w:1)
 	fn set_start_block() -> Weight {
-		(17_051_000 as Weight)
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Tokens TotalIssuance (r:1 w:0)
 	// Storage: Farm Pools (r:1 w:1)
@@ -119,26 +105,20 @@ impl WeightInfo for () {
 	// Storage: Farm NextPoolId (r:1 w:1)
 	// Storage: Farm TotalAllocPoint (r:1 w:1)
 	fn create_pool() -> Weight {
-		(44_750_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Farm Pools (r:2 w:1)
 	// Storage: Tokens Accounts (r:1 w:0)
 	// Storage: Farm TotalAllocPoint (r:1 w:1)
 	fn update_pool_alloc_point() -> Weight {
-		(50_830_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(4 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Farm Pools (r:1 w:1)
 	// Storage: Farm Participants (r:1 w:1)
 	// Storage: Tokens Accounts (r:2 w:2)
 	// Storage: System Account (r:2 w:1)
 	fn deposit_lp() -> Weight {
-		(88_363_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Farm Participants (r:1 w:1)
 	// Storage: Farm Pools (r:1 w:1)
@@ -149,8 +129,6 @@ impl WeightInfo for () {
 	// Storage: Farm TotalAllocPoint (r:1 w:0)
 	// Storage: System Account (r:2 w:2)
 	fn withdraw_lp() -> Weight {
-		(165_555_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(9 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }

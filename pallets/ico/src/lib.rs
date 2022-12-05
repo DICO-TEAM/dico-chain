@@ -277,16 +277,16 @@ pub mod pallet {
 	#[pallet::config]
 	#[pallet::disable_frame_system_supertrait_check]
 	pub trait Config: system::Config + tokens::Config {
-		type Event: From<Event<Self>>
-			+ Into<<Self as system::Config>::Event>
-			+ IsType<<Self as frame_system::Config>::Event>;
-		type PermitIcoOrigin: EnsureOrigin<Self::Origin>;
+		type RuntimeEvent: From<Event<Self>>
+			+ Into<<Self as system::Config>::RuntimeEvent>
+			+ IsType<<Self as frame_system::Config>::RuntimeEvent>;
+		type PermitIcoOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
-		type RejectIcoOrigin: EnsureOrigin<Self::Origin>;
+		type RejectIcoOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
-		type PermitReleaseOrigin: EnsureOrigin<Self::Origin>;
+		type PermitReleaseOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
-		type TerminateIcoOrigin: EnsureOrigin<Self::Origin>;
+		type TerminateIcoOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
 		type OnSlash: OnUnbalanced<NegativeImbalanceOf<Self>>;
 

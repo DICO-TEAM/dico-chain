@@ -41,36 +41,27 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: DicoOracle Members (r:1 w:1)
 	// Storage: PriceDao DepositBalance (r:0 w:1)
 	fn insert_feed_account() -> Weight {
-		(40_286_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: PriceDao DepositBalance (r:1 w:1)
 	// Storage: System Account (r:2 w:2)
 	// Storage: DicoOracle Members (r:1 w:1)
 	fn del_feed_account() -> Weight {
-		(95_460_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(4 as Weight))
-			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: DicoOracle LockedPrice (r:0 w:1)
 	fn unlock_price() -> Weight {
-		(18_065_000 as Weight)
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: PriceDao DepositBalance (r:1 w:1)
 	// Storage: DicoOracle Members (r:1 w:1)
 	fn exit_feed() -> Weight {
-		(17_854_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: PriceDao DepositBalance (r:1 w:1)
 	// Storage: System Account (r:1 w:1)
 	fn withdraw() -> Weight {
-		(35_335_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }
 
@@ -80,35 +71,26 @@ impl WeightInfo for () {
 	// Storage: DicoOracle Members (r:1 w:1)
 	// Storage: PriceDao DepositBalance (r:0 w:1)
 	fn insert_feed_account() -> Weight {
-		(40_286_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: PriceDao DepositBalance (r:1 w:1)
 	// Storage: System Account (r:2 w:2)
 	// Storage: DicoOracle Members (r:1 w:1)
 	fn del_feed_account() -> Weight {
-		(95_460_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(4 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: DicoOracle LockedPrice (r:0 w:1)
 	fn unlock_price() -> Weight {
-		(18_065_000 as Weight)
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: PriceDao DepositBalance (r:1 w:1)
 	// Storage: DicoOracle Members (r:1 w:1)
 	fn exit_feed() -> Weight {
-		(17_854_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: PriceDao DepositBalance (r:1 w:1)
 	// Storage: System Account (r:1 w:1)
 	fn withdraw() -> Weight {
-		(35_335_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }

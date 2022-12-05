@@ -40,15 +40,11 @@ pub struct DicoWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: LBP SupportFundraisingAssets (r:1 w:1)
 	fn add_fundraising_asset() -> Weight {
-		(20_550_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: LBP SupportFundraisingAssets (r:1 w:1)
 	fn remove_fundraising_asset() -> Weight {
-		(21_561_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: LBP SupportFundraisingAssets (r:1 w:0)
 	// Storage: LBP OngoingLbps (r:1 w:1)
@@ -57,36 +53,28 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: System Account (r:2 w:1)
 	// Storage: LBP Lbps (r:0 w:1)
 	fn create_lbp() -> Weight {
-		(126_654_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(9 as Weight))
-			.saturating_add(T::DbWeight::get().writes(8 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: LBP Lbps (r:1 w:1)
 	// Storage: Tokens Accounts (r:4 w:4)
 	// Storage: System Account (r:1 w:0)
 	// Storage: LBP OngoingLbps (r:0 w:1)
 	fn exit_lbp() -> Weight {
-		(93_223_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(6 as Weight))
-			.saturating_add(T::DbWeight::get().writes(6 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: LBP OngoingLbps (r:1 w:0)
 	// Storage: LBP Lbps (r:1 w:1)
 	// Storage: Tokens Accounts (r:5 w:5)
 	// Storage: System Account (r:3 w:1)
 	fn swap_exact_amount_supply() -> Weight {
-		(165_535_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(10 as Weight))
-			.saturating_add(T::DbWeight::get().writes(7 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: LBP OngoingLbps (r:1 w:0)
 	// Storage: LBP Lbps (r:1 w:1)
 	// Storage: Tokens Accounts (r:5 w:5)
 	// Storage: System Account (r:3 w:1)
 	fn swap_exact_amount_target() -> Weight {
-		(155_115_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(10 as Weight))
-			.saturating_add(T::DbWeight::get().writes(7 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }
 
@@ -94,15 +82,11 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 impl WeightInfo for () {
 	// Storage: LBP SupportFundraisingAssets (r:1 w:1)
 	fn add_fundraising_asset() -> Weight {
-		(20_550_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: LBP SupportFundraisingAssets (r:1 w:1)
 	fn remove_fundraising_asset() -> Weight {
-		(21_561_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: LBP SupportFundraisingAssets (r:1 w:0)
 	// Storage: LBP OngoingLbps (r:1 w:1)
@@ -111,35 +95,27 @@ impl WeightInfo for () {
 	// Storage: System Account (r:2 w:1)
 	// Storage: LBP Lbps (r:0 w:1)
 	fn create_lbp() -> Weight {
-		(126_654_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(9 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(8 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: LBP Lbps (r:1 w:1)
 	// Storage: Tokens Accounts (r:4 w:4)
 	// Storage: System Account (r:1 w:0)
 	// Storage: LBP OngoingLbps (r:0 w:1)
 	fn exit_lbp() -> Weight {
-		(93_223_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(6 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: LBP OngoingLbps (r:1 w:0)
 	// Storage: LBP Lbps (r:1 w:1)
 	// Storage: Tokens Accounts (r:5 w:5)
 	// Storage: System Account (r:3 w:1)
 	fn swap_exact_amount_supply() -> Weight {
-		(165_535_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(10 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(7 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: LBP OngoingLbps (r:1 w:0)
 	// Storage: LBP Lbps (r:1 w:1)
 	// Storage: Tokens Accounts (r:5 w:5)
 	// Storage: System Account (r:3 w:1)
 	fn swap_exact_amount_target() -> Weight {
-		(155_115_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(10 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(7 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }

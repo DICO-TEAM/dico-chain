@@ -46,9 +46,7 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: Nft NextClassId (r:1 w:1)
 	// Storage: Nft Classes (r:0 w:1)
 	fn create_class() -> Weight {
-		(27_761_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft NextTokenId (r:1 w:1)
 	// Storage: Nft AllTokensHash (r:1 w:1)
@@ -56,9 +54,7 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: Nft NoOwnerTokensOf (r:1 w:1)
 	// Storage: Nft Tokens (r:0 w:1)
 	fn mint() -> Weight {
-		(46_471_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(4 as Weight))
-			.saturating_add(T::DbWeight::get().writes(5 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:0)
@@ -67,9 +63,7 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: Nft NoOwnerTokensOf (r:1 w:1)
 	// Storage: Nft TokensOf (r:1 w:1)
 	fn claim() -> Weight {
-		(58_853_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(6 as Weight))
-			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:0)
@@ -77,54 +71,40 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: Nft TokensOf (r:1 w:1)
 	// Storage: Nft NoOwnerTokensOf (r:1 w:1)
 	fn burn() -> Weight {
-		(49_532_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(5 as Weight))
-			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft TokensOf (r:2 w:2)
 	fn transfer() -> Weight {
-		(39_521_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(3 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:1)
 	fn offer_token_for_sale() -> Weight {
-		(34_471_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:1)
 	fn withdraw_sale() -> Weight {
-		(34_181_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:1)
 	// Storage: System Account (r:1 w:1)
 	// Storage: Nft TokensOf (r:2 w:2)
 	fn buy_token() -> Weight {
-		(79_622_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(5 as Weight))
-			.saturating_add(T::DbWeight::get().writes(5 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:0)
 	// Storage: Nft TokensOf (r:1 w:0)
 	fn active() -> Weight {
-		(34_372_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(3 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:0)
 	fn inactive() -> Weight {
-		(29_811_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }
 
@@ -134,9 +114,7 @@ impl WeightInfo for () {
 	// Storage: Nft NextClassId (r:1 w:1)
 	// Storage: Nft Classes (r:0 w:1)
 	fn create_class() -> Weight {
-		(27_761_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft NextTokenId (r:1 w:1)
 	// Storage: Nft AllTokensHash (r:1 w:1)
@@ -144,9 +122,7 @@ impl WeightInfo for () {
 	// Storage: Nft NoOwnerTokensOf (r:1 w:1)
 	// Storage: Nft Tokens (r:0 w:1)
 	fn mint() -> Weight {
-		(46_471_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(4 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:0)
@@ -155,9 +131,7 @@ impl WeightInfo for () {
 	// Storage: Nft NoOwnerTokensOf (r:1 w:1)
 	// Storage: Nft TokensOf (r:1 w:1)
 	fn claim() -> Weight {
-		(58_853_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:0)
@@ -165,53 +139,39 @@ impl WeightInfo for () {
 	// Storage: Nft TokensOf (r:1 w:1)
 	// Storage: Nft NoOwnerTokensOf (r:1 w:1)
 	fn burn() -> Weight {
-		(49_532_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft TokensOf (r:2 w:2)
 	fn transfer() -> Weight {
-		(39_521_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(3 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:1)
 	fn offer_token_for_sale() -> Weight {
-		(34_471_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:1)
 	fn withdraw_sale() -> Weight {
-		(34_181_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:1)
 	// Storage: System Account (r:1 w:1)
 	// Storage: Nft TokensOf (r:2 w:2)
 	fn buy_token() -> Weight {
-		(79_622_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:0)
 	// Storage: Nft TokensOf (r:1 w:0)
 	fn active() -> Weight {
-		(34_372_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(3 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Nft Tokens (r:1 w:1)
 	// Storage: Nft InSaleTokens (r:1 w:0)
 	fn inactive() -> Weight {
-		(29_811_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }

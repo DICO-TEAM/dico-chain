@@ -40,27 +40,21 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: FarmExtend NextPoolExtendId (r:1 w:1)
 	// Storage: FarmExtend PoolExtends (r:0 w:1)
 	fn create_pool() -> Weight {
-		(76_923_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(5 as Weight))
-			.saturating_add(T::DbWeight::get().writes(5 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: FarmExtend PoolExtends (r:1 w:1)
 	// Storage: FarmExtend ParticipantExtends (r:1 w:1)
 	// Storage: Tokens Accounts (r:2 w:2)
 	// Storage: System Account (r:2 w:1)
 	fn deposit_asset() -> Weight {
-		(86_132_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(6 as Weight))
-			.saturating_add(T::DbWeight::get().writes(5 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: FarmExtend ParticipantExtends (r:1 w:1)
 	// Storage: FarmExtend PoolExtends (r:1 w:1)
 	// Storage: Tokens Accounts (r:2 w:2)
 	// Storage: System Account (r:1 w:0)
 	fn withdraw_asset() -> Weight {
-		(74_483_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(5 as Weight))
-			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }
 
@@ -71,26 +65,20 @@ impl WeightInfo for () {
 	// Storage: FarmExtend NextPoolExtendId (r:1 w:1)
 	// Storage: FarmExtend PoolExtends (r:0 w:1)
 	fn create_pool() -> Weight {
-		(76_923_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: FarmExtend PoolExtends (r:1 w:1)
 	// Storage: FarmExtend ParticipantExtends (r:1 w:1)
 	// Storage: Tokens Accounts (r:2 w:2)
 	// Storage: System Account (r:2 w:1)
 	fn deposit_asset() -> Weight {
-		(86_132_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: FarmExtend ParticipantExtends (r:1 w:1)
 	// Storage: FarmExtend PoolExtends (r:1 w:1)
 	// Storage: Tokens Accounts (r:2 w:2)
 	// Storage: System Account (r:1 w:0)
 	fn withdraw_asset() -> Weight {
-		(74_483_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }

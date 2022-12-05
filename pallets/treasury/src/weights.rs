@@ -39,29 +39,21 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: DicoTreasury ProposalCount (r:1 w:1)
 	// Storage: DicoTreasury Proposals (r:0 w:1)
 	fn propose_spend() -> Weight {
-		(39_839_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: DicoTreasury Proposals (r:1 w:1)
 	fn reject_proposal() -> Weight {
-		(43_162_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: DicoTreasury Proposals (r:1 w:1)
 	// Storage: DicoTreasury Approvals (r:1 w:1)
 	fn approve_proposal() -> Weight {
-		(28_292_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: DicoTreasury Approvals (r:1 w:1)
 	// Storage: DicoTreasury Proposals (r:1 w:0)
 	fn spend_fund() -> Weight {
-		(25_530_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }
 
@@ -70,28 +62,20 @@ impl WeightInfo for () {
 	// Storage: DicoTreasury ProposalCount (r:1 w:1)
 	// Storage: DicoTreasury Proposals (r:0 w:1)
 	fn propose_spend() -> Weight {
-		(39_839_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: DicoTreasury Proposals (r:1 w:1)
 	fn reject_proposal() -> Weight {
-		(43_162_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: DicoTreasury Proposals (r:1 w:1)
 	// Storage: DicoTreasury Approvals (r:1 w:1)
 	fn approve_proposal() -> Weight {
-		(28_292_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: DicoTreasury Approvals (r:1 w:1)
 	// Storage: DicoTreasury Proposals (r:1 w:0)
 	fn spend_fund() -> Weight {
-		(25_530_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }

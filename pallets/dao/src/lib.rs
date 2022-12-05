@@ -113,17 +113,17 @@ pub mod pallet {
 	#[pallet::config]
 	pub trait Config: frame_system::Config + ico::Config {
 		/// The outer origin type.
-		type Origin: From<IcoRawOrigin<Self::AccountId, MultiBalanceOf<Self>>>
-			+ Into<Result<IcoRawOrigin<Self::AccountId, MultiBalanceOf<Self>>, <Self as Config>::Origin>>;
+		type RuntimeOrigin: From<IcoRawOrigin<Self::AccountId, MultiBalanceOf<Self>>>
+			+ Into<Result<IcoRawOrigin<Self::AccountId, MultiBalanceOf<Self>>, <Self as Config>::RuntimeOrigin>>;
 		/// The outer call dispatch type.
 		type Proposal: Parameter
-			+ Dispatchable<Origin = <Self as Config>::Origin, PostInfo = PostDispatchInfo>
+			+ Dispatchable<RuntimeOrigin= <Self as Config>::RuntimeOrigin, PostInfo = PostDispatchInfo>
 			+ From<frame_system::Call<Self>>
 			+ GetDispatchInfo;
 		/// The outer event type.
-		type Event: From<Event<Self>>
-			+ Into<<Self as frame_system::Config>::Event>
-			+ IsType<<Self as frame_system::Config>::Event>;
+		type RuntimeEvent: From<Event<Self>>
+			+ Into<<Self as frame_system::Config>::RuntimeEvent>
+			+ IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
 
@@ -180,10 +180,10 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			currency_id: CurrencyIdOf<T>,
 			ico_index: u32,
-			#[pallet::compact] threshold: Percent,
+			threshold: Percent,
 			proposal: Box<<T as Config>::Proposal>,
 			reason: Vec<u8>,
-			#[pallet::compact] length_bound: u32,
+			length_bound: u32,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
@@ -243,7 +243,7 @@ pub mod pallet {
 			currency_id: CurrencyIdOf<T>,
 			ico_index: u32,
 			proposal: T::Hash,
-			#[pallet::compact] index: ProposalIndex,
+			index: ProposalIndex,
 			approve: bool,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
@@ -323,9 +323,9 @@ pub mod pallet {
 			currency_id: CurrencyIdOf<T>,
 			ico_index: u32,
 			proposal_hash: T::Hash,
-			#[pallet::compact] index: ProposalIndex,
-			#[pallet::compact] proposal_weight_bound: Weight,
-			#[pallet::compact] length_bound: u32,
+			index: ProposalIndex,
+			proposal_weight_bound: Weight,
+			length_bound: u32,
 		) -> DispatchResult {
 			let _ = ensure_signed(origin)?;
 
@@ -458,7 +458,7 @@ pub mod pallet {
 			ensure!(proposal_len <= length_bound, Error::<T>::WrongProposalLength);
 			let proposal = ProposalOf::<T>::get(currency_id, hash).ok_or(Error::<T>::ProposalMissing)?;
 			let proposal_weight = proposal.get_dispatch_info().weight;
-			ensure!(proposal_weight <= weight_bound, Error::<T>::WrongProposalWeight);
+			// ensure!(proposal_weight <= weight_bound, Error::<T>::WrongProposalWeight);
 			Ok((proposal, proposal_len as usize))
 		}
 

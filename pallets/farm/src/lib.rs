@@ -95,7 +95,7 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
 		/// The mining pool id
 		type PoolId: Parameter + Member + Into<u32> + AtLeast32Bit + Default + Copy + MaybeSerializeDeserialize;
@@ -104,7 +104,7 @@ pub mod pallet {
 		type Currency: MultiCurrencyExtended<Self::AccountId, CurrencyId = AssetId, Balance = Balance, Amount = Amount>;
 
 		/// The origin that is allowed to set or update parameter.
-		type FounderSetOrigin: EnsureOrigin<Self::Origin>;
+		type FounderSetOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
 		/// The mining pool's module id, keep all assets in pool.
 		#[pallet::constant]

@@ -43,17 +43,13 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: Dao ProposalCount (r:1 w:1)
 	// Storage: Dao Voting (r:0 w:1)
 	fn propose() -> Weight {
-		(70_853_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(6 as Weight))
-			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:0)
 	// Storage: Ico UnReleaseAssets (r:2 w:0)
 	// Storage: Dao Voting (r:1 w:1)
 	fn vote() -> Weight {
-		(55_552_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(4 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Dao Voting (r:1 w:1)
 	// Storage: Ico Ico (r:1 w:0)
@@ -61,17 +57,13 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: Dao Proposals (r:1 w:1)
 	// Storage: Dao ProposalOf (r:0 w:1)
 	fn close() -> Weight {
-		(56_601_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(4 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Dao Proposals (r:1 w:1)
 	// Storage: Dao Voting (r:0 w:1)
 	// Storage: Dao ProposalOf (r:0 w:1)
 	fn disapprove_proposal() -> Weight {
-		(27_951_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }
 
@@ -84,17 +76,13 @@ impl WeightInfo for () {
 	// Storage: Dao ProposalCount (r:1 w:1)
 	// Storage: Dao Voting (r:0 w:1)
 	fn propose() -> Weight {
-		(70_853_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:0)
 	// Storage: Ico UnReleaseAssets (r:2 w:0)
 	// Storage: Dao Voting (r:1 w:1)
 	fn vote() -> Weight {
-		(55_552_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(4 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Dao Voting (r:1 w:1)
 	// Storage: Ico Ico (r:1 w:0)
@@ -102,16 +90,12 @@ impl WeightInfo for () {
 	// Storage: Dao Proposals (r:1 w:1)
 	// Storage: Dao ProposalOf (r:0 w:1)
 	fn close() -> Weight {
-		(56_601_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(4 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Dao Proposals (r:1 w:1)
 	// Storage: Dao Voting (r:0 w:1)
 	// Storage: Dao ProposalOf (r:0 w:1)
 	fn disapprove_proposal() -> Weight {
-		(27_951_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }

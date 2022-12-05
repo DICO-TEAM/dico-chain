@@ -51,9 +51,9 @@ pub mod pallet {
 	#[pallet::config]
 	pub trait Config: frame_system::Config + pallet_amm::Config {
 		// 	type Event: From<Event> + Into<<Self as system::Trait>::Event>;
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		type Source: DataProvider<CurrencyId, Price> + DataFeeder<CurrencyId, Price, Self::AccountId>;
-		type FeedOrigin: EnsureOrigin<Self::Origin>;
+		type FeedOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		type UpdateOraclesStorgage: UpdateOraclesStorgage<Self::AccountId, CurrencyId>;
 		type BaseCurrency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
 

@@ -158,7 +158,7 @@ pub mod module {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config + dao::Config + pallet_vc::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		/// The class ID type
 		type ClassId: Parameter + Member + AtLeast32BitUnsigned + Default + Copy;
 		/// The token ID type

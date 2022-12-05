@@ -45,9 +45,7 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: Kyc KYCOf (r:1 w:0)
 	// Storage: Ico InitiatedIcoesOf (r:1 w:1)
 	fn initiate_ico() -> Weight {
-		(116_692_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(9 as Weight))
-			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico PendingIco (r:1 w:1)
 	// Storage: Tokens Accounts (r:2 w:2)
@@ -58,17 +56,13 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: Ico Ico (r:0 w:1)
 	// Storage: Ico IsUnservePledge (r:0 w:1)
 	fn permit_ico() -> Weight {
-		(114_423_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(7 as Weight))
-			.saturating_add(T::DbWeight::get().writes(9 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico PendingIco (r:1 w:1)
 	// Storage: Tokens Accounts (r:1 w:1)
 	// Storage: Ico InitiatedIcoesOf (r:1 w:1)
 	fn reject_ico() -> Weight {
-		(86_763_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(3 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:1)
 	// Storage: Currencies DicoAssetsInfo (r:1 w:0)
@@ -81,37 +75,27 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: Ico IcoesOf (r:1 w:1)
 	// Storage: Ico TotalPowerOf (r:1 w:1)
 	fn join() -> Weight {
-		(181_246_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(12 as Weight))
-			.saturating_add(T::DbWeight::get().writes(8 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:1)
 	// Storage: Ico PassedIcoes (r:1 w:1)
 	fn terminate_ico() -> Weight {
-		(41_153_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:0)
 	// Storage: Ico RequestReleaseInfo (r:1 w:1)
 	fn request_release() -> Weight {
-		(57_942_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:0)
 	// Storage: Ico RequestReleaseInfo (r:1 w:1)
 	fn cancel_request() -> Weight {
-		(75_483_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:1)
 	// Storage: Ico RequestReleaseInfo (r:1 w:1)
 	fn permit_release() -> Weight {
-		(61_942_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(2 as Weight))
-			.saturating_add(T::DbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:0)
 	// Storage: Ico IsUnservePledge (r:1 w:1)
@@ -119,50 +103,37 @@ impl<T: frame_system::Config> WeightInfo for DicoWeight<T> {
 	// Storage: System Account (r:1 w:1)
 	// Storage: Ico IcoLocks (r:1 w:1)
 	fn user_release_ico_amount() -> Weight {
-		(110_924_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(6 as Weight))
-			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico IcoLocks (r:1 w:1)
 	fn unlock() -> Weight {
-		(19_249_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico IcoMaxUsdtAmount (r:0 w:1)
 	// Storage: Ico IcoMinUsdtAmount (r:0 w:1)
 	fn set_system_ico_amount_bound() -> Weight {
-		(17_552_000 as Weight)
-			.saturating_add(T::DbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:1)
 	// Storage: Ico IcoMinUsdtAmount (r:1 w:0)
 	// Storage: Ico IcoMaxUsdtAmount (r:1 w:0)
 	fn initiator_set_ico_amount_bound() -> Weight {
-		(41_511_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(3 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:1)
 	fn initiator_set_ico_max_times() -> Weight {
-		(34_061_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:1)
 	// Storage: Ico TotalUsdt (r:1 w:1)
 	// Storage: Ico UnReleaseAssets (r:1 w:1)
 	// Storage: System Account (r:1 w:1)
 	fn get_reward() -> Weight {
-		(81_882_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(4 as Weight))
-			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico PowerMultipleOf (r:1 w:1)
 	fn set_asset_power_multiple() -> Weight {
-		(20_580_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }
 
@@ -177,9 +148,7 @@ impl WeightInfo for () {
 	// Storage: Kyc KYCOf (r:1 w:0)
 	// Storage: Ico InitiatedIcoesOf (r:1 w:1)
 	fn initiate_ico() -> Weight {
-		(116_692_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(9 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico PendingIco (r:1 w:1)
 	// Storage: Tokens Accounts (r:2 w:2)
@@ -190,17 +159,13 @@ impl WeightInfo for () {
 	// Storage: Ico Ico (r:0 w:1)
 	// Storage: Ico IsUnservePledge (r:0 w:1)
 	fn permit_ico() -> Weight {
-		(114_423_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(7 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(9 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico PendingIco (r:1 w:1)
 	// Storage: Tokens Accounts (r:1 w:1)
 	// Storage: Ico InitiatedIcoesOf (r:1 w:1)
 	fn reject_ico() -> Weight {
-		(86_763_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(3 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:1)
 	// Storage: Currencies DicoAssetsInfo (r:1 w:0)
@@ -213,37 +178,27 @@ impl WeightInfo for () {
 	// Storage: Ico IcoesOf (r:1 w:1)
 	// Storage: Ico TotalPowerOf (r:1 w:1)
 	fn join() -> Weight {
-		(181_246_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(12 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(8 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:1)
 	// Storage: Ico PassedIcoes (r:1 w:1)
 	fn terminate_ico() -> Weight {
-		(41_153_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:0)
 	// Storage: Ico RequestReleaseInfo (r:1 w:1)
 	fn request_release() -> Weight {
-		(57_942_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:0)
 	// Storage: Ico RequestReleaseInfo (r:1 w:1)
 	fn cancel_request() -> Weight {
-		(75_483_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:1)
 	// Storage: Ico RequestReleaseInfo (r:1 w:1)
 	fn permit_release() -> Weight {
-		(61_942_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(2 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:0)
 	// Storage: Ico IsUnservePledge (r:1 w:1)
@@ -251,49 +206,36 @@ impl WeightInfo for () {
 	// Storage: System Account (r:1 w:1)
 	// Storage: Ico IcoLocks (r:1 w:1)
 	fn user_release_ico_amount() -> Weight {
-		(110_924_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico IcoLocks (r:1 w:1)
 	fn unlock() -> Weight {
-		(19_249_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico IcoMaxUsdtAmount (r:0 w:1)
 	// Storage: Ico IcoMinUsdtAmount (r:0 w:1)
 	fn set_system_ico_amount_bound() -> Weight {
-		(17_552_000 as Weight)
-			.saturating_add(RocksDbWeight::get().writes(2 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:1)
 	// Storage: Ico IcoMinUsdtAmount (r:1 w:0)
 	// Storage: Ico IcoMaxUsdtAmount (r:1 w:0)
 	fn initiator_set_ico_amount_bound() -> Weight {
-		(41_511_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(3 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:1)
 	fn initiator_set_ico_max_times() -> Weight {
-		(34_061_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico Ico (r:1 w:1)
 	// Storage: Ico TotalUsdt (r:1 w:1)
 	// Storage: Ico UnReleaseAssets (r:1 w:1)
 	// Storage: System Account (r:1 w:1)
 	fn get_reward() -> Weight {
-		(81_882_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(4 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 	// Storage: Ico PowerMultipleOf (r:1 w:1)
 	fn set_asset_power_multiple() -> Weight {
-		(20_580_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(20_0000_0000)
 	}
 }
