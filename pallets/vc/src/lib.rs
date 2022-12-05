@@ -96,7 +96,8 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn is_open_cex_transfer)]
-	pub type IsOpenCexTransfer<T: Config> = StorageMap<_, Identity, T::DaoId, bool, ValueQuery, IsOpenCexTransferOnEmpty<T>>;
+	pub type IsOpenCexTransfer<T: Config> =
+		StorageMap<_, Identity, T::DaoId, bool, ValueQuery, IsOpenCexTransferOnEmpty<T>>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]

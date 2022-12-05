@@ -472,7 +472,6 @@ pub mod module {
 			Ok(().into())
 		}
 
-
 		/// update amount of account `who` under `currency_id`.
 		///
 		/// The dispatch origin of this call must be _Root_.

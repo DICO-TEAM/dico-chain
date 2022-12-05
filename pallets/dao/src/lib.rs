@@ -117,7 +117,7 @@ pub mod pallet {
 			+ Into<Result<IcoRawOrigin<Self::AccountId, MultiBalanceOf<Self>>, <Self as Config>::RuntimeOrigin>>;
 		/// The outer call dispatch type.
 		type Proposal: Parameter
-			+ Dispatchable<RuntimeOrigin= <Self as Config>::RuntimeOrigin, PostInfo = PostDispatchInfo>
+			+ Dispatchable<RuntimeOrigin = <Self as Config>::RuntimeOrigin, PostInfo = PostDispatchInfo>
 			+ From<frame_system::Call<Self>>
 			+ GetDispatchInfo;
 		/// The outer event type.
