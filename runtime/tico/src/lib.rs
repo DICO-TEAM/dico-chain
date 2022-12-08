@@ -94,7 +94,7 @@ mod constants;
 mod migrations;
 mod parachains;
 mod vc;
-mod weights;
+// mod weights;
 mod xcm_config;
 mod xcm_impls;
 
@@ -191,7 +191,7 @@ construct_runtime!(
 		Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 3,
 		Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 4,
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 5,
-		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 6,
+		TransactionPayment: pallet_transaction_payment::{Pallet, Storage, Event<T>} = 6,
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 7,
 		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 9,
 		// Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 10,
@@ -537,8 +537,8 @@ type TechnicalCollective = pallet_collective::Instance2;
 
 impl pallet_collective::Config<TechnicalCollective> for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
-	type RuntimeEvent = RuntimeEvent;
 	type Proposal = RuntimeCall;
+	type RuntimeEvent = RuntimeEvent;
 	type MotionDuration = TechnicalMotionDuration;
 	type MaxProposals = TechnicalMaxProposals;
 	type MaxMembers = TechnicalMaxMembers;

@@ -1,11 +1,14 @@
 use super::*;
 use crate::xcm_impls::FixedRateOfAsset;
 use pallet_currencies::currencies_trait::AssetIdMapping;
+use sp_runtime::WeakBoundedVec;
+
+type WeakBoundedVec1 = WeakBoundedVec<u8, ConstU32<32>>;
 
 pub fn ksm_per_second() -> u128 {
-	let base_weight = Balance::from(ExtrinsicBaseWeight::get());
+	let base_weight = Balance::from(ExtrinsicBaseWeight::get().ref_time());
 	let base_tx_fee = DOLLARS / 1000;
-	let base_tx_per_second = (WEIGHT_PER_SECOND as u128) / base_weight;
+	let base_tx_per_second = (WEIGHT_PER_SECOND.ref_time() as u128) / base_weight;
 	let fee_per_second = base_tx_per_second * base_tx_fee;
 	fee_per_second / 100
 }
@@ -23,35 +26,35 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 				1,
 				X2(
 					Parachain(ParachainInfo::parachain_id().into()),
-					GeneralKey(b"KICO".to_vec()),
+					GeneralKey(WeakBoundedVec1::try_from(b"KICO".to_vec()).unwrap()),
 				),
 			)),
 			DICO => Some(MultiLocation::new(
 				1,
 				X2(
 					Parachain(ParachainInfo::parachain_id().into()),
-					GeneralKey(b"DICO".to_vec()),
+					GeneralKey(WeakBoundedVec1::try_from(b"DICO".to_vec()).unwrap()),
 				),
 			)),
 			KAR => Some(MultiLocation::new(
 				1,
 				X2(
 					Parachain(paras::karura::ID),
-					GeneralKey(paras::karura::KAR_KEY.to_vec()),
+					GeneralKey(WeakBoundedVec1::try_from(paras::karura::KAR_KEY.to_vec()).unwrap()),
 				),
 			)),
 			AUSD => Some(MultiLocation::new(
 				1,
 				X2(
 					Parachain(paras::karura::ID),
-					GeneralKey(paras::karura::AUSD_KEY.to_vec()),
+					GeneralKey(WeakBoundedVec1::try_from(paras::karura::AUSD_KEY.to_vec()).unwrap()),
 				),
 			)),
 			LKSM => Some(MultiLocation::new(
 				1,
 				X2(
 					Parachain(paras::karura::ID),
-					GeneralKey(paras::karura::LKSM_KEY.to_vec()),
+					GeneralKey(WeakBoundedVec1::try_from(paras::karura::LKSM_KEY.to_vec()).unwrap()),
 				),
 			)),
 
@@ -59,7 +62,7 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 				1,
 				X2(
 					Parachain(parachains::listen::PARA_ID),
-					GeneralKey(parachains::listen::lt::TOKEN_SYMBOL.to_vec()),
+					GeneralKey(WeakBoundedVec1::try_from(parachains::listen::lt::TOKEN_SYMBOL.to_vec()).unwrap()),
 				),
 			)),
 
@@ -67,7 +70,7 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 				1,
 				X2(
 					Parachain(parachains::listen::PARA_ID),
-					GeneralKey(parachains::listen::like::TOKEN_SYMBOL.to_vec()),
+					GeneralKey(WeakBoundedVec1::try_from(parachains::listen::like::TOKEN_SYMBOL.to_vec()).unwrap()),
 				),
 			)),
 
@@ -90,45 +93,45 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if ParaId::from(id) == ParachainInfo::parachain_id() && key == b"KICO".to_vec() => Some(KICO),
+			} if ParaId::from(id) == ParachainInfo::parachain_id() && key == WeakBoundedVec1::try_from(b"KICO".to_vec()).unwrap() => Some(KICO),
 			MultiLocation {
 				parents: 0,
 				interior: X1(GeneralKey(key)),
-			} if key == b"KICO".to_vec() => Some(KICO),
+			} if key == WeakBoundedVec1::try_from(b"KICO".to_vec()).unwrap() => Some(KICO),
 
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if ParaId::from(id) == ParachainInfo::parachain_id() && key == b"DICO".to_vec() => Some(DICO),
+			} if ParaId::from(id) == ParachainInfo::parachain_id() && key == WeakBoundedVec1::try_from(b"DICO".to_vec()).unwrap() => Some(DICO),
 			MultiLocation {
 				parents: 0,
 				interior: X1(GeneralKey(key)),
-			} if key == b"DICO".to_vec() => Some(DICO),
+			} if key == WeakBoundedVec1::try_from(b"DICO".to_vec()).unwrap() => Some(DICO),
 
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == paras::karura::ID && key == paras::karura::AUSD_KEY.to_vec() => Some(AUSD),
+			} if id == paras::karura::ID && key == WeakBoundedVec1::try_from(paras::karura::AUSD_KEY.to_vec()).unwrap() => Some(AUSD),
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == paras::karura::ID && key == paras::karura::KAR_KEY.to_vec() => Some(KAR),
+			} if id == paras::karura::ID && key == WeakBoundedVec1::try_from(paras::karura::KAR_KEY.to_vec()).unwrap() => Some(KAR),
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == paras::karura::ID && key == paras::karura::LKSM_KEY.to_vec() => Some(LKSM),
+			} if id == paras::karura::ID && key == WeakBoundedVec1::try_from(paras::karura::LKSM_KEY.to_vec()).unwrap() => Some(LKSM),
 
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == parachains::listen::PARA_ID && key == parachains::listen::lt::TOKEN_SYMBOL.to_vec() => {
+			} if id == parachains::listen::PARA_ID && key == WeakBoundedVec1::try_from(parachains::listen::lt::TOKEN_SYMBOL.to_vec()).unwrap() => {
 				Some(parachains::listen::lt::ASSET_ID)
 			}
 
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == parachains::listen::PARA_ID && key == parachains::listen::like::TOKEN_SYMBOL.to_vec() => {
+			} if id == parachains::listen::PARA_ID && key == WeakBoundedVec1::try_from(parachains::listen::like::TOKEN_SYMBOL.to_vec()).unwrap() => {
 				Some(parachains::listen::like::ASSET_ID)
 			}
 
@@ -241,7 +244,7 @@ pub type XcmOriginToTransactDispatchOrigin = (
 
 parameter_types! {
 	// One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
-	pub UnitWeightCost: Weight = 100_000_000;
+	pub UnitWeightCost: u64 = 100_000_000;
 }
 
 match_type! {
@@ -267,42 +270,42 @@ parameter_types! {
 	pub KicoPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
-			X2(Parachain(ParachainInfo::parachain_id().into()), GeneralKey(b"KICO".to_vec())),
+			X2(Parachain(ParachainInfo::parachain_id().into()), GeneralKey(WeakBoundedVec1::try_from(b"KICO".to_vec()).unwrap())),
 		).into(),
 		ksm_per_second() * 30
 	);
 	pub KicoPerSecondOfCanonicalLocation: (AssetId, u128) = (
 		MultiLocation::new(
 			0,
-			X1(GeneralKey(b"KICO".to_vec())),
+			X1(GeneralKey(WeakBoundedVec1::try_from(b"KICO".to_vec()).unwrap())),
 		).into(),
 		ksm_per_second() * 30
 	);
 	pub DicoPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
-			X2(Parachain(ParachainInfo::parachain_id().into()), GeneralKey(b"DICO".to_vec())),
+			X2(Parachain(ParachainInfo::parachain_id().into()), GeneralKey(WeakBoundedVec1::try_from(b"DICO".to_vec()).unwrap())),
 		).into(),
 		ksm_per_second() * 30
 	);
 	pub DicoPerSecondOfCanonicalLocation: (AssetId, u128) = (
 		MultiLocation::new(
 			0,
-			X1(GeneralKey(b"DICO".to_vec())),
+			X1(GeneralKey(WeakBoundedVec1::try_from(b"DICO".to_vec()).unwrap())),
 		).into(),
 		ksm_per_second() * 30
 	);
 	pub AusdPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
-			X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::AUSD_KEY.to_vec())),
+			X2(Parachain(paras::karura::ID), GeneralKey(WeakBoundedVec1::try_from(paras::karura::AUSD_KEY.to_vec()).unwrap())),
 		).into(),
 		ksm_per_second() * 100
 	);
 	pub KarPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
-			X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::KAR_KEY.to_vec())),
+			X2(Parachain(paras::karura::ID), GeneralKey(WeakBoundedVec1::try_from(paras::karura::KAR_KEY.to_vec()).unwrap())),
 		).into(),
 		ksm_per_second() * 50
 	);
@@ -310,7 +313,7 @@ parameter_types! {
 	pub LIKEPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
-			X2(Parachain(parachains::listen::PARA_ID), GeneralKey(parachains::listen::like::TOKEN_SYMBOL.to_vec())),
+			X2(Parachain(parachains::listen::PARA_ID), GeneralKey(WeakBoundedVec1::try_from(parachains::listen::like::TOKEN_SYMBOL.to_vec()).unwrap())),
 		).into(),
 		ksm_per_second() * 50
 	);
@@ -318,7 +321,7 @@ parameter_types! {
 	pub LTPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
-			X2(Parachain(parachains::listen::PARA_ID), GeneralKey(parachains::listen::lt::TOKEN_SYMBOL.to_vec())),
+			X2(Parachain(parachains::listen::PARA_ID), GeneralKey(WeakBoundedVec1::try_from(parachains::listen::lt::TOKEN_SYMBOL.to_vec()).unwrap())),
 		).into(),
 		ksm_per_second() * 50
 	);
@@ -326,7 +329,7 @@ parameter_types! {
 	pub LKSMPerSecond: (AssetId, u128) = (
 		MultiLocation::new(
 			1,
-			X2(Parachain(paras::karura::ID), GeneralKey(paras::karura::LKSM_KEY.to_vec())),
+			X2(Parachain(paras::karura::ID), GeneralKey(WeakBoundedVec1::try_from(paras::karura::LKSM_KEY.to_vec()).unwrap())),
 		).into(),
 		ksm_per_second()
 	);
@@ -396,7 +399,7 @@ parameter_types! {
 impl pallet_xcm::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type RuntimeOrigin = RuntimeOrigin;
-	type RuntimeCall = untimeCall;
+	type RuntimeCall = RuntimeCall;
 	type SendXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
 	type XcmRouter = XcmRouter;
 	type ExecuteXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
@@ -406,7 +409,7 @@ impl pallet_xcm::Config for Runtime {
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 	type XcmTeleportFilter = Nothing;
 	type XcmReserveTransferFilter = Everything;
-	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
+	type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
 	type LocationInverter = LocationInverter<Ancestry>;
 	const VERSION_DISCOVERY_QUEUE_SIZE: u32 = 100;
 	// ^ Override for AdvertisedXcmVersion default
@@ -450,7 +453,8 @@ impl orml_xcm::Config for Runtime {
 }
 
 parameter_types! {
-	pub const BaseXcmWeight: Weight = 100_000_000;
+	pub const BaseXcmWeight: u64 =  100_000_000;
+
 	pub SelfLocation: MultiLocation = MultiLocation::new(1, X1(Parachain(ParachainInfo::parachain_id().into())));
 	pub const MaxAssetsForTransfer: usize = 2;
 }

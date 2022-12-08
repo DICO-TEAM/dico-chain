@@ -325,7 +325,7 @@ impl Contains<RuntimeCall> for CollectiveBaseCallFilter {
 
 impl daos_agency::Config for Runtime {
 	type RuntimeOrigin = RuntimeOrigin;
-	type RuntimeEvent = RuntimeOrigin;
+	type RuntimeEvent = RuntimeEvent;
 	type Proposal = RuntimeCall;
 	type CollectiveBaseCallFilter = CollectiveBaseCallFilter;
 	type DefaultVote = daos_agency::PrimeDefaultVote;
