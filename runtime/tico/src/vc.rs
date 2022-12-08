@@ -4,7 +4,7 @@
 use super::*;
 pub use codec::MaxEncodedLen;
 use daos_create_dao;
-use daos_emergency;
+// use daos_emergency;
 use daos_square::{
 	traits::{ConvertInto, Pledge as PledgeTrait},
 	Error,
@@ -25,17 +25,17 @@ use sp_runtime::DispatchError;
 pub use sp_runtime::{traits::Hash, RuntimeDebug};
 
 type CallId = u32;
-impl TryFrom<Call> for CallId {
+impl TryFrom<RuntimeCall> for CallId {
 	type Error = ();
 
-	fn try_from(call: Call) -> Result<Self, Self::Error> {
+	fn try_from(call: RuntimeCall) -> Result<Self, Self::Error> {
 		match call {
 			// daos
-			Call::CreateDao(func) => match func {
+			RuntimeCall::CreateDao(func) => match func {
 				daos_create_dao::Call::dao_remark { .. } => Ok(101 as CallId),
 				_ => Err(()),
 			},
-			Call::DaoAgency(func) => match func {
+			RuntimeCall::DaoAgency(func) => match func {
 				daos_agency::Call::disapprove_proposal { .. } => Ok(201 as CallId),
 				daos_agency::Call::set_motion_duration { .. } => Ok(202 as CallId),
 				daos_agency::Call::set_max_proposals { .. } => Ok(203 as CallId),
@@ -43,7 +43,7 @@ impl TryFrom<Call> for CallId {
 				daos_agency::Call::set_ensure_origin_for_every_call { .. } => Ok(205 as CallId),
 				_ => Err(()),
 			},
-			Call::DaoSquare(func) => match func {
+			RuntimeCall::DaoSquare(func) => match func {
 				daos_square::Call::set_min_vote_weight_for_every_call { .. } => Ok(301 as CallId),
 				daos_square::Call::set_max_public_props { .. } => Ok(302 as CallId),
 				daos_square::Call::set_launch_period { .. } => Ok(303 as CallId),
@@ -53,19 +53,19 @@ impl TryFrom<Call> for CallId {
 				daos_square::Call::set_enactment_period { .. } => Ok(307 as CallId),
 				_ => Err(()),
 			},
-			Call::DaoSudo(func) => match func {
+			RuntimeCall::DaoSudo(func) => match func {
 				daos_sudo::Call::set_sudo_account { .. } => Ok(401 as CallId),
 				daos_sudo::Call::close_sudo { .. } => Ok(402 as CallId),
 				_ => Err(()),
 			},
 
 			// about assets
-			Call::Currencies(func) => match func {
+			RuntimeCall::Currencies(func) => match func {
 				pallet_currencies::Call::burn { .. } => Ok(901 as CallId),
 				pallet_currencies::Call::transfer { .. } => Ok(902 as CallId),
 				_ => Err(()),
 			},
-			Call::Nft(func) => match func {
+			RuntimeCall::Nft(func) => match func {
 				pallet_nft::Call::transfer { .. } => Ok(501 as CallId),
 				pallet_nft::Call::claim { .. } => Ok(502 as CallId),
 				pallet_nft::Call::burn { .. } => Ok(503 as CallId),
@@ -76,7 +76,7 @@ impl TryFrom<Call> for CallId {
 				pallet_nft::Call::inactive { .. } => Ok(508 as CallId),
 				_ => Err(()),
 			},
-			Call::AMM(func) => match func {
+			RuntimeCall::AMM(func) => match func {
 				pallet_amm::Call::add_liquidity { .. } => Ok(601 as CallId),
 				pallet_amm::Call::remove_liquidity { .. } => Ok(602 as CallId),
 				pallet_amm::Call::swap_exact_assets_for_assets { .. } => Ok(603 as CallId),
@@ -85,7 +85,7 @@ impl TryFrom<Call> for CallId {
 			},
 
 			// vc
-			Call::Vault(func) => match func {
+			RuntimeCall::Vault(func) => match func {
 				pallet_vc::Call::set_guarders { .. } => Ok(701 as CallId),
 				pallet_vc::Call::remove_guarder { .. } => Ok(702 as CallId),
 				pallet_vc::Call::add_guarder { .. } => Ok(703 as CallId),
@@ -96,7 +96,7 @@ impl TryFrom<Call> for CallId {
 				_ => Err(()),
 			},
 			// ico
-			Call::Ico(func) => match func {
+			RuntimeCall::Ico(func) => match func {
 				pallet_ico::Call::join { .. } => Ok(801 as CallId),
 				pallet_ico::Call::user_release_ico_amount { .. } => Ok(802 as CallId),
 				pallet_ico::Call::unlock { .. } => Ok(803 as CallId),
@@ -278,8 +278,8 @@ impl TryCreate<AccountId, DaoId, DispatchError> for ConcreteId<u32, CurrencyId> 
 	}
 }
 
-impl BaseCallFilter<Call> for ConcreteId<u32, CurrencyId> {
-	fn contains(&self, call: Call) -> bool {
+impl BaseCallFilter<RuntimeCall> for ConcreteId<u32, CurrencyId> {
+	fn contains(&self, call: RuntimeCall) -> bool {
 		true
 	}
 }
@@ -293,8 +293,8 @@ impl AfterCreate<AccountId, DaoId> for CreatedDo {
 }
 
 impl daos_create_dao::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
 	type CallId = CallId;
 	type DaoId = DaoId;
 	type ConcreteId = ConcreteId<u32, CurrencyId>;
@@ -303,7 +303,7 @@ impl daos_create_dao::Config for Runtime {
 }
 
 impl daos_sudo::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
 }
 
@@ -313,9 +313,9 @@ parameter_types! {
 
 pub struct CollectiveBaseCallFilter;
 
-impl Contains<Call> for CollectiveBaseCallFilter {
-	fn contains(call: &Call) -> bool {
-		if let Call::DoAs(func) = call {
+impl Contains<RuntimeCall> for CollectiveBaseCallFilter {
+	fn contains(call: &RuntimeCall) -> bool {
+		if let RuntimeCall::DoAs(func) = call {
 			matches!(func, daos_doas::Call::do_as_agency { .. })
 		} else {
 			false
@@ -324,10 +324,10 @@ impl Contains<Call> for CollectiveBaseCallFilter {
 }
 
 impl daos_agency::Config for Runtime {
-	type Origin = Origin;
-	type Proposal = Call;
+	type RuntimeOrigin = RuntimeOrigin;
+	type RuntimeEvent = RuntimeOrigin;
+	type Proposal = RuntimeCall;
 	type CollectiveBaseCallFilter = CollectiveBaseCallFilter;
-	type Event = Event;
 	type DefaultVote = daos_agency::PrimeDefaultVote;
 	type MaxMembersForSystem = MaxMembersForSystem;
 	type WeightInfo = ();
@@ -335,13 +335,13 @@ impl daos_agency::Config for Runtime {
 }
 
 impl daos_doas::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type DoAsOrigin = DaoAgency;
 	type WeightInfo = ();
 }
 
 impl pallet_vc::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type SetCollectiveMembers = DaoAgency;
 	type MultiCurrency = Currencies;
 }
@@ -351,7 +351,7 @@ parameter_types! {
 }
 
 impl daos_square::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Pledge = Pledge<u32, Balance>;
 	type Conviction = Conviction;
 	type Currency = Balances;
@@ -363,11 +363,11 @@ parameter_types! {
 	pub const TrackPeriod: BlockNumber = 30 *MINUTES;
 }
 
-impl daos_emergency::Config for Runtime {
-	type Event = Event;
-	type ExternalOrigin = EnsureRoot<AccountId>;
-	type Currency = Balances;
-	type MinPledge = MinPledge;
-	type TrackPeriod = TrackPeriod;
-	type WeightInfo = ();
-}
+// impl daos_emergency::Config for Runtime {
+// 	type Event = Event;
+// 	type ExternalOrigin = EnsureRoot<AccountId>;
+// 	type Currency = Balances;
+// 	type MinPledge = MinPledge;
+// 	type TrackPeriod = TrackPeriod;
+// 	type WeightInfo = ();
+// }
