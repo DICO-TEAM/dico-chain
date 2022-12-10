@@ -45,6 +45,7 @@ use sp_std::{
 	prelude::*,
 	result,
 };
+use codec::MaxEncodedLen;
 // pub use weights::WeightInfo;
 pub use crate::pallet::*;
 
@@ -75,8 +76,8 @@ pub(crate) type CurrencyIdOf<T> =
 /// given motion.
 pub type MemberCount = u32;
 
-/// Origin for the collective module.
-#[derive(PartialEq, Eq, Clone, RuntimeDebug, Encode, Decode, TypeInfo)]
+#[derive(PartialEq, Eq, Clone, RuntimeDebug, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[scale_info(skip_type_params(I))]
 pub enum IcoRawOrigin<AccountId, MulBalance> {
 	/// It has been condoned by a given number of members of the collective from
 	/// a given total.
