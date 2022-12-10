@@ -33,12 +33,12 @@ npm i polkadot-launch -g
 ```
 ### clone projects
 ```asm
-git clone https://github.com/paritytech/polkadot.git 
+git clone https://github.com/paritytech/polkadot.git
 git clone https://github.com/DICO-TEAM/dico-chain.git
 cd dico-chain
 make submodule
 ```
-### build 
+### build
 Execute the following command in dico-chain and polkadot files.
 ```asm
 cargo build --release
@@ -49,7 +49,8 @@ Execute the following command in the dico-chain file
 cd launch
 polkadot-launch config.json
 ```
-### 
+Connect to local testnet ws://localhost:9946
+###
 ## Contributions
 
 Contributors are welcomed to join this project. Please check [CONTRIBUTING](./.github/CONTRIBUTING.md) about how to contribute
