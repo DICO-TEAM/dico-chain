@@ -28,7 +28,7 @@ use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, BlockNumberProvider, Convert, Zero},
+	traits::{AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, BlockNumberProvider, Convert, Zero, ConstU32},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, DispatchResult, Percent,
 };
@@ -95,7 +95,7 @@ pub mod constants;
 mod migrations;
 mod parachains;
 mod vc;
-mod weights;
+// mod weights;
 mod xcm_config;
 mod xcm_impls;
 
@@ -137,9 +137,9 @@ pub mod opaque {
 	pub type BlockId = generic::BlockId<Block>;
 }
 /// Unchecked extrinsic type as expected by this runtime.
-pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
+pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
 /// Extrinsic type that has already been checked.
-pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
+pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
 pub type Executive =
 	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem, ()>;
@@ -172,14 +172,19 @@ pub fn native_version() -> NativeVersion {
 	}
 }
 
-/// We assume that ~10% of the block weight is consumed by `on_initalize` handlers.
-/// This is used to limit the maximal weight of a single extrinsic.
-const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
-/// We allow `Normal` extrinsics to fill up the block up to 75%, the rest can be used
-/// by  Operational  extrinsics.
+/// We assume that ~5% of the block weight is consumed by `on_initialize` handlers. This is
+/// used to limit the maximal weight of a single extrinsic.
+const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(5);
+
+/// We allow `Normal` extrinsics to fill up the block up to 75%, the rest can be used by
+/// `Operational` extrinsics.
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
+
 /// We allow for 0.5 of a second of compute with a 12 second average block time.
-const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND / 2;
+const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND
+	.saturating_div(2)
+	.set_proof_size(cumulus_primitives_core::relay_chain::v2::MAX_POV_SIZE as u64);
+
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -195,7 +200,7 @@ construct_runtime!(
 		Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 3,
 		Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 4,
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 5,
-		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 6,
+		TransactionPayment: pallet_transaction_payment::{Pallet, Storage, Event<T>} = 6,
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 7,
 		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 9,
 		// Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 10,
@@ -235,10 +240,11 @@ construct_runtime!(
 		// vc
 		CreateDao: daos_create_dao::{Pallet, Storage, Call, Event<T>} = 60,
 		DaoSudo: daos_sudo::{Pallet, Storage, Call, Event<T>} = 61,
-		DaoCollective: daos_collective::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
+		DaoAgency: daos_agency::{Pallet, Origin<T>, Storage, Call, Event<T>} = 62,
 		DoAs: daos_doas::{Pallet, Storage, Call, Event<T>} = 63,
 		Vault: pallet_vc::{Pallet, Storage, Call, Event<T>} = 64,
-		DaoDemocracy: daos_democracy::{Pallet, Storage, Call, Event<T>} = 65,
+		DaoSquare: daos_square::{Pallet, Storage, Call, Event<T>} = 65,
+		// DaoEmergency: daos_emergency::{Pallet, Storage, Call, Event<T>} = 66,
 
 		//local pallet
 		Kyc: pallet_kyc::{Pallet, Call, Storage, Event<T>} = 70,
@@ -287,20 +293,20 @@ parameter_types! {
 }
 
 pub struct BaseCallFilter;
-impl Contains<Call> for BaseCallFilter {
-	fn contains(call: &Call) -> bool {
+impl Contains<RuntimeCall> for BaseCallFilter {
+	fn contains(call: &RuntimeCall) -> bool {
 		!matches!(
 			call,
 			// vc
-			Call::Vault(_)
+			RuntimeCall::Vault(_)
 			// daos
-			| Call::DaoSudo(_)
-			| Call::DaoCollective(_)
-			| Call::DoAs(_)
-			| Call::CreateDao(_)
-			| Call::DaoDemocracy(_)
+			| RuntimeCall::DaoSudo(_)
+			| RuntimeCall::DaoAgency(_)
+			| RuntimeCall::DoAs(_)
+			| RuntimeCall::CreateDao(_)
+			| RuntimeCall::DaoSquare(_)
 			// sudo
-			| Call::Sudo(_)
+			| RuntimeCall::Sudo(_)
 		)
 	}
 }
@@ -322,8 +328,6 @@ impl OnKilledAccount<AccountId> for KilledAccount {
 impl frame_system::Config for Runtime {
 	/// The identifier used to distinguish between accounts.
 	type AccountId = AccountId;
-	/// The aggregated dispatch type that is available for extrinsics.
-	type Call = Call;
 	/// The lookup mechanism to get account ID from whatever is passed in dispatchers.
 	type Lookup = AccountIdLookup<AccountId, ()>;
 	/// The index type for storing how many extrinsics an account has signed.
@@ -336,10 +340,6 @@ impl frame_system::Config for Runtime {
 	type Hashing = BlakeTwo256;
 	/// The header type.
 	type Header = generic::Header<BlockNumber, BlakeTwo256>;
-	/// The ubiquitous event type.
-	type Event = Event;
-	/// The ubiquitous origin type.
-	type Origin = Origin;
 	/// Maximum number of block number to block hash mappings to keep (oldest pruned first).
 	type BlockHashCount = BlockHashCount;
 	/// Runtime version.
@@ -354,9 +354,9 @@ impl frame_system::Config for Runtime {
 	/// The weight of database operations that the runtime can invoke.
 	type DbWeight = RocksDbWeight;
 	/// The basic call filter to use in dispatchable.
-	type BaseCallFilter = BaseCallFilter;
+	type BaseCallFilter = Everything;
 	/// Weight information for the extrinsics of this pallet.
-	type SystemWeightInfo = weights::frame_system::WeightInfo<Runtime>;
+	type SystemWeightInfo = ();
 	/// Block & extrinsics weights: base values and limits.
 	type BlockWeights = RuntimeBlockWeights;
 	/// The maximum length of a block (in bytes).
@@ -366,6 +366,9 @@ impl frame_system::Config for Runtime {
 	/// The action to take on a Runtime Upgrade
 	type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
+	type RuntimeOrigin = RuntimeOrigin;
+	type RuntimeCall = RuntimeCall;
+	type RuntimeEvent = RuntimeEvent;
 }
 
 parameter_types! {
@@ -387,8 +390,8 @@ parameter_types! {
 }
 
 impl pallet_multisig::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
 	type Currency = Balances;
 	type DepositBase = MultisigDepositBase;
 	type DepositFactor = MultisigDepositFactor;
@@ -408,11 +411,11 @@ impl pallet_balances::Config for Runtime {
 	/// The type for recording an account's balance.
 	type Balance = Balance;
 	/// The ubiquitous event type.
-	type Event = Event;
-	type DustRemoval = Treasury;
+	type RuntimeEvent = RuntimeEvent;
+	type DustRemoval = ();
 	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = System;
-	type WeightInfo = weights::pallet_balances::WeightInfo<Runtime>;
+	type WeightInfo = ();
 	type MaxLocks = MaxLocks;
 	type MaxReserves = MaxReserves;
 	type ReserveIdentifier = [u8; 8];
@@ -424,6 +427,7 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
 	type OnChargeTransaction = pallet_transaction_payment::CurrencyAdapter<Balances, ()>;
 	type WeightToFee = IdentityFee<Balance>;
 	type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
@@ -434,8 +438,8 @@ impl pallet_transaction_payment::Config for Runtime {
 impl pallet_randomness_collective_flip::Config for Runtime {}
 
 impl pallet_sudo::Config for Runtime {
-	type Call = Call;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
 }
 
 parameter_types! {
@@ -453,8 +457,10 @@ parameter_types! {
 }
 
 impl pallet_democracy::Config for Runtime {
-	type Proposal = Call;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
+	type Preimages = ();
+	type MaxDeposits = ConstU32<100>;
+	type MaxBlacklisted = ConstU32<100>;
 	type Currency = Balances;
 	type EnactmentPeriod = EnactmentPeriod;
 	type LaunchPeriod = LaunchPeriod;
@@ -468,23 +474,23 @@ impl pallet_democracy::Config for Runtime {
 	/// A super-majority can have the next scheduled referendum be a straight majority-carries vote.
 	type ExternalMajorityOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2u32, 3u32>,
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3u32, 4u32>,
 	>;
 	/// A unanimous council can have the next scheduled referendum be a straight default-carries
 	/// (NTB) vote.
 	type ExternalDefaultOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3u32, 4u32>,
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 1u32>,
 	>;
 	/// Two thirds of the technical committee can have an ExternalMajority/ExternalDefault vote
 	/// be tabled immediately and with a shorter voting/enactment period.
 	type FastTrackOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 1u32, 2u32>,
+		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 2u32, 3u32>,
 	>;
 	type InstantOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
-		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 3u32, 4u32>,
+		pallet_collective::EnsureProportionAtLeast<AccountId, TechnicalCollective, 1u32, 1u32>,
 	>;
 	type InstantAllowed = InstantAllowed;
 	type FastTrackVotingPeriod = FastTrackVotingPeriod;
@@ -504,8 +510,6 @@ impl pallet_democracy::Config for Runtime {
 	// only do it once and it lasts only for the cool-off period.
 	type VetoOrigin = pallet_collective::EnsureMember<AccountId, TechnicalCollective>;
 	type CooloffPeriod = CooloffPeriod;
-	type PreimageByteDeposit = PreimageByteDeposit;
-	type OperationalPreimageOrigin = pallet_collective::EnsureMember<AccountId, CouncilCollective>;
 	type Slash = Treasury;
 	type Scheduler = Scheduler;
 	type PalletsOrigin = OriginCaller;
@@ -524,14 +528,14 @@ parameter_types! {
 type CouncilCollective = pallet_collective::Instance1;
 
 impl pallet_collective::Config<CouncilCollective> for Runtime {
-	type Origin = Origin;
-	type Proposal = Call;
-	type Event = Event;
+	type RuntimeOrigin = RuntimeOrigin;
+	type RuntimeEvent = RuntimeEvent;
+	type Proposal = RuntimeCall;
 	type MotionDuration = CouncilMotionDuration;
 	type MaxProposals = CouncilMaxProposals;
 	type MaxMembers = CouncilMaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
-	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -555,14 +559,14 @@ parameter_types! {
 type TechnicalCollective = pallet_collective::Instance2;
 
 impl pallet_collective::Config<TechnicalCollective> for Runtime {
-	type Origin = Origin;
-	type Proposal = Call;
-	type Event = Event;
+	type RuntimeOrigin = RuntimeOrigin;
+	type Proposal = RuntimeCall;
+	type RuntimeEvent = RuntimeEvent;
 	type MotionDuration = TechnicalMotionDuration;
 	type MaxProposals = TechnicalMaxProposals;
 	type MaxMembers = TechnicalMaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
-	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = ();
 }
 
 type EnsureRootOrHalfCouncil = EnsureOneOf<
@@ -591,8 +595,8 @@ parameter_types! {
 }
 
 impl pallet_treasury::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
 	type PalletId = TreasuryPalletId;
-	type ProposalBondMaximum = ProposalBondMaximum;
 	type Currency = Balances;
 	type ApproveOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
@@ -602,7 +606,6 @@ impl pallet_treasury::Config for Runtime {
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1u32, 2u32>,
 	>;
-	type Event = Event;
 	type OnSlash = ();
 	type ProposalBond = ProposalBond;
 	type ProposalBondMinimum = ProposalBondMinimum;
@@ -610,8 +613,9 @@ impl pallet_treasury::Config for Runtime {
 	type Burn = Burn;
 	type BurnDestination = ();
 	type SpendFunds = ();
-	type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = ();
 	type MaxApprovals = MaxApprovals;
+	type ProposalBondMaximum = ProposalBondMaximum;
 	type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
 }
 
@@ -623,17 +627,16 @@ parameter_types! {
 }
 
 impl pallet_scheduler::Config for Runtime {
-	type Event = Event;
-	type Origin = Origin;
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeOrigin = RuntimeOrigin;
+	type RuntimeCall = RuntimeCall;
+	type Preimages = ();
 	type PalletsOrigin = OriginCaller;
-	type Call = Call;
 	type MaximumWeight = MaximumSchedulerWeight;
 	type ScheduleOrigin = EnsureRoot<AccountId>;
 	type MaxScheduledPerBlock = MaxScheduledPerBlock;
-	type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = ();
 	type OriginPrivilegeCmp = EqualPrivilegeOnly;
-	type PreimageProvider = ();
-	type NoPreimagePostponement = NoPreimagePostponement;
 }
 
 parameter_types! {
@@ -654,7 +657,7 @@ parameter_types! {
 }
 
 impl pallet_session::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = <Self as frame_system::Config>::AccountId;
 	// we don't have stash and controller, thus we don't need the convert as well.
 	type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
@@ -683,7 +686,7 @@ type EnsureRootOrMoreThanHalfCouncil = EnsureOneOf<
 pub type CollatorSelectionUpdateOrigin = EnsureRoot<AccountId>;
 
 impl pallet_collator_selection::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type UpdateOrigin = CollatorSelectionUpdateOrigin;
 	type PotId = PotId;
@@ -699,12 +702,12 @@ impl pallet_collator_selection::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ReservedXcmpWeight: Weight = MAXIMUM_BLOCK_WEIGHT / 4;
-	pub const ReservedDmpWeight: Weight = MAXIMUM_BLOCK_WEIGHT / 4;
+	pub const ReservedXcmpWeight: Weight = MAXIMUM_BLOCK_WEIGHT.saturating_div(4);
+	pub const ReservedDmpWeight: Weight = MAXIMUM_BLOCK_WEIGHT.saturating_div(4);
 }
 
 impl cumulus_pallet_parachain_system::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type OnSystemEvent = ();
 	type SelfParaId = parachain_info::Pallet<Runtime>;
 	type OutboundXcmpMessageSource = XcmpQueue;
@@ -735,7 +738,7 @@ parameter_types! {
 }
 
 impl pallet_identity::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type BasicDeposit = BasicDeposit;
 	type FieldDeposit = FieldDeposit;
@@ -746,7 +749,7 @@ impl pallet_identity::Config for Runtime {
 	type Slashed = Treasury;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type RegistrarOrigin = EnsureRootOrHalfCouncil;
-	type WeightInfo = pallet_identity::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -763,7 +766,7 @@ parameter_types! {
 
 /// Configure the pallet template in pallets/template.
 impl pallet_kyc::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type PalletId = KYCPalletId;
 	type BasicDeposit = KYCBasicDeposit;
@@ -779,7 +782,7 @@ impl pallet_kyc::Config for Runtime {
 }
 
 impl pallet_amm::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = Currencies;
 	type CurrenciesHandler = Currencies;
 	type LiquidityAssetIdBase = MaxCreatableCurrencyId;
@@ -788,27 +791,27 @@ impl pallet_amm::Config for Runtime {
 }
 
 impl pallet_lbp::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = Currencies;
 	type PalletId = LBPPalletId;
 	type LbpId = u32;
 	type WeightInfo = pallet_lbp::weights::DicoWeight<Runtime>;
 	type TreasuryHandler = DicoTreasury;
-	type FounderSetOrigin = EnsureRootOrHalfCouncil;
+	type FounderSetOrigin = EnsureRootOrMoreThanHalfCouncil;
 }
 
 impl pallet_farm::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type PoolId = u32;
 	type Currency = Currencies;
-	type FounderSetOrigin = EnsureRootOrHalfCouncil;
+	type FounderSetOrigin = EnsureRootOrMoreThanHalfCouncil;
 	type NativeAssetId = DICOAssetId;
 	type PalletId = FarmPalletId;
 	type WeightInfo = pallet_farm::weights::DicoWeight<Runtime>;
 }
 
 impl pallet_farm_extend::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = Currencies;
 	type PalletId = FarmExtendPalletId;
 	type PoolExtendId = u32;
@@ -862,15 +865,13 @@ impl Happened<(AccountId, CurrencyId)> for OnKilledTokenAccount {
 }
 
 impl orml_tokens::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
+	type CurrencyHooks = ();
 	type Balance = Balance;
 	type Amount = Amount;
 	type CurrencyId = CurrencyId;
 	type WeightInfo = ();
 	type ExistentialDeposits = ExistentialDeposits;
-	type OnDust = orml_tokens::TransferDust<Runtime, TreasuryAccount>;
-	type OnNewTokenAccount = OnNewTokenAccount;
-	type OnKilledTokenAccount = OnKilledTokenAccount;
 	type MaxLocks = MaxLocks;
 	type MaxReserves = TokensMaxReserves;
 	type ReserveIdentifier = [u8; 8];
@@ -883,7 +884,7 @@ parameter_types! {
 }
 
 impl orml_vesting::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type MinVestedTransfer = MinVestedTransfer;
 	type VestedTransferOrigin = frame_system::EnsureSigned<AccountId>;
@@ -899,7 +900,7 @@ parameter_types! {
 }
 
 impl pallet_currencies::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type MultiCurrency = Tokens;
 
 	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
@@ -909,9 +910,10 @@ impl pallet_currencies::Config for Runtime {
 	type GetNativeCurrencyId = DICOAssetId;
 
 	type WeightInfo = pallet_currencies::weights::DicoWeight<Runtime>;
-	type USDCurrencyId = USDCurrencyId;
+
 	type CreateConsume = CreateConsume;
 	type MaxCreatableCurrencyId = MaxCreatableCurrencyId;
+	type USDCurrencyId = USDCurrencyId;
 }
 
 // price data
@@ -927,7 +929,7 @@ parameter_types! {
 type DicoDataProvider = pallet_oracle::Instance1;
 
 impl pallet_oracle::Config<DicoDataProvider> for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type OnNewData = ();
 	type CombineData = pallet_oracle::DefaultCombineData<Runtime, MinimumCount, ExpiresIn, DicoDataProvider>;
 	type Time = Timestamp;
@@ -964,7 +966,7 @@ type EnsureRootOrTwoThirdsGeneralCouncil = EnsureOneOf<
 >;
 
 impl pallet_pricedao::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Source = AggregatedDataProvider;
 	type FeedOrigin = EnsureRootOrTwoThirdsGeneralCouncil;
 	type UpdateOraclesStorgage = DicoOracle;
@@ -975,6 +977,7 @@ impl pallet_pricedao::Config for Runtime {
 	type WeightInfo = pallet_pricedao::weights::DicoWeight<Runtime>;
 }
 
+
 parameter_types! {
 	pub const DicoProposalBond: Balance = 100 * DOLLARS;
 	pub const DicoSpendPeriod: BlockNumber = 7 * DAYS;
@@ -982,6 +985,7 @@ parameter_types! {
 }
 
 impl pallet_dico_treasury::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
 	type ApproveOrigin = EnsureOneOf<
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>,
@@ -992,8 +996,6 @@ impl pallet_dico_treasury::Config for Runtime {
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>,
 	>;
-
-	type Event = Event;
 	type GetNativeCurrencyId = DICOAssetId;
 	type ProposalBond = DicoProposalBond;
 	type SpendPeriod = DicoSpendPeriod;
@@ -1017,7 +1019,7 @@ parameter_types! {
 }
 
 impl pallet_ico::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent ;
 	type PermitIcoOrigin = pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>;
 	type RejectIcoOrigin = pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>;
 	type PermitReleaseOrigin = pallet_dao::EnsureProportionAtLeast<Runtime, AccountId, 1, 2>;
@@ -1050,9 +1052,9 @@ parameter_types! {
 }
 
 impl pallet_dao::Config for Runtime {
-	type Origin = Origin;
-	type Proposal = Call;
-	type Event = Event;
+	type RuntimeOrigin = RuntimeOrigin;
+	type RuntimeEvent = RuntimeEvent;
+	type Proposal = RuntimeCall;
 	type MotionDuration = DicoMotionDuration;
 	type MaxProposals = DicoMaxProposals;
 	type WeightInfo = pallet_dao::weights::DicoWeight<Runtime>;
@@ -1067,7 +1069,7 @@ parameter_types! {
 }
 
 impl pallet_nft::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type ClassId = u32;
 	type TokenId = u32;
 	type Currency = Balances;
