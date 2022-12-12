@@ -25,7 +25,7 @@ path = "runtime-api"
 codec               = { package = "parity-scale-codec", version = "3.0.0", default-features = false }
 serde               = { version = "1", optional = true }
 
-jsonrpsee = { version = "0.14.0", features = ["server", "macros"] }
+jsonrpsee = { version = "0.15.1", features = ["server", "macros"] }
 futures             = { version = "0.3.15"}
 
 

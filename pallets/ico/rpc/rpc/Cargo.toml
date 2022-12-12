@@ -17,7 +17,7 @@ codec               = { package = 'parity-scale-codec', version = '3.0.0', defau
 #jsonrpc-core        = { version = '18.0.0' }
 #jsonrpc-core-client = { version = '18.0.0' }
 #jsonrpc-derive      = { version = '18.0.0' }
-jsonrpsee = { version = "0.14.0", features = ["server", "macros"] }
+jsonrpsee = { version = "0.15.1", features = ["server", "macros"] }
 
 sc-rpc-api          = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.32', default-features = false }
 sp-api              = { git = 'https://github.com/paritytech/substrate.git', branch = 'polkadot-v0.9.32', default-features = false }

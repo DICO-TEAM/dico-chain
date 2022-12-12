@@ -14,7 +14,7 @@ build       = 'build.rs'
 targets = ['x86_64-unknown-linux-gnu']
 
 [build-dependencies]
-substrate-build-script-utils = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.25' }
+substrate-build-script-utils = { git = 'https://github.com/paritytech/substrate', branch = 'polkadot-v0.9.32' }
 
 [[bin]]
 name = 'tico'
@@ -24,7 +24,7 @@ clap = { version = "4.0.29", features = ["derive"] }
 log = "0.4.17"
 codec = { package = "parity-scale-codec", version = "3.0.0" }
 serde = { version = "1.0.149", features = ["derive"] }
-jsonrpsee = { version = "0.16.2", features = ["server"] }
+jsonrpsee = { version = "=0.15.1", features = ["server"] }
 
 # Local1
 parachain-template-runtime = { package = "tico-runtime", path = '../../runtime/tico' }

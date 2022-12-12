@@ -45,20 +45,20 @@ where
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
 	C::Api: BlockBuilder<Block>,
 	P: TransactionPool + Sync + Send + 'static,
-	// C::Api: pallet_farm_rpc::FarmRuntimeApi<Block, AccountId, PoolId, Balance>,
-	// C::Api: pallet_ico_rpc_runtime_api::IcoAmountApi<Block, AccountId, CurrencyId, Nonce, Balance>,
+	C::Api: pallet_farm_rpc::FarmRuntimeApi<Block, AccountId, PoolId, Balance>,
+	C::Api: pallet_ico_rpc_runtime_api::IcoAmountApi<Block, AccountId, CurrencyId, Nonce, Balance>,
 {
-	// use pallet_farm_rpc::{Farm, FarmApiServer};
-	// use pallet_ico_rpc::{FullIco, IcoApiServer};
+	use pallet_farm_rpc::{Farm, FarmApiServer};
+	use pallet_ico_rpc::{FullIco, IcoApiServer};
 
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut module = RpcExtension::new(());
 	let FullDeps { client, pool, deny_unsafe } = deps;
-	// // local
-	// module.merge(FullIco::new(client.clone(), deny_unsafe).into_rpc())?;
-	// module.merge(Farm::new(client.clone(), deny_unsafe).into_rpc())?;
+	// local
+	module.merge(FullIco::new(client.clone(), deny_unsafe).into_rpc())?;
+	module.merge(Farm::new(client.clone(), deny_unsafe).into_rpc())?;
 
 	module.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	module.merge(TransactionPayment::new(client).into_rpc())?;
