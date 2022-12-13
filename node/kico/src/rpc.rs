@@ -4,10 +4,11 @@
 //! capabilities that are specific to this project's runtime configuration.
 
 #![warn(missing_docs)]
+#![allow(unused_imports)]
 
-use std::sync::Arc;
-
+use pallet_ico_rpc::FullIco;
 use parachain_template_runtime::{opaque::Block, AccountId, Balance, CurrencyId, Index as Nonce, PoolId};
+use std::sync::Arc;
 
 use sc_client_api::AuxStore;
 pub use sc_rpc::{DenyUnsafe, SubscriptionTaskExecutor};
@@ -42,16 +43,15 @@ where
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
 	C::Api: BlockBuilder<Block>,
+	P: TransactionPool + Sync + Send + 'static,
 	C::Api: pallet_farm_rpc::FarmRuntimeApi<Block, AccountId, PoolId, Balance>,
 	C::Api: pallet_ico_rpc_runtime_api::IcoAmountApi<Block, AccountId, CurrencyId, Nonce, Balance>,
-
-	P: TransactionPool + Sync + Send + 'static,
 {
-	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
-	use substrate_frame_rpc_system::{System, SystemApiServer};
-	// local
 	use pallet_farm_rpc::{Farm, FarmApiServer};
 	use pallet_ico_rpc::{FullIco, IcoApiServer};
+
+	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
+	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut module = RpcExtension::new(());
 	let FullDeps {
@@ -59,13 +59,11 @@ where
 		pool,
 		deny_unsafe,
 	} = deps;
-
-	module.merge(System::new(client.clone(), pool.clone(), deny_unsafe).into_rpc())?;
-	module.merge(TransactionPayment::new(client.clone()).into_rpc())?;
-
 	// local
 	module.merge(FullIco::new(client.clone(), deny_unsafe).into_rpc())?;
 	module.merge(Farm::new(client.clone(), deny_unsafe).into_rpc())?;
 
+	module.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
+	module.merge(TransactionPayment::new(client).into_rpc())?;
 	Ok(module)
 }

@@ -28,7 +28,10 @@ use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, BlockNumberProvider, Convert, Zero, ConstU32},
+	traits::{
+		AccountIdConversion, AccountIdLookup, BlakeTwo256, Block as BlockT, BlockNumberProvider, ConstU32, Convert,
+		Zero,
+	},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, DispatchResult, Percent,
 };
@@ -184,7 +187,6 @@ const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND
 	.saturating_div(2)
 	.set_proof_size(cumulus_primitives_core::relay_chain::v2::MAX_POV_SIZE as u64);
-
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -977,7 +979,6 @@ impl pallet_pricedao::Config for Runtime {
 	type WeightInfo = pallet_pricedao::weights::DicoWeight<Runtime>;
 }
 
-
 parameter_types! {
 	pub const DicoProposalBond: Balance = 100 * DOLLARS;
 	pub const DicoSpendPeriod: BlockNumber = 7 * DAYS;
@@ -1019,7 +1020,7 @@ parameter_types! {
 }
 
 impl pallet_ico::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent ;
+	type RuntimeEvent = RuntimeEvent;
 	type PermitIcoOrigin = pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>;
 	type RejectIcoOrigin = pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>;
 	type PermitReleaseOrigin = pallet_dao::EnsureProportionAtLeast<Runtime, AccountId, 1, 2>;

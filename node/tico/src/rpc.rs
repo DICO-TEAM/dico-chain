@@ -4,6 +4,7 @@
 //! capabilities that are specific to this project's runtime configuration.
 
 #![warn(missing_docs)]
+#![allow(unused_imports)]
 
 use std::sync::Arc;
 use pallet_ico_rpc::FullIco;

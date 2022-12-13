@@ -93,7 +93,11 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if ParaId::from(id) == ParachainInfo::parachain_id() && key == WeakBoundedVec1::try_from(b"KICO".to_vec()).unwrap() => Some(KICO),
+			} if ParaId::from(id) == ParachainInfo::parachain_id()
+				&& key == WeakBoundedVec1::try_from(b"KICO".to_vec()).unwrap() =>
+			{
+				Some(KICO)
+			}
 			MultiLocation {
 				parents: 0,
 				interior: X1(GeneralKey(key)),
@@ -102,7 +106,11 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if ParaId::from(id) == ParachainInfo::parachain_id() && key == WeakBoundedVec1::try_from(b"DICO".to_vec()).unwrap() => Some(DICO),
+			} if ParaId::from(id) == ParachainInfo::parachain_id()
+				&& key == WeakBoundedVec1::try_from(b"DICO".to_vec()).unwrap() =>
+			{
+				Some(DICO)
+			}
 			MultiLocation {
 				parents: 0,
 				interior: X1(GeneralKey(key)),
@@ -111,27 +119,43 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == paras::karura::ID && key == WeakBoundedVec1::try_from(paras::karura::AUSD_KEY.to_vec()).unwrap() => Some(AUSD),
+			} if id == paras::karura::ID
+				&& key == WeakBoundedVec1::try_from(paras::karura::AUSD_KEY.to_vec()).unwrap() =>
+			{
+				Some(AUSD)
+			}
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == paras::karura::ID && key == WeakBoundedVec1::try_from(paras::karura::KAR_KEY.to_vec()).unwrap() => Some(KAR),
+			} if id == paras::karura::ID
+				&& key == WeakBoundedVec1::try_from(paras::karura::KAR_KEY.to_vec()).unwrap() =>
+			{
+				Some(KAR)
+			}
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == paras::karura::ID && key == WeakBoundedVec1::try_from(paras::karura::LKSM_KEY.to_vec()).unwrap() => Some(LKSM),
+			} if id == paras::karura::ID
+				&& key == WeakBoundedVec1::try_from(paras::karura::LKSM_KEY.to_vec()).unwrap() =>
+			{
+				Some(LKSM)
+			}
 
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == parachains::listen::PARA_ID && key == WeakBoundedVec1::try_from(parachains::listen::lt::TOKEN_SYMBOL.to_vec()).unwrap() => {
+			} if id == parachains::listen::PARA_ID
+				&& key == WeakBoundedVec1::try_from(parachains::listen::lt::TOKEN_SYMBOL.to_vec()).unwrap() =>
+			{
 				Some(parachains::listen::lt::ASSET_ID)
 			}
 
 			MultiLocation {
 				parents: 1,
 				interior: X2(Parachain(id), GeneralKey(key)),
-			} if id == parachains::listen::PARA_ID && key == WeakBoundedVec1::try_from(parachains::listen::like::TOKEN_SYMBOL.to_vec()).unwrap() => {
+			} if id == parachains::listen::PARA_ID
+				&& key == WeakBoundedVec1::try_from(parachains::listen::like::TOKEN_SYMBOL.to_vec()).unwrap() =>
+			{
 				Some(parachains::listen::like::ASSET_ID)
 			}
 

@@ -20,6 +20,7 @@
 // Disable the following two lints since they originate from an external macro (namely decl_storage)
 #![allow(clippy::string_lit_as_bytes)]
 #![allow(clippy::unused_unit)]
+#![allow(deprecated)]
 
 use codec::{Decode, Encode};
 use scale_info::TypeInfo;

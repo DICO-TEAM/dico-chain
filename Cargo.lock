@@ -3719,6 +3719,71 @@ dependencies = [
 ]
 
 [[package]]
+name = "kico"
+version = "2.0.0"
+dependencies = [
+ "clap",
+ "cumulus-client-cli",
+ "cumulus-client-consensus-aura",
+ "cumulus-client-consensus-common",
+ "cumulus-client-network",
+ "cumulus-client-service",
+ "cumulus-primitives-core",
+ "cumulus-primitives-parachain-inherent",
+ "cumulus-relay-chain-inprocess-interface",
+ "cumulus-relay-chain-interface",
+ "cumulus-relay-chain-minimal-node",
+ "cumulus-relay-chain-rpc-interface",
+ "dico-primitives",
+ "frame-benchmarking",
+ "frame-benchmarking-cli",
+ "jsonrpsee",
+ "kico-runtime",
+ "log",
+ "pallet-currencies",
+ "pallet-farm-rpc",
+ "pallet-ico-rpc",
+ "pallet-ico-rpc-runtime-api",
+ "pallet-transaction-payment-rpc",
+ "parity-scale-codec 3.2.1",
+ "polkadot-cli",
+ "polkadot-primitives",
+ "polkadot-service",
+ "sc-basic-authorship",
+ "sc-chain-spec",
+ "sc-cli",
+ "sc-client-api",
+ "sc-consensus",
+ "sc-executor",
+ "sc-network",
+ "sc-network-common",
+ "sc-rpc",
+ "sc-service",
+ "sc-sysinfo",
+ "sc-telemetry",
+ "sc-tracing",
+ "sc-transaction-pool",
+ "sc-transaction-pool-api",
+ "serde",
+ "sp-api",
+ "sp-block-builder",
+ "sp-blockchain",
+ "sp-consensus-aura",
+ "sp-core",
+ "sp-keystore",
+ "sp-offchain",
+ "sp-runtime",
+ "sp-session",
+ "sp-timestamp",
+ "sp-transaction-pool",
+ "substrate-build-script-utils 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.25)",
+ "substrate-frame-rpc-system",
+ "substrate-prometheus-endpoint",
+ "try-runtime-cli",
+ "xcm",
+]
+
+[[package]]
 name = "kico-runtime"
 version = "2.0.0"
 dependencies = [
@@ -7039,7 +7104,7 @@ dependencies = [
  "sp-core",
  "sp-keyring",
  "sp-trie",
- "substrate-build-script-utils",
+ "substrate-build-script-utils 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.32)",
  "thiserror",
  "try-runtime-cli",
 ]
@@ -11376,6 +11441,14 @@ dependencies = [
 [[package]]
 name = "substrate-build-script-utils"
 version = "3.0.0"
+source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.25#3348e144f0a2b39ce08bd8e3b976c42fe0c990b9"
+dependencies = [
+ "platforms",
+]
+
+[[package]]
+name = "substrate-build-script-utils"
+version = "3.0.0"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.32#5ea6d95309aaccfa399c5f72e5a14a4b7c6c4ca1"
 dependencies = [
  "platforms",
@@ -11671,7 +11744,7 @@ dependencies = [
  "sp-session",
  "sp-timestamp",
  "sp-transaction-pool",
- "substrate-build-script-utils",
+ "substrate-build-script-utils 3.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.32)",
  "substrate-frame-rpc-system",
  "substrate-prometheus-endpoint",
  "tico-runtime",

@@ -40,12 +40,11 @@ use static_assertions::const_assert;
 use frame_support::{
 	construct_runtime, match_type, parameter_types,
 	traits::{
-		ConstU32,
-		Contains, EnsureOneOf, EqualPrivilegeOnly, Everything, LockIdentifier, Nothing, OnKilledAccount, OnNewAccount,
-		OnRuntimeUpgrade, U128CurrencyToVote,
+		ConstU32, Contains, EnsureOneOf, EqualPrivilegeOnly, Everything, LockIdentifier, Nothing, OnKilledAccount,
+		OnNewAccount, OnRuntimeUpgrade, U128CurrencyToVote,
 	},
 	weights::{
-		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND, },
+		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
 		ConstantMultiplier, DispatchClass, IdentityFee, Weight,
 	},
 	PalletId,
@@ -995,7 +994,7 @@ parameter_types! {
 }
 
 impl pallet_ico::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent ;
+	type RuntimeEvent = RuntimeEvent;
 	type PermitIcoOrigin = pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>;
 	type RejectIcoOrigin = pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1u32, 2u32>;
 	type PermitReleaseOrigin = pallet_dao::EnsureProportionAtLeast<Runtime, AccountId, 1, 2>;

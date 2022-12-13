@@ -3,7 +3,7 @@ panic = 'unwind'
 
 [workspace]
 members = [
-    'node/tico',
+    'node/*',
     'pallets/*',
 	'pallets/ico/rpc/rpc',
 	'pallets/farm/rpc',

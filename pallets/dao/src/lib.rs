@@ -21,8 +21,10 @@
 #![recursion_limit = "128"]
 #![allow(unused_mut)]
 #![allow(dead_code)]
+#![allow(deprecated)]
 
 // use codec::{Codec, Encode, Decode, MaxEncodedLen};
+use codec::MaxEncodedLen;
 pub use frame_support::{
 	codec::{Codec, Decode, Encode},
 	dispatch::{DispatchError, DispatchResult, DispatchResultWithPostInfo, Dispatchable, Parameter, PostDispatchInfo},
@@ -45,7 +47,6 @@ use sp_std::{
 	prelude::*,
 	result,
 };
-use codec::MaxEncodedLen;
 // pub use weights::WeightInfo;
 pub use crate::pallet::*;
 
